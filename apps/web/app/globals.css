@@ -1,50 +1,61 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-@media (prefers-color-scheme: dark) {
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --brand-peach:       #F9A37E;
+    --brand-sage:        #A8C69F;
+    --brand-cream:       #E8E2D6;
+    --brand-brown:       #4A453E;
+    --brand-peach-light: #FBD5C1;
+    --brand-sage-light:  #C8DEC4;
+    --brand-brown-light: #7A736A;
   }
-}
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
+  * {
+    border-color: #E8E2D6;
+    box-sizing: border-box;
+  }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.imgDark {
-  display: none;
-}
-
-@media (prefers-color-scheme: dark) {
   html {
-    color-scheme: dark;
+    scroll-behavior: smooth;
   }
 
-  .imgLight {
-    display: none;
+  body {
+    background-color: #FDFAF6;
+    color: #4A453E;
+    font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
-  .imgDark {
-    display: unset;
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    color: #4A453E;
   }
 }
+
+@layer components {
+  /* Primary button - Peach */
+  .btn-primary {
+    @apply bg-[#F9A37E] hover:bg-[#E8855A] text-white font-bold text-xs py-3 px-6 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95;
+  }
+
+  /* Secondary button - Brown outline */
+  .btn-secondary {
+    @apply border border-[#4A453E] hover:bg-[#4A453E] text-[#4A453E] hover:text-white font-bold text-xs py-3 px-6 rounded-xl transition-all duration-200 active:scale-95;
+  }
+
+  /* Sage button */
+  .btn-sage {
+    @apply bg-[#A8C69F] hover:bg-[#7AA870] text-[#2E2B26] font-bold text-xs py-3 px-6 rounded-xl transition-all duration-200 active:scale-95;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar         { width: 5px; height: 5px; }
+::-webkit-scrollbar-track   { background: transparent; }
+::-webkit-scrollbar-thumb   { background: #E8E2D6; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #A8C69F; }
