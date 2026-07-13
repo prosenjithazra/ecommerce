@@ -44,7 +44,7 @@ function ThankYouPageContent() {
       </div>
 
       {/* Summary Box */}
-      <div className="max-w-sm w-full bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-3xl p-6 shadow-xl space-y-4">
+      <div className="max-w-sm w-full bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-6 shadow-xl space-y-4">
         <div className="flex justify-between items-center text-xs">
           <span className="text-zinc-450">Order Number</span>
           <span className="font-extrabold text-zinc-900 dark:text-white font-mono">{orderId}</span>
@@ -63,13 +63,13 @@ function ThankYouPageContent() {
       <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
         <Link
           href="/"
-          className="bg-zinc-950 hover:bg-zinc-900 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 font-extrabold text-xs py-3.5 px-6 rounded-2xl transition-all shadow-md flex items-center gap-1.5"
+          className="bg-zinc-950 hover:bg-zinc-900 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-md flex items-center gap-1.5"
         >
           <ShoppingBag className="w-4 h-4" /> Continue Shopping
         </Link>
         <button
           onClick={handleDownloadInvoice}
-          className="border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-extrabold text-xs py-3.5 px-6 rounded-2xl transition-all flex items-center gap-1.5"
+          className="border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all flex items-center gap-1.5"
         >
           <Download className="w-4 h-4" /> Invoice Receipt
         </button>

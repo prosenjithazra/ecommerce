@@ -166,7 +166,7 @@ export default function ProductDetailPage() {
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}
-                  className={`min-w-10 h-10 px-3 rounded-xl text-xs font-extrabold border transition-all ${
+                  className={`min-w-10 h-10 px-3 rounded-lg text-xs font-extrabold border transition-all ${
                     selectedSize === size
                       ? 'bg-[#4A453E] text-white border-[#4A453E]'
                       : 'bg-transparent text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
@@ -181,7 +181,7 @@ export default function ProductDetailPage() {
           {/* Quantity */}
           <div className="space-y-2">
             <span className="text-xs font-bold text-[#4A453E]">Quantity</span>
-            <div className="flex items-center border border-[#E8E2D6] rounded-xl overflow-hidden bg-[#FDFAF6] h-10 w-28">
+            <div className="flex items-center border border-[#E8E2D6] rounded-lg overflow-hidden bg-[#FDFAF6] h-10 w-28">
               <button
                 onClick={() => setQuantity(q => Math.max(1, q - 1))}
                 className="w-9 h-full flex items-center justify-center text-[#7A736A] hover:text-[#4A453E] hover:bg-[#E8E2D6]/40 transition-colors"
@@ -204,14 +204,14 @@ export default function ProductDetailPage() {
           <div className="grid grid-cols-2 gap-3 pt-2">
             <button
               onClick={handleAddToCart}
-              className="flex items-center justify-center gap-2 bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-3.5 px-6 rounded-2xl transition-all shadow-lg shadow-[#A8C69F]/25 active:scale-95"
+              className="flex items-center justify-center gap-2 bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#A8C69F]/25 active:scale-95"
             >
               <ShoppingBag className="w-4 h-4" />
               Add to Cart
             </button>
             <button
               onClick={handleBuyNow}
-              className="bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-2xl transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95"
+              className="bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95"
             >
               Buy It Now
             </button>

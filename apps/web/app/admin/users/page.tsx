@@ -53,7 +53,7 @@ export default function AdminUsersPage() {
               placeholder="Search by name or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-xl outline-none focus:border-[#F9A37E] transition-colors text-zinc-700 placeholder:text-zinc-400"
+              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#F9A37E] transition-colors text-zinc-700 placeholder:text-zinc-400"
             />
           </div>
           <div className="flex gap-2">
@@ -72,9 +72,9 @@ export default function AdminUsersPage() {
         {/* User Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filtered.map((u, idx) => (
-            <div key={u.id} className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex gap-4">
+            <div key={u.id} className="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-all flex gap-4">
               {/* Avatar */}
-              <div className={`w-12 h-12 flex-shrink-0 rounded-2xl bg-gradient-to-br ${avatarColors[idx % avatarColors.length]} flex items-center justify-center font-black text-white text-base shadow-md`}>
+              <div className={`w-12 h-12 flex-shrink-0 rounded-lg bg-gradient-to-br ${avatarColors[idx % avatarColors.length]} flex items-center justify-center font-black text-white text-base shadow-md`}>
                 {u.name.charAt(0).toUpperCase()}
               </div>
 
@@ -102,7 +102,7 @@ export default function AdminUsersPage() {
                   </div>
                   <button
                     onClick={() => toggle(u.id)}
-                    className={`flex items-center gap-1.5 text-[9px] font-extrabold px-2.5 py-1.5 rounded-xl border transition-all ${u.status === "Active" ? "text-red-500 border-red-200 hover:bg-red-50" : "text-emerald-600 border-emerald-200 hover:bg-emerald-50"}`}
+                    className={`flex items-center gap-1.5 text-[9px] font-extrabold px-2.5 py-1.5 rounded-lg border transition-all ${u.status === "Active" ? "text-red-500 border-red-200 hover:bg-red-50" : "text-emerald-600 border-emerald-200 hover:bg-emerald-50"}`}
                   >
                     {u.status === "Active" ? <ShieldOff className="w-3.5 h-3.5" /> : <ShieldCheck className="w-3.5 h-3.5" />}
                     {u.status === "Active" ? "Suspend" : "Activate"}

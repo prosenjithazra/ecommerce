@@ -37,7 +37,7 @@ export default function AdminDashboardPage() {
           {stats.map((s) => {
             const Icon = s.icon;
             return (
-              <div key={s.label} className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+              <div key={s.label} className="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-xs font-semibold text-zinc-400 mb-1">{s.label}</p>
@@ -47,7 +47,7 @@ export default function AdminDashboardPage() {
                       {s.sub}
                     </p>
                   </div>
-                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center shadow-md flex-shrink-0`}>
+                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${s.color} flex items-center justify-center shadow-md flex-shrink-0`}>
                     <Icon className="w-5 h-5 text-white" />
                   </div>
                 </div>
@@ -60,7 +60,7 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
           {/* Recent Orders Table */}
-          <div className="lg:col-span-3 bg-white border border-zinc-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="lg:col-span-3 bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
               <h2 className="font-extrabold text-sm text-zinc-800">Recent Orders</h2>
               <Link href="/admin/orders" className="text-[10px] font-bold text-[#F9A37E] hover:underline flex items-center gap-1">
@@ -85,15 +85,15 @@ export default function AdminDashboardPage() {
 
           {/* Quick Nav Tiles */}
           <div className="lg:col-span-2 space-y-3">
-            <div className="bg-gradient-to-br from-[#F9A37E] to-[#e8855a] rounded-2xl p-5 shadow-md text-white">
+            <div className="bg-gradient-to-br from-[#F9A37E] to-[#e8855a] rounded-lg p-5 shadow-md text-white">
               <Package className="w-6 h-6 mb-2 opacity-80" />
               <p className="font-black text-base leading-tight">Add New Product</p>
               <p className="text-xs opacity-70 mb-3">Expand your catalog with a new listing</p>
-              <Link href="/admin/products/add" className="text-xs font-extrabold bg-white text-[#e8855a] px-4 py-1.5 rounded-xl inline-flex items-center gap-1 hover:opacity-90 transition-opacity">
+              <Link href="/admin/products/add" className="text-xs font-extrabold bg-white text-[#e8855a] px-4 py-1.5 rounded-lg inline-flex items-center gap-1 hover:opacity-90 transition-opacity">
                 Go to Add <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
-            <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm">
+            <div className="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm">
               <AlertCircle className="w-5 h-5 text-amber-500 mb-1" />
               <p className="text-xs font-extrabold text-zinc-800 mb-0.5">POD API Status</p>
               <p className="text-[10px] text-zinc-400 mb-2">Qikink integration is active and syncing orders.</p>

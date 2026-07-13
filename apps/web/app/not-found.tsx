@@ -26,11 +26,11 @@ export default function NotFoundPage() {
 
       <div className="flex gap-3 pt-2">
         <Link href="/"
-          className="bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-3.5 px-6 rounded-2xl transition-all shadow-lg shadow-[#A8C69F]/20 flex items-center gap-1.5 active:scale-95">
+          className="bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#A8C69F]/20 flex items-center gap-1.5 active:scale-95">
           <Home className="w-4 h-4" /> Back to Home
         </Link>
         <Link href="/products"
-          className="bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-2xl transition-all shadow-lg shadow-[#F9A37E]/20 flex items-center gap-1.5 active:scale-95">
+          className="bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/20 flex items-center gap-1.5 active:scale-95">
           <Compass className="w-4 h-4" /> Browse Shop
         </Link>
       </div>

@@ -52,8 +52,8 @@ export default function CartPage() {
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-3">
             {cart.map((item) => (
-              <div key={item.id} className="p-3 sm:p-4 border border-[#E8E2D6] bg-white rounded-2xl flex gap-3 sm:gap-4 hover:shadow-sm transition-shadow">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl overflow-hidden flex-shrink-0">
+              <div key={item.id} className="p-3 sm:p-4 border border-[#E8E2D6] bg-white rounded-lg flex gap-3 sm:gap-4 hover:shadow-sm transition-shadow">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg overflow-hidden flex-shrink-0">
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0 flex flex-col justify-between">
@@ -102,7 +102,7 @@ export default function CartPage() {
 
           {/* Order Summary */}
           <div className="space-y-4">
-            <div className="bg-white border border-[#E8E2D6] rounded-3xl p-5 space-y-5 shadow-sm">
+            <div className="bg-white border border-[#E8E2D6] rounded-lg p-5 space-y-5 shadow-sm">
               <h3 className="font-extrabold text-base text-[#4A453E] pb-3 border-b border-[#E8E2D6]">Order Summary</h3>
 
               {/* Coupon input */}
@@ -112,10 +112,10 @@ export default function CartPage() {
                   <input
                     type="text" placeholder="Coupon code"
                     value={couponCode} onChange={(e) => setCouponCode(e.target.value)}
-                    className="w-full h-10 bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] uppercase text-[#4A453E] font-mono"
+                    className="w-full h-10 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] uppercase text-[#4A453E] font-mono"
                   />
                 </div>
-                <button type="submit" className="h-10 bg-[#A8C69F] hover:bg-[#92b089] text-white rounded-xl px-5 text-xs font-extrabold transition-all shadow-md shadow-[#A8C69F]/10 flex-shrink-0 flex items-center justify-center">
+                <button type="submit" className="h-10 bg-[#A8C69F] hover:bg-[#92b089] text-white rounded-lg px-5 text-xs font-extrabold transition-all shadow-md shadow-[#A8C69F]/10 flex-shrink-0 flex items-center justify-center">
                   Apply
                 </button>
               </form>
@@ -147,7 +147,7 @@ export default function CartPage() {
               </div>
 
               {/* Delivery estimate */}
-              <div className="p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-2xl flex items-start gap-3">
+              <div className="p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg flex items-start gap-3">
                 <Calendar className="w-4 h-4 text-[#A8C69F] mt-0.5 flex-shrink-0" />
                 <div className="text-[10px] text-[#7A736A]">
                   <span className="font-bold text-[#4A453E] block">Estimated Delivery</span>
@@ -157,7 +157,7 @@ export default function CartPage() {
 
               <Link
                 href="/checkout"
-                className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#F9A37E]/25"
+                className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#F9A37E]/25"
               >
                 Proceed to Checkout
               </Link>

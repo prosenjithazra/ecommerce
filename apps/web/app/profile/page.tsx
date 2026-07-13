@@ -76,7 +76,7 @@ export default function ProfilePage() {
         </div>
         <button
           onClick={logout}
-          className="text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 py-2.5 px-4 rounded-xl border border-red-200 dark:border-red-900/60 flex items-center gap-1.5 transition-all"
+          className="text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 py-2.5 px-4 rounded-lg border border-red-200 dark:border-red-900/60 flex items-center gap-1.5 transition-all"
         >
           <LogOut className="w-4 h-4" /> Log Out
         </button>
@@ -85,28 +85,28 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
         
         {/* Sidebar Tabs Select */}
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-3xl p-4 flex flex-col gap-1.5">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-4 flex flex-col gap-1.5">
           <button
             onClick={() => setActiveTab('info')}
-            className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-xl text-left transition-all ${activeTab === 'info' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
+            className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-lg text-left transition-all ${activeTab === 'info' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
           >
             <User className="w-4 h-4" /> Personal Info
           </button>
           <button
             onClick={() => setActiveTab('address')}
-            className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-xl text-left transition-all ${activeTab === 'address' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
+            className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-lg text-left transition-all ${activeTab === 'address' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
           >
             <MapPin className="w-4 h-4" /> Address Book
           </button>
           <button
             onClick={() => setActiveTab('password')}
-            className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-xl text-left transition-all ${activeTab === 'password' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
+            className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-lg text-left transition-all ${activeTab === 'password' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
           >
             <KeyRound className="w-4 h-4" /> Change Password
           </button>
           <button
             onClick={() => setActiveTab('preferences')}
-            className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-xl text-left transition-all ${activeTab === 'preferences' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
+            className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-lg text-left transition-all ${activeTab === 'preferences' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
           >
             <Sliders className="w-4 h-4" /> Preferences
           </button>
@@ -114,7 +114,7 @@ export default function ProfilePage() {
           <div className="border-t border-[#E8E2D6] my-1.5 pt-1.5">
             <Link
               href="/admin"
-              className="flex items-center gap-2.5 text-xs font-extrabold py-2.5 px-4 rounded-xl text-left transition-all text-[#F9A37E] hover:bg-[#FBD5C1]/10"
+              className="flex items-center gap-2.5 text-xs font-extrabold py-2.5 px-4 rounded-lg text-left transition-all text-[#F9A37E] hover:bg-[#FBD5C1]/10"
             >
               <LayoutDashboard className="w-4 h-4" /> Admin Console
             </Link>
@@ -122,7 +122,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Main Content Area */}
-        <div className="lg:col-span-3 bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-3xl p-6 sm:p-8">
+        <div className="lg:col-span-3 bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-6 sm:p-8">
           
           {/* 1. Personal Info Tab */}
           {activeTab === 'info' && (
@@ -136,7 +136,7 @@ export default function ProfilePage() {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-xl py-3 px-4 text-xs outline-none focus:border-indigo-500"
+                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-indigo-500"
                   />
                 </div>
                 <div>
@@ -146,7 +146,7 @@ export default function ProfilePage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-xl py-3 px-4 text-xs outline-none focus:border-indigo-500"
+                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-indigo-500"
                   />
                 </div>
               </div>
@@ -156,10 +156,10 @@ export default function ProfilePage() {
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-xl py-3 px-4 text-xs outline-none"
+                  className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
                 />
               </div>
-              <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-xl transition-all">
+              <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-lg transition-all">
                 Save Changes
               </button>
             </form>
@@ -184,7 +184,7 @@ export default function ProfilePage() {
               </div>
 
               {showAddressForm ? (
-                <form onSubmit={handleAddressSubmit} className="space-y-4 p-4 border border-zinc-200 dark:border-zinc-850 rounded-2xl bg-zinc-50 dark:bg-zinc-950/20">
+                <form onSubmit={handleAddressSubmit} className="space-y-4 p-4 border border-zinc-200 dark:border-zinc-850 rounded-lg bg-zinc-50 dark:bg-zinc-950/20">
                   <h4 className="font-bold text-xs text-zinc-800 dark:text-zinc-200">
                     {editingAddress ? "Edit Address details" : "Add New Address"}
                   </h4>
@@ -195,7 +195,7 @@ export default function ProfilePage() {
                       required
                       value={addrForm.fullName}
                       onChange={(e) => setAddrForm({ ...addrForm, fullName: e.target.value })}
-                      className="w-full bg-white dark:bg-zinc-800 border border-zinc-250 rounded-xl py-2 px-3 text-xs outline-none"
+                      className="w-full bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs outline-none"
                     />
                     <input
                       type="tel"
@@ -203,7 +203,7 @@ export default function ProfilePage() {
                       required
                       value={addrForm.phone}
                       onChange={(e) => setAddrForm({ ...addrForm, phone: e.target.value })}
-                      className="w-full bg-white dark:bg-zinc-800 border border-zinc-250 rounded-xl py-2 px-3 text-xs outline-none"
+                      className="w-full bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs outline-none"
                     />
                   </div>
                   <input
@@ -212,7 +212,7 @@ export default function ProfilePage() {
                     required
                     value={addrForm.street}
                     onChange={(e) => setAddrForm({ ...addrForm, street: e.target.value })}
-                    className="w-full bg-white dark:bg-zinc-800 border border-zinc-250 rounded-xl py-2 px-3 text-xs outline-none"
+                    className="w-full bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs outline-none"
                   />
                   <div className="grid grid-cols-3 gap-2">
                     <input
@@ -221,7 +221,7 @@ export default function ProfilePage() {
                       required
                       value={addrForm.city}
                       onChange={(e) => setAddrForm({ ...addrForm, city: e.target.value })}
-                      className="bg-white dark:bg-zinc-800 border border-zinc-250 rounded-xl py-2 px-3 text-xs"
+                      className="bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs"
                     />
                     <input
                       type="text"
@@ -229,7 +229,7 @@ export default function ProfilePage() {
                       required
                       value={addrForm.state}
                       onChange={(e) => setAddrForm({ ...addrForm, state: e.target.value })}
-                      className="bg-white dark:bg-zinc-800 border border-zinc-250 rounded-xl py-2 px-3 text-xs"
+                      className="bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs"
                     />
                     <input
                       type="text"
@@ -237,7 +237,7 @@ export default function ProfilePage() {
                       required
                       value={addrForm.zip}
                       onChange={(e) => setAddrForm({ ...addrForm, zip: e.target.value })}
-                      className="bg-white dark:bg-zinc-800 border border-zinc-250 rounded-xl py-2 px-3 text-xs"
+                      className="bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs"
                     />
                   </div>
                   <label className="flex items-center gap-2 cursor-pointer pt-2">
@@ -256,11 +256,11 @@ export default function ProfilePage() {
                         setShowAddressForm(false);
                         setEditingAddress(null);
                       }}
-                      className="text-xs font-bold text-zinc-400 py-2 px-4 rounded-xl hover:bg-zinc-100"
+                      className="text-xs font-bold text-zinc-400 py-2 px-4 rounded-lg hover:bg-zinc-100"
                     >
                       Cancel
                     </button>
-                    <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2 px-4 rounded-xl shadow-md">
+                    <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2 px-4 rounded-lg shadow-md">
                       Save Details
                     </button>
                   </div>
@@ -293,7 +293,7 @@ export default function ProfilePage() {
                     required
                     value={passwords.current}
                     onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-xl py-3 px-4 text-xs outline-none"
+                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
                   />
                 </div>
                 <div>
@@ -303,7 +303,7 @@ export default function ProfilePage() {
                     required
                     value={passwords.new}
                     onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-xl py-3 px-4 text-xs outline-none"
+                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
                   />
                 </div>
                 <div>
@@ -313,11 +313,11 @@ export default function ProfilePage() {
                     required
                     value={passwords.confirm}
                     onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-xl py-3 px-4 text-xs outline-none"
+                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
                   />
                 </div>
               </div>
-              <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-xl transition-all">
+              <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-lg transition-all">
                 Update credentials
               </button>
             </form>
@@ -329,7 +329,7 @@ export default function ProfilePage() {
               <h3 className="font-extrabold text-base text-zinc-900 dark:text-white pb-3 border-b border-zinc-150">Preferences</h3>
 
               {/* Danger zone delete */}
-              <div className="p-6 border border-red-200/50 bg-red-50/20 dark:border-red-950/40 dark:bg-red-950/10 rounded-2xl space-y-4">
+              <div className="p-6 border border-red-200/50 bg-red-50/20 dark:border-red-950/40 dark:bg-red-950/10 rounded-lg space-y-4">
                 <div className="flex gap-3">
                   <ShieldAlert className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
                   <div className="text-xs">
@@ -339,7 +339,7 @@ export default function ProfilePage() {
                 </div>
                 <button
                   onClick={handleDeleteAccount}
-                  className="bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs py-2 px-4 rounded-xl transition-colors shadow"
+                  className="bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs py-2 px-4 rounded-lg transition-colors shadow"
                 >
                   Delete My Account
                 </button>

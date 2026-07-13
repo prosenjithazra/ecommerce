@@ -29,7 +29,7 @@ export const MobileBottomNav: React.FC = () => {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex flex-col items-center justify-center py-1 px-3 relative transition-all rounded-xl ${
+              className={`flex flex-col items-center justify-center py-1 px-3 relative transition-all rounded-lg ${
                 pathname === item.href
                   ? 'text-[#F9A37E]'
                   : 'text-[#A89B8A] hover:text-[#4A453E]'

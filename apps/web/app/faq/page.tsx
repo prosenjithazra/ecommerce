@@ -46,7 +46,7 @@ export default function FaqPage() {
       <Breadcrumb items={[{ name: "Frequently Asked Questions" }]} />
 
       <section className="text-center space-y-3 max-w-xl mx-auto">
-        <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-500 rounded-2xl flex items-center justify-center mx-auto">
+        <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-500 rounded-lg flex items-center justify-center mx-auto">
           <HelpCircle className="w-6 h-6" />
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold text-zinc-900 dark:text-white tracking-tight">Help Center</h1>
@@ -61,7 +61,7 @@ export default function FaqPage() {
               {cat.icon}
               {cat.title}
             </h3>
-            <div className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 rounded-3xl divide-y divide-zinc-200 dark:divide-zinc-800 overflow-hidden shadow-sm">
+            <div className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 rounded-lg divide-y divide-zinc-200 dark:divide-zinc-800 overflow-hidden shadow-sm">
               {cat.questions.map((faq, idx) => {
                 const uniqueId = `${cat.id}-${idx}`;
                 const isOpen = openIdx === uniqueId;

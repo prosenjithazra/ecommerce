@@ -50,7 +50,7 @@ export default function AdminOrdersPage() {
               placeholder="Search by order ID or customer..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-xl outline-none focus:border-[#F9A37E] transition-colors text-zinc-700 placeholder:text-zinc-400"
+              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#F9A37E] transition-colors text-zinc-700 placeholder:text-zinc-400"
             />
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -71,7 +71,7 @@ export default function AdminOrdersPage() {
           {STATUS_OPTIONS.map((s) => {
             const count = orders.filter((o) => o.status === s).length;
             return (
-              <div key={s} className="bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-center shadow-sm">
+              <div key={s} className="bg-white border border-zinc-200 rounded-lg px-4 py-3 text-center shadow-sm">
                 <p className="text-2xl font-black text-zinc-900">{count}</p>
                 <p className="text-[10px] font-bold text-zinc-400 mt-0.5">{s}</p>
               </div>
@@ -80,7 +80,7 @@ export default function AdminOrdersPage() {
         </div>
 
         {/* Orders Table */}
-        <div className="bg-white border border-zinc-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-zinc-50 border-b border-zinc-200">
@@ -112,7 +112,7 @@ export default function AdminOrdersPage() {
                       <select
                         value={o.status}
                         onChange={(e) => updateStatus(o.id, e.target.value)}
-                        className="bg-zinc-50 border border-zinc-200 rounded-xl py-1.5 px-2.5 text-[10px] font-bold text-zinc-700 outline-none hover:border-[#F9A37E] transition-colors cursor-pointer"
+                        className="bg-zinc-50 border border-zinc-200 rounded-lg py-1.5 px-2.5 text-[10px] font-bold text-zinc-700 outline-none hover:border-[#F9A37E] transition-colors cursor-pointer"
                       >
                         {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
                       </select>

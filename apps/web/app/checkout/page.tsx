@@ -23,7 +23,7 @@ export default function CheckoutPage() {
   const shippingFee = shippingMethod === 'express' ? 14.99 : (subtotal > 50 ? 0 : 5.99);
   const total = subtotal + tax + shippingFee;
 
-  const inputClass = "w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl py-2.5 px-4 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E] placeholder-[#A89B8A]";
+  const inputClass = "w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg py-2.5 px-4 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E] placeholder-[#A89B8A]";
 
   const handleAddNewAddress = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +52,7 @@ export default function CheckoutPage() {
         <div className="lg:col-span-2 space-y-5">
 
           {/* 1. Shipping Address */}
-          <div className="bg-white border border-[#E8E2D6] rounded-2xl p-5 space-y-4">
+          <div className="bg-white border border-[#E8E2D6] rounded-lg p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="font-extrabold text-sm text-[#4A453E]">1. Shipping Address</h3>
               {!showAddForm && (
@@ -64,7 +64,7 @@ export default function CheckoutPage() {
             </div>
 
             {showAddForm ? (
-              <form onSubmit={handleAddNewAddress} className="space-y-3 p-4 border border-[#E8E2D6] rounded-xl bg-[#FDFAF6]">
+              <form onSubmit={handleAddNewAddress} className="space-y-3 p-4 border border-[#E8E2D6] rounded-lg bg-[#FDFAF6]">
                 <h4 className="font-bold text-xs text-[#4A453E]">New Shipping Details</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input type="text" placeholder="Full Name" required value={newAddr.fullName}
@@ -84,11 +84,11 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex gap-2 justify-end">
                   <button type="button" onClick={() => setShowAddForm(false)}
-                    className="text-xs font-bold text-[#A89B8A] py-2 px-4 rounded-xl hover:bg-[#E8E2D6] transition-colors">
+                    className="text-xs font-bold text-[#A89B8A] py-2 px-4 rounded-lg hover:bg-[#E8E2D6] transition-colors">
                     Cancel
                   </button>
                   <button type="submit"
-                    className="bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-2.5 px-6 rounded-2xl transition-all shadow-lg shadow-[#A8C69F]/20">
+                    className="bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all shadow-lg shadow-[#A8C69F]/20">
                     Save Address
                   </button>
                 </div>
@@ -97,7 +97,7 @@ export default function CheckoutPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {addresses.map(addr => (
                   <div key={addr.id} onClick={() => setSelectedAddressId(addr.id)}
-                    className={`cursor-pointer border-2 rounded-xl p-4 transition-all ${
+                    className={`cursor-pointer border-2 rounded-lg p-4 transition-all ${
                       selectedAddressId === addr.id
                         ? 'border-[#F9A37E] bg-[#FBD5C1]/10'
                         : 'border-[#E8E2D6] hover:border-[#A89B8A]'
@@ -112,7 +112,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* 2. Billing address */}
-          <div className="bg-white border border-[#E8E2D6] rounded-2xl p-5">
+          <div className="bg-white border border-[#E8E2D6] rounded-lg p-5">
             <label className="flex items-center gap-2.5 cursor-pointer">
               <input type="checkbox" checked={sameAsBilling}
                 onChange={(e) => setSameAsBilling(e.target.checked)}
@@ -122,7 +122,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* 3. Shipping method */}
-          <div className="bg-white border border-[#E8E2D6] rounded-2xl p-5 space-y-3">
+          <div className="bg-white border border-[#E8E2D6] rounded-lg p-5 space-y-3">
             <h3 className="font-extrabold text-sm text-[#4A453E]">2. Shipping Method</h3>
             <div className="space-y-2">
               {[
@@ -130,7 +130,7 @@ export default function CheckoutPage() {
                 { id: 'express', label: 'Express Air Shipping', sub: '2–3 business days', price: '₹14.99' }
               ].map(opt => (
                 <label key={opt.id}
-                  className={`flex items-center justify-between p-4 border rounded-xl cursor-pointer transition-all ${
+                  className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all ${
                     shippingMethod === opt.id
                       ? 'border-[#F9A37E] bg-[#FBD5C1]/10'
                       : 'border-[#E8E2D6] hover:border-[#A89B8A]'
@@ -151,7 +151,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* 4. Additional details */}
-          <div className="bg-white border border-[#E8E2D6] rounded-2xl p-5 space-y-4">
+          <div className="bg-white border border-[#E8E2D6] rounded-lg p-5 space-y-4">
             <h3 className="font-extrabold text-sm text-[#4A453E]">3. Additional Details</h3>
             <div>
               <label className="block text-xs font-bold text-[#4A453E] mb-1.5">GSTIN (Optional)</label>
@@ -169,7 +169,7 @@ export default function CheckoutPage() {
         </div>
 
         {/* ── Right: Order Summary ── */}
-        <div className="bg-white border border-[#E8E2D6] rounded-2xl p-5 space-y-5 shadow-sm sticky top-20">
+        <div className="bg-white border border-[#E8E2D6] rounded-lg p-5 space-y-5 shadow-sm sticky top-20">
           <h3 className="font-extrabold text-base text-[#4A453E] pb-3 border-b border-[#E8E2D6]">Order Summary</h3>
 
           {/* Items */}
@@ -210,7 +210,7 @@ export default function CheckoutPage() {
           </div>
 
           <button onClick={handleProceedToPayment}
-            className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-2xl transition-all shadow-lg shadow-[#F9A37E]/25 flex items-center justify-center active:scale-95">
+            className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 flex items-center justify-center active:scale-95">
             Continue to Payment →
           </button>
         </div>

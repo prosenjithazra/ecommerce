@@ -67,7 +67,7 @@ export default function EditProductPage() {
     router.push("/admin/products");
   };
 
-  const inputCls = "w-full bg-white border border-zinc-200 rounded-xl py-3 px-4 text-xs font-medium text-zinc-800 outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/10 transition-all placeholder:text-zinc-400";
+  const inputCls = "w-full bg-white border border-zinc-200 rounded-lg py-3 px-4 text-xs font-medium text-zinc-800 outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/10 transition-all placeholder:text-zinc-400";
   const labelCls = "block text-xs font-extrabold text-zinc-600 mb-1.5";
 
   return (
@@ -81,7 +81,7 @@ export default function EditProductPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             <div className="lg:col-span-2 space-y-4">
-              <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm space-y-4">
                 <h3 className="font-extrabold text-sm text-zinc-800 flex items-center gap-2">
                   <ImagePlus className="w-4 h-4 text-[#F9A37E]" /> Product Images
                 </h3>
@@ -92,7 +92,7 @@ export default function EditProductPage() {
                     <p className="text-[9px] font-bold uppercase text-zinc-400 tracking-widest mb-2">Current Images</p>
                     <div className="grid grid-cols-2 gap-2">
                       {existingImages.map((src, idx) => (
-                        <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-zinc-200">
+                        <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-zinc-200">
                           <img src={src} alt="" className="w-full h-full object-cover" />
                           {idx === 0 && <span className="absolute top-1 left-1 text-[8px] font-extrabold bg-[#F9A37E] text-white px-1.5 py-0.5 rounded-md uppercase">Primary</span>}
                         </div>
@@ -104,7 +104,7 @@ export default function EditProductPage() {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full border-2 border-dashed border-zinc-300 hover:border-[#F9A37E] rounded-2xl p-5 flex flex-col items-center gap-1.5 transition-all hover:bg-[#F9A37E]/5 cursor-pointer group"
+                  className="w-full border-2 border-dashed border-zinc-300 hover:border-[#F9A37E] rounded-lg p-5 flex flex-col items-center gap-1.5 transition-all hover:bg-[#F9A37E]/5 cursor-pointer group"
                 >
                   <Upload className="w-6 h-6 text-zinc-300 group-hover:text-[#F9A37E] transition-colors" />
                   <span className="text-xs font-bold text-zinc-400 group-hover:text-[#F9A37E] transition-colors">Upload Additional Images</span>
@@ -116,7 +116,7 @@ export default function EditProductPage() {
                     <p className="text-[9px] font-bold uppercase text-zinc-400 tracking-widest mb-2">New Uploads</p>
                     <div className="grid grid-cols-2 gap-2">
                       {newImages.map((img, idx) => (
-                        <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-zinc-200 group">
+                        <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-zinc-200 group">
                           <img src={img.preview} alt="" className="w-full h-full object-cover" />
                           <button type="button" onClick={() => setNewImages((p) => p.filter((_, i) => i !== idx))} className="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <X className="w-3 h-3 text-white" />
@@ -128,7 +128,7 @@ export default function EditProductPage() {
                 )}
               </div>
 
-              <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm space-y-4">
                 <h3 className="font-extrabold text-sm text-zinc-800">Publish Settings</h3>
                 <label className="flex items-center gap-3 cursor-pointer" onClick={() => setForm((p) => ({ ...p, inStock: !p.inStock }))}>
                   <div className={`relative w-10 rounded-full transition-colors cursor-pointer ${form.inStock ? "bg-[#A8C69F]" : "bg-zinc-200"}`} style={{ height: '22px' }}>
@@ -150,7 +150,7 @@ export default function EditProductPage() {
             </div>
 
             <div className="lg:col-span-3 space-y-4">
-              <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm space-y-4">
                 <h3 className="font-extrabold text-sm text-zinc-800 flex items-center gap-2">
                   <Package className="w-4 h-4 text-[#F9A37E]" /> Product Details
                 </h3>
@@ -180,21 +180,21 @@ export default function EditProductPage() {
                 </div>
               </div>
 
-              <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm space-y-3">
+              <div className="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm space-y-3">
                 <h3 className="font-extrabold text-sm text-zinc-800">Available Sizes</h3>
                 <div className="flex flex-wrap gap-2">
                   {SIZES.map((s) => (
-                    <button key={s} type="button" onClick={() => toggleSize(s)} className={`w-11 h-10 text-xs font-extrabold rounded-xl border-2 transition-all ${form.selectedSizes.includes(s) ? "bg-[#F9A37E]/15 border-[#F9A37E] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}>{s}</button>
+                    <button key={s} type="button" onClick={() => toggleSize(s)} className={`w-11 h-10 text-xs font-extrabold rounded-lg border-2 transition-all ${form.selectedSizes.includes(s) ? "bg-[#F9A37E]/15 border-[#F9A37E] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}>{s}</button>
                   ))}
                 </div>
               </div>
 
-              <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm space-y-3">
+              <div className="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm space-y-3">
                 <h3 className="font-extrabold text-sm text-zinc-800">Available Colors</h3>
                 <div className="flex flex-wrap gap-3">
                   {COLORS.map((c) => (
                     <button key={c.name} type="button" onClick={() => toggleColor(c.name)} title={c.name} className="flex flex-col items-center gap-1">
-                      <span className={`w-8 h-8 rounded-xl border-2 transition-all ${form.selectedColors.includes(c.name) ? "border-[#F9A37E] scale-110 shadow-md" : "border-zinc-200 hover:border-zinc-400"}`} style={{ backgroundColor: c.hex }} />
+                      <span className={`w-8 h-8 rounded-lg border-2 transition-all ${form.selectedColors.includes(c.name) ? "border-[#F9A37E] scale-110 shadow-md" : "border-zinc-200 hover:border-zinc-400"}`} style={{ backgroundColor: c.hex }} />
                       <span className="text-[8px] font-bold text-zinc-400 w-9 text-center truncate leading-tight">{c.name}</span>
                     </button>
                   ))}
@@ -202,8 +202,8 @@ export default function EditProductPage() {
               </div>
 
               <div className="flex gap-3 pt-2">
-                <Link href="/admin/products" className="flex-1 text-center py-3.5 px-6 border-2 border-zinc-200 text-zinc-600 font-extrabold text-xs rounded-xl hover:bg-zinc-50 transition-colors">Cancel</Link>
-                <button type="submit" disabled={submitting} className="flex-1 flex items-center justify-center gap-2 bg-[#F9A37E] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-3.5 px-6 rounded-xl transition-all shadow-md shadow-[#F9A37E]/20">
+                <Link href="/admin/products" className="flex-1 text-center py-3.5 px-6 border-2 border-zinc-200 text-zinc-600 font-extrabold text-xs rounded-lg hover:bg-zinc-50 transition-colors">Cancel</Link>
+                <button type="submit" disabled={submitting} className="flex-1 flex items-center justify-center gap-2 bg-[#F9A37E] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20">
                   <Save className="w-4 h-4" /> {submitting ? "Saving..." : "Save Changes"}
                 </button>
               </div>

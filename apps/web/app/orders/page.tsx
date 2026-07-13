@@ -30,13 +30,13 @@ export default function OrdersPage() {
       </div>
 
       {/* Filters + Search */}
-      <div className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center bg-white border border-[#E8E2D6] p-4 rounded-2xl">
+      <div className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center bg-white border border-[#E8E2D6] p-4 rounded-lg">
         <div className="flex flex-wrap gap-1.5">
           {(['All', 'Pending', 'Processing', 'Shipped', 'Delivered'] as const).map(status => (
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
-              className={`text-xs font-extrabold py-2 px-4 rounded-2xl border transition-all ${
+              className={`text-xs font-extrabold py-2 px-4 rounded-lg border transition-all ${
                 statusFilter === status
                   ? 'bg-[#A8C69F] border-[#A8C69F] text-white shadow-md shadow-[#A8C69F]/20'
                   : 'bg-transparent text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
@@ -52,7 +52,7 @@ export default function OrdersPage() {
           <input
             type="text" placeholder="Search orders..."
             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl py-2 pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E]"
+            className="w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg py-2 pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E]"
           />
         </div>
       </div>

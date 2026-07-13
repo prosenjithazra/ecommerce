@@ -13,7 +13,7 @@ interface CategoryCardProps {
 
 export const CategoryCard: React.FC<CategoryCardProps> = ({ name, image, count, href }) => {
   return (
-    <Link href={href} className="group relative block aspect-[4/3] rounded-2xl overflow-hidden bg-[#E8E2D6] shadow-sm border border-[#E8E2D6]">
+    <Link href={href} className="group relative block aspect-[4/3] rounded-lg overflow-hidden bg-[#E8E2D6] shadow-sm border border-[#E8E2D6]">
       <img
         src={image}
         alt={name}

@@ -65,7 +65,7 @@ export default function CategoriesPage() {
       <section className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
         
         {/* Sidebar filters */}
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-3xl p-6 space-y-6 lg:sticky lg:top-20">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-6 space-y-6 lg:sticky lg:top-20">
           <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
             <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white flex items-center gap-1.5">
               <SlidersHorizontal className="w-4 h-4 text-indigo-500" /> Filters
@@ -86,7 +86,7 @@ export default function CategoriesPage() {
               placeholder="Search categories..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl py-2.5 pl-9 pr-3 text-xs outline-none focus:border-indigo-500 text-zinc-900 dark:text-white"
+              className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg py-2.5 pl-9 pr-3 text-xs outline-none focus:border-indigo-500 text-zinc-900 dark:text-white"
             />
           </div>
 
@@ -186,7 +186,7 @@ export default function CategoriesPage() {
 
           {/* Grids */}
           {filteredCategories.length === 0 ? (
-            <div className="p-12 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl">
+            <div className="p-12 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg">
               <span className="text-sm font-bold text-zinc-500">No categories match your filters.</span>
             </div>
           ) : (

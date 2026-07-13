@@ -60,9 +60,9 @@ export default function NotificationsPage() {
           {list.map(notif => (
             <div 
               key={notif.id} 
-              className={`p-4 border rounded-2xl bg-white dark:bg-zinc-900/60 flex gap-4 transition-all ${notif.read ? 'border-zinc-200 dark:border-zinc-800 opacity-70' : 'border-indigo-500 shadow-md shadow-indigo-50/20'}`}
+              className={`p-4 border rounded-lg bg-white dark:bg-zinc-900/60 flex gap-4 transition-all ${notif.read ? 'border-zinc-200 dark:border-zinc-800 opacity-70' : 'border-indigo-500 shadow-md shadow-indigo-50/20'}`}
             >
-              <div className="w-10 h-10 bg-zinc-55 dark:bg-zinc-850 rounded-xl flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-zinc-55 dark:bg-zinc-850 rounded-lg flex items-center justify-center flex-shrink-0">
                 {getIcon(notif.type)}
               </div>
               <div className="flex-1 min-w-0">

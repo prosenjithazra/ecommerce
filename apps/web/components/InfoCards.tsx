@@ -24,14 +24,14 @@ export const ProductGallery: React.FC<{ images: string[]; name: string }> = ({ i
           <button
             key={idx}
             onClick={() => setActiveImage(img)}
-            className={`w-14 h-14 rounded-xl overflow-hidden border-2 bg-[#F5F0E8] flex-shrink-0 transition-all ${activeImage === img ? 'border-[#F9A37E] scale-105' : 'border-transparent'}`}
+            className={`w-14 h-14 rounded-lg overflow-hidden border-2 bg-[#F5F0E8] flex-shrink-0 transition-all ${activeImage === img ? 'border-[#F9A37E] scale-105' : 'border-transparent'}`}
           >
             <img src={img} alt={`${name} ${idx}`} className="w-full h-full object-cover" />
           </button>
         ))}
       </div>
       <div
-        className="relative aspect-square w-full bg-[#F5F0E8] rounded-3xl overflow-hidden cursor-zoom-in order-1 md:order-2 border border-[#E8E2D6]"
+        className="relative aspect-square w-full bg-[#F5F0E8] rounded-lg overflow-hidden cursor-zoom-in order-1 md:order-2 border border-[#E8E2D6]"
         onMouseMove={handleMouseMove}
         onMouseLeave={() => setZoomStyle({})}
       >
@@ -47,7 +47,7 @@ export const ProductGallery: React.FC<{ images: string[]; name: string }> = ({ i
 /* 2. REVIEW CARD */
 interface ReviewCardProps { name: string; rating: number; date: string; comment: string; verified: boolean; }
 export const ReviewCard: React.FC<ReviewCardProps> = ({ name, rating, date, comment, verified }) => (
-  <div className="p-4 border border-[#E8E2D6] rounded-2xl bg-white space-y-3">
+  <div className="p-4 border border-[#E8E2D6] rounded-lg bg-white space-y-3">
     <div className="flex items-center justify-between">
       <div className="space-y-0.5">
         <div className="flex items-center gap-2">
@@ -74,7 +74,7 @@ export const CouponCard: React.FC<{ code: string; discountDesc: string; expiry: 
     showToast("Coupon Copied", `Promo code ${code} copied!`, "success");
   };
   return (
-    <div className="border border-dashed border-[#F9A37E]/50 bg-[#FBD5C1]/20 rounded-2xl p-4 flex items-center justify-between gap-4">
+    <div className="border border-dashed border-[#F9A37E]/50 bg-[#FBD5C1]/20 rounded-lg p-4 flex items-center justify-between gap-4">
       <div className="space-y-1">
         <div className="flex items-center gap-2">
           <span className="font-extrabold text-xs text-[#4A453E] bg-white border border-[#E8E2D6] py-1 px-2.5 rounded-lg tracking-wider font-mono">
@@ -84,7 +84,7 @@ export const CouponCard: React.FC<{ code: string; discountDesc: string; expiry: 
         </div>
         <p className="text-[10px] text-[#A89B8A]">Expires: {expiry}</p>
       </div>
-      <button onClick={handleCopy} className="p-2 bg-[#F9A37E] hover:bg-[#E8855A] text-white rounded-xl transition-all hover:scale-105" title="Copy Code">
+      <button onClick={handleCopy} className="p-2 bg-[#F9A37E] hover:bg-[#E8855A] text-white rounded-lg transition-all hover:scale-105" title="Copy Code">
         <Copy className="w-4 h-4" />
       </button>
     </div>
@@ -94,7 +94,7 @@ export const CouponCard: React.FC<{ code: string; discountDesc: string; expiry: 
 /* 4. ADDRESS CARD */
 interface AddressCardProps { address: Address; onEdit: (a: Address) => void; onDelete: (id: string) => void; onSetDefault: (id: string) => void; }
 export const AddressCard: React.FC<AddressCardProps> = ({ address, onEdit, onDelete, onSetDefault }) => (
-  <div className={`p-4 border rounded-2xl bg-white flex flex-col justify-between gap-3 transition-all ${address.isDefault ? 'border-[#F9A37E] shadow-sm shadow-[#F9A37E]/20' : 'border-[#E8E2D6]'}`}>
+  <div className={`p-4 border rounded-lg bg-white flex flex-col justify-between gap-3 transition-all ${address.isDefault ? 'border-[#F9A37E] shadow-sm shadow-[#F9A37E]/20' : 'border-[#E8E2D6]'}`}>
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <h4 className="font-extrabold text-sm text-[#4A453E]">{address.fullName}</h4>
@@ -134,7 +134,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({ address, onEdit, onDel
 export const OrderCard: React.FC<{ order: Order; onViewDetails: (id: string) => void }> = ({ order, onViewDetails }) => {
   const itemsCount = order.items.reduce((acc, it) => acc + it.quantity, 0);
   return (
-    <div className="p-4 border border-[#E8E2D6] rounded-2xl bg-white space-y-3">
+    <div className="p-4 border border-[#E8E2D6] rounded-lg bg-white space-y-3">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#E8E2D6]">
         <div className="flex items-center gap-2">
           <span className="font-extrabold text-sm text-[#4A453E]">{order.id}</span>
@@ -146,7 +146,7 @@ export const OrderCard: React.FC<{ order: Order; onViewDetails: (id: string) => 
         </div>
       </div>
       <div className="flex gap-3">
-        <div className="w-14 h-14 bg-[#E8E2D6] rounded-xl overflow-hidden flex-shrink-0">
+        <div className="w-14 h-14 bg-[#E8E2D6] rounded-lg overflow-hidden flex-shrink-0">
           <img src={order.items[0]?.image} alt={order.items[0]?.name} className="w-full h-full object-cover" />
         </div>
         <div className="flex-1 min-w-0">
@@ -178,9 +178,9 @@ export const OrderCard: React.FC<{ order: Order; onViewDetails: (id: string) => 
 
 /* 6. TRANSACTION CARD */
 export const TransactionCard: React.FC<{ txn: Transaction }> = ({ txn }) => (
-  <div className="p-4 border border-[#E8E2D6] rounded-xl bg-white flex items-center justify-between gap-4">
+  <div className="p-4 border border-[#E8E2D6] rounded-lg bg-white flex items-center justify-between gap-4">
     <div className="flex items-center gap-3">
-      <div className="w-10 h-10 bg-[#E8E2D6] rounded-xl flex items-center justify-center">
+      <div className="w-10 h-10 bg-[#E8E2D6] rounded-lg flex items-center justify-center">
         <FileText className="w-5 h-5 text-[#A8C69F]" />
       </div>
       <div>
@@ -196,7 +196,7 @@ export const TransactionCard: React.FC<{ txn: Transaction }> = ({ txn }) => (
         <span className="text-[9px] mt-0.5 inline-block"><StatusBadge status={txn.status} /></span>
       </div>
       <button
-        className="p-2 border border-[#E8E2D6] text-[#A89B8A] hover:text-[#4A453E] rounded-xl transition-all"
+        className="p-2 border border-[#E8E2D6] text-[#A89B8A] hover:text-[#4A453E] rounded-lg transition-all"
         title="Download Receipt"
         onClick={() => alert("Simulating invoice download...")}
       >

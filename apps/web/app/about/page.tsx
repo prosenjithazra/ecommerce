@@ -50,8 +50,8 @@ export default function AboutPage() {
 
       {/* Mission & Vision */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="p-8 bg-zinc-50 dark:bg-zinc-900/40 rounded-3xl border border-zinc-200/50 dark:border-zinc-800 space-y-4">
-          <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-500 rounded-2xl flex items-center justify-center">
+        <div className="p-8 bg-zinc-50 dark:bg-zinc-900/40 rounded-lg border border-zinc-200/50 dark:border-zinc-800 space-y-4">
+          <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-500 rounded-lg flex items-center justify-center">
             <Rocket className="w-6 h-6" />
           </div>
           <h3 className="font-extrabold text-lg text-zinc-900 dark:text-white">Our Mission</h3>
@@ -59,8 +59,8 @@ export default function AboutPage() {
             To provide the most intuitive, beautiful, and accessible print-on-demand customization experience online. We enable zero-minimum orders so that creative printing has no entry barriers.
           </p>
         </div>
-        <div className="p-8 bg-zinc-50 dark:bg-zinc-900/40 rounded-3xl border border-zinc-200/50 dark:border-zinc-800 space-y-4">
-          <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-2xl flex items-center justify-center">
+        <div className="p-8 bg-zinc-50 dark:bg-zinc-900/40 rounded-lg border border-zinc-200/50 dark:border-zinc-800 space-y-4">
+          <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-lg flex items-center justify-center">
             <Compass className="w-6 h-6" />
           </div>
           <h3 className="font-extrabold text-lg text-zinc-900 dark:text-white">Our Vision</h3>
@@ -75,7 +75,7 @@ export default function AboutPage() {
         <h2 className="text-2xl font-extrabold text-zinc-900 dark:text-white tracking-tight text-center">Company Milestones</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {milestones.map((m) => (
-            <div key={m.year} className="p-6 border border-zinc-150 dark:border-zinc-800 rounded-3xl bg-white dark:bg-zinc-900/60 relative">
+            <div key={m.year} className="p-6 border border-zinc-150 dark:border-zinc-800 rounded-lg bg-white dark:bg-zinc-900/60 relative">
               <span className="text-2xl font-black text-indigo-550 dark:text-indigo-400 block mb-2">{m.year}</span>
               <h4 className="font-bold text-sm text-zinc-850 dark:text-white mb-2">{m.title}</h4>
               <p className="text-[11px] text-zinc-450 dark:text-zinc-400 leading-relaxed">{m.desc}</p>
@@ -109,7 +109,7 @@ export default function AboutPage() {
         <p className="text-xs text-[#E8E2D6]/70 max-w-sm mx-auto">Browse our premium print-ready collection and order with confidence — fast delivery, easy returns.</p>
         <Link
           href="/products"
-          className="inline-block bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3.5 px-8 rounded-xl transition-colors shadow-lg"
+          className="inline-block bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3.5 px-8 rounded-lg transition-colors shadow-lg"
         >
           Shop Collection →
         </Link>

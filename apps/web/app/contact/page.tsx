@@ -28,7 +28,7 @@ export default function ContactPage() {
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
         
         {/* Contact form */}
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 shadow-xl rounded-3xl p-6 sm:p-10 space-y-6">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 shadow-xl rounded-lg p-6 sm:p-10 space-y-6">
           <h3 className="font-extrabold text-lg text-zinc-900 dark:text-white">Send us a message</h3>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -40,7 +40,7 @@ export default function ContactPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Jane"
-                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl py-3 px-4 text-xs outline-none focus:border-indigo-500 text-zinc-950 dark:text-zinc-50"
+                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg py-3 px-4 text-xs outline-none focus:border-indigo-500 text-zinc-950 dark:text-zinc-50"
                 />
               </div>
               <div>
@@ -51,7 +51,7 @@ export default function ContactPage() {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="jane@example.com"
-                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl py-3 px-4 text-xs outline-none focus:border-indigo-500 text-zinc-950 dark:text-zinc-50"
+                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg py-3 px-4 text-xs outline-none focus:border-indigo-500 text-zinc-950 dark:text-zinc-50"
                 />
               </div>
             </div>
@@ -63,7 +63,7 @@ export default function ContactPage() {
                 value={formData.subject}
                 onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                 placeholder="Bulk order inquiry"
-                className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl py-3 px-4 text-xs outline-none focus:border-indigo-500 text-zinc-950 dark:text-zinc-50"
+                className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg py-3 px-4 text-xs outline-none focus:border-indigo-500 text-zinc-950 dark:text-zinc-50"
               />
             </div>
 
@@ -75,13 +75,13 @@ export default function ContactPage() {
                 value={formData.message}
                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                 placeholder="Write details about your request..."
-                className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl py-3 px-4 text-xs outline-none focus:border-indigo-500 text-zinc-955 dark:text-zinc-50 resize-none"
+                className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg py-3 px-4 text-xs outline-none focus:border-indigo-500 text-zinc-955 dark:text-zinc-50 resize-none"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3.5 px-4 rounded-xl transition-all shadow-md shadow-[#F9A37E]/25 dark:shadow-none flex items-center justify-center gap-2"
+              className="w-full bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3.5 px-4 rounded-lg transition-all shadow-md shadow-[#F9A37E]/25 dark:shadow-none flex items-center justify-center gap-2"
             >
               <Send className="w-4 h-4" /> Send Message
             </button>
@@ -94,14 +94,14 @@ export default function ContactPage() {
           <div className="space-y-4">
             <h3 className="font-extrabold text-lg text-zinc-900 dark:text-white">Studio details</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="p-4 border border-zinc-150 dark:border-zinc-800 rounded-2xl bg-zinc-50 dark:bg-zinc-900/30 flex gap-3">
+              <div className="p-4 border border-zinc-150 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/30 flex gap-3">
                 <MapPin className="w-5 h-5 text-indigo-500 mt-0.5 flex-shrink-0" />
                 <div className="text-xs">
                   <span className="font-bold text-zinc-850 dark:text-white block">Headquarters</span>
                   <span className="text-zinc-500 dark:text-zinc-400 mt-1 block">123 Creative Street, Suite 100, New York, NY 10001</span>
                 </div>
               </div>
-              <div className="p-4 border border-zinc-150 dark:border-zinc-800 rounded-2xl bg-zinc-50 dark:bg-zinc-900/30 flex gap-3">
+              <div className="p-4 border border-zinc-150 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-900/30 flex gap-3">
                 <Phone className="w-5 h-5 text-indigo-500 mt-0.5 flex-shrink-0" />
                 <div className="text-xs">
                   <span className="font-bold text-zinc-850 dark:text-white block">Call Us</span>
@@ -125,13 +125,13 @@ export default function ContactPage() {
           {/* Social connections */}
           <div className="flex gap-4 items-center justify-center lg:justify-start">
             <span className="text-xs font-bold text-zinc-400">Follow our print designs:</span>
-            <a href="#" className="p-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 rounded-xl transition-colors text-zinc-650 dark:text-zinc-300">
+            <a href="#" className="p-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 rounded-lg transition-colors text-zinc-650 dark:text-zinc-300">
               <Twitter className="w-4.5 h-4.5" />
             </a>
-            <a href="#" className="p-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 rounded-xl transition-colors text-zinc-650 dark:text-zinc-300">
+            <a href="#" className="p-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 rounded-lg transition-colors text-zinc-650 dark:text-zinc-300">
               <Instagram className="w-4.5 h-4.5" />
             </a>
-            <a href="#" className="p-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 rounded-xl transition-colors text-zinc-650 dark:text-zinc-300">
+            <a href="#" className="p-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 rounded-lg transition-colors text-zinc-650 dark:text-zinc-300">
               <Facebook className="w-4.5 h-4.5" />
             </a>
           </div>

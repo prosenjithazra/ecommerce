@@ -84,7 +84,7 @@ export default function ProductsPage() {
         <input
           type="text" placeholder="Search product..."
           value={search} onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl py-2.5 pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E]"
+          className="w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg py-2.5 pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E]"
         />
       </div>
 
@@ -126,7 +126,7 @@ export default function ProductsPage() {
             const isSelected = selectedSizes.includes(size);
             return (
               <button key={size} onClick={() => handleSizeToggle(size)}
-                className={`min-w-8 h-8 px-2 rounded-xl text-[10px] font-extrabold border transition-all ${
+                className={`min-w-8 h-8 px-2 rounded-lg text-[10px] font-extrabold border transition-all ${
                   isSelected ? 'bg-[#F9A37E] text-white border-[#F9A37E]' : 'text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
                 }`}
               >{size}</button>
@@ -149,7 +149,7 @@ export default function ProductsPage() {
       <section className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
 
         {/* Sidebar - Desktop Only */}
-        <div className="hidden lg:block bg-white border border-[#E8E2D6] rounded-3xl p-5 space-y-5 lg:sticky lg:top-20">
+        <div className="hidden lg:block bg-white border border-[#E8E2D6] rounded-lg p-5 space-y-5 lg:sticky lg:top-20">
           <div className="flex items-center justify-between pb-3 border-b border-[#E8E2D6]">
             <h3 className="font-extrabold text-sm text-[#4A453E] flex items-center gap-1.5">
               <SlidersHorizontal className="w-4 h-4 text-[#F9A37E]" /> Filters
@@ -169,7 +169,7 @@ export default function ProductsPage() {
               {/* Mobile Filter Button */}
               <button
                 onClick={() => setIsFilterDrawerOpen(true)}
-                className="flex-none flex items-center justify-center gap-1.5 border border-[#E8E2D6] hover:border-[#A89B8A] bg-white rounded-xl py-2 px-3.5 text-xs font-bold text-[#4A453E] transition-all hover:scale-[1.02]"
+                className="flex-none flex items-center justify-center gap-1.5 border border-[#E8E2D6] hover:border-[#A89B8A] bg-white rounded-lg py-2 px-3.5 text-xs font-bold text-[#4A453E] transition-all hover:scale-[1.02]"
               >
                 <SlidersHorizontal className="w-3.5 h-3.5 text-[#F9A37E]" /> Filters
               </button>
@@ -190,7 +190,7 @@ export default function ProductsPage() {
           </div>
 
           {filteredProducts.length === 0 ? (
-            <div className="p-12 text-center border-2 border-dashed border-[#E8E2D6] rounded-3xl">
+            <div className="p-12 text-center border-2 border-dashed border-[#E8E2D6] rounded-lg">
               <span className="text-sm font-bold text-[#A89B8A]">No products match your filters.</span>
             </div>
           ) : (

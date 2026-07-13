@@ -57,11 +57,11 @@ export const Footer: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full sm:flex-1 h-11 bg-[#3A3530] border border-[rgba(255,255,255,0.1)] text-[#E8E2D6] text-xs rounded-xl px-4 outline-none focus:border-[#F9A37E] placeholder:text-[#6A635A]"
+                className="w-full sm:flex-1 h-11 bg-[#3A3530] border border-[rgba(255,255,255,0.1)] text-[#E8E2D6] text-xs rounded-lg px-4 outline-none focus:border-[#F9A37E] placeholder:text-[#6A635A]"
               />
               <button
                 type="submit"
-                className="w-full sm:w-auto bg-[#F9A37E] hover:bg-[#E8855A] text-white rounded-xl px-6 h-11 flex items-center justify-center gap-1.5 font-bold text-xs transition-colors flex-shrink-0"
+                className="w-full sm:w-auto bg-[#F9A37E] hover:bg-[#E8855A] text-white rounded-lg px-6 h-11 flex items-center justify-center gap-1.5 font-bold text-xs transition-colors flex-shrink-0"
               >
                 Subscribe <Send className="w-3.5 h-3.5" />
               </button>
@@ -148,7 +148,7 @@ export const Footer: React.FC = () => {
               { icon: <Instagram className="w-4 h-4" />, href: "#" },
               { icon: <Facebook className="w-4 h-4" />,  href: "#" },
             ].map((s, i) => (
-              <a key={i} href={s.href} className="w-8 h-8 rounded-xl bg-[rgba(255,255,255,0.08)] hover:bg-[#F9A37E] hover:text-white text-[#A89B8A] flex items-center justify-center transition-all">
+              <a key={i} href={s.href} className="w-8 h-8 rounded-lg bg-[rgba(255,255,255,0.08)] hover:bg-[#F9A37E] hover:text-white text-[#A89B8A] flex items-center justify-center transition-all">
                 {s.icon}
               </a>
             ))}

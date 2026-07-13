@@ -34,7 +34,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   return (
     <>
-      <div className="group relative flex flex-col bg-white border border-[#E8E2D6] rounded-2xl overflow-hidden hover:shadow-lg hover:shadow-[#F9A37E]/10 transition-all duration-300">
+      <div className="group relative flex flex-col bg-white border border-[#E8E2D6] rounded-lg overflow-hidden hover:shadow-lg hover:shadow-[#F9A37E]/10 transition-all duration-300">
 
         {/* Image area */}
         <div className="relative aspect-square w-full bg-[#F5F0E8] overflow-hidden">
@@ -124,7 +124,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       {quickViewOpen && (
         <Modal isOpen={quickViewOpen} onClose={() => setQuickViewOpen(false)}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="aspect-square bg-[#F5F0E8] rounded-2xl overflow-hidden">
+            <div className="aspect-square bg-[#F5F0E8] rounded-lg overflow-hidden">
               <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
             </div>
 
@@ -178,7 +178,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                       <button
                         key={size}
                         onClick={() => setSelectedSize(size)}
-                        className={`min-w-8 h-8 px-2 rounded-xl text-xs font-extrabold border transition-all ${
+                        className={`min-w-8 h-8 px-2 rounded-lg text-xs font-extrabold border transition-all ${
                           selectedSize === size
                             ? 'bg-[#4A453E] text-white border-[#4A453E]'
                             : 'bg-transparent text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
@@ -194,14 +194,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <div className="flex gap-3 pt-5 mt-5 border-t border-[#E8E2D6]">
                 <button
                   onClick={(e) => { handleQuickAddToCart(e); setQuickViewOpen(false); }}
-                  className="flex-1 bg-[#A8C69F] hover:bg-[#92b089] text-white text-xs font-extrabold py-3.5 px-6 rounded-2xl transition-all shadow-lg shadow-[#A8C69F]/25 flex items-center justify-center gap-2"
+                  className="flex-1 bg-[#A8C69F] hover:bg-[#92b089] text-white text-xs font-extrabold py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#A8C69F]/25 flex items-center justify-center gap-2"
                 >
                   <ShoppingBag className="w-4 h-4" /> Add to Cart
                 </button>
                 <Link
                   href={`/products/${product.id}`}
                   onClick={() => setQuickViewOpen(false)}
-                  className="bg-[#F9A37E] hover:bg-[#e28e6c] text-white text-xs font-extrabold py-3.5 px-6 rounded-2xl transition-all shadow-lg shadow-[#F9A37E]/25 flex items-center justify-center"
+                  className="bg-[#F9A37E] hover:bg-[#e28e6c] text-white text-xs font-extrabold py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 flex items-center justify-center"
                 >
                   View Details
                 </Link>

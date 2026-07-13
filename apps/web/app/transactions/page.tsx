@@ -29,7 +29,7 @@ export default function TransactionsPage() {
         <p className="text-xs text-zinc-400">Ledger of all print-on-demand invoice transactions and refund statuses.</p>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-zinc-50 dark:bg-zinc-900/60 p-4 border border-zinc-150 dark:border-zinc-800 rounded-3xl">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-zinc-50 dark:bg-zinc-900/60 p-4 border border-zinc-150 dark:border-zinc-800 rounded-lg">
         <div className="flex gap-2">
           {(['All', 'Payment', 'Refund'] as const).map(type => (
             <button
@@ -54,7 +54,7 @@ export default function TransactionsPage() {
             placeholder="Search txn or order ID..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl py-2 pl-9 pr-3 text-xs outline-none focus:border-indigo-500 text-zinc-900 dark:text-white"
+            className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg py-2 pl-9 pr-3 text-xs outline-none focus:border-indigo-500 text-zinc-900 dark:text-white"
           />
         </div>
       </div>

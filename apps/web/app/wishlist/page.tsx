@@ -40,7 +40,7 @@ export default function WishlistPage() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {wishlist.map(item => (
-            <div key={item.id} className="border border-[#E8E2D6] bg-white rounded-2xl overflow-hidden shadow-sm flex flex-col">
+            <div key={item.id} className="border border-[#E8E2D6] bg-white rounded-lg overflow-hidden shadow-sm flex flex-col">
               <div className="relative aspect-square w-full bg-[#E8E2D6]">
                 <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 <button
@@ -66,13 +66,13 @@ export default function WishlistPage() {
                 <div className="grid grid-cols-2 gap-1.5">
                   <Link
                     href={`/products/${item.id}`}
-                    className="border border-[#A8C69F] hover:bg-[#A8C69F] text-[#4A453E] hover:text-white font-extrabold text-[10px] py-2 px-2 rounded-2xl transition-all text-center"
+                    className="border border-[#A8C69F] hover:bg-[#A8C69F] text-[#4A453E] hover:text-white font-extrabold text-[10px] py-2 px-2 rounded-lg transition-all text-center"
                   >
                     View
                   </Link>
                   <button
                     onClick={() => handleMoveToCart(item)}
-                    className="bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-[10px] py-2 px-2 rounded-2xl transition-all shadow-md shadow-[#F9A37E]/20 flex items-center justify-center gap-1"
+                    className="bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-[10px] py-2 px-2 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20 flex items-center justify-center gap-1"
                   >
                     <ShoppingBag className="w-3 h-3" /> Cart
                   </button>

@@ -26,7 +26,7 @@ export default function SignUpPage() {
     router.push('/');
   };
 
-  const inputClass = "mt-1.5 w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl py-3 px-4 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E] placeholder-[#A89B8A]";
+  const inputClass = "mt-1.5 w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg py-3 px-4 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E] placeholder-[#A89B8A]";
 
   return (
     <div className="min-h-screen bg-[#FDFAF6] flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8">
@@ -43,7 +43,7 @@ export default function SignUpPage() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white border border-[#E8E2D6] shadow-xl rounded-xl sm:rounded-3xl py-5 sm:py-8 px-4 sm:px-10">
+        <div className="bg-white border border-[#E8E2D6] shadow-xl rounded-lg sm:rounded-lg py-5 sm:py-8 px-4 sm:px-10">
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="name" className="block text-xs font-bold text-[#4A453E]">
@@ -118,7 +118,7 @@ export default function SignUpPage() {
 
             <button
               type="submit"
-              className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-2xl transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95 mt-2"
+              className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95 mt-2"
             >
               Register Account
             </button>
@@ -140,7 +140,7 @@ export default function SignUpPage() {
                 loginUser("google.creator@gmail.com");
                 router.push('/');
               }}
-              className="mt-4 w-full border border-[#E8E2D6] hover:bg-[#FDFAF6] text-[#4A453E] font-extrabold text-xs py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
+              className="mt-4 w-full border border-[#E8E2D6] hover:bg-[#FDFAF6] text-[#4A453E] font-extrabold text-xs py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               <svg className="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12.24 10.285V13.4h6.887c-.648 2.41-2.519 4.13-5.136 4.13A5.79 5.79 0 0 1 8.2 11.75a5.79 5.79 0 0 1 5.79-5.786c1.5 0 2.87.57 3.93 1.5l2.44-2.44A9.15 9.15 0 0 0 13.99 2.5a9.25 9.25 0 0 0-9.25 9.25 9.25 9.25 0 0 0 9.25 9.25c5.11 0 9.19-3.67 9.19-9.25 0-.585-.05-1.155-.15-1.715z" />
@@ -156,7 +156,7 @@ export default function SignUpPage() {
             </span>
             <Link
               href="/login"
-              className="w-full bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-3 px-4 rounded-xl transition-all shadow-md shadow-[#A8C69F]/20 flex items-center justify-center text-center animate-fade-in-up"
+              className="w-full bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-3 px-4 rounded-lg transition-all shadow-md shadow-[#A8C69F]/20 flex items-center justify-center text-center animate-fade-in-up"
             >
               Sign In
             </Link>

@@ -31,19 +31,19 @@ export const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages,
   return (
     <div className="flex items-center justify-center gap-2 mt-8 py-4">
       <button onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1}
-        className="p-2 border border-[#E8E2D6] rounded-xl hover:bg-[#E8E2D6] disabled:opacity-40 transition-colors text-[#7A736A]">
+        className="p-2 border border-[#E8E2D6] rounded-lg hover:bg-[#E8E2D6] disabled:opacity-40 transition-colors text-[#7A736A]">
         <ArrowLeft className="w-4 h-4" />
       </button>
       {pages.map(page => (
         <button key={page} onClick={() => onPageChange(page)}
-          className={`w-9 h-9 rounded-xl text-xs font-bold transition-all border ${
+          className={`w-9 h-9 rounded-lg text-xs font-bold transition-all border ${
             currentPage === page
               ? 'bg-[#4A453E] border-[#4A453E] text-white'
               : 'bg-transparent border-[#E8E2D6] text-[#7A736A] hover:border-[#A89B8A]'
           }`}>{page}</button>
       ))}
       <button onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages}
-        className="p-2 border border-[#E8E2D6] rounded-xl hover:bg-[#E8E2D6] disabled:opacity-40 transition-colors text-[#7A736A]">
+        className="p-2 border border-[#E8E2D6] rounded-lg hover:bg-[#E8E2D6] disabled:opacity-40 transition-colors text-[#7A736A]">
         <ArrowRight className="w-4 h-4" />
       </button>
     </div>
@@ -53,14 +53,14 @@ export const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages,
 /* 3. EMPTY STATE */
 interface EmptyStateProps { title: string; description: string; actionText?: string; actionHref?: string; icon?: React.ReactNode; }
 export const EmptyState: React.FC<EmptyStateProps> = ({ title, description, actionText, actionHref, icon }) => (
-  <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-[#E8E2D6] rounded-3xl max-w-md mx-auto py-12">
+  <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-[#E8E2D6] rounded-lg max-w-md mx-auto py-12">
     <div className="w-16 h-16 bg-[#E8E2D6] text-[#A89B8A] rounded-full flex items-center justify-center mb-5">
       {icon || <EyeOff className="w-8 h-8" />}
     </div>
     <h3 className="font-extrabold text-lg text-[#4A453E] tracking-tight">{title}</h3>
     <p className="text-xs text-[#7A736A] max-w-xs mt-2 leading-relaxed">{description}</p>
     {actionText && actionHref && (
-      <Link href={actionHref} className="mt-6 bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-2xl transition-all shadow-lg shadow-[#F9A37E]/25">
+      <Link href={actionHref} className="mt-6 bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25">
         {actionText}
       </Link>
     )}
@@ -73,8 +73,8 @@ export const SkeletonLoader: React.FC<{ type?: 'card' | 'list' | 'detail' }> = (
     return (
       <div className="space-y-4 w-full">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="flex gap-4 p-4 border border-[#E8E2D6] rounded-2xl animate-pulse">
-            <div className="w-16 h-16 bg-[#E8E2D6] rounded-xl" />
+          <div key={i} className="flex gap-4 p-4 border border-[#E8E2D6] rounded-lg animate-pulse">
+            <div className="w-16 h-16 bg-[#E8E2D6] rounded-lg" />
             <div className="flex-1 space-y-2 py-1">
               <div className="h-4 bg-[#E8E2D6] rounded w-3/4" />
               <div className="h-3 bg-[#E8E2D6] rounded w-1/2" />
@@ -87,7 +87,7 @@ export const SkeletonLoader: React.FC<{ type?: 'card' | 'list' | 'detail' }> = (
   if (type === 'detail') {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-pulse w-full max-w-5xl mx-auto py-8">
-        <div className="aspect-square bg-[#E8E2D6] rounded-3xl" />
+        <div className="aspect-square bg-[#E8E2D6] rounded-lg" />
         <div className="space-y-6 py-4">
           <div className="h-8 bg-[#E8E2D6] rounded w-3/4" />
           <div className="h-5 bg-[#E8E2D6] rounded w-1/4" />
@@ -96,7 +96,7 @@ export const SkeletonLoader: React.FC<{ type?: 'card' | 'list' | 'detail' }> = (
             <div className="h-4 bg-[#E8E2D6] rounded w-full" />
             <div className="h-4 bg-[#E8E2D6] rounded w-5/6" />
           </div>
-          <div className="h-12 bg-[#E8E2D6] rounded-2xl w-full mt-8" />
+          <div className="h-12 bg-[#E8E2D6] rounded-lg w-full mt-8" />
         </div>
       </div>
     );
@@ -104,8 +104,8 @@ export const SkeletonLoader: React.FC<{ type?: 'card' | 'list' | 'detail' }> = (
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
       {[...Array(4)].map((_, i) => (
-        <div key={i} className="border border-[#E8E2D6] rounded-2xl p-4 space-y-4 animate-pulse">
-          <div className="aspect-square bg-[#E8E2D6] rounded-xl w-full" />
+        <div key={i} className="border border-[#E8E2D6] rounded-lg p-4 space-y-4 animate-pulse">
+          <div className="aspect-square bg-[#E8E2D6] rounded-lg w-full" />
           <div className="h-4 bg-[#E8E2D6] rounded w-3/4" />
           <div className="h-3 bg-[#E8E2D6] rounded w-1/2" />
           <div className="flex justify-between items-center pt-2">
@@ -190,7 +190,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white border border-[#E8E2D6] rounded-3xl p-6 shadow-2xl max-w-sm w-full z-10 animate-fade-in-up">
+      <div className="relative bg-white border border-[#E8E2D6] rounded-lg p-6 shadow-2xl max-w-sm w-full z-10 animate-fade-in-up">
         <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mb-4">
           <AlertTriangle className="w-6 h-6" />
         </div>
@@ -198,11 +198,11 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         <p className="text-xs text-[#7A736A] mt-2 leading-relaxed">{description}</p>
         <div className="flex gap-3 mt-5">
           <button onClick={onClose}
-            className="flex-1 border border-[#E8E2D6] text-[#7A736A] py-2.5 rounded-xl font-bold text-xs hover:bg-[#E8E2D6] transition-colors">
+            className="flex-1 border border-[#E8E2D6] text-[#7A736A] py-2.5 rounded-lg font-bold text-xs hover:bg-[#E8E2D6] transition-colors">
             {cancelText}
           </button>
           <button onClick={() => { onConfirm(); onClose(); }}
-            className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2.5 rounded-xl font-bold text-xs transition-colors">
+            className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2.5 rounded-lg font-bold text-xs transition-colors">
             {confirmText}
           </button>
         </div>
@@ -256,14 +256,14 @@ export const Select: React.FC<SelectProps> = ({ value, onChange, options, placeh
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between border border-[#E8E2D6] bg-white rounded-xl py-2 px-3.5 text-xs font-semibold text-[#4A453E] outline-none shadow-sm focus:border-[#F9A37E] transition-all text-left"
+        className="w-full flex items-center justify-between border border-[#E8E2D6] bg-white rounded-lg py-2 px-3.5 text-xs font-semibold text-[#4A453E] outline-none shadow-sm focus:border-[#F9A37E] transition-all text-left"
       >
         <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
         <ChevronDown className={`w-4 h-4 text-[#A89B8A] transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 w-full min-w-[8rem] mt-1.5 bg-white border border-[#E8E2D6] rounded-xl shadow-lg p-1 space-y-0.5 animate-fade-in-up duration-150">
+        <div className="absolute z-50 w-full min-w-[8rem] mt-1.5 bg-white border border-[#E8E2D6] rounded-lg shadow-lg p-1 space-y-0.5 animate-fade-in-up duration-150">
           {options.map((opt) => {
             const isSelected = opt.value === value;
             return (

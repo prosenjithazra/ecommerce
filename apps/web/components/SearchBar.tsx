@@ -30,7 +30,7 @@ export const SearchBar: React.FC<{ initialValue?: string }> = ({ initialValue = 
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => setTimeout(() => setFocused(false), 200)}
-          className="w-full bg-white dark:bg-zinc-900 border-2 border-zinc-150 dark:border-zinc-800 focus:border-indigo-500 dark:focus:border-indigo-500/80 rounded-2xl py-3.5 pl-12 pr-12 text-sm outline-none shadow-sm transition-colors text-zinc-950 dark:text-zinc-50"
+          className="w-full bg-white dark:bg-zinc-900 border-2 border-zinc-150 dark:border-zinc-800 focus:border-indigo-500 dark:focus:border-indigo-500/80 rounded-lg py-3.5 pl-12 pr-12 text-sm outline-none shadow-sm transition-colors text-zinc-950 dark:text-zinc-50"
         />
         {query && (
           <button 
@@ -45,7 +45,7 @@ export const SearchBar: React.FC<{ initialValue?: string }> = ({ initialValue = 
 
       {/* Suggestion Dropdown */}
       {focused && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-2xl p-4 z-50 animate-fade-in-up duration-200">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-lg p-4 z-50 animate-fade-in-up duration-200">
           <div className="space-y-4">
             {/* Popular tags */}
             <div>

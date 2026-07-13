@@ -158,7 +158,7 @@ export const Header: React.FC = () => {
             ) : (
               <Link
                 href="/login"
-                className="flex items-center gap-1.5 py-1.5 px-3.5 bg-[#F9A37E] hover:bg-[#E8855A] text-white rounded-xl text-xs font-extrabold transition-all shadow-md shadow-[#F9A37E]/20 active:scale-95 ml-1"
+                className="flex items-center gap-1.5 py-2 px-3.5 bg-[#F9A37E] hover:bg-[#E8855A] text-white rounded-md text-xs font-extrabold transition-all shadow-md shadow-[#F9A37E]/20 active:scale-95 ml-1"
                 aria-label="Account"
               >
                 <User className="w-3.5 h-3.5" />
@@ -206,12 +206,12 @@ export const Header: React.FC = () => {
                 placeholder="Search t-shirts, hoodies, accessories..."
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
-                className="w-full bg-[#FDFAF6] border-2 border-[#E8E2D6] focus:border-[#F9A37E] rounded-2xl py-4 pl-12 pr-4 text-base font-medium text-[#4A453E] outline-none transition-colors placeholder:text-[#C4B8A8]"
+                className="w-full bg-[#FDFAF6] border-2 border-[#E8E2D6] focus:border-[#F9A37E] rounded-lg py-4 pl-12 pr-4 text-base font-medium text-[#4A453E] outline-none transition-colors placeholder:text-[#C4B8A8]"
               />
               {searchValue && (
                 <button
                   type="submit"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#F9A37E] hover:bg-[#E8855A] text-white font-bold text-xs py-2 px-4 rounded-xl transition-all flex items-center gap-1"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#F9A37E] hover:bg-[#E8855A] text-white font-bold text-xs py-2 px-4 rounded-lg transition-all flex items-center gap-1"
                 >
                   Search <ArrowRight className="w-3.5 h-3.5" />
                 </button>
@@ -274,7 +274,7 @@ export const Header: React.FC = () => {
                   key={item.name}
                   href={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`text-sm font-semibold py-2.5 px-3 rounded-xl transition-all ${
+                  className={`text-sm font-semibold py-2.5 px-3 rounded-lg transition-all ${
                     pathname === item.href
                       ? "bg-[#FBD5C1] text-[#E8855A]"
                       : "text-[#4A453E] hover:bg-[#E8E2D6]"
@@ -288,7 +288,7 @@ export const Header: React.FC = () => {
                   <Link
                     href="/profile"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-sm font-semibold py-2.5 px-3 rounded-xl text-[#4A453E] hover:bg-[#E8E2D6]"
+                    className="text-sm font-semibold py-2.5 px-3 rounded-lg text-[#4A453E] hover:bg-[#E8E2D6]"
                   >
                     My Profile
                   </Link>
@@ -297,7 +297,7 @@ export const Header: React.FC = () => {
                       logout();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="text-left text-sm font-semibold py-2.5 px-3 rounded-xl text-red-500 hover:bg-red-50"
+                    className="text-left text-sm font-semibold py-2.5 px-3 rounded-lg text-red-500 hover:bg-red-50"
                   >
                     Log Out
                   </button>
@@ -306,7 +306,7 @@ export const Header: React.FC = () => {
                 <Link
                   href="/login"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="mt-2 text-center text-sm font-bold py-2.5 px-3 rounded-xl bg-[#F9A37E] text-white hover:bg-[#E8855A]"
+                  className="mt-2 text-center text-sm font-bold py-2.5 px-3 rounded-lg bg-[#F9A37E] text-white hover:bg-[#E8855A]"
                 >
                   Log In / Register
                 </Link>
@@ -359,7 +359,7 @@ export const Header: React.FC = () => {
                   <Link
                     href="/products"
                     onClick={() => setIsCartOpen(false)}
-                    className="bg-[#F9A37E] hover:bg-[#E8855A] text-white text-xs font-bold py-2.5 px-6 rounded-xl transition-all"
+                    className="bg-[#F9A37E] hover:bg-[#E8855A] text-white text-xs font-bold py-2.5 px-6 rounded-lg transition-all"
                   >
                     Start Shopping
                   </Link>
@@ -368,9 +368,9 @@ export const Header: React.FC = () => {
                 cart.map((item) => (
                   <div
                     key={item.id}
-                    className="flex gap-3 p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-2xl"
+                    className="flex gap-3 p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg"
                   >
-                    <div className="w-14 h-14 bg-[#E8E2D6] rounded-xl overflow-hidden flex-shrink-0">
+                    <div className="w-14 h-14 bg-[#E8E2D6] rounded-lg overflow-hidden flex-shrink-0">
                       <img
                         src={item.image}
                         alt={item.name}
@@ -435,14 +435,14 @@ export const Header: React.FC = () => {
                   <Link
                     href="/cart"
                     onClick={() => setIsCartOpen(false)}
-                    className="border border-[#E8E2D6] hover:bg-[#E8E2D6] text-[#4A453E] text-xs font-bold py-3 px-4 rounded-xl transition-all text-center"
+                    className="border border-[#E8E2D6] hover:bg-[#E8E2D6] text-[#4A453E] text-xs font-bold py-3 px-4 rounded-lg transition-all text-center"
                   >
                     View Cart
                   </Link>
                   <Link
                     href="/checkout"
                     onClick={() => setIsCartOpen(false)}
-                    className="bg-[#F9A37E] hover:bg-[#E8855A] text-white text-xs font-bold py-3 px-4 rounded-xl transition-all text-center shadow-sm"
+                    className="bg-[#F9A37E] hover:bg-[#E8855A] text-white text-xs font-bold py-3 px-4 rounded-lg transition-all text-center shadow-sm"
                   >
                     Checkout
                   </Link>

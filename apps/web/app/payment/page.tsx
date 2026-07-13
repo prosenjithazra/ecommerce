@@ -58,34 +58,34 @@ function PaymentPageContent() {
         
         {/* Left Side: Payment Gateways Selector */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-3xl p-6 space-y-6">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-6 space-y-6">
             <h3 className="font-extrabold text-base text-zinc-909 dark:text-white">Select Payment Method</h3>
             
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <button
                 onClick={() => setPaymentMethod('card')}
-                className={`flex flex-col items-center justify-center p-4 border rounded-2xl gap-2 font-bold text-xs transition-all ${paymentMethod === 'card' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
+                className={`flex flex-col items-center justify-center p-4 border rounded-lg gap-2 font-bold text-xs transition-all ${paymentMethod === 'card' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
               >
                 <CreditCard className="w-5 h-5" />
                 <span>Card</span>
               </button>
               <button
                 onClick={() => setPaymentMethod('upi')}
-                className={`flex flex-col items-center justify-center p-4 border rounded-2xl gap-2 font-bold text-xs transition-all ${paymentMethod === 'upi' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
+                className={`flex flex-col items-center justify-center p-4 border rounded-lg gap-2 font-bold text-xs transition-all ${paymentMethod === 'upi' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
               >
                 <PhoneCall className="w-5 h-5" />
                 <span>UPI Pay</span>
               </button>
               <button
                 onClick={() => setPaymentMethod('netbank')}
-                className={`flex flex-col items-center justify-center p-4 border rounded-2xl gap-2 font-bold text-xs transition-all ${paymentMethod === 'netbank' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
+                className={`flex flex-col items-center justify-center p-4 border rounded-lg gap-2 font-bold text-xs transition-all ${paymentMethod === 'netbank' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
               >
                 <Landmark className="w-5 h-5" />
                 <span>Net Banking</span>
               </button>
               <button
                 onClick={() => setPaymentMethod('wallet')}
-                className={`flex flex-col items-center justify-center p-4 border rounded-2xl gap-2 font-bold text-xs transition-all ${paymentMethod === 'wallet' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
+                className={`flex flex-col items-center justify-center p-4 border rounded-lg gap-2 font-bold text-xs transition-all ${paymentMethod === 'wallet' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
               >
                 <Wallet className="w-5 h-5" />
                 <span>Wallets</span>
@@ -105,7 +105,7 @@ function PaymentPageContent() {
                       value={cardDetails.name}
                       onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
                       placeholder="Jane Doe"
-                      className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-xl py-3 px-4 text-xs outline-none"
+                      className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
                     />
                   </div>
                   <div className="space-y-2">
@@ -116,7 +116,7 @@ function PaymentPageContent() {
                       value={cardDetails.number}
                       onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
                       placeholder="4000 1234 5678 9010"
-                      className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-xl py-3 px-4 text-xs outline-none"
+                      className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -128,7 +128,7 @@ function PaymentPageContent() {
                         required
                         value={cardDetails.expiry}
                         onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
-                        className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-xl py-3 px-4 text-xs outline-none"
+                        className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
                       />
                     </div>
                     <div className="space-y-2">
@@ -140,7 +140,7 @@ function PaymentPageContent() {
                         required
                         value={cardDetails.cvv}
                         onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
-                        className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-xl py-3 px-4 text-xs outline-none"
+                        className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
                       />
                     </div>
                   </div>
@@ -156,7 +156,7 @@ function PaymentPageContent() {
                       placeholder="jane.doe@okaxis"
                       value={upiId}
                       onChange={(e) => setUpiId(e.target.value)}
-                      className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-xl py-3 px-4 text-xs outline-none"
+                      className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
                     />
                   </div>
                   <div className="flex gap-2">
@@ -211,7 +211,7 @@ function PaymentPageContent() {
 
               <button
                 type="submit"
-                className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center mt-6"
+                className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-4 rounded-lg transition-all shadow-lg flex items-center justify-center mt-6"
               >
                 Pay ₹{total.toFixed(2)} Securely
               </button>
@@ -222,7 +222,7 @@ function PaymentPageContent() {
 
         {/* Right Side: Payment breakdowns summary */}
         <div className="space-y-6">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-3xl p-6 shadow-xl space-y-6">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-6 shadow-xl space-y-6">
             <h3 className="font-extrabold text-base text-zinc-900 dark:text-white pb-3 border-b border-zinc-150 dark:border-zinc-800">
               Payment Summary
             </h3>
@@ -249,7 +249,7 @@ function PaymentPageContent() {
             </div>
 
             {address && (
-              <div className="p-3.5 bg-zinc-50 dark:bg-zinc-850 rounded-2xl space-y-1.5 text-[10px]">
+              <div className="p-3.5 bg-zinc-50 dark:bg-zinc-850 rounded-lg space-y-1.5 text-[10px]">
                 <span className="font-bold text-zinc-800 dark:text-zinc-200 block uppercase">Shipping Destination</span>
                 <p className="text-zinc-500 dark:text-zinc-400">{address.fullName}</p>
                 <p className="text-zinc-500 dark:text-zinc-400 truncate">{address.street}, {address.city}</p>

@@ -48,7 +48,7 @@ export default function TrackOrderPage() {
       </div>
 
       {/* Main timeline tracker */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-3xl p-6 sm:p-10 shadow">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-6 sm:p-10 shadow">
         <div className="relative border-l border-zinc-200 dark:border-zinc-800 ml-3 pl-8 space-y-8 py-2">
           
           {timeline.map((step, index) => (
@@ -77,7 +77,7 @@ export default function TrackOrderPage() {
       </div>
 
       {/* Delivery Summary destination */}
-      <div className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-150 dark:border-zinc-800 rounded-3xl p-6 flex gap-4 items-start">
+      <div className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-150 dark:border-zinc-800 rounded-lg p-6 flex gap-4 items-start">
         <MapPin className="w-6 h-6 text-indigo-500 mt-0.5 flex-shrink-0" />
         <div className="text-xs space-y-1">
           <span className="font-extrabold text-zinc-900 dark:text-white block">Delivery Destination</span>

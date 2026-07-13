@@ -47,7 +47,7 @@ export default function AddressesPage() {
               setEditingAddr(null);
               setShowForm(true);
             }}
-            className="bg-zinc-950 hover:bg-zinc-900 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 font-extrabold text-xs py-2.5 px-4 rounded-xl transition-all shadow"
+            className="bg-zinc-950 hover:bg-zinc-900 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 font-extrabold text-xs py-2.5 px-4 rounded-lg transition-all shadow"
           >
             + Add New Address
           </button>
@@ -55,7 +55,7 @@ export default function AddressesPage() {
       </div>
 
       {showForm ? (
-        <form onSubmit={handleSubmit} className="max-w-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-3xl space-y-4 shadow-xl">
+        <form onSubmit={handleSubmit} className="max-w-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-lg space-y-4 shadow-xl">
           <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white pb-3 border-b border-zinc-150">
             {editingAddr ? "Modify Address" : "New Address Details"}
           </h3>
@@ -67,7 +67,7 @@ export default function AddressesPage() {
                 required
                 value={form.fullName}
                 onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                className="w-full bg-zinc-55 border rounded-xl py-2 px-3 text-xs outline-none focus:border-indigo-500"
+                className="w-full bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-indigo-500"
               />
             </div>
             <div>
@@ -77,7 +77,7 @@ export default function AddressesPage() {
                 required
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className="w-full bg-zinc-55 border rounded-xl py-2 px-3 text-xs outline-none focus:border-indigo-500"
+                className="w-full bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-indigo-500"
               />
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function AddressesPage() {
               required
               value={form.street}
               onChange={(e) => setForm({ ...form, street: e.target.value })}
-              className="w-full bg-zinc-55 border rounded-xl py-2 px-3 text-xs outline-none focus:border-indigo-500"
+              className="w-full bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-indigo-500"
             />
           </div>
           <div className="grid grid-cols-3 gap-2">
@@ -98,7 +98,7 @@ export default function AddressesPage() {
               required
               value={form.city}
               onChange={(e) => setForm({ ...form, city: e.target.value })}
-              className="bg-zinc-55 border rounded-xl py-2 px-3 text-xs"
+              className="bg-zinc-55 border rounded-lg py-2 px-3 text-xs"
             />
             <input
               type="text"
@@ -106,7 +106,7 @@ export default function AddressesPage() {
               required
               value={form.state}
               onChange={(e) => setForm({ ...form, state: e.target.value })}
-              className="bg-zinc-55 border rounded-xl py-2 px-3 text-xs"
+              className="bg-zinc-55 border rounded-lg py-2 px-3 text-xs"
             />
             <input
               type="text"
@@ -114,7 +114,7 @@ export default function AddressesPage() {
               required
               value={form.zip}
               onChange={(e) => setForm({ ...form, zip: e.target.value })}
-              className="bg-zinc-55 border rounded-xl py-2 px-3 text-xs"
+              className="bg-zinc-55 border rounded-lg py-2 px-3 text-xs"
             />
           </div>
           <label className="flex items-center gap-2 cursor-pointer pt-2">
@@ -133,11 +133,11 @@ export default function AddressesPage() {
                 setShowForm(false);
                 setEditingAddr(null);
               }}
-              className="text-xs font-bold text-zinc-400 py-2 px-4 rounded-xl hover:bg-zinc-100"
+              className="text-xs font-bold text-zinc-400 py-2 px-4 rounded-lg hover:bg-zinc-100"
             >
               Cancel
             </button>
-            <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2 px-4 rounded-xl shadow-md">
+            <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2 px-4 rounded-lg shadow-md">
               Save Shipping Details
             </button>
           </div>

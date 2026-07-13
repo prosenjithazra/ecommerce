@@ -33,7 +33,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
       />
 
       {/* Modal Container */}
-      <div className="relative bg-white border border-[#E8E2D6] rounded-3xl shadow-xl max-w-3xl w-full overflow-hidden z-15 animate-fade-in-up duration-300">
+      <div className="relative bg-white border border-[#E8E2D6] rounded-lg shadow-xl max-w-3xl w-full overflow-hidden z-15 animate-fade-in-up duration-300">
         
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-[#E8E2D6]">

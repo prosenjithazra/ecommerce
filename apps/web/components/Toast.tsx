@@ -17,7 +17,7 @@ export const Toast: React.FC<ToastProps> = ({ toast, onDismiss }) => {
   }[toast.type] ?? { icon: <Info className="w-5 h-5 text-[#A8C69F]" />, bar: '#E8E2D6' };
 
   return (
-    <div className="flex items-start gap-3 p-4 bg-white border border-[#E8E2D6] shadow-xl rounded-2xl max-w-sm w-full animate-fade-in-up pointer-events-auto overflow-hidden relative">
+    <div className="flex items-start gap-3 p-4 bg-white border border-[#E8E2D6] shadow-xl rounded-lg max-w-sm w-full animate-fade-in-up pointer-events-auto overflow-hidden relative">
       {/* left accent bar */}
       <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl" style={{ backgroundColor: config.bar }} />
       <div className="ml-1 flex-shrink-0 mt-0.5">{config.icon}</div>

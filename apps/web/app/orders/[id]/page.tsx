@@ -48,13 +48,13 @@ export default function OrderDetailPage() {
         <div className="flex gap-3">
           <button
             onClick={() => alert("Downloading PDF Invoice...")}
-            className="border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-extrabold text-xs py-2.5 px-4 rounded-xl transition-all flex items-center gap-1.5"
+            className="border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-extrabold text-xs py-2.5 px-4 rounded-lg transition-all flex items-center gap-1.5"
           >
             <Download className="w-4 h-4" /> Invoice
           </button>
           <Link
             href={`/orders/${order.id}/track`}
-            className="bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-2.5 px-4 rounded-xl transition-all flex items-center gap-1.5"
+            className="bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-2.5 px-4 rounded-lg transition-all flex items-center gap-1.5"
           >
             <Truck className="w-4 h-4" /> Track Shipment
           </Link>
@@ -66,12 +66,12 @@ export default function OrderDetailPage() {
         {/* Left 2 Columns: Items & Address */}
         <div className="md:col-span-2 space-y-6">
           {/* Order Items */}
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-3xl p-6 space-y-4">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-6 space-y-4">
             <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white">Items in this shipment</h3>
             <div className="divide-y divide-zinc-150 dark:divide-zinc-800">
               {order.items.map((item, index) => (
                 <div key={index} className="flex gap-4 py-4 first:pt-0 last:pb-0">
-                  <div className="w-14 h-14 bg-zinc-50 dark:bg-zinc-800 rounded-xl overflow-hidden flex-shrink-0">
+                  <div className="w-14 h-14 bg-zinc-50 dark:bg-zinc-800 rounded-lg overflow-hidden flex-shrink-0">
                     <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -89,7 +89,7 @@ export default function OrderDetailPage() {
           </div>
 
           {/* Delivery destination */}
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-3xl p-6 space-y-3 text-xs">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-6 space-y-3 text-xs">
             <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white">Shipping Information</h3>
             <div className="space-y-1 text-zinc-500 dark:text-zinc-400">
               <p className="font-extrabold text-zinc-850 dark:text-zinc-250">{order.address.fullName}</p>
@@ -102,7 +102,7 @@ export default function OrderDetailPage() {
 
         {/* Right Column: Payment summaries */}
         <div className="space-y-6">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-3xl p-6 shadow space-y-4 text-xs">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-6 shadow space-y-4 text-xs">
             <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white pb-2 border-b border-zinc-150">Payment Breakdown</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-zinc-500">
@@ -128,7 +128,7 @@ export default function OrderDetailPage() {
           {isCancellable && (
             <button
               onClick={() => setCancelOpen(true)}
-              className="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400 py-3 rounded-2xl text-xs font-extrabold transition-all"
+              className="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400 py-3 rounded-lg text-xs font-extrabold transition-all"
             >
               Cancel Order
             </button>

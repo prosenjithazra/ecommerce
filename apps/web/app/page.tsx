@@ -350,8 +350,8 @@ export default function HomePage() {
             { icon: <Layers className="w-5 h-5 text-[#A8C69F]" />,      label: "No MOQ" },
             { icon: <Sparkles className="w-5 h-5 text-[#F9A37E]" />,    label: "Custom Studio" },
           ].map((item) => (
-            <div key={item.label} className="flex items-center gap-2.5 p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-2xl">
-              <div className="w-8 h-8 bg-[#E8E2D6] rounded-xl flex items-center justify-center flex-shrink-0">
+            <div key={item.label} className="flex items-center gap-2.5 p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg">
+              <div className="w-8 h-8 bg-[#E8E2D6] rounded-lg flex items-center justify-center flex-shrink-0">
                 {item.icon}
               </div>
               <span className="text-xs font-bold text-[#4A453E] leading-tight">{item.label}</span>
@@ -387,7 +387,7 @@ export default function HomePage() {
             </h2>
             <p className="text-xs text-[#7A736A] mt-0.5">Curated blanks for your custom look</p>
           </div>
-          <div className="flex bg-[#E8E2D6] p-1 rounded-xl self-start sm:self-auto">
+          <div className="flex bg-[#E8E2D6] p-1 rounded-lg self-start sm:self-auto">
             {(['trending', 'best', 'new'] as const).map((tab) => (
               <button
                 key={tab}
@@ -419,8 +419,8 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {processSteps.map((step, idx) => (
-              <div key={step.name} className="relative p-6 bg-white rounded-3xl shadow-sm text-center">
-                <div className="w-12 h-12 bg-[#FBD5C1] text-[#F9A37E] rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div key={step.name} className="relative p-6 bg-white rounded-lg shadow-sm text-center">
+                <div className="w-12 h-12 bg-[#FBD5C1] text-[#F9A37E] rounded-lg flex items-center justify-center mx-auto mb-4">
                   {step.icon}
                 </div>
                 <span className="font-black text-4xl text-[#E8E2D6] absolute top-4 right-4 leading-none">{step.step}</span>
@@ -458,7 +458,7 @@ export default function HomePage() {
             "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=500&auto=format&fit=crop&q=80",
             "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=500&auto=format&fit=crop&q=80",
           ].map((src, i) => (
-            <div key={i} className="aspect-square rounded-2xl overflow-hidden group">
+            <div key={i} className="aspect-square rounded-lg overflow-hidden group">
               <img src={src} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
             </div>
           ))}
@@ -468,7 +468,7 @@ export default function HomePage() {
       {/* ── FAQ ── */}
       <section className="max-w-2xl mx-auto px-4 space-y-4">
         <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] text-center">Frequently Asked Questions</h2>
-        <div className="rounded-3xl bg-white border border-[#E8E2D6] overflow-hidden divide-y divide-[#E8E2D6]">
+        <div className="rounded-lg bg-white border border-[#E8E2D6] overflow-hidden divide-y divide-[#E8E2D6]">
           {faqs.map((faq, idx) => (
             <div key={idx} className="p-4 sm:p-5">
               <button
