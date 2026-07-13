@@ -8,6 +8,10 @@ import { OrdersModule } from './orders/orders.module';
 import { ProductsModule } from './products/products.module';
 import { UserEntity } from './user/entitites/user.entity';
 import { UserModule } from './user/user.module';
+import { CategoryModule } from './category/category.module';
+import { BannerEntity } from './banner/entities/banner.entity';
+import { BannerModule } from './banner/banner.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -21,13 +25,19 @@ import { UserModule } from './user/user.module';
         const databaseUrl = configService.get<string>('DATABASE_URL');
 
         if (!databaseUrl) {
-          throw new Error('DATABASE_URL is missing from the environment');
+          return {
+            type: 'postgres',
+            database: databaseUrl,
+            entities: [UserEntity, BannerEntity],
+            autoLoadEntities: true,
+            synchronize: true,
+          };
         }
 
         return {
           type: 'postgres',
           url: databaseUrl,
-          entities: [UserEntity],
+          entities: [UserEntity, BannerEntity],
           autoLoadEntities: true,
           synchronize: true,
           ssl:
@@ -40,6 +50,9 @@ import { UserModule } from './user/user.module';
     UserModule,
     ProductsModule,
     OrdersModule,
+    CategoryModule,
+    BannerModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

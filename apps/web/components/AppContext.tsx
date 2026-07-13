@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getApiUrl } from './ApiConfig';
 
 // Interfaces
 export interface TextLayer {
@@ -130,7 +131,7 @@ interface AppContextType {
   toasts: ToastMessage[];
   searchQuery: string;
   isDarkMode: boolean;
-  currentUser: { name: string; email: string; phone: string } | null;
+  currentUser: { name: string; email: string; phone?: string; id?: string; role?: string; avatar?: string } | null;
   setSearchQuery: (q: string) => void;
   toggleDarkMode: () => void; // kept for backward compat, no-op
   showToast: (title: string, message: string, type?: 'success' | 'error' | 'info') => void;
@@ -149,7 +150,9 @@ interface AppContextType {
   cancelOrder: (id: string) => void;
   markNotificationsAsRead: () => void;
   logout: () => void;
-  loginUser: (email: string) => void;
+  loginUser: (email: string, password?: string) => Promise<boolean>;
+  registerUser: (name: string, email: string, password: string, phone?: string) => Promise<boolean>;
+  updateUserProfile: (name: string, avatar?: string) => Promise<boolean>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -293,11 +296,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [searchQuery, setSearchQuery] = useState("");
   const isDarkMode = false; // dark mode removed
   const toggleDarkMode = () => {}; // no-op kept for backward compat
-  const [currentUser, setCurrentUser] = useState<{ name: string; email: string; phone: string } | null>({
-    name: "Jane Doe",
-    email: "jane.doe@example.com",
-    phone: "+1 555-0199"
-  });
+  const [currentUser, setCurrentUser] = useState<{ name: string; email: string; phone?: string; id?: string; role?: string; avatar?: string } | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetch(getApiUrl("/user/profile"), {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("Invalid token");
+      })
+      .then(user => {
+        setCurrentUser({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          avatar: user.avatar,
+          phone: "+1 555-0199"
+        });
+      })
+      .catch(() => {
+        localStorage.removeItem("token");
+        setCurrentUser(null);
+      });
+    }
+  }, []);
 
   // Toast System
   const showToast = (title: string, message: string, type: 'success' | 'error' | 'info' = 'success') => {
@@ -483,17 +511,89 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const logout = () => {
+    localStorage.removeItem("token");
     setCurrentUser(null);
     showToast("Logged Out", "You have been logged out of your account.", "info");
   };
 
-  const loginUser = (email: string) => {
-    setCurrentUser({
-      name: "Jane Doe",
-      email: email,
-      phone: "+1 555-0199"
-    });
-    showToast("Welcome Back!", `Logged in successfully as ${email}`, "success");
+  const loginUser = async (email: string, password?: string): Promise<boolean> => {
+    try {
+      const res = await fetch(getApiUrl("/user/login"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password: password || "dummy-password" }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast("Login Failed", data.message || "Invalid credentials", "error");
+        return false;
+      }
+      localStorage.setItem("token", data.token);
+      setCurrentUser({
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role,
+        avatar: data.user.avatar,
+        phone: "+1 555-0199"
+      });
+      showToast("Welcome Back!", `Logged in successfully as ${data.user.email}`, "success");
+      return true;
+    } catch (err) {
+      showToast("Connection Error", "Could not connect to the authentication server.", "error");
+      return false;
+    }
+  };
+
+  const registerUser = async (name: string, email: string, password: string, phone?: string): Promise<boolean> => {
+    try {
+      const res = await fetch(getApiUrl("/user/register"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, phone }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast("Registration Failed", data.message || "Could not register account", "error");
+        return false;
+      }
+      return loginUser(email, password);
+    } catch (err) {
+      showToast("Connection Error", "Could not connect to the authentication server.", "error");
+      return false;
+    }
+  };
+
+  const updateUserProfile = async (name: string, avatar?: string): Promise<boolean> => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(getApiUrl("/user/profile/update"), {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ name, avatar })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast("Update Failed", data.message || "Failed to update profile", "error");
+        return false;
+      }
+      setCurrentUser({
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        role: data.role,
+        avatar: data.avatar,
+        phone: "+1 555-0199"
+      });
+      showToast("Profile Updated", "Your changes have been saved successfully.", "success");
+      return true;
+    } catch (err) {
+      showToast("Connection Error", "Could not connect to the profile update server.", "error");
+      return false;
+    }
   };
 
   return (
@@ -526,7 +626,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       cancelOrder,
       markNotificationsAsRead,
       logout,
-      loginUser
+      loginUser,
+      registerUser,
+      updateUserProfile
     }}>
       {children}
     </AppContext.Provider>

@@ -10,8 +10,8 @@ export class UserEntity {
   email: string;
   @Column()
   password: string;
-  @Column()
-  avatar: string;
+  @Column({ nullable: true })
+  avatar?: string;
   @Column()
   role: string;
   @Column()

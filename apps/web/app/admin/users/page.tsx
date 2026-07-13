@@ -1,23 +1,52 @@
 "use client";
 
-import { useState } from "react";
-import { Search, ShieldOff, ShieldCheck, Mail, Phone } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, ShieldOff, ShieldCheck, Mail, Loader2 } from "lucide-react";
 import { AdminTopbar } from "../AdminSidebar";
 import { useApp } from "../../../components/AppContext";
+import { getApiUrl } from "../../../components/ApiConfig";
 
 const INITIAL_USERS = [
-  { id: "u1", name: "Jane Doe", email: "jane.doe@example.com", phone: "+1 555-0199", orders: 4, spent: 24294, status: "Active", joined: "2026-01-12" },
-  { id: "u2", name: "Alex Mercer", email: "alex.mercer@gmail.com", phone: "+1 555-0144", orders: 7, spent: 56280, status: "Active", joined: "2025-11-03" },
-  { id: "u3", name: "Sarah Connor", email: "s.connor@cyberdyne.org", phone: "+1 555-0100", orders: 2, spent: 11398, status: "Suspended", joined: "2026-03-20" },
-  { id: "u4", name: "Mark Wells", email: "mark.w@example.com", phone: "+91 98765-43210", orders: 1, spent: 2299, status: "Active", joined: "2026-07-01" },
-  { id: "u5", name: "Priya Sharma", email: "priya.s@gmail.com", phone: "+91 87654-32109", orders: 3, spent: 18497, status: "Active", joined: "2025-12-14" },
+  { id: "u1", name: "Jane Doe", email: "jane.doe@example.com", role: "admin", status: "Active", createdAt: "2026-01-12T00:00:00.000Z" },
+  { id: "u2", name: "Alex Mercer", email: "alex.mercer@gmail.com", role: "user", status: "Active", createdAt: "2025-11-03T00:00:00.000Z" },
+  { id: "u3", name: "Sarah Connor", email: "s.connor@cyberdyne.org", role: "user", status: "Suspended", createdAt: "2026-03-20T00:00:00.000Z" },
+  { id: "u4", name: "Mark Wells", email: "mark.w@example.com", role: "user", status: "Active", createdAt: "2026-07-01T00:00:00.000Z" },
+  { id: "u5", name: "Priya Sharma", email: "priya.s@gmail.com", role: "user", status: "Active", createdAt: "2025-12-14T00:00:00.000Z" },
 ];
 
 export default function AdminUsersPage() {
   const { showToast } = useApp();
-  const [users, setUsers] = useState(INITIAL_USERS);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"All" | "Active" | "Suspended">("All");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    fetch(getApiUrl("/user"), {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    .then(res => {
+      if (res.status === 401) {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+        throw new Error("Session expired. Please log in again.");
+      }
+      if (res.ok) return res.json();
+      throw new Error("Failed to load backend users");
+    })
+    .then(data => {
+      setUsers(data);
+      setLoading(false);
+    })
+    .catch(err => {
+      showToast("Error", err.message || "Failed to load users.", "error");
+      setUsers([]);
+      setLoading(false);
+    });
+  }, []);
 
   const filtered = users.filter((u) => {
     const s = search.toLowerCase();
@@ -37,16 +66,22 @@ export default function AdminUsersPage() {
     );
   };
 
-  const avatarColors = ["from-[#A8C69F] to-[#7dab73]", "from-[#F9A37E] to-[#e8855a]", "from-violet-400 to-violet-600", "from-sky-400 to-sky-600", "from-rose-400 to-rose-600"];
+  const avatarColors = [
+    "from-[#A8C69F] to-[#7dab73]",
+    "from-[#F9A37E] to-[#e8855a]",
+    "from-violet-400 to-violet-600",
+    "from-sky-400 to-sky-600",
+    "from-rose-400 to-rose-600"
+  ];
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <AdminTopbar title="Users" subtitle={`${users.length} registered customers`} />
+      
       <main className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-6">
-
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-          <div className="relative flex-1 max-w-sm">
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+          <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
             <input
               type="text"
@@ -69,52 +104,79 @@ export default function AdminUsersPage() {
           </div>
         </div>
 
-        {/* User Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filtered.map((u, idx) => (
-            <div key={u.id} className="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-all flex gap-4">
-              {/* Avatar */}
-              <div className={`w-12 h-12 flex-shrink-0 rounded-lg bg-gradient-to-br ${avatarColors[idx % avatarColors.length]} flex items-center justify-center font-black text-white text-base shadow-md`}>
-                {u.name.charAt(0).toUpperCase()}
-              </div>
-
-              {/* Info */}
-              <div className="flex-1 min-w-0 space-y-2.5">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <h3 className="font-extrabold text-sm text-zinc-900 leading-tight">{u.name}</h3>
-                    <p className="text-[10px] text-zinc-400 font-medium">Joined {u.joined}</p>
-                  </div>
-                  <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full border whitespace-nowrap flex-shrink-0 ${u.status === "Active" ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-red-50 text-red-600 border-red-100"}`}>
-                    {u.status}
-                  </span>
-                </div>
-
-                <div className="flex gap-4 text-[10px] text-zinc-500 flex-wrap">
-                  <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {u.email}</span>
-                  <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {u.phone}</span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex gap-4 text-[10px] text-zinc-500">
-                    <span><strong className="text-zinc-900 font-extrabold">{u.orders}</strong> orders</span>
-                    <span><strong className="text-zinc-900 font-extrabold">₹{u.spent.toLocaleString()}</strong> spent</span>
-                  </div>
-                  <button
-                    onClick={() => toggle(u.id)}
-                    className={`flex items-center gap-1.5 text-[9px] font-extrabold px-2.5 py-1.5 rounded-lg border transition-all ${u.status === "Active" ? "text-red-500 border-red-200 hover:bg-red-50" : "text-emerald-600 border-emerald-200 hover:bg-emerald-50"}`}
-                  >
-                    {u.status === "Active" ? <ShieldOff className="w-3.5 h-3.5" /> : <ShieldCheck className="w-3.5 h-3.5" />}
-                    {u.status === "Active" ? "Suspend" : "Activate"}
-                  </button>
-                </div>
-              </div>
+        {/* Loading Spinner */}
+        {loading ? (
+          <div className="py-20 flex flex-col items-center justify-center gap-3 text-zinc-400">
+            <Loader2 className="w-8 h-8 animate-spin text-[#F9A37E]" />
+            <span className="text-xs font-bold">Loading users from backend...</span>
+          </div>
+        ) : (
+          /* Users Table */
+          <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-zinc-50 border-b border-zinc-200">
+                  <tr>
+                    {["#", "User", "Email", "Role", "Joined Date", "Status", "Actions"].map((h) => (
+                      <th key={h} className="py-3.5 px-4 font-extrabold text-zinc-500 text-[10px] uppercase tracking-wide whitespace-nowrap first:pl-5">
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-100">
+                  {filtered.map((u, idx) => (
+                    <tr key={u.id} className="hover:bg-zinc-50 transition-colors group">
+                      <td className="py-4 pl-5 px-4 text-zinc-400 font-bold text-[11px]">{idx + 1}</td>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2.5">
+                          <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${avatarColors[idx % avatarColors.length]} flex items-center justify-center font-black text-white text-[11px] shadow-sm`}>
+                            {u.name.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="font-extrabold text-zinc-900">{u.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="text-zinc-600 font-medium">{u.email}</span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 border border-zinc-200 uppercase tracking-wide">{u.role || 'user'}</span>
+                      </td>
+                      <td className="py-4 px-4 text-zinc-500">
+                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full border uppercase tracking-wide ${u.status === "Active" ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-red-50 text-red-600 border-red-100"}`}>
+                          {u.status}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <button
+                          onClick={() => toggle(u.id)}
+                          className={`flex items-center gap-1.5 text-[9px] font-extrabold px-2.5 py-1.5 rounded-lg border transition-all ${
+                            u.status === "Active" 
+                              ? "text-red-500 border-red-200 hover:bg-red-50" 
+                              : "text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                          }`}
+                        >
+                          <ShieldOff className="w-3.5 h-3.5" />
+                          {u.status === "Active" ? "Suspend" : "Activate"}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          ))}
-        </div>
-
-        {filtered.length === 0 && (
-          <p className="py-12 text-center text-zinc-400 text-sm font-bold">No users match your search.</p>
+            {filtered.length === 0 && (
+              <p className="py-12 text-center text-zinc-400 text-sm font-bold">No users match your search.</p>
+            )}
+            <div className="px-5 py-3 border-t border-zinc-100 bg-zinc-50">
+              <p className="text-[10px] font-bold text-zinc-400">
+                Showing <strong className="text-zinc-600">{filtered.length}</strong> of <strong className="text-zinc-600">{users.length}</strong> users
+              </p>
+            </div>
+          </div>
         )}
       </main>
     </div>

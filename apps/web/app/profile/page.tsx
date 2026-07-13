@@ -1,20 +1,31 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useApp, Address } from '../../components/AppContext';
 import { Breadcrumb } from '../../components/UIComponents';
-import { User, MapPin, ShieldAlert, KeyRound, Sliders, LogOut, LayoutDashboard } from 'lucide-react';
+import { User, MapPin, ShieldAlert, KeyRound, Sliders, LogOut, LayoutDashboard, Upload, Camera } from 'lucide-react';
 import { AddressCard } from '../../components/InfoCards';
 
 export default function ProfilePage() {
-  const { currentUser, logout, addresses, deleteAddress, setDefaultAddress, addAddress, updateAddress, isDarkMode, toggleDarkMode, showToast } = useApp();
+  const { currentUser, logout, addresses, deleteAddress, setDefaultAddress, addAddress, updateAddress, isDarkMode, toggleDarkMode, showToast, updateUserProfile } = useApp();
   const [activeTab, setActiveTab] = useState<'info' | 'address' | 'password' | 'preferences'>('info');
 
   // Personal Info Form
   const [name, setName] = useState(currentUser?.name || "Jane Doe");
   const [email, setEmail] = useState(currentUser?.email || "jane@example.com");
   const [phone, setPhone] = useState(currentUser?.phone || "");
+  const [avatar, setAvatar] = useState(currentUser?.avatar || "");
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (currentUser) {
+      setName(currentUser.name);
+      setEmail(currentUser.email);
+      setAvatar(currentUser.avatar || "");
+    }
+  }, [currentUser]);
 
   // Password Form
   const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" });
@@ -24,9 +35,19 @@ export default function ProfilePage() {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [addrForm, setAddrForm] = useState({ fullName: "", street: "", city: "", state: "", zip: "", country: "United States", phone: "", isDefault: false });
 
-  const handleUpdateInfo = (e: React.FormEvent) => {
+  const handleUpdateInfo = async (e: React.FormEvent) => {
     e.preventDefault();
-    showToast("Profile Updated", "Your changes have been saved successfully.", "success");
+    await updateUserProfile(name, avatar);
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setAvatar(ev.target?.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleUpdatePassword = (e: React.FormEvent) => {
@@ -128,6 +149,46 @@ export default function ProfilePage() {
           {activeTab === 'info' && (
             <form onSubmit={handleUpdateInfo} className="space-y-6">
               <h3 className="font-extrabold text-base text-zinc-900 dark:text-white pb-3 border-b border-zinc-150">Personal Information</h3>
+              
+              {/* Avatar Upload */}
+              <div className="flex flex-col sm:flex-row items-center gap-5">
+                <div className="relative group">
+                  <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-[#FBD5C1] bg-zinc-100 flex items-center justify-center font-black text-xl text-[#7A736A] shadow-sm">
+                    {avatar ? (
+                      <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      name.charAt(0).toUpperCase()
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute bottom-0 right-0 p-1.5 bg-[#F9A37E] hover:bg-[#E8855A] text-white rounded-full shadow transition-all hover:scale-110"
+                    title="Change Avatar"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-zinc-800">Avatar Image</h4>
+                  <p className="text-[10px] text-zinc-400 mt-1">Upload a custom square avatar for your creator profile.</p>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mt-2 text-[10px] font-extrabold text-[#F9A37E] hover:text-[#E8855A] flex items-center gap-1"
+                  >
+                    <Upload className="w-3 h-3" /> Upload Image
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                  />
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-zinc-650 mb-1.5">Full Name</label>

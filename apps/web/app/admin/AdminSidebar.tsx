@@ -16,6 +16,7 @@ import {
   Menu,
   Bell,
   ChevronRight,
+  Image,
 } from "lucide-react";
 import { useApp } from "../../components/AppContext";
 
@@ -25,6 +26,7 @@ const mainMenuItems = [
   { href: "/admin/categories", label: "Categories", icon: Layers, exact: false },
   { href: "/admin/orders", label: "Orders", icon: Sliders, exact: false },
   { href: "/admin/users", label: "Users", icon: Users, exact: false },
+  { href: "/admin/banners", label: "Home Banners", icon: Image, exact: false },
 ];
 
 const policyMenuItems = [

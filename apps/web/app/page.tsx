@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { getApiUrl } from '../components/ApiConfig';
 import Link from 'next/link';
-import { ArrowRight, ChevronLeft, ChevronRight, Paintbrush, ShieldCheck, Sparkles, ShoppingBag, Flame, Truck, Layers } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Paintbrush, ShieldCheck, Sparkles, ShoppingBag, Flame, Truck, Layers, Leaf, Palette } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { CategoryCard } from '../components/CategoryCard';
 import { ReviewCard } from '../components/InfoCards';
@@ -83,7 +84,7 @@ const HERO_SLIDES = [
     badge: "NEW COLLECTION",
     headline1: "PRINTED",
     headline2: "T-SHIRTS",
-    headline2Color: "#F9A37E",
+    headline2Color: "#E5A93B",
     sub: "Express Your Style with Unique Prints & Premium Quality",
     badges: [
       { icon: "🌿", label: "100%\nCOTTON" },
@@ -91,209 +92,263 @@ const HERO_SLIDES = [
       { icon: "🛡️", label: "DURABLE &\nLONG LASTING" },
       { icon: "🚚", label: "FAST\nDELIVERY" },
     ],
-    bg: "#E8E2D6",
-    accent: "#F9A37E",
+    bg: "#F4F4F4",
+    accent: "#E5A93B",
+    textDark: true,
+    productImg: "https://res.cloudinary.com/mywtapmm/image/upload/v1783943689/my-turborepo-ecommerce/iabnpywsmj5rodkneylp.png",
+  },
+  {
+    id: 2,
+    badge: "",
+    headline1: "PRINTED",
+    headline2: "TO IMPRESS",
+    headline2Color: "#1E40AF",
+    sub: "Comfort You Feel, Style You Love.",
+    badges: [
+      { icon: "👕", label: "PREMIUM QUALITY\nFABRIC" },
+      { icon: "🖨️", label: "LONG LASTING\nPRINTS" },
+      { icon: "👥", label: "UNISEX\nCOLLECTION" },
+    ],
+    bg: "#F0F4F8",
+    accent: "#1E40AF",
     textDark: true,
     productImg: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=700&auto=format&fit=crop&q=80",
   },
   {
-    id: 2,
-    badge: "BOLD DESIGNS",
+    id: 3,
+    badge: "",
     headline1: "BOLD DESIGNS.",
     headline2: "REAL YOU.",
-    headline2Color: "#F9A37E",
+    headline2Color: "#E5A93B",
     sub: "PRINTED T-SHIRTS",
     badges: [
       { icon: "🌿", label: "SOFT &\nBREATHABLE" },
       { icon: "🎨", label: "VIBRANT\nPRINTS" },
       { icon: "🛡️", label: "DURABLE\nQUALITY" },
     ],
-    bg: "#4A453E",
-    accent: "#F9A37E",
+    bg: "#121212",
+    accent: "#E5A93B",
     textDark: false,
     productImg: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=700&auto=format&fit=crop&q=80",
   },
-  {
-    id: 3,
-    badge: "CUSTOM STUDIO",
-    headline1: "DESIGN IT.",
-    headline2: "OWN IT.",
-    headline2Color: "#A8C69F",
-    sub: "Create unique hoodies, totes & accessories with our drag-and-drop studio.",
-    badges: [
-      { icon: "✏️", label: "DESIGN\nSTUDIO" },
-      { icon: "🎯", label: "NO MIN.\nORDER" },
-      { icon: "⚡", label: "48HR\nFULFILLMENT" },
-    ],
-    bg: "#FDFAF6",
-    accent: "#A8C69F",
-    textDark: true,
-    productImg: "https://images.unsplash.com/photo-1578932750294-f5075e85f44a?w=700&auto=format&fit=crop&q=80",
-  },
 ];
 
+const FEATURE_ICONS: Record<string, any> = {
+  "100% COTTON": Leaf,
+  "HIGH QUALITY PRINT": Palette,
+  "DURABLE & LONG LASTING": ShieldCheck,
+  "FAST DELIVERY": Truck,
+  "SOFT & BREATHABLE": Leaf,
+  "VIBRANT PRINTS": Palette,
+  "DURABLE QUALITY": ShieldCheck,
+  "PREMIUM QUALITY FABRIC": Leaf,
+  "LONG LASTING PRINTS": Palette,
+  "UNISEX COLLECTION": Layers,
+};
+
 function HeroBanner() {
+  const [slides, setSlides] = useState<any[]>(HERO_SLIDES);
   const [current, setCurrent] = useState(0);
   const [animKey, setAnimKey] = useState(0);
+
+  useEffect(() => {
+    fetch(getApiUrl("/banner"))
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("unreachable");
+      })
+      .then(data => {
+        if (data && data.length > 0) {
+          setSlides(data);
+        }
+      })
+      .catch(() => {
+        // fallback quietly to HERO_SLIDES
+      });
+  }, []);
 
   const goTo = useCallback((idx: number) => {
     setCurrent(idx);
     setAnimKey(k => k + 1);
   }, []);
 
-  const next = useCallback(() => goTo((current + 1) % HERO_SLIDES.length), [current, goTo]);
-  const prev = useCallback(() => goTo((current - 1 + HERO_SLIDES.length) % HERO_SLIDES.length), [current, goTo]);
+  const slide = slides[current] || HERO_SLIDES[0]!;
+  const slideBadges = slide.badges || (
+    (slide.accent === '#1E40AF' || slide.headline2 === 'TO IMPRESS')
+      ? [
+          { icon: "👕", label: "PREMIUM QUALITY\nFABRIC" },
+          { icon: "🖨️", label: "LONG LASTING\nPRINTS" },
+          { icon: "👥", label: "UNISEX\nCOLLECTION" },
+        ]
+      : (!slide.textDark || slide.headline2 === 'REAL YOU.')
+        ? [
+            { icon: "🌿", label: "SOFT &\nBREATHABLE" },
+            { icon: "🎨", label: "VIBRANT\nPRINTS" },
+            { icon: "🛡️", label: "DURABLE\nQUALITY" },
+          ]
+        : [
+            { icon: "🌿", label: "100%\nCOTTON" },
+            { icon: "🎨", label: "HIGH QUALITY\nPRINT" },
+            { icon: "🛡️", label: "DURABLE &\nLONG LASTING" },
+            { icon: "🚚", label: "FAST\nDELIVERY" },
+          ]
+  );
+  const isDarkTheme = !slide.textDark;
+  const hasBgImg = !!(slide.bgImg && slide.bgImg.length > 10);
+  const headline1Color = slide.headline1Color || (isDarkTheme ? '#FFFFFF' : '#2E2B26');
+  const subColor = slide.subColor || (isDarkTheme ? '#D4D4D8' : '#52525B');
+  const badgeColor = slide.badgeColor || slide.accent || '#E5A93B';
 
-  // Auto-play
-  useEffect(() => {
-    const timer = setInterval(next, 5000);
-    return () => clearInterval(timer);
-  }, [next]);
-
-  const slide = HERO_SLIDES[current]!;
+  // Parse overlay color (hex → rgba with opacity)
+  const overlayHex = slide.overlayColor || '#000000';
+  const overlayR = parseInt(overlayHex.slice(1, 3), 16);
+  const overlayG = parseInt(overlayHex.slice(3, 5), 16);
+  const overlayB = parseInt(overlayHex.slice(5, 7), 16);
+  const overlayRgba = (opacity: number) => `rgba(${overlayR},${overlayG},${overlayB},${opacity})`;
 
   return (
     <section
-      className="relative overflow-hidden transition-colors duration-700"
-      style={{ backgroundColor: slide.bg, minHeight: '420px' }}
+      className="relative overflow-hidden select-none min-h-[500px] sm:min-h-[580px] lg:min-h-[640px] flex items-center"
+      style={{
+        backgroundColor: hasBgImg ? '#111' : (isDarkTheme ? '#111' : (slide.bg || '#F4F4F4')),
+      }}
     >
-      {/* Decorative brush-stroke blobs */}
+      {/* Full-width background image */}
+      {hasBgImg && (
+        <img
+          src={slide.bgImg}
+          alt="banner background"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          style={{ objectPosition: 'center', zIndex: 0 }}
+        />
+      )}
+
+      {/* Overlay — dynamic color from admin, always on top of bgImg */}
       <div
-        className="absolute top-0 right-0 w-72 h-72 opacity-20 pointer-events-none"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          background: slide.accent,
-          borderRadius: '0 0 0 80%',
-          transform: 'translate(30%, -30%)',
+          zIndex: 2,
+          background: hasBgImg
+            ? `linear-gradient(to right, ${overlayRgba(0.92)} 0%, ${overlayRgba(0.45)} 50%, ${overlayRgba(0.38)} 100%)`
+            : (isDarkTheme
+              ? `radial-gradient(circle at 30% 50%, ${overlayRgba(0.55)} 0%, ${overlayRgba(0.35)} 100%)`
+              : `linear-gradient(135deg, ${overlayRgba(0.07)} 0%, ${overlayRgba(0.01)} 100%)`)
         }}
       />
-      <div
-        className="absolute bottom-0 left-0 w-48 h-48 opacity-15 pointer-events-none"
-        style={{
-          background: slide.accent,
-          borderRadius: '0 80% 0 0',
-          transform: 'translate(-30%, 30%)',
-        }}
-      />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center relative z-10">
+      {/* Content wrapper */}
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center relative" style={{ zIndex: 10 }}>
 
-        {/* Left: Content */}
-        <div key={`content-${animKey}`} className="space-y-4 animate-slide-in-left text-center lg:text-left order-2 lg:order-1">
-          {/* Badge */}
-          <span
-            className="inline-block text-[10px] font-extrabold tracking-[0.2em] uppercase px-3 py-1 rounded-full border"
-            style={{
-              borderColor: slide.accent,
-              color: slide.accent,
-              backgroundColor: slide.textDark ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)',
-            }}
-          >
-            {slide.badge}
-          </span>
+        {/* ─── LEFT COLUMN: Text and Actions ─── */}
+        <div key={`content-${animKey}`} className="space-y-6 animate-slide-in-left text-center lg:text-left order-2 lg:order-1">
 
-          {/* Headline */}
+          {/* Chip Badge */}
+          {slide.badge && (
+            <span
+              className="inline-block text-[10px] font-black tracking-[0.2em] uppercase px-4 py-1.5 rounded-sm mb-1"
+              style={{ backgroundColor: badgeColor, color: '#fff' }}
+            >
+              {slide.badge}
+            </span>
+          )}
+
+          {/* Headlines */}
           <div className="space-y-1">
             <h1
-              className="text-4xl sm:text-6xl font-black leading-none tracking-tight"
-              style={{ color: slide.textDark ? '#2E2B26' : '#FFFFFF' }}
+              className="text-5xl sm:text-[72px] lg:text-[80px] font-black leading-none tracking-tight normal"
+              style={{
+                fontFamily: "'Arizonia', cursive",
+                color: headline1Color,
+                textShadow: hasBgImg ? '0 2px 12px rgba(0,0,0,0.45)' : 'none',
+              }}
             >
               {slide.headline1}
             </h1>
             <h2
-              className="text-4xl sm:text-6xl font-black leading-none tracking-tight italic"
-              style={{ color: slide.headline2Color }}
+              className="text-5xl sm:text-[72px] lg:text-[80px] font-black leading-none tracking-tight normal"
+              style={{
+                fontFamily: "'Arizonia', cursive",
+                color: slide.headline2Color || '#E5A93B',
+                textShadow: hasBgImg ? '0 2px 12px rgba(0,0,0,0.45)' : 'none',
+              }}
             >
               {slide.headline2}
             </h2>
           </div>
 
-          {/* Subtext */}
+          {/* Subtitle */}
           <p
-            className="text-xs sm:text-sm leading-relaxed max-w-sm mx-auto lg:mx-0"
-            style={{ color: slide.textDark ? '#7A736A' : 'rgba(255,255,255,0.75)' }}
+            className="text-sm sm:text-base font-bold leading-relaxed max-w-sm mx-auto lg:mx-0"
+            style={{ color: subColor }}
           >
             {slide.sub}
           </p>
 
-          {/* Feature badges row */}
-          <div className="flex flex-wrap justify-center lg:justify-start gap-4 py-2">
-            {slide.badges.map((b) => (
-              <div key={b.label} className="flex flex-col items-center gap-1 text-center">
-                <span className="text-xl">{b.icon}</span>
-                <span
-                  className="text-[9px] font-extrabold tracking-wide whitespace-pre-line leading-tight"
-                  style={{ color: slide.textDark ? '#4A453E' : 'rgba(255,255,255,0.85)' }}
-                >
-                  {b.label}
-                </span>
-              </div>
-            ))}
+          {/* Feature Badges */}
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-y-4 pt-1">
+            {slideBadges.map((b: any, idx: number) => {
+              const labelKey = b.label.replace(/\n/g, ' ').trim().toUpperCase();
+              const IconComp = FEATURE_ICONS[labelKey] || Leaf;
+              const featureColor = hasBgImg || isDarkTheme ? '#e4e4e7' : '#3f3f46';
+              const dividerColor = hasBgImg || isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)';
+              return (
+                <div key={idx} className="flex items-center">
+                  {idx > 0 && (
+                    <div className="hidden sm:block h-8 w-px mx-4" style={{ backgroundColor: dividerColor }} />
+                  )}
+                  <div className="flex flex-col items-center lg:items-start gap-1.5">
+                    <IconComp className="w-5 h-5" style={{ color: featureColor }} strokeWidth={1.8} />
+                    <span
+                      className="text-[9px] font-black tracking-widest uppercase whitespace-pre-line leading-tight text-center lg:text-left"
+                      style={{ color: featureColor }}
+                    >
+                      {b.label}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          {/* CTA button */}
-          <div className="flex flex-wrap justify-center lg:justify-start gap-3 pt-1">
+          {/* CTA Button */}
+          <div className="flex justify-center lg:justify-start pt-3">
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 font-extrabold text-xs px-6 py-3 rounded-none transition-all hover:scale-105 active:scale-95"
-              style={{ background: slide.textDark ? '#4A453E' : slide.accent, color: '#FFFFFF' }}
+              className="inline-flex items-center gap-2 font-black text-sm px-8 py-4 text-white rounded-sm transition-all hover:scale-105 active:scale-95 shadow-lg"
+              style={{ backgroundColor: slide.accent || '#E5A93B' }}
             >
-              SHOP NOW <ArrowRight className="w-3.5 h-3.5" />
+              SHOP NOW &rarr;
             </Link>
           </div>
         </div>
 
-        {/* Right: Product image */}
+        {/* ─── RIGHT COLUMN: Product Image ─── */}
         <div key={`img-${animKey}`} className="relative flex items-center justify-center order-1 lg:order-2 animate-slide-in-right">
           <img
             src={slide.productImg}
             alt={slide.headline1}
-            className="w-56 h-56 sm:w-80 sm:h-80 lg:w-[420px] lg:h-[420px] object-cover rounded-full shadow-2xl"
-            style={{ objectFit: 'cover' }}
-          />
-          {/* Accent ring */}
-          <div
-            className="absolute inset-0 rounded-full pointer-events-none"
-            style={{
-              border: `3px solid ${slide.accent}`,
-              transform: 'scale(1.08)',
-              opacity: 0.4,
-            }}
+            className="w-64 h-64 sm:w-[380px] sm:h-[380px] lg:w-[500px] lg:h-[500px] object-contain drop-shadow-2xl transition-all duration-700 ease-in-out hover:scale-105"
           />
         </div>
       </div>
 
-      {/* Slider Controls */}
-      <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-3 z-10">
-        {HERO_SLIDES.map((_, idx) => (
+      {/* Slider Dots */}
+      <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-2.5 z-20">
+        {slides.map((_, idx) => (
           <button
             key={idx}
             onClick={() => goTo(idx)}
             className="transition-all duration-300"
             style={{
-              width: idx === current ? '24px' : '8px',
-              height: '8px',
+              width: idx === current ? '24px' : '7px',
+              height: '7px',
               borderRadius: '99px',
-              backgroundColor: idx === current ? slide.accent : 'rgba(0,0,0,0.2)',
+              backgroundColor: idx === current ? (slide.accent || '#E5A93B') : 'rgba(255,255,255,0.35)',
             }}
           />
         ))}
       </div>
-      <button
-        onClick={prev}
-        className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110"
-        style={{ background: 'rgba(255,255,255,0.8)', color: '#4A453E' }}
-        aria-label="Previous slide"
-      >
-        <ChevronLeft className="w-5 h-5" />
-      </button>
-      <button
-        onClick={next}
-        className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110"
-        style={{ background: 'rgba(255,255,255,0.8)', color: '#4A453E' }}
-        aria-label="Next slide"
-      >
-        <ChevronRight className="w-5 h-5" />
-      </button>
+
     </section>
   );
 }

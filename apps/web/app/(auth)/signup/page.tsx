@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useApp } from '../../../components/AppContext';
 
 export default function SignUpPage() {
-  const { loginUser } = useApp();
+  const { registerUser, loginUser } = useApp();
   const router = useRouter();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -15,15 +15,17 @@ export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName || !email || !password || !acceptTerms) return;
     if (password !== confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
-    loginUser(email);
-    router.push('/');
+    const success = await registerUser(fullName, email, password, phone);
+    if (success) {
+      router.push('/');
+    }
   };
 
   const inputClass = "mt-1.5 w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg py-3 px-4 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E] placeholder-[#A89B8A]";
@@ -105,9 +107,9 @@ export default function SignUpPage() {
                 <input
                   type="checkbox" required checked={acceptTerms}
                   onChange={(e) => setAcceptTerms(e.target.checked)}
-                  className="w-4 h-4 mt-0.5 rounded border-[#E8E2D6] accent-[#F9A37E]"
+                  className="w-4 h-4 rounded border-[#E8E2D6] accent-[#F9A37E]"
                 />
-                <span className="text-[10px] text-[#7A736A] font-medium leading-normal">
+                <span className="text-[10px] text-[#7A736A] font-medium leading-[15px]">
                   I accept the{' '}
                   <Link href="/terms" className="font-bold hover:underline text-[#F9A37E]">Terms of Service</Link>
                   {' '}and{' '}

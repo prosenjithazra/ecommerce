@@ -23,6 +23,12 @@ export default {
           'brown-dark':  '#2E2B26',
         },
       },
+      fontFamily: {
+        heading: ['Quintessential', 'Georgia', 'serif'],
+        body:    ['Elm Sans', 'system-ui', 'sans-serif'],
+        sans:    ['Elm Sans', 'system-ui', 'sans-serif'],
+        serif:   ['Quintessential', 'Georgia', 'serif'],
+      },
       keyframes: {
         'fade-in-up': {
           '0%':   { opacity: '0', transform: 'translateY(12px)' },

@@ -14,11 +14,13 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
-    loginUser(email);
-    router.push('/');
+    const success = await loginUser(email, password);
+    if (success) {
+      router.push('/');
+    }
   };
 
   return (
