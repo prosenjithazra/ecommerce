@@ -3,7 +3,7 @@
 import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useApp } from '../../components/AppContext';
-import { Breadcrumb, Price } from '../../components/UIComponents';
+import { Breadcrumb, Price, Select } from '../../components/UIComponents';
 import { CreditCard, Wallet, Landmark, PhoneCall, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 function PaymentPageContent() {
@@ -64,28 +64,28 @@ function PaymentPageContent() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <button
                 onClick={() => setPaymentMethod('card')}
-                className={`flex flex-col items-center justify-center p-4 border rounded-2xl gap-2 font-bold text-xs transition-all ${paymentMethod === 'card' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-650' : 'border-zinc-150 text-zinc-550'}`}
+                className={`flex flex-col items-center justify-center p-4 border rounded-2xl gap-2 font-bold text-xs transition-all ${paymentMethod === 'card' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
               >
                 <CreditCard className="w-5 h-5" />
                 <span>Card</span>
               </button>
               <button
                 onClick={() => setPaymentMethod('upi')}
-                className={`flex flex-col items-center justify-center p-4 border rounded-2xl gap-2 font-bold text-xs transition-all ${paymentMethod === 'upi' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-650' : 'border-zinc-150 text-zinc-550'}`}
+                className={`flex flex-col items-center justify-center p-4 border rounded-2xl gap-2 font-bold text-xs transition-all ${paymentMethod === 'upi' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
               >
                 <PhoneCall className="w-5 h-5" />
                 <span>UPI Pay</span>
               </button>
               <button
                 onClick={() => setPaymentMethod('netbank')}
-                className={`flex flex-col items-center justify-center p-4 border rounded-2xl gap-2 font-bold text-xs transition-all ${paymentMethod === 'netbank' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-650' : 'border-zinc-150 text-zinc-550'}`}
+                className={`flex flex-col items-center justify-center p-4 border rounded-2xl gap-2 font-bold text-xs transition-all ${paymentMethod === 'netbank' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
               >
                 <Landmark className="w-5 h-5" />
                 <span>Net Banking</span>
               </button>
               <button
                 onClick={() => setPaymentMethod('wallet')}
-                className={`flex flex-col items-center justify-center p-4 border rounded-2xl gap-2 font-bold text-xs transition-all ${paymentMethod === 'wallet' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-650' : 'border-zinc-150 text-zinc-550'}`}
+                className={`flex flex-col items-center justify-center p-4 border rounded-2xl gap-2 font-bold text-xs transition-all ${paymentMethod === 'wallet' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
               >
                 <Wallet className="w-5 h-5" />
                 <span>Wallets</span>
@@ -128,7 +128,7 @@ function PaymentPageContent() {
                         required
                         value={cardDetails.expiry}
                         onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
-                        className="bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-xl py-3 px-4 text-xs outline-none"
+                        className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-xl py-3 px-4 text-xs outline-none"
                       />
                     </div>
                     <div className="space-y-2">
@@ -140,7 +140,7 @@ function PaymentPageContent() {
                         required
                         value={cardDetails.cvv}
                         onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
-                        className="bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-xl py-3 px-4 text-xs outline-none"
+                        className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-xl py-3 px-4 text-xs outline-none"
                       />
                     </div>
                   </div>
@@ -178,16 +178,16 @@ function PaymentPageContent() {
                 <div className="space-y-4 animate-fade-in-up duration-200">
                   <div className="space-y-2">
                     <label className="block text-xs font-bold text-zinc-650">Select Bank</label>
-                    <select
+                    <Select
                       value={selectedBank}
-                      onChange={(e) => setSelectedBank(e.target.value)}
-                      className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-250 rounded-xl py-3 px-4 text-xs outline-none font-semibold"
-                    >
-                      <option value="">-- Choose Bank --</option>
-                      <option value="chase">Chase Bank</option>
-                      <option value="bofa">Bank of America</option>
-                      <option value="wells">Wells Fargo</option>
-                    </select>
+                      onChange={(val) => setSelectedBank(val)}
+                      placeholder="-- Choose Bank --"
+                      options={[
+                        { value: "chase", label: "Chase Bank" },
+                        { value: "bofa", label: "Bank of America" },
+                        { value: "wells", label: "Wells Fargo" }
+                      ]}
+                    />
                   </div>
                 </div>
               )}
@@ -196,24 +196,24 @@ function PaymentPageContent() {
                 <div className="space-y-4 animate-fade-in-up duration-200">
                   <div className="space-y-2">
                     <label className="block text-xs font-bold text-zinc-650">Select Wallet</label>
-                    <select
+                    <Select
                       value={selectedWallet}
-                      onChange={(e) => setSelectedWallet(e.target.value)}
-                      className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-250 rounded-xl py-3 px-4 text-xs outline-none font-semibold"
-                    >
-                      <option value="">-- Choose Wallet --</option>
-                      <option value="apple">Apple Pay</option>
-                      <option value="amazon">Amazon Pay</option>
-                    </select>
+                      onChange={(val) => setSelectedWallet(val)}
+                      placeholder="-- Choose Wallet --"
+                      options={[
+                        { value: "apple", label: "Apple Pay" },
+                        { value: "amazon", label: "Amazon Pay" }
+                      ]}
+                    />
                   </div>
                 </div>
               )}
 
               <button
                 type="submit"
-                className="w-full bg-indigo-650 hover:bg-indigo-705 text-white font-extrabold text-xs py-3.5 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center mt-6"
+                className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center mt-6"
               >
-                Pay ${total.toFixed(2)} Securely
+                Pay ₹{total.toFixed(2)} Securely
               </button>
 
             </form>
@@ -230,21 +230,21 @@ function PaymentPageContent() {
             <div className="space-y-3 text-xs">
               <div className="flex justify-between">
                 <span className="text-zinc-500">Checkout Subtotal</span>
-                <span className="font-bold text-zinc-800 dark:text-zinc-200">${subtotal.toFixed(2)}</span>
+                <span className="font-bold text-zinc-800 dark:text-zinc-200">₹{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-500">Tax / GST (18%)</span>
-                <span className="font-bold text-zinc-800 dark:text-zinc-200">${tax.toFixed(2)}</span>
+                <span className="font-bold text-zinc-800 dark:text-zinc-200">₹{tax.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-500">Shipping Fees</span>
                 <span className="font-bold text-zinc-800 dark:text-zinc-200">
-                  {shippingFee === 0 ? "FREE" : `$${shippingFee.toFixed(2)}`}
+                  {shippingFee === 0 ? "FREE" : `₹${shippingFee.toFixed(2)}`}
                 </span>
               </div>
               <div className="flex justify-between pt-3 border-t border-zinc-150 dark:border-zinc-800 text-sm font-black">
                 <span className="text-zinc-900 dark:text-white">Amount Due</span>
-                <span className="text-indigo-650 dark:text-indigo-400">${total.toFixed(2)}</span>
+                <span className="text-indigo-600 dark:text-indigo-400">₹{total.toFixed(2)}</span>
               </div>
             </div>
 

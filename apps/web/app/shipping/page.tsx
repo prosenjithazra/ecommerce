@@ -20,8 +20,8 @@ export default function ShippingPage() {
         <section className="space-y-3">
           <h2 className="text-base font-extrabold text-zinc-900 dark:text-white">2. Shipping Durations & Charges</h2>
           <ul className="list-disc pl-5 space-y-2">
-            <li><strong>Standard Ground Shipping</strong>: Free for orders above $50 (otherwise $5.99). Takes 4-6 business days to arrive.</li>
-            <li><strong>Express Air Shipping</strong>: $14.99 flat. Takes 2-3 business days.</li>
+            <li><strong>Standard Ground Shipping</strong>: Free for orders above ₹50 (otherwise ₹5.99). Takes 4-6 business days to arrive.</li>
+            <li><strong>Express Air Shipping</strong>: ₹14.99 flat. Takes 2-3 business days.</li>
           </ul>
         </section>
 

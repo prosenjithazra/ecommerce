@@ -105,9 +105,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           <div className="flex items-center justify-between mt-3">
             <div className="flex items-center gap-1">
-              <span className="font-extrabold text-sm text-[#4A453E]">${product.price}</span>
+              <span className="font-extrabold text-sm text-[#4A453E]">₹{product.price}</span>
               {product.originalPrice > product.price && (
-                <span className="text-xs text-[#A89B8A] line-through">${product.originalPrice}</span>
+                <span className="text-xs text-[#A89B8A] line-through">₹{product.originalPrice}</span>
               )}
             </div>
             <Link
@@ -146,9 +146,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 </div>
 
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-extrabold text-[#4A453E]">${product.price}</span>
+                  <span className="text-2xl font-extrabold text-[#4A453E]">₹{product.price}</span>
                   {product.originalPrice > product.price && (
-                    <span className="text-sm text-[#A89B8A] line-through">${product.originalPrice}</span>
+                    <span className="text-sm text-[#A89B8A] line-through">₹{product.originalPrice}</span>
                   )}
                 </div>
 

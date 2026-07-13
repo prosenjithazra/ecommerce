@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
-import { useApp } from '../../components/AppContext';
+import { useApp } from '../../../components/AppContext';
 
 export default function LoginPage() {
   const { loginUser } = useApp();
@@ -22,7 +22,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFAF6] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#FDFAF6] flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link href="/" className="inline-block font-extrabold text-3xl tracking-tight text-[#4A453E] mb-3">
           PRINT<span className="text-[#F9A37E]">HUB</span>
@@ -30,16 +30,13 @@ export default function LoginPage() {
         <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">
           Welcome back to the studio
         </h2>
-        <p className="mt-1.5 text-xs text-[#A89B8A]">
-          Or{' '}
-          <Link href="/signup" className="font-bold text-[#F9A37E] hover:text-[#E8855A]">
-            register a free account
-          </Link>
+        <p className="mt-1.5 text-xs text-[#A89B8A] hidden sm:block">
+          Access your designs, orders, and preferences.
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-6 border border-[#E8E2D6] shadow-sm rounded-3xl sm:px-10">
+        <div className="bg-white border border-[#E8E2D6] shadow-xl rounded-xl sm:rounded-3xl py-5 sm:py-8 px-4 sm:px-10">
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-xs font-bold text-[#4A453E]">Email address</label>
@@ -84,6 +81,7 @@ export default function LoginPage() {
             </button>
           </form>
 
+          {/* Social login partition */}
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -103,6 +101,19 @@ export default function LoginPage() {
               </svg>
               Google Workspace
             </button>
+          </div>
+
+          {/* Bottom Switcher buttons */}
+          <div className="mt-6 pt-5 border-t border-[#E8E2D6] space-y-3">
+            <span className="text-[10px] font-bold text-[#A89B8A] uppercase tracking-wider text-center block">
+              New here?
+            </span>
+            <Link
+              href="/signup"
+              className="w-full bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-3.5 px-4 rounded-xl transition-all shadow-md shadow-[#A8C69F]/20 flex items-center justify-center text-center animate-fade-in-up"
+            >
+              Sign Up
+            </Link>
           </div>
         </div>
       </div>

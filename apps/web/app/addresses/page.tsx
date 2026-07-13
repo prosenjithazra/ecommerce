@@ -122,7 +122,7 @@ export default function AddressesPage() {
               type="checkbox"
               checked={form.isDefault}
               onChange={(e) => setForm({ ...form, isDefault: e.target.checked })}
-              className="w-4 h-4 rounded border accent-indigo-650"
+              className="w-4 h-4 rounded border accent-indigo-600"
             />
             <span className="text-xs text-zinc-550 font-medium">Set as primary default shipping address</span>
           </label>
@@ -137,7 +137,7 @@ export default function AddressesPage() {
             >
               Cancel
             </button>
-            <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs py-2 px-4 rounded-xl shadow-md">
+            <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2 px-4 rounded-xl shadow-md">
               Save Shipping Details
             </button>
           </div>

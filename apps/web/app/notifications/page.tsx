@@ -43,7 +43,7 @@ export default function NotificationsPage() {
         </div>
         <button
           onClick={handleMarkAllRead}
-          className="text-xs font-bold text-indigo-650 hover:underline flex items-center gap-1"
+          className="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1"
         >
           <Check className="w-4 h-4" /> Mark all read
         </button>
@@ -76,7 +76,7 @@ export default function NotificationsPage() {
                 {!notif.read && (
                   <button
                     onClick={() => handleMarkRead(notif.id)}
-                    className="text-[10px] font-bold text-indigo-650 hover:underline flex items-center gap-1 mt-3"
+                    className="text-[10px] font-bold text-indigo-600 hover:underline flex items-center gap-1 mt-3"
                   >
                     <Eye className="w-3.5 h-3.5" /> Mark as Read
                   </button>

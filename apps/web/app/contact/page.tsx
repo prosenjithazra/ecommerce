@@ -81,7 +81,7 @@ export default function ContactPage() {
 
             <button
               type="submit"
-              className="w-full bg-indigo-650 hover:bg-indigo-705 text-white font-extrabold text-xs py-3.5 px-4 rounded-xl transition-all shadow-md shadow-indigo-200 dark:shadow-none flex items-center justify-center gap-2"
+              className="w-full bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3.5 px-4 rounded-xl transition-all shadow-md shadow-[#F9A37E]/25 dark:shadow-none flex items-center justify-center gap-2"
             >
               <Send className="w-4 h-4" /> Send Message
             </button>

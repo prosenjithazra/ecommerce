@@ -7,6 +7,7 @@ import { ProductCard } from '../components/ProductCard';
 import { CategoryCard } from '../components/CategoryCard';
 import { ReviewCard } from '../components/InfoCards';
 import { Product } from '../components/AppContext';
+import { Slider } from '../components/UIComponents';
 
 const INITIAL_PRODUCTS: Product[] = [
   {
@@ -402,11 +403,11 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <Slider desktopCols={4}>
           {getFilteredProducts().map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
-        </div>
+        </Slider>
       </section>
 
       {/* ── HOW IT WORKS ── */}
@@ -437,11 +438,11 @@ export default function HomePage() {
           <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">Loved by Creators</h2>
           <p className="text-xs text-[#7A736A] mt-1">See what our customers have designed.</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Slider desktopCols={3}>
           {reviews.map((rev) => (
             <ReviewCard key={rev.name} name={rev.name} rating={rev.rating} date={rev.date} comment={rev.comment} verified={rev.verified} />
           ))}
-        </div>
+        </Slider>
       </section>
 
       {/* ── INSTAGRAM GALLERY ── */}

@@ -75,7 +75,7 @@ function ThankYouPageContent() {
         </button>
         <Link
           href="/orders"
-          className="text-xs font-bold text-indigo-650 hover:underline flex items-center gap-1"
+          className="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1"
         >
           Track Shipment <ArrowRight className="w-4 h-4" />
         </Link>

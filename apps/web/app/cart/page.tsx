@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ShoppingBag, Trash2, Tag, Calendar, ShieldCheck } from 'lucide-react';
+import { ShoppingBag, Trash2, Tag, Calendar, ShieldCheck, Minus, Plus } from 'lucide-react';
 import { useApp } from '../../components/AppContext';
 import { Breadcrumb, EmptyState, Price } from '../../components/UIComponents';
 import { CouponCard } from '../../components/InfoCards';
@@ -52,17 +52,17 @@ export default function CartPage() {
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-3">
             {cart.map((item) => (
-              <div key={item.id} className="p-4 border border-[#E8E2D6] bg-white rounded-2xl flex gap-4 hover:shadow-sm transition-shadow">
-                <div className="w-18 h-18 min-w-[4.5rem] bg-[#E8E2D6] rounded-xl overflow-hidden flex-shrink-0">
+              <div key={item.id} className="p-3 sm:p-4 border border-[#E8E2D6] bg-white rounded-2xl flex gap-3 sm:gap-4 hover:shadow-sm transition-shadow">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl overflow-hidden flex-shrink-0">
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0 flex flex-col justify-between">
                   <div>
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-extrabold text-sm text-[#4A453E] truncate">{item.name}</h3>
+                      <h3 className="font-extrabold text-xs sm:text-sm text-[#4A453E] truncate">{item.name}</h3>
                       <button
                         onClick={() => removeFromCart(item.id)}
-                        className="text-[#A89B8A] hover:text-red-400 transition-colors p-1 flex-shrink-0"
+                        className="text-[#C4B8A8] hover:text-red-400 transition-colors p-1 flex-shrink-0"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -71,13 +71,23 @@ export default function CartPage() {
                       Size: <span className="font-bold text-[#7A736A]">{item.size}</span> · Color: <span className="font-bold text-[#7A736A]">{item.color}</span>
                     </p>
                   </div>
-                  <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-center gap-1 border border-[#E8E2D6] rounded-xl px-2 py-1 bg-[#FDFAF6]">
-                      <button onClick={() => updateCartQty(item.id, item.quantity - 1)} className="px-2 text-sm font-bold text-[#A89B8A] hover:text-[#4A453E]">-</button>
-                      <span className="text-xs font-extrabold w-4 text-center text-[#4A453E]">{item.quantity}</span>
-                      <button onClick={() => updateCartQty(item.id, item.quantity + 1)} className="px-2 text-sm font-bold text-[#A89B8A] hover:text-[#4A453E]">+</button>
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center border border-[#E8E2D6] rounded-lg bg-[#FDFAF6] h-8 w-24 overflow-hidden">
+                      <button
+                        onClick={() => updateCartQty(item.id, item.quantity - 1)}
+                        className="w-8 h-full flex items-center justify-center text-[#7A736A] hover:text-[#4A453E] hover:bg-[#E8E2D6]/40 transition-colors"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+                      <span className="flex-1 text-xs font-bold text-center text-[#4A453E]">{item.quantity}</span>
+                      <button
+                        onClick={() => updateCartQty(item.id, item.quantity + 1)}
+                        className="w-8 h-full flex items-center justify-center text-[#7A736A] hover:text-[#4A453E] hover:bg-[#E8E2D6]/40 transition-colors"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
                     </div>
-                    <span className="font-extrabold text-sm text-[#4A453E]">${(item.price * item.quantity).toFixed(2)}</span>
+                    <span className="font-extrabold text-xs sm:text-sm text-[#4A453E]">₹{(item.price * item.quantity).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -98,14 +108,14 @@ export default function CartPage() {
               {/* Coupon input */}
               <form onSubmit={handleApplyCoupon} className="flex gap-2">
                 <div className="relative flex-1">
-                  <Tag className="w-4 h-4 text-[#A89B8A] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Tag className="w-3.5 h-3.5 text-[#A89B8A] absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text" placeholder="Coupon code"
                     value={couponCode} onChange={(e) => setCouponCode(e.target.value)}
-                    className="w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl py-2.5 pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] uppercase text-[#4A453E] font-mono"
+                    className="w-full h-10 bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] uppercase text-[#4A453E] font-mono"
                   />
                 </div>
-                <button type="submit" className="bg-[#A8C69F] hover:bg-[#92b089] text-white rounded-2xl py-2.5 px-6 text-xs font-extrabold transition-all shadow-lg shadow-[#A8C69F]/20 flex-shrink-0">
+                <button type="submit" className="h-10 bg-[#A8C69F] hover:bg-[#92b089] text-white rounded-xl px-5 text-xs font-extrabold transition-all shadow-md shadow-[#A8C69F]/10 flex-shrink-0 flex items-center justify-center">
                   Apply
                 </button>
               </form>
@@ -114,25 +124,25 @@ export default function CartPage() {
               <div className="space-y-2.5 text-xs">
                 <div className="flex justify-between">
                   <span className="text-[#7A736A]">Cart Subtotal</span>
-                  <span className="font-extrabold text-[#4A453E]">${subtotal.toFixed(2)}</span>
+                  <span className="font-extrabold text-[#4A453E]">₹{subtotal.toFixed(2)}</span>
                 </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-emerald-600 font-bold">
                     <span>Coupon Discount</span>
-                    <span>-${discountAmount.toFixed(2)}</span>
+                    <span>-₹{discountAmount.toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
                   <span className="text-[#7A736A]">Tax / GST (18%)</span>
-                  <span className="font-extrabold text-[#4A453E]">${tax.toFixed(2)}</span>
+                  <span className="font-extrabold text-[#4A453E]">₹{tax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[#7A736A]">Standard Shipping</span>
-                  <span className="font-extrabold text-[#A8C69F]">{shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}</span>
+                  <span className="font-extrabold text-[#A8C69F]">{shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}</span>
                 </div>
                 <div className="flex justify-between pt-3 border-t border-[#E8E2D6] text-sm font-black">
                   <span className="text-[#4A453E]">Total Amount</span>
-                  <span className="text-[#F9A37E]">${total.toFixed(2)}</span>
+                  <span className="text-[#F9A37E]">₹{total.toFixed(2)}</span>
                 </div>
               </div>
 

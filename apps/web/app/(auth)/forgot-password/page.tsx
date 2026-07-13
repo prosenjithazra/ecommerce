@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useApp } from '../../components/AppContext';
+import { useApp } from '../../../components/AppContext';
 
 export default function ForgotPasswordPage() {
   const { showToast } = useApp();
@@ -18,7 +18,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFAF6] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#FDFAF6] flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link href="/" className="inline-block font-extrabold text-3xl tracking-tight text-[#4A453E] mb-3">
           PRINT<span className="text-[#F9A37E]">HUB</span>
@@ -26,13 +26,13 @@ export default function ForgotPasswordPage() {
         <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">
           Reset your password
         </h2>
-        <p className="mt-1.5 text-xs text-[#A89B8A] px-4">
+        <p className="mt-1.5 text-xs text-[#A89B8A] px-4 hidden sm:block">
           Enter your email address and we will send you a 6-digit OTP code to verify your identity.
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-6 border border-[#E8E2D6] shadow-sm rounded-3xl sm:px-10">
+        <div className="bg-white border border-[#E8E2D6] shadow-xl rounded-xl sm:rounded-3xl py-5 sm:py-8 px-4 sm:px-10">
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-xs font-bold text-[#4A453E]">
@@ -51,13 +51,28 @@ export default function ForgotPasswordPage() {
             >
               Send OTP Code
             </button>
+          </form>
 
-            <div className="text-center pt-2">
-              <Link href="/login" className="text-xs font-bold text-[#A89B8A] hover:text-[#4A453E]">
-                Back to Sign In
+          {/* Bottom Switcher buttons */}
+          <div className="mt-6 pt-5 border-t border-[#E8E2D6] space-y-3">
+            <span className="text-[10px] font-bold text-[#A89B8A] uppercase tracking-wider text-center block">
+              Want to sign in or register instead?
+            </span>
+            <div className="grid grid-cols-2 gap-3">
+              <Link
+                href="/login"
+                className="w-full bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-3 px-4 rounded-xl transition-all shadow-md shadow-[#A8C69F]/20 flex items-center justify-center text-center"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/signup"
+                className="w-full border border-[#E8E2D6] hover:bg-[#FDFAF6] text-[#4A453E] font-extrabold text-xs py-3 px-4 rounded-xl transition-colors flex items-center justify-center text-center"
+              >
+                Sign Up
               </Link>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>

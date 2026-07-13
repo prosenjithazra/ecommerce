@@ -105,7 +105,7 @@ export default function AboutPage() {
       {/* Call to action */}
       <section className="p-12 bg-[#4A453E] text-white rounded-[32px] text-center space-y-6 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-[#F9A37E]/10 blur-[100px] pointer-events-none" />
-        <h2 className="text-3xl font-extrabold tracking-tight max-w-lg mx-auto">Ready to wear your story?</h2>
+        <h2 className="text-3xl font-extrabold tracking-tight max-w-lg mx-auto text-white">Ready to wear your story?</h2>
         <p className="text-xs text-[#E8E2D6]/70 max-w-sm mx-auto">Browse our premium print-ready collection and order with confidence — fast delivery, easy returns.</p>
         <Link
           href="/products"

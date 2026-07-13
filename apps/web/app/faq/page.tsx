@@ -14,7 +14,7 @@ export default function FaqPage() {
       icon: <Paintbrush className="w-5 h-5 text-indigo-500" />,
       questions: [
         { q: "What design file formats can I upload?", a: "Our canvas designer supports transparent PNGs, JPEGs, and SVGs. We highly recommend utilizing high-resolution transparent PNG files (at least 300 DPI) for clean direct-to-garment print lines." },
-        { q: "Can I print on both the front and back of the shirt?", a: "Yes! Use the 'Front / Back' view toggle in the design studio to add text layers and custom graphic images to both sides. Custom double-sided printing adds a minor $5 setup fee." }
+        { q: "Can I print on both the front and back of the shirt?", a: "Yes! Use the 'Front / Back' view toggle in the design studio to add text layers and custom graphic images to both sides. Custom double-sided printing adds a minor ₹5 setup fee." }
       ]
     },
     {

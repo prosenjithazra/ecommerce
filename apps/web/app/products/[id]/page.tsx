@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { ShoppingBag, Heart, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
+import { ShoppingBag, Heart, ShieldCheck, Truck, RefreshCw, Minus, Plus } from 'lucide-react';
 import { useApp, Product } from '../../../components/AppContext';
 import { ProductGallery, ReviewCard } from '../../../components/InfoCards';
 import { ProductCard } from '../../../components/ProductCard';
@@ -88,7 +88,7 @@ export default function ProductDetailPage() {
   const relatedProducts = Object.values(PRODUCTS_DB).filter(p => p.id !== product.id);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 pb-24">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10 pb-24">
       <Breadcrumb items={[{ name: "Products", href: "/products" }, { name: product.name }]} />
 
       {/* ── Product Main Grid ── */}
@@ -181,19 +181,21 @@ export default function ProductDetailPage() {
           {/* Quantity */}
           <div className="space-y-2">
             <span className="text-xs font-bold text-[#4A453E]">Quantity</span>
-            <div className="flex items-center gap-0 border border-[#E8E2D6] rounded-xl w-32 justify-between overflow-hidden bg-[#FDFAF6]">
+            <div className="flex items-center border border-[#E8E2D6] rounded-xl overflow-hidden bg-[#FDFAF6] h-10 w-28">
               <button
                 onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                className="w-10 h-10 flex items-center justify-center text-[#A89B8A] hover:text-[#4A453E] hover:bg-[#E8E2D6] font-bold text-base transition-colors"
+                className="w-9 h-full flex items-center justify-center text-[#7A736A] hover:text-[#4A453E] hover:bg-[#E8E2D6]/40 transition-colors"
+                type="button"
               >
-                −
+                <Minus className="w-3.5 h-3.5" />
               </button>
-              <span className="text-sm font-extrabold text-[#4A453E] w-8 text-center">{quantity}</span>
+              <span className="flex-1 text-xs font-bold text-center text-[#4A453E]">{quantity}</span>
               <button
                 onClick={() => setQuantity(q => q + 1)}
-                className="w-10 h-10 flex items-center justify-center text-[#A89B8A] hover:text-[#4A453E] hover:bg-[#E8E2D6] font-bold text-base transition-colors"
+                className="w-9 h-full flex items-center justify-center text-[#7A736A] hover:text-[#4A453E] hover:bg-[#E8E2D6]/40 transition-colors"
+                type="button"
               >
-                +
+                <Plus className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -245,7 +247,7 @@ export default function ProductDetailPage() {
       </div>
 
       {/* ── Tabs: Description / Print / Shipping ── */}
-      <section className="space-y-5 pt-8 border-t border-[#E8E2D6]">
+      <section className="space-y-4 pt-5 sm:pt-8 border-t border-[#E8E2D6]">
         <div className="flex border-b border-[#E8E2D6] text-xs">
           {(['desc', 'print', 'ship'] as const).map((tab, i) => {
             const labels = ['Description', 'Print Details', 'Shipping & Returns'];
@@ -276,7 +278,7 @@ export default function ProductDetailPage() {
       </section>
 
       {/* ── Reviews ── */}
-      <section className="space-y-5 pt-8 border-t border-[#E8E2D6]">
+      <section className="space-y-4 pt-5 sm:pt-8 border-t border-[#E8E2D6]">
         <h2 className="text-xl font-extrabold text-[#4A453E] tracking-tight">Customer Reviews</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <ReviewCard name="Jane Doe" rating={5} date="3 days ago" comment="Perfect sizing and very comfortable fabric. The print came out exactly as shown!" verified={true} />
@@ -286,7 +288,7 @@ export default function ProductDetailPage() {
       </section>
 
       {/* ── Related Products ── */}
-      <section className="space-y-5 pt-8 border-t border-[#E8E2D6]">
+      <section className="space-y-4 pt-5 sm:pt-8 border-t border-[#E8E2D6]">
         <h2 className="text-xl font-extrabold text-[#4A453E] tracking-tight">You May Also Like</h2>
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {relatedProducts.map(p => <ProductCard key={p.id} product={p} />)}

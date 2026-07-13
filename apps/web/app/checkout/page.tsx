@@ -126,8 +126,8 @@ export default function CheckoutPage() {
             <h3 className="font-extrabold text-sm text-[#4A453E]">2. Shipping Method</h3>
             <div className="space-y-2">
               {[
-                { id: 'standard', label: 'Standard Ground Shipping', sub: '4–6 business days', price: subtotal > 50 ? 'FREE' : '$5.99' },
-                { id: 'express', label: 'Express Air Shipping', sub: '2–3 business days', price: '$14.99' }
+                { id: 'standard', label: 'Standard Ground Shipping', sub: '4–6 business days', price: subtotal > 50 ? 'FREE' : '₹5.99' },
+                { id: 'express', label: 'Express Air Shipping', sub: '2–3 business days', price: '₹14.99' }
               ].map(opt => (
                 <label key={opt.id}
                   className={`flex items-center justify-between p-4 border rounded-xl cursor-pointer transition-all ${
@@ -184,7 +184,7 @@ export default function CheckoutPage() {
                     {item.name} <span className="text-[10px] text-[#A89B8A]">×{item.quantity}</span>
                   </span>
                 </div>
-                <span className="font-extrabold text-[#4A453E] flex-shrink-0">${(item.price * item.quantity).toFixed(2)}</span>
+                <span className="font-extrabold text-[#4A453E] flex-shrink-0">₹{(item.price * item.quantity).toFixed(2)}</span>
               </div>
             ))}
           </div>
@@ -193,19 +193,19 @@ export default function CheckoutPage() {
           <div className="space-y-2.5 text-xs pt-3 border-t border-[#E8E2D6]">
             <div className="flex justify-between">
               <span className="text-[#7A736A]">Subtotal</span>
-              <span className="font-bold text-[#4A453E]">${subtotal.toFixed(2)}</span>
+              <span className="font-bold text-[#4A453E]">₹{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[#7A736A]">Tax / GST (18%)</span>
-              <span className="font-bold text-[#4A453E]">${tax.toFixed(2)}</span>
+              <span className="font-bold text-[#4A453E]">₹{tax.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[#7A736A]">Shipping</span>
-              <span className="font-bold text-[#A8C69F]">{shippingFee === 0 ? "FREE" : `$${shippingFee.toFixed(2)}`}</span>
+              <span className="font-bold text-[#A8C69F]">{shippingFee === 0 ? "FREE" : `₹${shippingFee.toFixed(2)}`}</span>
             </div>
             <div className="flex justify-between pt-3 border-t border-[#E8E2D6] text-sm font-black">
               <span className="text-[#4A453E]">Estimated Total</span>
-              <span className="text-[#F9A37E]">${total.toFixed(2)}</span>
+              <span className="text-[#F9A37E]">₹{total.toFixed(2)}</span>
             </div>
           </div>
 

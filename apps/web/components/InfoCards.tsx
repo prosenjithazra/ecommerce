@@ -159,7 +159,7 @@ export const OrderCard: React.FC<{ order: Order; onViewDetails: (id: string) => 
           )}
         </div>
         <div className="text-right">
-          <span className="font-extrabold text-sm text-[#4A453E]">${order.total.toFixed(2)}</span>
+          <span className="font-extrabold text-sm text-[#4A453E]">₹{order.total.toFixed(2)}</span>
           <p className="text-[10px] text-[#A89B8A] mt-1">({itemsCount} units)</p>
         </div>
       </div>
@@ -191,7 +191,7 @@ export const TransactionCard: React.FC<{ txn: Transaction }> = ({ txn }) => (
     <div className="flex items-center gap-3">
       <div className="text-right">
         <span className="font-extrabold text-xs text-[#4A453E] block">
-          {txn.type === 'Payment' ? '-' : '+'}${txn.amount.toFixed(2)}
+          {txn.type === 'Payment' ? '-' : '+'}₹{txn.amount.toFixed(2)}
         </span>
         <span className="text-[9px] mt-0.5 inline-block"><StatusBadge status={txn.status} /></span>
       </div>

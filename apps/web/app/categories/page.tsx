@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Breadcrumb, Pagination } from '../../components/UIComponents';
+import { Breadcrumb, Pagination, Select } from '../../components/UIComponents';
 import { CategoryCard } from '../../components/CategoryCard';
 import { Filter, SlidersHorizontal, Search, RotateCcw } from 'lucide-react';
 
@@ -72,7 +72,7 @@ export default function CategoriesPage() {
             </h3>
             <button 
               onClick={handleReset}
-              className="text-[10px] font-bold text-zinc-400 hover:text-indigo-650 flex items-center gap-1 transition-colors"
+              className="text-[10px] font-bold text-zinc-400 hover:text-indigo-600 flex items-center gap-1 transition-colors"
             >
               <RotateCcw className="w-3 h-3" /> Reset
             </button>
@@ -98,7 +98,7 @@ export default function CategoriesPage() {
                 type="checkbox"
                 checked={inStockOnly}
                 onChange={(e) => setInStockOnly(e.target.checked)}
-                className="w-4 h-4 border border-zinc-200 dark:border-zinc-700 rounded bg-zinc-50 dark:bg-zinc-850 accent-indigo-650"
+                className="w-4 h-4 border border-zinc-200 dark:border-zinc-700 rounded bg-zinc-50 dark:bg-zinc-850 accent-indigo-600"
               />
               <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">In stock only</span>
             </label>
@@ -154,7 +154,7 @@ export default function CategoriesPage() {
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => handleBrandToggle(brand)}
-                      className="w-4 h-4 border border-zinc-200 dark:border-zinc-700 rounded bg-zinc-50 dark:bg-zinc-850 accent-indigo-650"
+                      className="w-4 h-4 border border-zinc-200 dark:border-zinc-700 rounded bg-zinc-50 dark:bg-zinc-850 accent-indigo-600"
                     />
                     <span className="text-xs text-zinc-505 dark:text-zinc-400 font-medium">{brand}</span>
                   </label>
@@ -171,15 +171,16 @@ export default function CategoriesPage() {
             <span className="text-xs font-bold text-zinc-400">{filteredCategories.length} Categories Found</span>
             <div className="flex items-center gap-2">
               <span className="text-xs text-zinc-400">Sort:</span>
-              <select
+              <Select
                 value={sort}
-                onChange={(e) => setSort(e.target.value)}
-                className="bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-xl py-1.5 px-3 text-xs outline-none text-zinc-700 dark:text-zinc-300 font-semibold"
-              >
-                <option value="popular">Popularity</option>
-                <option value="name-asc">Alphabetical (A-Z)</option>
-                <option value="name-desc">Alphabetical (Z-A)</option>
-              </select>
+                onChange={(val) => setSort(val)}
+                options={[
+                  { value: "popular", label: "Popularity" },
+                  { value: "name-asc", label: "Alphabetical (A-Z)" },
+                  { value: "name-desc", label: "Alphabetical (Z-A)" }
+                ]}
+                className="w-44"
+              />
             </div>
           </div>
 

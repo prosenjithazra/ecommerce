@@ -66,7 +66,7 @@ export default function OrdersPage() {
           icon={<ShoppingBag className="w-8 h-8 text-[#A8C69F]" />}
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 max-w-4xl">
+        <div className="grid grid-cols-1 gap-4">
           {filteredOrders.map(order => (
             <OrderCard
               key={order.id}

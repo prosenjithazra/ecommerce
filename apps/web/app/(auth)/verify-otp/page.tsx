@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useApp } from '../../components/AppContext';
+import { useApp } from '../../../components/AppContext';
 
 export default function VerifyOtpPage() {
   const { showToast } = useApp();
@@ -55,7 +55,7 @@ export default function VerifyOtpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFAF6] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#FDFAF6] flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link href="/" className="inline-block font-extrabold text-3xl tracking-tight text-[#4A453E] mb-3">
           PRINT<span className="text-[#F9A37E]">HUB</span>
@@ -63,13 +63,13 @@ export default function VerifyOtpPage() {
         <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">
           Verify security code
         </h2>
-        <p className="mt-1.5 text-xs text-[#A89B8A]">
+        <p className="mt-1.5 text-xs text-[#A89B8A] hidden sm:block">
           Enter the 6-digit code sent to your inbox.
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-6 border border-[#E8E2D6] shadow-sm rounded-3xl sm:px-10">
+        <div className="bg-white border border-[#E8E2D6] shadow-xl rounded-xl sm:rounded-3xl py-5 sm:py-8 px-4 sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="flex justify-center gap-2">
               {otp.map((data, index) => (
@@ -82,7 +82,7 @@ export default function VerifyOtpPage() {
                   onChange={(e) => handleChange(e.target, index)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
                   onFocus={(e) => e.target.select()}
-                  className="w-12 h-12 text-center text-lg font-bold border border-[#E8E2D6] bg-[#FDFAF6] rounded-xl outline-none focus:border-[#F9A37E] text-[#4A453E]"
+                  className="w-10 h-10 sm:w-12 sm:h-12 text-center text-lg font-bold border border-[#E8E2D6] bg-[#FDFAF6] rounded-xl outline-none focus:border-[#F9A37E] text-[#4A453E]"
                 />
               ))}
             </div>
@@ -106,11 +106,29 @@ export default function VerifyOtpPage() {
                   Resend OTP Code
                 </button>
               )}
-              <Link href="/forgot-password" className="font-bold text-[#A89B8A] hover:text-[#4A453E] mt-2">
-                Use different email
-              </Link>
             </div>
           </form>
+
+          {/* Bottom Switcher buttons */}
+          <div className="mt-6 pt-5 border-t border-[#E8E2D6] space-y-3">
+            <span className="text-[10px] font-bold text-[#A89B8A] uppercase tracking-wider text-center block">
+              Want to start over or authenticate?
+            </span>
+            <div className="grid grid-cols-2 gap-3">
+              <Link
+                href="/login"
+                className="w-full bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-3 px-4 rounded-xl transition-all shadow-md shadow-[#A8C69F]/20 flex items-center justify-center text-center"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/signup"
+                className="w-full border border-[#E8E2D6] hover:bg-[#FDFAF6] text-[#4A453E] font-extrabold text-xs py-3 px-4 rounded-xl transition-colors flex items-center justify-center text-center"
+              >
+                Sign Up
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>

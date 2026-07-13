@@ -1,13 +1,26 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { ShoppingBag, Heart, User, Search, Menu, X, Trash2, ArrowRight } from 'lucide-react';
-import { useApp } from './AppContext';
+import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  ShoppingBag,
+  Heart,
+  User,
+  Search,
+  Menu,
+  X,
+  Trash2,
+  ArrowRight,
+  LayoutDashboard,
+  Minus,
+  Plus,
+} from "lucide-react";
+import { useApp } from "./AppContext";
 
 export const Header: React.FC = () => {
-  const { cart, wishlist, currentUser, logout, removeFromCart, updateCartQty } = useApp();
+  const { cart, wishlist, currentUser, logout, removeFromCart, updateCartQty } =
+    useApp();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -18,13 +31,16 @@ export const Header: React.FC = () => {
 
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
   const wishlistCount = wishlist.length;
-  const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const subtotal = cart.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0,
+  );
 
   const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'Shop', href: '/products' },
-    { name: 'About', href: '/about' },
-    { name: 'Contact', href: '/contact' },
+    { name: "Home", href: "/" },
+    { name: "Shop", href: "/products" },
+    { name: "About", href: "/about" },
+    { name: "Contact", href: "/contact" },
   ];
 
   useEffect(() => {
@@ -36,14 +52,14 @@ export const Header: React.FC = () => {
   // Close search on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         setIsSearchOpen(false);
         setIsMobileMenuOpen(false);
         setIsCartOpen(false);
       }
     };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
   }, []);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -59,16 +75,6 @@ export const Header: React.FC = () => {
     <>
       <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-sm border-b border-[#E8E2D6]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="md:hidden p-2 text-[#4A453E] hover:text-[#F9A37E] transition-colors"
-            aria-label="Open menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
             <span className="font-extrabold text-xl tracking-tight text-[#4A453E]">
@@ -87,8 +93,8 @@ export const Header: React.FC = () => {
                 href={item.href}
                 className={`text-sm font-medium transition-all ${
                   pathname === item.href
-                    ? 'text-[#F9A37E] font-bold'
-                    : 'text-[#7A736A] hover:text-[#4A453E]'
+                    ? "text-[#F9A37E] font-bold"
+                    : "text-[#7A736A] hover:text-[#4A453E]"
                 }`}
               >
                 {item.name}
@@ -136,30 +142,62 @@ export const Header: React.FC = () => {
             </button>
 
             {/* Account */}
-            <Link
-              href={currentUser ? "/profile" : "/login"}
-              className="p-2 text-[#7A736A] hover:text-[#F9A37E] transition-colors"
-              aria-label="Account"
+            {currentUser ? (
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 hover:opacity-90 transition-opacity pl-2"
+                aria-label="Account"
+              >
+                <div className="w-7 h-7 rounded-full bg-[#F9A37E] text-white flex items-center justify-center text-xs font-black border border-[#E8E2D6] shadow-sm">
+                  {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <span className="hidden sm:inline text-xs font-extrabold text-[#4A453E]">
+                  {currentUser.name}
+                </span>
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="flex items-center gap-1.5 py-1.5 px-3.5 bg-[#F9A37E] hover:bg-[#E8855A] text-white rounded-xl text-xs font-extrabold transition-all shadow-md shadow-[#F9A37E]/20 active:scale-95 ml-1"
+                aria-label="Account"
+              >
+                <User className="w-3.5 h-3.5" />
+                <span>Login</span>
+              </Link>
+            )}
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden p-2 text-[#7A736A] hover:text-[#F9A37E] transition-colors"
+              aria-label="Open menu"
             >
-              <User className="w-5 h-5" />
-            </Link>
+              <LayoutDashboard className="w-5 h-5"/>
+            </button>
           </div>
         </div>
       </header>
 
       {/* ── FULL-PAGE SEARCH DRAWER ── */}
       {isSearchOpen && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-white/98 backdrop-blur-md animate-fade-in-up" style={{ animationDuration: '200ms' }}>
+        <div
+          className="fixed inset-0 z-50 flex flex-col bg-white/98 backdrop-blur-md animate-fade-in-up"
+          style={{ animationDuration: "200ms" }}
+        >
           {/* Search Header */}
           <div className="max-w-3xl mx-auto w-full px-4 pt-16 pb-8">
             <button
-              onClick={() => { setIsSearchOpen(false); setSearchValue(""); }}
+              onClick={() => {
+                setIsSearchOpen(false);
+                setSearchValue("");
+              }}
               className="absolute top-4 right-4 p-2 rounded-full bg-[#E8E2D6] hover:bg-[#F9A37E] hover:text-white text-[#4A453E] transition-all"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <p className="text-xs font-bold tracking-widest uppercase text-[#A8C69F] mb-3">Search PrintHub</p>
+            <p className="text-xs font-bold tracking-widest uppercase text-[#A8C69F] mb-3">
+              Search PrintHub
+            </p>
             <form onSubmit={handleSearchSubmit} className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A8C69F]" />
               <input
@@ -182,9 +220,17 @@ export const Header: React.FC = () => {
 
             {/* Quick Suggestions */}
             <div className="mt-6 space-y-3">
-              <p className="text-xs font-semibold text-[#A8C69F] uppercase tracking-wider">Popular searches</p>
+              <p className="text-xs font-semibold text-[#A8C69F] uppercase tracking-wider">
+                Popular searches
+              </p>
               <div className="flex flex-wrap gap-2">
-                {['Custom T-Shirt', 'Hoodie', 'Tote Bag', 'Printed Cap', 'Sweatshirt'].map((tag) => (
+                {[
+                  "Custom T-Shirt",
+                  "Hoodie",
+                  "Tote Bag",
+                  "Printed Cap",
+                  "Sweatshirt",
+                ].map((tag) => (
                   <button
                     key={tag}
                     onClick={() => {
@@ -205,9 +251,12 @@ export const Header: React.FC = () => {
 
       {/* ── MOBILE SIDEBAR DRAWER ── */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="fixed inset-0 bg-black/40" onClick={() => setIsMobileMenuOpen(false)} />
-          <div className="relative w-72 bg-white h-full flex flex-col shadow-2xl">
+        <div className="fixed inset-0 z-50 flex justify-start">
+          <div
+            className="fixed inset-0 bg-black/40 animate-fade-in-overlay"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          <div className="relative w-72 bg-white h-full flex flex-col shadow-2xl animate-slide-from-left">
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#E8E2D6]">
               <span className="font-extrabold text-lg text-[#4A453E]">
                 PRINT<span className="text-[#F9A37E]">HUB</span>
@@ -227,8 +276,8 @@ export const Header: React.FC = () => {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`text-sm font-semibold py-2.5 px-3 rounded-xl transition-all ${
                     pathname === item.href
-                      ? 'bg-[#FBD5C1] text-[#E8855A]'
-                      : 'text-[#4A453E] hover:bg-[#E8E2D6]'
+                      ? "bg-[#FBD5C1] text-[#E8855A]"
+                      : "text-[#4A453E] hover:bg-[#E8E2D6]"
                   }`}
                 >
                   {item.name}
@@ -236,18 +285,29 @@ export const Header: React.FC = () => {
               ))}
               {currentUser ? (
                 <>
-                  <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-semibold py-2.5 px-3 rounded-xl text-[#4A453E] hover:bg-[#E8E2D6]">
+                  <Link
+                    href="/profile"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-sm font-semibold py-2.5 px-3 rounded-xl text-[#4A453E] hover:bg-[#E8E2D6]"
+                  >
                     My Profile
                   </Link>
                   <button
-                    onClick={() => { logout(); setIsMobileMenuOpen(false); }}
+                    onClick={() => {
+                      logout();
+                      setIsMobileMenuOpen(false);
+                    }}
                     className="text-left text-sm font-semibold py-2.5 px-3 rounded-xl text-red-500 hover:bg-red-50"
                   >
                     Log Out
                   </button>
                 </>
               ) : (
-                <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="mt-2 text-center text-sm font-bold py-2.5 px-3 rounded-xl bg-[#F9A37E] text-white hover:bg-[#E8855A]">
+                <Link
+                  href="/login"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="mt-2 text-center text-sm font-bold py-2.5 px-3 rounded-xl bg-[#F9A37E] text-white hover:bg-[#E8855A]"
+                >
                   Log In / Register
                 </Link>
               )}
@@ -259,16 +319,24 @@ export const Header: React.FC = () => {
       {/* ── CART DRAWER ── */}
       {isCartOpen && (
         <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="fixed inset-0 bg-black/40" onClick={() => setIsCartOpen(false)} />
-          <div className="relative w-full max-w-sm bg-white h-full flex flex-col shadow-2xl">
+          <div
+            className="fixed inset-0 bg-black/40 animate-fade-in-overlay"
+            onClick={() => setIsCartOpen(false)}
+          />
+          <div className="relative w-full max-w-sm bg-white h-full flex flex-col shadow-2xl animate-slide-from-right">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#E8E2D6]">
               <h3 className="font-bold text-base text-[#4A453E] flex items-center gap-2">
                 <ShoppingBag className="w-5 h-5 text-[#F9A37E]" />
                 Your Cart
-                <span className="text-xs font-semibold text-[#7A736A]">({cartCount})</span>
+                <span className="text-xs font-semibold text-[#7A736A]">
+                  ({cartCount})
+                </span>
               </h3>
-              <button onClick={() => setIsCartOpen(false)} className="p-1.5 rounded-lg bg-[#E8E2D6] text-[#7A736A] hover:text-[#4A453E]">
+              <button
+                onClick={() => setIsCartOpen(false)}
+                className="p-1.5 rounded-lg bg-[#E8E2D6] text-[#7A736A] hover:text-[#4A453E]"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -281,8 +349,12 @@ export const Header: React.FC = () => {
                     <ShoppingBag className="w-7 h-7 text-[#A8C69F]" />
                   </div>
                   <div>
-                    <p className="font-bold text-sm text-[#4A453E]">Cart is empty</p>
-                    <p className="text-xs text-[#7A736A] mt-1">Fill it with custom prints!</p>
+                    <p className="font-bold text-sm text-[#4A453E]">
+                      Cart is empty
+                    </p>
+                    <p className="text-xs text-[#7A736A] mt-1">
+                      Fill it with custom prints!
+                    </p>
                   </div>
                   <Link
                     href="/products"
@@ -294,23 +366,55 @@ export const Header: React.FC = () => {
                 </div>
               ) : (
                 cart.map((item) => (
-                  <div key={item.id} className="flex gap-3 p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-2xl">
+                  <div
+                    key={item.id}
+                    className="flex gap-3 p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-2xl"
+                  >
                     <div className="w-14 h-14 bg-[#E8E2D6] rounded-xl overflow-hidden flex-shrink-0">
-                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-xs text-[#4A453E] truncate">{item.name}</h4>
-                      <p className="text-[10px] text-[#7A736A] mt-0.5">{item.size} · {item.color}</p>
+                      <h4 className="font-bold text-xs text-[#4A453E] truncate">
+                        {item.name}
+                      </h4>
+                      <p className="text-[10px] text-[#7A736A] mt-0.5">
+                        {item.size} · {item.color}
+                      </p>
                       <div className="flex items-center justify-between mt-2">
-                        <div className="flex items-center gap-1 border border-[#E8E2D6] rounded-lg">
-                          <button onClick={() => updateCartQty(item.id, item.quantity - 1)} className="px-2 py-0.5 text-[#7A736A] hover:text-[#4A453E] text-sm font-semibold">-</button>
-                          <span className="text-xs font-bold w-4 text-center text-[#4A453E]">{item.quantity}</span>
-                          <button onClick={() => updateCartQty(item.id, item.quantity + 1)} className="px-2 py-0.5 text-[#7A736A] hover:text-[#4A453E] text-sm font-semibold">+</button>
+                        <div className="flex items-center border border-[#E8E2D6] rounded-lg bg-[#FDFAF6] h-7 w-20 overflow-hidden">
+                          <button
+                            onClick={() =>
+                              updateCartQty(item.id, item.quantity - 1)
+                            }
+                            className="w-7 h-full flex items-center justify-center text-[#7A736A] hover:text-[#4A453E] hover:bg-[#E8E2D6]/40 transition-colors"
+                          >
+                            <Minus className="w-2.5 h-2.5" />
+                          </button>
+                          <span className="flex-1 text-[10px] font-bold text-center text-[#4A453E]">
+                            {item.quantity}
+                          </span>
+                          <button
+                            onClick={() =>
+                              updateCartQty(item.id, item.quantity + 1)
+                            }
+                            className="w-7 h-full flex items-center justify-center text-[#7A736A] hover:text-[#4A453E] hover:bg-[#E8E2D6]/40 transition-colors"
+                          >
+                            <Plus className="w-2.5 h-2.5" />
+                          </button>
                         </div>
-                        <span className="font-extrabold text-xs text-[#4A453E]">${(item.price * item.quantity).toFixed(2)}</span>
+                        <span className="font-extrabold text-xs text-[#4A453E]">
+                          ₹{(item.price * item.quantity).toFixed(2)}
+                        </span>
                       </div>
                     </div>
-                    <button onClick={() => removeFromCart(item.id)} className="p-1 text-[#C4B8A8] hover:text-red-400 transition-colors self-start">
+                    <button
+                      onClick={() => removeFromCart(item.id)}
+                      className="p-1 text-[#C4B8A8] hover:text-red-400 transition-colors self-start"
+                    >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -323,7 +427,9 @@ export const Header: React.FC = () => {
               <div className="px-4 py-4 bg-[#FDFAF6] border-t border-[#E8E2D6] space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-[#7A736A]">Subtotal</span>
-                  <span className="font-extrabold text-base text-[#4A453E]">${subtotal.toFixed(2)}</span>
+                  <span className="font-extrabold text-base text-[#4A453E]">
+                    ₹{subtotal.toFixed(2)}
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <Link

@@ -18,12 +18,12 @@ export const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <div className="min-h-screen flex flex-col justify-between">
       <div>
-        <Header />
-        <main className="pb-16 md:pb-0">{children}</main>
+        {!isAuth && <Header />}
+        <main className="relative">{children}</main>
       </div>
 
       {!isAuth && <Footer />}
-      <MobileBottomNav />
+      {!isAuth && <MobileBottomNav />}
 
       {/* Global Toast Overlay */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />

@@ -25,7 +25,7 @@ export const StickyAddToCart: React.FC<StickyAddToCartProps> = ({
         <div className="min-w-0">
           <h4 className="font-bold text-xs text-[#4A453E] truncate max-w-[140px]">{name}</h4>
           <p className="text-[10px] text-[#A89B8A] mt-0.5">
-            ${price.toFixed(2)} · <span className="uppercase">{selectedSize}</span> · {selectedColor}
+            ₹{price.toFixed(2)} · <span className="uppercase">{selectedSize}</span> · {selectedColor}
           </p>
         </div>
       </div>

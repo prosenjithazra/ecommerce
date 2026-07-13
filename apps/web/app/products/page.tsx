@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Breadcrumb, Pagination } from '../../components/UIComponents';
+import { Breadcrumb, Pagination, Drawer, Select } from '../../components/UIComponents';
 import { ProductCard } from '../../components/ProductCard';
 import { SlidersHorizontal, Search, RotateCcw, Paintbrush } from 'lucide-react';
 import { Product } from '../../components/AppContext';
@@ -61,6 +61,7 @@ export default function ProductsPage() {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
   const filterColors = ["White", "Black", "Grey", "Blue", "Green", "Red"];
   const filterSizes = ["S", "M", "L", "XL", "XXL"];
@@ -75,6 +76,67 @@ export default function ProductsPage() {
 
   const filteredProducts = INITIAL_PRODUCTS.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
 
+  const FilterContent = () => (
+    <>
+      {/* Search */}
+      <div className="relative">
+        <Search className="w-4 h-4 text-[#A89B8A] absolute left-3 top-1/2 -translate-y-1/2" />
+        <input
+          type="text" placeholder="Search product..."
+          value={search} onChange={(e) => setSearch(e.target.value)}
+          className="w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl py-2.5 pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E]"
+        />
+      </div>
+
+      {/* Availability */}
+      <div className="space-y-2">
+        <h4 className="text-xs font-bold text-[#4A453E]">Availability</h4>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox" checked={inStockOnly}
+            onChange={(e) => setInStockOnly(e.target.checked)}
+            className="w-4 h-4 rounded border-[#E8E2D6] accent-[#F9A37E]"
+          />
+          <span className="text-xs text-[#7A736A] font-medium">In stock only</span>
+        </label>
+      </div>
+
+      {/* Colors */}
+      <div className="space-y-2">
+        <h4 className="text-xs font-bold text-[#4A453E]">Colors</h4>
+        <div className="flex flex-wrap gap-1.5">
+          {filterColors.map(color => {
+            const isSelected = selectedColors.includes(color);
+            return (
+              <button key={color} onClick={() => handleColorToggle(color)}
+                className={`text-[10px] font-bold py-1 px-2.5 rounded-lg border transition-colors ${
+                  isSelected ? 'bg-[#4A453E] text-white border-[#4A453E]' : 'text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
+                }`}
+              >{color}</button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Sizes */}
+      <div className="space-y-2">
+        <h4 className="text-xs font-bold text-[#4A453E]">Sizes</h4>
+        <div className="flex flex-wrap gap-1.5">
+          {filterSizes.map(size => {
+            const isSelected = selectedSizes.includes(size);
+            return (
+              <button key={size} onClick={() => handleSizeToggle(size)}
+                className={`min-w-8 h-8 px-2 rounded-xl text-[10px] font-extrabold border transition-all ${
+                  isSelected ? 'bg-[#F9A37E] text-white border-[#F9A37E]' : 'text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
+                }`}
+              >{size}</button>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-16">
       <Breadcrumb items={[{ name: "Products" }]} />
@@ -86,8 +148,8 @@ export default function ProductsPage() {
 
       <section className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
 
-        {/* Sidebar */}
-        <div className="bg-white border border-[#E8E2D6] rounded-3xl p-5 space-y-5 lg:sticky lg:top-20">
+        {/* Sidebar - Desktop Only */}
+        <div className="hidden lg:block bg-white border border-[#E8E2D6] rounded-3xl p-5 space-y-5 lg:sticky lg:top-20">
           <div className="flex items-center justify-between pb-3 border-b border-[#E8E2D6]">
             <h3 className="font-extrabold text-sm text-[#4A453E] flex items-center gap-1.5">
               <SlidersHorizontal className="w-4 h-4 text-[#F9A37E]" /> Filters
@@ -96,78 +158,34 @@ export default function ProductsPage() {
               <RotateCcw className="w-3 h-3" /> Reset
             </button>
           </div>
-
-          {/* Search */}
-          <div className="relative">
-            <Search className="w-4 h-4 text-[#A89B8A] absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text" placeholder="Search product..."
-              value={search} onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl py-2.5 pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E]"
-            />
-          </div>
-
-          {/* Availability */}
-          <div className="space-y-2">
-            <h4 className="text-xs font-bold text-[#4A453E]">Availability</h4>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox" checked={inStockOnly}
-                onChange={(e) => setInStockOnly(e.target.checked)}
-                className="w-4 h-4 rounded border-[#E8E2D6] accent-[#F9A37E]"
-              />
-              <span className="text-xs text-[#7A736A] font-medium">In stock only</span>
-            </label>
-          </div>
-
-          {/* Colors */}
-          <div className="space-y-2">
-            <h4 className="text-xs font-bold text-[#4A453E]">Colors</h4>
-            <div className="flex flex-wrap gap-1.5">
-              {filterColors.map(color => {
-                const isSelected = selectedColors.includes(color);
-                return (
-                  <button key={color} onClick={() => handleColorToggle(color)}
-                    className={`text-[10px] font-bold py-1 px-2.5 rounded-lg border transition-colors ${
-                      isSelected ? 'bg-[#4A453E] text-white border-[#4A453E]' : 'text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
-                    }`}
-                  >{color}</button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Sizes */}
-          <div className="space-y-2">
-            <h4 className="text-xs font-bold text-[#4A453E]">Sizes</h4>
-            <div className="flex flex-wrap gap-1.5">
-              {filterSizes.map(size => {
-                const isSelected = selectedSizes.includes(size);
-                return (
-                  <button key={size} onClick={() => handleSizeToggle(size)}
-                    className={`min-w-8 h-8 px-2 rounded-xl text-[10px] font-extrabold border transition-all ${
-                      isSelected ? 'bg-[#F9A37E] text-white border-[#F9A37E]' : 'text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
-                    }`}
-                  >{size}</button>
-                );
-              })}
-            </div>
-          </div>
+          <FilterContent />
         </div>
 
         {/* Product Grid */}
         <div className="lg:col-span-3 space-y-5">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <span className="text-xs font-bold text-[#A89B8A]">{filteredProducts.length} Products Found</span>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-[#A89B8A]">Sort:</span>
-              <select value={sort} onChange={(e) => setSort(e.target.value)}
-                className="bg-white border border-[#E8E2D6] rounded-xl py-1.5 px-3 text-xs outline-none text-[#4A453E] font-semibold focus:border-[#F9A37E]">
-                <option value="popular">Popularity</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="rating">Rating</option>
-              </select>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              {/* Mobile Filter Button */}
+              <button
+                onClick={() => setIsFilterDrawerOpen(true)}
+                className="flex-none flex items-center justify-center gap-1.5 border border-[#E8E2D6] hover:border-[#A89B8A] bg-white rounded-xl py-2 px-3.5 text-xs font-bold text-[#4A453E] transition-all hover:scale-[1.02]"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#F9A37E]" /> Filters
+              </button>
+              
+              <span className="text-xs text-[#A89B8A] flex-shrink-0 ml-auto sm:ml-0 font-semibold">Sort by:</span>
+              <Select
+                value={sort}
+                onChange={(val) => setSort(val)}
+                options={[
+                  { value: "popular", label: "Popularity" },
+                  { value: "price-low", label: "Price: Low to High" },
+                  { value: "price-high", label: "Price: High to Low" },
+                  { value: "rating", label: "Rating" }
+                ]}
+                className="flex-1 sm:w-40 sm:flex-none"
+              />
             </div>
           </div>
 
@@ -176,7 +194,7 @@ export default function ProductsPage() {
               <span className="text-sm font-bold text-[#A89B8A]">No products match your filters.</span>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 grid-cols-mobile-single">
               {filteredProducts.map(prod => <ProductCard key={prod.id} product={prod} />)}
             </div>
           )}
@@ -184,6 +202,23 @@ export default function ProductsPage() {
           <Pagination currentPage={currentPage} totalPages={3} onPageChange={(p) => setCurrentPage(p)} />
         </div>
       </section>
+
+      {/* Mobile Filters Drawer */}
+      <Drawer
+        isOpen={isFilterDrawerOpen}
+        onClose={() => setIsFilterDrawerOpen(false)}
+        title="Product Filters"
+      >
+        <div className="space-y-6 pt-2">
+          <div className="flex justify-between items-center border-b border-[#E8E2D6] pb-4">
+            <span className="text-xs font-bold text-[#7A736A]">{filteredProducts.length} results</span>
+            <button onClick={handleReset} className="text-[10px] font-bold text-[#A89B8A] hover:text-[#F9A37E] flex items-center gap-1 transition-colors">
+              <RotateCcw className="w-3.5 h-3.5" /> Reset Filters
+            </button>
+          </div>
+          <FilterContent />
+        </div>
+      </Drawer>
     </div>
   );
 }

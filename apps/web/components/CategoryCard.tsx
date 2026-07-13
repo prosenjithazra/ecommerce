@@ -20,7 +20,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ name, image, count, 
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 p-4">
+      <div className="absolute bottom-0 left-0 right-0 p-2.5 md:p-4">
         <span className="text-[9px] uppercase font-extrabold tracking-widest text-[#F9A37E]">
           {count} Products
         </span>

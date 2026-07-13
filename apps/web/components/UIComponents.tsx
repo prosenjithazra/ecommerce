@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ChevronRight, Home, EyeOff, X, ArrowLeft, ArrowRight, Star, AlertTriangle } from 'lucide-react';
+import { ChevronRight, Home, EyeOff, X, ArrowLeft, ArrowRight, Star, AlertTriangle, ChevronDown, Check, ChevronLeft } from 'lucide-react';
 
 /* 1. BREADCRUMB */
 interface BreadcrumbItem { name: string; href?: string; }
@@ -134,11 +134,11 @@ export const Rating: React.FC<{ value: number; size?: number }> = ({ value, size
 export const Price: React.FC<{ value: number; original?: number; size?: 'sm' | 'md' | 'lg' }> = ({ value, original, size = 'md' }) => (
   <div className="flex items-baseline gap-1.5">
     <span className={`font-extrabold text-[#4A453E] ${size === 'sm' ? 'text-sm' : size === 'lg' ? 'text-2xl' : 'text-base'}`}>
-      ${value.toFixed(2)}
+      ₹{value.toFixed(2)}
     </span>
     {original && original > value && (
       <span className={`text-[#A89B8A] line-through ${size === 'sm' ? 'text-[10px]' : size === 'lg' ? 'text-sm' : 'text-xs'}`}>
-        ${original.toFixed(2)}
+        ₹{original.toFixed(2)}
       </span>
     )}
   </div>
@@ -163,9 +163,9 @@ interface DrawerProps { isOpen: boolean; onClose: () => void; title: string; chi
 export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
-      <div className="fixed inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-white h-full flex flex-col shadow-2xl">
+    <div className="fixed inset-0 z-50 flex justify-start !m-0">
+      <div className="fixed inset-0 bg-black/40 animate-fade-in-overlay" onClick={onClose} />
+      <div className="relative w-full max-w-md bg-white h-full flex flex-col shadow-2xl animate-slide-from-left">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#E8E2D6]">
           <h3 className="font-bold text-base text-[#4A453E]">{title}</h3>
           <button onClick={onClose} className="p-1.5 rounded-lg bg-[#E8E2D6] text-[#7A736A] hover:text-[#4A453E]">
@@ -220,3 +220,149 @@ export const LoadingSpinner: React.FC = () => (
     </div>
   </div>
 );
+
+/* 11. SELECT (Shadcn style) */
+export interface SelectOption {
+  value: string;
+  label: string;
+}
+
+interface SelectProps {
+  value: string;
+  onChange: (value: string) => void;
+  options: SelectOption[];
+  placeholder?: string;
+  className?: string;
+}
+
+export const Select: React.FC<SelectProps> = ({ value, onChange, options, placeholder = "Select...", className = "" }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(opt => opt.value === value);
+
+  return (
+    <div className={`relative ${className}`} ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between border border-[#E8E2D6] bg-white rounded-xl py-2 px-3.5 text-xs font-semibold text-[#4A453E] outline-none shadow-sm focus:border-[#F9A37E] transition-all text-left"
+      >
+        <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
+        <ChevronDown className={`w-4 h-4 text-[#A89B8A] transition-transform ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-50 w-full min-w-[8rem] mt-1.5 bg-white border border-[#E8E2D6] rounded-xl shadow-lg p-1 space-y-0.5 animate-fade-in-up duration-150">
+          {options.map((opt) => {
+            const isSelected = opt.value === value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+                className={`w-full flex items-center justify-between rounded-lg py-2 px-3 text-xs text-left transition-colors ${
+                  isSelected
+                    ? "bg-[#FBD5C1]/30 text-[#E8855A] font-extrabold"
+                    : "text-[#7A736A] hover:bg-[#FDFAF6] hover:text-[#4A453E] font-medium"
+                }`}
+              >
+                <span className="truncate">{opt.label}</span>
+                {isSelected && <Check className="w-3.5 h-3.5 text-[#E8855A]" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* 12. RESPONSIVE SLIDER (Shadcn/Swiper style) */
+interface SliderProps {
+  children: React.ReactNode[];
+  desktopCols?: 3 | 4;
+}
+
+export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => {
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = React.useState(0);
+
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const index = Math.round(scrollLeft / (clientWidth * 0.666));
+      setActiveIndex(Math.min(index, children.length - 1));
+    }
+  };
+
+  const desktopGridClass = desktopCols === 3 ? "md:grid-cols-3" : "lg:grid-cols-4";
+  const gridBreakpoint = desktopCols === 3 ? "md" : "lg";
+
+  const containerClass = gridBreakpoint === 'md'
+    ? `flex md:grid ${desktopGridClass} gap-5 md:gap-5 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory pb-4 no-scrollbar scroll-smooth`
+    : `flex lg:grid ${desktopGridClass} gap-5 lg:gap-5 overflow-x-auto lg:overflow-x-visible snap-x snap-mandatory pb-4 no-scrollbar scroll-smooth`;
+
+  const itemClass = gridBreakpoint === 'md'
+    ? 'w-[66.6%] min-w-[66.6%] sm:w-[45%] sm:min-w-[45%] md:w-auto md:min-w-0 snap-start flex-shrink-0 flex [&>*]:w-full [&>*]:h-full'
+    : 'w-[66.6%] min-w-[66.6%] sm:w-[45%] sm:min-w-[45%] lg:w-auto lg:min-w-0 snap-start flex-shrink-0 flex [&>*]:w-full [&>*]:h-full';
+
+  const controlsVisibilityClass = gridBreakpoint === 'md' ? 'md:hidden' : 'lg:hidden';
+
+  return (
+    <div className="relative group/slider w-full">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className={containerClass}
+      >
+        {children.map((child, idx) => (
+          <div key={idx} className={itemClass}>
+            {child}
+          </div>
+        ))}
+      </div>
+
+      {children.length > 1 && (
+        <div className={`flex justify-center gap-1.5 mt-2 ${controlsVisibilityClass}`}>
+          {Array.from({ length: children.length }).map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                if (scrollRef.current) {
+                  const child = scrollRef.current.children[idx] as HTMLElement;
+                  if (child) {
+                    child.scrollIntoView({
+                      behavior: 'smooth',
+                      block: 'nearest',
+                      inline: 'start'
+                    });
+                  }
+                }
+              }}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                activeIndex === idx
+                  ? 'bg-[#F9A37E] w-4'
+                  : 'bg-[#E8E2D6] w-1.5'
+              }`}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};

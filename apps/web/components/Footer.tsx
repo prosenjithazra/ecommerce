@@ -50,18 +50,18 @@ export const Footer: React.FC = () => {
             <p className="text-xs text-[#A89B8A] max-w-xs">Sign up for updates, exclusive drops, and 10% off your first order.</p>
           </div>
           <div className="lg:col-span-2 flex items-center">
-            <form onSubmit={handleSubscribe} className="flex gap-2 w-full max-w-lg">
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2.5 w-full max-w-lg">
               <input
                 type="email"
                 placeholder="Enter your email address"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 bg-[#3A3530] border border-[rgba(255,255,255,0.1)] text-[#E8E2D6] text-xs rounded-xl py-3 px-4 outline-none focus:border-[#F9A37E] placeholder:text-[#6A635A]"
+                className="w-full sm:flex-1 h-11 bg-[#3A3530] border border-[rgba(255,255,255,0.1)] text-[#E8E2D6] text-xs rounded-xl px-4 outline-none focus:border-[#F9A37E] placeholder:text-[#6A635A]"
               />
               <button
                 type="submit"
-                className="bg-[#F9A37E] hover:bg-[#E8855A] text-white rounded-xl py-3 px-5 flex items-center gap-1.5 font-bold text-xs transition-colors flex-shrink-0"
+                className="w-full sm:w-auto bg-[#F9A37E] hover:bg-[#E8855A] text-white rounded-xl px-6 h-11 flex items-center justify-center gap-1.5 font-bold text-xs transition-colors flex-shrink-0"
               >
                 Subscribe <Send className="w-3.5 h-3.5" />
               </button>

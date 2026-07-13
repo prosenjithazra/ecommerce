@@ -54,7 +54,7 @@ export default function OrderDetailPage() {
           </button>
           <Link
             href={`/orders/${order.id}/track`}
-            className="bg-indigo-650 hover:bg-indigo-705 text-white font-extrabold text-xs py-2.5 px-4 rounded-xl transition-all flex items-center gap-1.5"
+            className="bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-2.5 px-4 rounded-xl transition-all flex items-center gap-1.5"
           >
             <Truck className="w-4 h-4" /> Track Shipment
           </Link>
@@ -81,7 +81,7 @@ export default function OrderDetailPage() {
                     </p>
                   </div>
                   <span className="font-extrabold text-xs text-zinc-900 dark:text-white">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    ₹{(item.price * item.quantity).toFixed(2)}
                   </span>
                 </div>
               ))}
@@ -111,15 +111,15 @@ export default function OrderDetailPage() {
               </div>
               <div className="flex justify-between text-zinc-500">
                 <span>Subtotal</span>
-                <span className="font-bold text-zinc-800 dark:text-zinc-250">${(order.total / 1.18).toFixed(2)}</span>
+                <span className="font-bold text-zinc-800 dark:text-zinc-250">₹{(order.total / 1.18).toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-zinc-500">
                 <span>Tax / GST (18%)</span>
-                <span className="font-bold text-zinc-800 dark:text-zinc-250">${(order.total - order.total / 1.18).toFixed(2)}</span>
+                <span className="font-bold text-zinc-800 dark:text-zinc-250">₹{(order.total - order.total / 1.18).toFixed(2)}</span>
               </div>
               <div className="flex justify-between pt-2 border-t border-zinc-150 dark:border-zinc-800 font-extrabold text-sm text-zinc-900 dark:text-white">
                 <span>Total Amount Paid</span>
-                <span className="text-indigo-650 dark:text-indigo-400">${order.total.toFixed(2)}</span>
+                <span className="text-indigo-600 dark:text-indigo-400">₹{order.total.toFixed(2)}</span>
               </div>
             </div>
           </div>

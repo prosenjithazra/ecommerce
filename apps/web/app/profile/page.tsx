@@ -87,25 +87,25 @@ export default function ProfilePage() {
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-3xl p-4 flex flex-col gap-1.5">
           <button
             onClick={() => setActiveTab('info')}
-            className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-xl text-left transition-all ${activeTab === 'info' ? 'bg-indigo-50/50 text-indigo-650 dark:bg-indigo-950/20 dark:text-indigo-400' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
+            className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-xl text-left transition-all ${activeTab === 'info' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
           >
             <User className="w-4 h-4" /> Personal Info
           </button>
           <button
             onClick={() => setActiveTab('address')}
-            className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-xl text-left transition-all ${activeTab === 'address' ? 'bg-indigo-50/50 text-indigo-650 dark:bg-indigo-950/20 dark:text-indigo-400' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
+            className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-xl text-left transition-all ${activeTab === 'address' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
           >
             <MapPin className="w-4 h-4" /> Address Book
           </button>
           <button
             onClick={() => setActiveTab('password')}
-            className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-xl text-left transition-all ${activeTab === 'password' ? 'bg-indigo-50/50 text-indigo-650 dark:bg-indigo-950/20 dark:text-indigo-400' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
+            className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-xl text-left transition-all ${activeTab === 'password' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
           >
             <KeyRound className="w-4 h-4" /> Change Password
           </button>
           <button
             onClick={() => setActiveTab('preferences')}
-            className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-xl text-left transition-all ${activeTab === 'preferences' ? 'bg-indigo-50/50 text-indigo-650 dark:bg-indigo-950/20 dark:text-indigo-400' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
+            className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-xl text-left transition-all ${activeTab === 'preferences' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
           >
             <Sliders className="w-4 h-4" /> Preferences
           </button>
@@ -149,7 +149,7 @@ export default function ProfilePage() {
                   className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-xl py-3 px-4 text-xs outline-none"
                 />
               </div>
-              <button type="submit" className="bg-indigo-650 hover:bg-indigo-705 text-white font-extrabold text-xs py-3 px-6 rounded-xl transition-all">
+              <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-xl transition-all">
                 Save Changes
               </button>
             </form>
@@ -166,7 +166,7 @@ export default function ProfilePage() {
                       setEditingAddress(null);
                       setShowAddressForm(true);
                     }}
-                    className="text-xs font-bold text-indigo-655"
+                    className="text-xs font-bold text-[#F9A37E] hover:text-[#E8855A] transition-colors"
                   >
                     + Add New Address
                   </button>
@@ -235,7 +235,7 @@ export default function ProfilePage() {
                       type="checkbox"
                       checked={addrForm.isDefault}
                       onChange={(e) => setAddrForm({ ...addrForm, isDefault: e.target.checked })}
-                      className="w-4 h-4 rounded border border-zinc-200 accent-indigo-650"
+                      className="w-4 h-4 rounded border border-zinc-200 accent-indigo-600"
                     />
                     <span className="text-xs text-zinc-550 dark:text-zinc-400 font-medium">Set as primary shipping address</span>
                   </label>
@@ -250,7 +250,7 @@ export default function ProfilePage() {
                     >
                       Cancel
                     </button>
-                    <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs py-2 px-4 rounded-xl shadow-md">
+                    <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2 px-4 rounded-xl shadow-md">
                       Save Details
                     </button>
                   </div>
@@ -307,7 +307,7 @@ export default function ProfilePage() {
                   />
                 </div>
               </div>
-              <button type="submit" className="bg-indigo-650 hover:bg-indigo-705 text-white font-extrabold text-xs py-3 px-6 rounded-xl transition-all">
+              <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-xl transition-all">
                 Update credentials
               </button>
             </form>
@@ -317,21 +317,6 @@ export default function ProfilePage() {
           {activeTab === 'preferences' && (
             <div className="space-y-8">
               <h3 className="font-extrabold text-base text-zinc-900 dark:text-white pb-3 border-b border-zinc-150">Preferences</h3>
-              
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 block">Dark Theme Mode</span>
-                    <span className="text-[10px] text-zinc-400 block mt-0.5">Toggle site dark color layout.</span>
-                  </div>
-                  <button
-                    onClick={toggleDarkMode}
-                    className={`w-11 h-6 rounded-full relative transition-all duration-300 ${isDarkMode ? 'bg-indigo-600' : 'bg-zinc-200'}`}
-                  >
-                    <span className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all ${isDarkMode ? 'left-6' : 'left-1'}`} />
-                  </button>
-                </div>
-              </div>
 
               {/* Danger zone delete */}
               <div className="p-6 border border-red-200/50 bg-red-50/20 dark:border-red-950/40 dark:bg-red-950/10 rounded-2xl space-y-4">
