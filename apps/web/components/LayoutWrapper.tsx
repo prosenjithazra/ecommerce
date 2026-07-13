@@ -13,7 +13,7 @@ export const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ childre
   const pathname = usePathname();
 
   // Route groups to hide Footer or Header
-  const isAuth = ['/login', '/signup', '/forgot-password', '/verify-otp', '/reset-password'].includes(pathname);
+  const isAuth = ['/login', '/signup', '/forgot-password', '/verify-otp', '/reset-password'].includes(pathname) || pathname.startsWith('/admin');
 
   return (
     <div className="min-h-screen flex flex-col justify-between">

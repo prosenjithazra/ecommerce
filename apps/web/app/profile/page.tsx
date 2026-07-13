@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useApp, Address } from '../../components/AppContext';
 import { Breadcrumb } from '../../components/UIComponents';
-import { User, MapPin, ShieldAlert, KeyRound, Sliders, LogOut } from 'lucide-react';
+import { User, MapPin, ShieldAlert, KeyRound, Sliders, LogOut, LayoutDashboard } from 'lucide-react';
 import { AddressCard } from '../../components/InfoCards';
 
 export default function ProfilePage() {
@@ -109,6 +110,15 @@ export default function ProfilePage() {
           >
             <Sliders className="w-4 h-4" /> Preferences
           </button>
+          
+          <div className="border-t border-[#E8E2D6] my-1.5 pt-1.5">
+            <Link
+              href="/admin"
+              className="flex items-center gap-2.5 text-xs font-extrabold py-2.5 px-4 rounded-xl text-left transition-all text-[#F9A37E] hover:bg-[#FBD5C1]/10"
+            >
+              <LayoutDashboard className="w-4 h-4" /> Admin Console
+            </Link>
+          </div>
         </div>
 
         {/* Main Content Area */}
