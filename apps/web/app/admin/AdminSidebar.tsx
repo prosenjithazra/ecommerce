@@ -81,11 +81,8 @@ export function AdminSidebar() {
     <div className="flex flex-col h-full bg-zinc-950 text-zinc-300">
       {/* Brand */}
       <div className="px-5 py-6 border-b border-zinc-800 flex items-center justify-between flex-shrink-0">
-        <Link href="/" className="flex items-center gap-2.5">
-          <img src="/logoMainNew.png" alt="Kaiva Fashion Logo" className="h-9 w-auto object-contain brightness-0 invert" />
-          <div className="leading-tight">
-            <span className="text-[#F9A37E] text-[9px] font-extrabold tracking-[0.2em] block">ADMIN CONSOLE</span>
-          </div>
+        <Link href="/admin" className="flex items-center gap-2.5">
+          <img src="/logoMainNew.png" alt="Kaiva Fashion Logo" className="h-9 w-auto object-contain" />
         </Link>
         <button
           onClick={() => setMobileOpen(false)}

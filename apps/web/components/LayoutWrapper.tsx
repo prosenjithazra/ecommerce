@@ -67,7 +67,7 @@ export const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [activeRequests, progressWidth]);
 
   // Route groups to hide Footer or Header
-  const isAuth = ['/login', '/signup', '/forgot-password', '/verify-otp', '/reset-password'].includes(pathname) || pathname.startsWith('/admin');
+  const isAuth = ['/login', '/signup', '/forgot-password', '/verify-otp', '/reset-password', '/coming-soon', '/maintenance'].includes(pathname) || pathname.startsWith('/admin');
 
   return (
     <div className="min-h-screen flex flex-col justify-between">

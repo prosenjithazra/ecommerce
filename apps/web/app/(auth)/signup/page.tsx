@@ -40,7 +40,7 @@ export default function SignUpPage() {
           Create your creator account
         </h2>
         <p className="mt-1.5 text-xs text-[#A89B8A] hidden sm:block">
-          Join to start custom designing custom premium apparel.
+          Join to browse and order premium printed apparel.
         </p>
       </div>
 

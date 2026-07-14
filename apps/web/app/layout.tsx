@@ -15,7 +15,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "Kaiva Fashion - Premium Print-on-Demand Storefront",
-  description: "Create and order premium custom-designed apparel, hoodies, and accessories instantly.",
+  description: "Order premium printed apparel, hoodies, and accessories instantly.",
   icons: {
     icon: "/favicon.ico",
   },

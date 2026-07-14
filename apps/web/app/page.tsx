@@ -523,7 +523,7 @@ export default function HomePage() {
             { icon: <ShieldCheck className="w-5 h-5 text-[#A8C69F]" />, label: "Quality Guarantee" },
             { icon: <Truck className="w-5 h-5 text-[#F9A37E]" />,       label: "48hr Fulfillment" },
             { icon: <Layers className="w-5 h-5 text-[#A8C69F]" />,      label: "No MOQ" },
-            { icon: <Sparkles className="w-5 h-5 text-[#F9A37E]" />,    label: "Custom Studio" },
+            { icon: <Sparkles className="w-5 h-5 text-[#F9A37E]" />,    label: "Premium Prints" },
           ].map((item) => (
             <div key={item.label} className="flex items-center gap-2.5 p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg">
               <div className="w-8 h-8 bg-[#E8E2D6] rounded-lg flex items-center justify-center flex-shrink-0">

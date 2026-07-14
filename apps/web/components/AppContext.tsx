@@ -268,7 +268,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       trackingNumber: "TRK-98724109",
       trackingTimeline: [
         { status: "Order Placed", date: "2026-07-08 10:00 AM", desc: "Your order has been logged and confirmed.", done: true },
-        { status: "Processing & Print", date: "2026-07-08 02:00 PM", desc: "The custom design has been printed on the base t-shirts.", done: true },
+        { status: "Processing & Print", date: "2026-07-08 02:00 PM", desc: "The items have been printed and prepared.", done: true },
         { status: "Shipped", date: "2026-07-09 09:00 AM", desc: "Package picked up by DHL Express.", done: true },
         { status: "Delivered", date: "2026-07-10 11:30 AM", desc: "Delivered and signed at receptionist desk.", done: true }
       ]
@@ -288,8 +288,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: "n1",
-      title: "Design Studio Updated!",
-      message: "Check out the new Google Fonts library inside our custom designer.",
+      title: "New Styles Added!",
+      message: "Check out the new catalog selections now available.",
       type: "promo",
       date: "2 hours ago",
       read: false
@@ -512,7 +512,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       trackingNumber: `TRK-${Math.floor(10000000 + Math.random() * 90000000)}`,
       trackingTimeline: [
         { status: "Order Placed", date: "Just now", desc: "Your order has been logged and confirmed.", done: true },
-        { status: "Processing & Print", date: "Estimated Tomorrow", desc: "The custom design will be printed on the base t-shirts.", done: false },
+        { status: "Processing & Print", date: "Estimated Tomorrow", desc: "Your items will be printed and prepared.", done: false },
         { status: "Shipped", date: "Estimated 2 days", desc: "Package will be dispatched via standard courier.", done: false },
         { status: "Delivered", date: "Estimated 4-5 days", desc: "Delivered and signed at your door.", done: false }
       ]

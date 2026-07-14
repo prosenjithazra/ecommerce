@@ -6,7 +6,7 @@ import { ShoppingBag, Heart, ShieldCheck, Truck, RefreshCw, Minus, Plus } from '
 import { useApp, Product } from '../../../components/AppContext';
 import { ProductGallery, ReviewCard } from '../../../components/InfoCards';
 import { ProductCard } from '../../../components/ProductCard';
-import { Breadcrumb, Price, Rating } from '../../../components/UIComponents';
+import { Breadcrumb, Price, Rating, Slider } from '../../../components/UIComponents';
 import { StickyAddToCart } from '../../../components/StickyAddToCart';
 
 const PRODUCTS_DB: Record<string, Product> = {
@@ -87,7 +87,7 @@ export default function ProductDetailPage() {
   const relatedProducts = Object.values(PRODUCTS_DB).filter(p => p.id !== product.id);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-10 pb-12 sm:pb-24">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-5 pb-12 sm:pb-24">
       <Breadcrumb items={[{ name: "Products", href: "/products" }, { name: product.name }]} />
 
       {/* ── Product Main Grid ── */}
@@ -203,14 +203,14 @@ export default function ProductDetailPage() {
           <div className="grid grid-cols-2 gap-3 pt-2">
             <button
               onClick={handleAddToCart}
-              className="flex items-center justify-center gap-2 bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#A8C69F]/25 active:scale-95"
+              className="flex items-center justify-center gap-2 bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-2 px-4 sm:py-3.5 sm:px-6 rounded-lg transition-all shadow-lg shadow-[#A8C69F]/25 active:scale-95"
             >
               <ShoppingBag className="w-4 h-4" />
               Add to Cart
             </button>
             <button
               onClick={handleBuyNow}
-              className="bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95"
+              className="bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-2 px-4 sm:py-3.5 sm:px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95"
             >
               Buy It Now
             </button>
@@ -228,7 +228,7 @@ export default function ProductDetailPage() {
           </button>
 
           {/* Trust indicators */}
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-3 py-2 sm:py-4 border-t border-[#E8E2D6] text-[10px] text-[#7A736A] text-center">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-3 py-3 sm:py-4 border-t border-[#E8E2D6] text-[10px] text-[#7A736A] text-center">
             <div className="space-y-1.5">
               <ShieldCheck className="w-5 h-5 text-[#A8C69F] mx-auto" />
               <span className="font-bold text-[#4A453E] block">Safe Print</span>
@@ -246,7 +246,7 @@ export default function ProductDetailPage() {
       </div>
 
       {/* ── Tabs: Description / Print / Shipping ── */}
-      <section className="space-y-3 pt-3.5 sm:pt-8 border-t border-[#E8E2D6]">
+      <section className="space-y-3 pt-1.5 sm:pt-2 border-t border-[#E8E2D6]">
         <div className="flex border-b border-[#E8E2D6] text-xs">
           {(['desc', 'print', 'ship'] as const).map((tab, i) => {
             const labels = ['Description', 'Print Details', 'Shipping & Returns'];
@@ -254,7 +254,7 @@ export default function ProductDetailPage() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`pb-3 font-bold px-4 transition-all border-b-2 ${
+                className={`pb-3 text-[12px] sm:text-sm md:text-lg font-bold p-2 sm:px-4 transition-all border-b-2 ${
                   activeTab === tab
                     ? 'text-[#4A453E] border-[#F9A37E]'
                     : 'text-[#A89B8A] border-transparent hover:text-[#4A453E]'
@@ -277,7 +277,7 @@ export default function ProductDetailPage() {
       </section>
 
       {/* ── Reviews ── */}
-      <section className="space-y-3 pt-3.5 sm:pt-8 border-t border-[#E8E2D6]">
+      <section className="space-y-3 pt-1.5 sm:pt-2 border-t border-[#E8E2D6]">
         <h2 className="text-xl font-extrabold text-[#4A453E] tracking-tight">Customer Reviews</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <ReviewCard name="Jane Doe" rating={5} date="3 days ago" comment="Perfect sizing and very comfortable fabric. The print came out exactly as shown!" verified={true} />
@@ -287,11 +287,17 @@ export default function ProductDetailPage() {
       </section>
 
       {/* ── Related Products ── */}
-      <section className="space-y-3 pt-3.5 sm:pt-8 border-t border-[#E8E2D6]">
+      <section className="space-y-3 pt-3.5 sm:pt-10 border-t border-[#E8E2D6]">
         <h2 className="text-xl font-extrabold text-[#4A453E] tracking-tight">You May Also Like</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {relatedProducts.map(p => <ProductCard key={p.id} product={p} />)}
-        </div>
+        {relatedProducts.length > 2 ? (
+          <Slider desktopCols={4}>
+            {relatedProducts.map(p => <ProductCard key={p.id} product={p} />)}
+          </Slider>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-4">
+            {relatedProducts.map(p => <ProductCard key={p.id} product={p} />)}
+          </div>
+        )}
       </section>
 
       {/* Sticky mobile add to cart */}

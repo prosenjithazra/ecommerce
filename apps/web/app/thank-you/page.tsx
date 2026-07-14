@@ -39,7 +39,7 @@ function ThankYouPageContent() {
           Thank you for your order!
         </h1>
         <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 max-w-md mx-auto leading-relaxed">
-          Your custom design order is now in the print queue. We have dispatched a confirmation email detailing your receipt.
+          Your order has been received and is now in the print queue. We have dispatched a confirmation email detailing your receipt.
         </p>
       </div>
 
