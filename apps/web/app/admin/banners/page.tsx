@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { Plus, Edit2, Trash2, ArrowLeft, Save, Upload, X, Check, Search, Eye, Sparkles } from "lucide-react";
+import { Plus, Edit2, Trash2, ArrowLeft, Save, Upload, X } from "lucide-react";
 import { AdminTopbar } from "../AdminSidebar";
 import { useApp } from "../../../components/AppContext";
 import { getApiUrl } from "../../../components/ApiConfig";
@@ -26,6 +25,7 @@ interface Banner {
   isActive: boolean;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const INITIAL_MOCK_BANNERS: Banner[] = [
   {
     id: "b1",
@@ -323,6 +323,7 @@ export default function AdminBannersPage() {
     });
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchBanners();
   }, []);

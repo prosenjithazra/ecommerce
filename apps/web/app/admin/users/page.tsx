@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, ShieldOff, ShieldCheck, Mail, Loader2 } from "lucide-react";
+import { Search, ShieldOff, Loader2 } from "lucide-react";
 import { AdminTopbar } from "../AdminSidebar";
 import { useApp } from "../../../components/AppContext";
 import { getApiUrl } from "../../../components/ApiConfig";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const INITIAL_USERS = [
   { id: "u1", name: "Jane Doe", email: "jane.doe@example.com", role: "admin", status: "Active", createdAt: "2026-01-12T00:00:00.000Z" },
   { id: "u2", name: "Alex Mercer", email: "alex.mercer@gmail.com", role: "user", status: "Active", createdAt: "2025-11-03T00:00:00.000Z" },
@@ -14,9 +15,18 @@ const INITIAL_USERS = [
   { id: "u5", name: "Priya Sharma", email: "priya.s@gmail.com", role: "user", status: "Active", createdAt: "2025-12-14T00:00:00.000Z" },
 ];
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+  createdAt: string;
+}
+
 export default function AdminUsersPage() {
   const { showToast } = useApp();
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"All" | "Active" | "Suspended">("All");
@@ -46,6 +56,7 @@ export default function AdminUsersPage() {
       setUsers([]);
       setLoading(false);
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = users.filter((u) => {
@@ -56,14 +67,25 @@ export default function AdminUsersPage() {
   });
 
   const toggle = (id: string) => {
-    setUsers((prev) =>
-      prev.map((u) => {
-        if (u.id !== id) return u;
-        const next = u.status === "Active" ? "Suspended" : "Active";
-        showToast(`Account ${next}`, `${u.name}'s account has been ${next.toLowerCase()}.`, next === "Active" ? "success" : "info");
-        return { ...u, status: next };
-      })
-    );
+    const token = localStorage.getItem("token");
+    fetch(getApiUrl(`/user/${id}/status`), {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    .then(res => {
+      if (res.ok) return res.json();
+      throw new Error("Failed to update user status");
+    })
+    .then(updatedUser => {
+      setUsers((prev) => prev.map((u) => u.id === id ? updatedUser : u));
+      const next = updatedUser.status;
+      showToast(`Account ${next}`, `${updatedUser.name}'s account has been ${next.toLowerCase()}.`, next === "Active" ? "success" : "info");
+    })
+    .catch(err => {
+      showToast("Error", err.message || "Failed to update user status.", "error");
+    });
   };
 
   const avatarColors = [

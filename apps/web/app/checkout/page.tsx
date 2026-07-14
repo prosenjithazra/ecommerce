@@ -42,17 +42,17 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-6 pb-8 sm:pb-16">
       <Breadcrumb items={[{ name: "Cart", href: "/cart" }, { name: "Checkout" }]} />
       <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A453E] tracking-tight">Checkout</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 items-start">
 
         {/* ── Left: Form Steps ── */}
-        <div className="lg:col-span-2 space-y-5">
+        <div className="lg:col-span-2 space-y-3.5 sm:space-y-5">
 
           {/* 1. Shipping Address */}
-          <div className="bg-white border border-[#E8E2D6] rounded-lg p-5 space-y-4">
+          <div className="bg-white border border-[#E8E2D6] rounded-lg p-4 sm:p-5 space-y-3 sm:space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="font-extrabold text-sm text-[#4A453E]">1. Shipping Address</h3>
               {!showAddForm && (
@@ -112,7 +112,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* 2. Billing address */}
-          <div className="bg-white border border-[#E8E2D6] rounded-lg p-5">
+          <div className="bg-white border border-[#E8E2D6] rounded-lg p-4 sm:p-5">
             <label className="flex items-center gap-2.5 cursor-pointer">
               <input type="checkbox" checked={sameAsBilling}
                 onChange={(e) => setSameAsBilling(e.target.checked)}
@@ -122,7 +122,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* 3. Shipping method */}
-          <div className="bg-white border border-[#E8E2D6] rounded-lg p-5 space-y-3">
+          <div className="bg-white border border-[#E8E2D6] rounded-lg p-4 sm:p-5 space-y-2.5 sm:space-y-3">
             <h3 className="font-extrabold text-sm text-[#4A453E]">2. Shipping Method</h3>
             <div className="space-y-2">
               {[
@@ -151,7 +151,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* 4. Additional details */}
-          <div className="bg-white border border-[#E8E2D6] rounded-lg p-5 space-y-4">
+          <div className="bg-white border border-[#E8E2D6] rounded-lg p-4 sm:p-5 space-y-3 sm:space-y-4">
             <h3 className="font-extrabold text-sm text-[#4A453E]">3. Additional Details</h3>
             <div>
               <label className="block text-xs font-bold text-[#4A453E] mb-1.5">GSTIN (Optional)</label>
@@ -169,8 +169,8 @@ export default function CheckoutPage() {
         </div>
 
         {/* ── Right: Order Summary ── */}
-        <div className="bg-white border border-[#E8E2D6] rounded-lg p-5 space-y-5 shadow-sm sticky top-20">
-          <h3 className="font-extrabold text-base text-[#4A453E] pb-3 border-b border-[#E8E2D6]">Order Summary</h3>
+        <div className="bg-white border border-[#E8E2D6] rounded-lg p-4 sm:p-5 space-y-3.5 sm:space-y-5 shadow-sm sticky top-20">
+          <h3 className="font-extrabold text-base text-[#4A453E] pb-2 sm:pb-3 border-b border-[#E8E2D6]">Order Summary</h3>
 
           {/* Items */}
           <div className="space-y-3 max-h-48 overflow-y-auto">

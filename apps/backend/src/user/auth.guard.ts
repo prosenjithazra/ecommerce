@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 
@@ -21,7 +26,9 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      const secret = this.configService.get<string>('JWT_SECRET') || 'printhub-super-secret-key-123';
+      const secret =
+        this.configService.get<string>('JWT_SECRET') ||
+        'printhub-super-secret-key-123';
       const decoded = jwt.verify(token, secret);
       request.user = decoded;
       return true;

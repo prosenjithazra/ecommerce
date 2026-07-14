@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ShoppingBag, Heart, ShieldCheck, Truck, RefreshCw, Minus, Plus } from 'lucide-react';
 import { useApp, Product } from '../../../components/AppContext';
@@ -88,17 +87,17 @@ export default function ProductDetailPage() {
   const relatedProducts = Object.values(PRODUCTS_DB).filter(p => p.id !== product.id);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10 pb-24">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-10 pb-12 sm:pb-24">
       <Breadcrumb items={[{ name: "Products", href: "/products" }, { name: product.name }]} />
 
       {/* ── Product Main Grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-12 items-start">
 
         {/* Gallery */}
         <ProductGallery images={product.images} name={product.name} />
 
         {/* Product Info */}
-        <div className="space-y-5">
+        <div className="space-y-3.5 sm:space-y-5">
 
           {/* Category + Tag */}
           <div className="flex items-center gap-2">
@@ -125,7 +124,7 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Price */}
-          <div className="pb-4 border-b border-[#E8E2D6]">
+          <div className="pb-2.5 sm:pb-4 border-b border-[#E8E2D6]">
             <Price value={product.price} original={product.originalPrice} size="lg" />
           </div>
 
@@ -229,7 +228,7 @@ export default function ProductDetailPage() {
           </button>
 
           {/* Trust indicators */}
-          <div className="grid grid-cols-3 gap-3 py-4 border-t border-[#E8E2D6] text-[10px] text-[#7A736A] text-center">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-3 py-2 sm:py-4 border-t border-[#E8E2D6] text-[10px] text-[#7A736A] text-center">
             <div className="space-y-1.5">
               <ShieldCheck className="w-5 h-5 text-[#A8C69F] mx-auto" />
               <span className="font-bold text-[#4A453E] block">Safe Print</span>
@@ -247,7 +246,7 @@ export default function ProductDetailPage() {
       </div>
 
       {/* ── Tabs: Description / Print / Shipping ── */}
-      <section className="space-y-4 pt-5 sm:pt-8 border-t border-[#E8E2D6]">
+      <section className="space-y-3 pt-3.5 sm:pt-8 border-t border-[#E8E2D6]">
         <div className="flex border-b border-[#E8E2D6] text-xs">
           {(['desc', 'print', 'ship'] as const).map((tab, i) => {
             const labels = ['Description', 'Print Details', 'Shipping & Returns'];
@@ -269,7 +268,7 @@ export default function ProductDetailPage() {
         <div className="text-sm text-[#7A736A] leading-relaxed max-w-3xl">
           {activeTab === 'desc' && <p>{product.description}</p>}
           {activeTab === 'print' && (
-            <p>We use high-fidelity Direct-To-Garment (DTG) digital printing with ecological, water-based inks that penetrate deep into the fibers. Crisp designs that won't peel, crack, or flake — even after multiple machine washes.</p>
+            <p>We use high-fidelity Direct-To-Garment (DTG) digital printing with ecological, water-based inks that penetrate deep into the fibers. Crisp designs that won&apos;t peel, crack, or flake — even after multiple machine washes.</p>
           )}
           {activeTab === 'ship' && (
             <p>Custom apparel is made to order. Production takes 2–3 business days. Standard US shipping is 3–5 business days. Hassle-free returns on print errors or defective blanks within 30 days of receipt.</p>
@@ -278,7 +277,7 @@ export default function ProductDetailPage() {
       </section>
 
       {/* ── Reviews ── */}
-      <section className="space-y-4 pt-5 sm:pt-8 border-t border-[#E8E2D6]">
+      <section className="space-y-3 pt-3.5 sm:pt-8 border-t border-[#E8E2D6]">
         <h2 className="text-xl font-extrabold text-[#4A453E] tracking-tight">Customer Reviews</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <ReviewCard name="Jane Doe" rating={5} date="3 days ago" comment="Perfect sizing and very comfortable fabric. The print came out exactly as shown!" verified={true} />
@@ -288,7 +287,7 @@ export default function ProductDetailPage() {
       </section>
 
       {/* ── Related Products ── */}
-      <section className="space-y-4 pt-5 sm:pt-8 border-t border-[#E8E2D6]">
+      <section className="space-y-3 pt-3.5 sm:pt-8 border-t border-[#E8E2D6]">
         <h2 className="text-xl font-extrabold text-[#4A453E] tracking-tight">You May Also Like</h2>
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {relatedProducts.map(p => <ProductCard key={p.id} product={p} />)}

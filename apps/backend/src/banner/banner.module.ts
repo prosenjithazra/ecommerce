@@ -6,10 +6,7 @@ import { BannerController } from './banner.controller';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([BannerEntity]),
-    CloudinaryModule,
-  ],
+  imports: [TypeOrmModule.forFeature([BannerEntity]), CloudinaryModule],
   controllers: [BannerController],
   providers: [BannerService],
   exports: [BannerService],

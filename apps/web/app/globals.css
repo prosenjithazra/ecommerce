@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Arizonia&family=Quintessential&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Arizonia&family=Faculty+Glyphic&family=Quintessential&display=swap');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/elm-sans@5/index.css');
 
 @tailwind base;
@@ -23,6 +23,7 @@
 
   html {
     scroll-behavior: smooth;
+    font-size: 18px;
   }
 
   body {
@@ -116,3 +117,70 @@
     border-radius: 0.25rem !important;
   }
 }
+
+/* Top progress bar for API loading */
+.api-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #F9A37E, #A8C69F, #F9A37E);
+  background-size: 200% 100%;
+  z-index: 99999;
+  transition: width 0.4s ease-out, opacity 0.4s ease-out;
+  box-shadow: 0 0 10px rgba(249, 163, 126, 0.5);
+  animation: api-progress-shimmer 1.5s infinite linear;
+}
+
+@keyframes api-progress-shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* Skeleton loader premium shimmer */
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f5f0e8 25%, #ebdcc8 50%, #f5f0e8 75%);
+  background-size: 200% 100%;
+  animation: skeleton-load-shimmer 1.6s infinite ease-in-out;
+}
+
+@keyframes skeleton-load-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* Preloader Animations */
+@keyframes fade-out-preloader {
+  0% { opacity: 1; }
+  100% { opacity: 0; pointer-events: none; visibility: hidden; }
+}
+
+@keyframes logo-pulse {
+  0% { transform: scale(0.93); filter: drop-shadow(0 2px 6px rgba(249, 163, 126, 0.15)); }
+  50% { transform: scale(1.05); filter: drop-shadow(0 8px 20px rgba(249, 163, 126, 0.35)); }
+  100% { transform: scale(0.93); filter: drop-shadow(0 2px 6px rgba(249, 163, 126, 0.15)); }
+}
+
+.animate-logo-pulse {
+  animation: logo-pulse 1.8s infinite ease-in-out;
+}
+
+@keyframes spin-reverse {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.animate-spin-reverse {
+  animation: spin-reverse 1.5s linear infinite;
+}
+
+@keyframes subtle-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-subtle-bounce {
+  animation: subtle-bounce 2.2s ease-in-out infinite;
+}
+
+
+

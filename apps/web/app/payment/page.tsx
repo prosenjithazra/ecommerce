@@ -3,8 +3,8 @@
 import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useApp } from '../../components/AppContext';
-import { Breadcrumb, Price, Select } from '../../components/UIComponents';
-import { CreditCard, Wallet, Landmark, PhoneCall, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Breadcrumb, Select } from '../../components/UIComponents';
+import { CreditCard, Wallet, Landmark, PhoneCall, ShieldCheck } from 'lucide-react';
 
 function PaymentPageContent() {
   const router = useRouter();
@@ -49,43 +49,43 @@ function PaymentPageContent() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-8 pb-8 sm:pb-16">
       <Breadcrumb items={[{ name: "Shopping Cart", href: "/cart" }, { name: "Checkout", href: "/checkout" }, { name: "Payment" }]} />
 
-      <h1 className="text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">Payment Gateway</h1>
+      <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">Payment Gateway</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 items-start">
         
         {/* Left Side: Payment Gateways Selector */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-6 space-y-6">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-4 sm:p-6 space-y-4 sm:space-y-6">
             <h3 className="font-extrabold text-base text-zinc-909 dark:text-white">Select Payment Method</h3>
             
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
               <button
                 onClick={() => setPaymentMethod('card')}
-                className={`flex flex-col items-center justify-center p-4 border rounded-lg gap-2 font-bold text-xs transition-all ${paymentMethod === 'card' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
+                className={`flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg gap-1.5 sm:gap-2 font-bold text-xs transition-all ${paymentMethod === 'card' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
               >
                 <CreditCard className="w-5 h-5" />
                 <span>Card</span>
               </button>
               <button
                 onClick={() => setPaymentMethod('upi')}
-                className={`flex flex-col items-center justify-center p-4 border rounded-lg gap-2 font-bold text-xs transition-all ${paymentMethod === 'upi' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
+                className={`flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg gap-1.5 sm:gap-2 font-bold text-xs transition-all ${paymentMethod === 'upi' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
               >
                 <PhoneCall className="w-5 h-5" />
                 <span>UPI Pay</span>
               </button>
               <button
                 onClick={() => setPaymentMethod('netbank')}
-                className={`flex flex-col items-center justify-center p-4 border rounded-lg gap-2 font-bold text-xs transition-all ${paymentMethod === 'netbank' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
+                className={`flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg gap-1.5 sm:gap-2 font-bold text-xs transition-all ${paymentMethod === 'netbank' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
               >
                 <Landmark className="w-5 h-5" />
                 <span>Net Banking</span>
               </button>
               <button
                 onClick={() => setPaymentMethod('wallet')}
-                className={`flex flex-col items-center justify-center p-4 border rounded-lg gap-2 font-bold text-xs transition-all ${paymentMethod === 'wallet' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
+                className={`flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg gap-1.5 sm:gap-2 font-bold text-xs transition-all ${paymentMethod === 'wallet' ? 'border-indigo-600 bg-indigo-50/10 text-indigo-600' : 'border-zinc-150 text-zinc-550'}`}
               >
                 <Wallet className="w-5 h-5" />
                 <span>Wallets</span>
@@ -93,11 +93,11 @@ function PaymentPageContent() {
             </div>
 
             {/* Sub fields */}
-            <form onSubmit={handlePay} className="pt-4 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+            <form onSubmit={handlePay} className="pt-4 border-t border-zinc-100 dark:border-zinc-800 space-y-3 sm:space-y-4">
               
               {paymentMethod === 'card' && (
-                <div className="space-y-4 animate-fade-in-up duration-200">
-                  <div className="space-y-2">
+                <div className="space-y-3 sm:space-y-4 animate-fade-in-up duration-200">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <label className="block text-xs font-bold text-zinc-650 dark:text-zinc-350">Cardholder Name</label>
                     <input
                       type="text"
@@ -105,10 +105,10 @@ function PaymentPageContent() {
                       value={cardDetails.name}
                       onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
                       placeholder="Jane Doe"
-                      className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
+                      className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-2.5 sm:py-3 px-4 text-xs outline-none"
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <label className="block text-xs font-bold text-zinc-650 dark:text-zinc-350">Card Number</label>
                     <input
                       type="text"
@@ -116,11 +116,11 @@ function PaymentPageContent() {
                       value={cardDetails.number}
                       onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
                       placeholder="4000 1234 5678 9010"
-                      className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
+                      className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-2.5 sm:py-3 px-4 text-xs outline-none"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="space-y-1.5 sm:space-y-2">
                       <label className="block text-xs font-bold text-zinc-650 dark:text-zinc-350">Expiry Date</label>
                       <input
                         type="text"
@@ -128,10 +128,10 @@ function PaymentPageContent() {
                         required
                         value={cardDetails.expiry}
                         onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
-                        className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
+                        className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-2.5 sm:py-3 px-4 text-xs outline-none"
                       />
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-1.5 sm:space-y-2">
                       <label className="block text-xs font-bold text-zinc-650 dark:text-zinc-350">CVV</label>
                       <input
                         type="password"
@@ -140,7 +140,7 @@ function PaymentPageContent() {
                         required
                         value={cardDetails.cvv}
                         onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
-                        className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
+                        className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-2.5 sm:py-3 px-4 text-xs outline-none"
                       />
                     </div>
                   </div>
@@ -148,15 +148,15 @@ function PaymentPageContent() {
               )}
 
               {paymentMethod === 'upi' && (
-                <div className="space-y-4 animate-fade-in-up duration-200">
-                  <div className="space-y-2">
+                <div className="space-y-3 sm:space-y-4 animate-fade-in-up duration-200">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <label className="block text-xs font-bold text-zinc-650">UPI ID / Virtual Payment Address</label>
                     <input
                       type="text"
                       placeholder="jane.doe@okaxis"
                       value={upiId}
                       onChange={(e) => setUpiId(e.target.value)}
-                      className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
+                      className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-2.5 sm:py-3 px-4 text-xs outline-none"
                     />
                   </div>
                   <div className="flex gap-2">
@@ -175,8 +175,8 @@ function PaymentPageContent() {
               )}
 
               {paymentMethod === 'netbank' && (
-                <div className="space-y-4 animate-fade-in-up duration-200">
-                  <div className="space-y-2">
+                <div className="space-y-3 sm:space-y-4 animate-fade-in-up duration-200">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <label className="block text-xs font-bold text-zinc-650">Select Bank</label>
                     <Select
                       value={selectedBank}
@@ -193,8 +193,8 @@ function PaymentPageContent() {
               )}
 
               {paymentMethod === 'wallet' && (
-                <div className="space-y-4 animate-fade-in-up duration-200">
-                  <div className="space-y-2">
+                <div className="space-y-3 sm:space-y-4 animate-fade-in-up duration-200">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <label className="block text-xs font-bold text-zinc-650">Select Wallet</label>
                     <Select
                       value={selectedWallet}
@@ -211,7 +211,7 @@ function PaymentPageContent() {
 
               <button
                 type="submit"
-                className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-4 rounded-lg transition-all shadow-lg flex items-center justify-center mt-6"
+                className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-4 rounded-lg transition-all shadow-lg flex items-center justify-center mt-4 sm:mt-6"
               >
                 Pay ₹{total.toFixed(2)} Securely
               </button>
@@ -221,8 +221,8 @@ function PaymentPageContent() {
         </div>
 
         {/* Right Side: Payment breakdowns summary */}
-        <div className="space-y-6">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-6 shadow-xl space-y-6">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-4 sm:p-6 shadow-xl space-y-4 sm:space-y-6">
             <h3 className="font-extrabold text-base text-zinc-900 dark:text-white pb-3 border-b border-zinc-150 dark:border-zinc-800">
               Payment Summary
             </h3>

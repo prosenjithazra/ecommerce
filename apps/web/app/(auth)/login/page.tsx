@@ -26,8 +26,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-[#FDFAF6] flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-block font-extrabold text-3xl tracking-tight text-[#4A453E] mb-3">
-          PRINT<span className="text-[#F9A37E]">HUB</span>
+        <Link href="/" className="inline-block mb-3">
+          <img src="/logoMainNew.png" alt="Kaiva Fashion Logo" className="h-12 w-auto mx-auto object-contain" />
         </Link>
         <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">
           Welcome back to the studio

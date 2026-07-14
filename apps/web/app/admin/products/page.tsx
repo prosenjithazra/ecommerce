@@ -1,10 +1,13 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Plus, Edit2, Trash2, Search, ArrowUpDown } from "lucide-react";
 import { AdminTopbar } from "../AdminSidebar";
-import { useState } from "react";
+import { useApp } from "../../../components/AppContext";
+import { getApiUrl } from "../../../components/ApiConfig";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const INITIAL_PRODUCTS = [
   { id: "p1", name: "Premium Soft Cotton Tee", price: 2549, originalPrice: 3399, category: "T-Shirts", image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=200&auto=format&fit=crop&q=80", inStock: true, tag: "Best Seller", sku: "PHT-001" },
   { id: "p2", name: "Heavyweight Fleece Hoodie", price: 4249, originalPrice: 5099, category: "Hoodies", image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&auto=format&fit=crop&q=80", inStock: true, tag: "New", sku: "PHH-002" },
@@ -20,19 +23,64 @@ const TAG_STYLES: Record<string, string> = {
   "Eco": "bg-emerald-50 text-emerald-700 border-emerald-100",
 };
 
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  originalPrice: number;
+  category: string;
+  image: string;
+  inStock: boolean;
+  tag: string;
+  sku: string;
+}
+
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState(INITIAL_PRODUCTS);
+  const { showToast } = useApp();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [_loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterCat, setFilterCat] = useState("All");
   const [filterStock, setFilterStock] = useState("All");
   const [sortField, setSortField] = useState<"name" | "price" | "category">("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
+  useEffect(() => {
+    fetch(getApiUrl("/products"))
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to load products");
+      })
+      .then(data => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        showToast("Error", err.message || "Failed to load products.", "error");
+        setProducts([]);
+        setLoading(false);
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const categories = ["All", ...Array.from(new Set(products.map((p) => p.category)))];
 
   const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this product?")) {
-      setProducts((prev) => prev.filter((p) => p.id !== id));
+      fetch(getApiUrl(`/products/${id}`), {
+        method: "DELETE"
+      })
+        .then(res => {
+          if (res.ok) {
+            setProducts((prev) => prev.filter((p) => p.id !== id));
+            showToast("Deleted", "Product deleted successfully.", "info");
+          } else {
+            throw new Error("Failed to delete product");
+          }
+        })
+        .catch(err => {
+          showToast("Error", err.message || "Failed to delete product.", "error");
+        });
     }
   };
 

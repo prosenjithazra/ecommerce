@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Upload, X, ImagePlus, Save, Package } from "lucide-react";
 import { AdminTopbar } from "../../AdminSidebar";
 import { useApp } from "../../../../components/AppContext";
+import { getApiUrl } from "../../../../components/ApiConfig";
 
 const CATEGORIES = ["T-Shirts", "Hoodies", "Jackets", "Mugs", "Accessories", "Bags", "Phone Cases"];
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL", "3XL"];
@@ -82,10 +83,45 @@ export default function AddProductPage() {
       return;
     }
     setSubmitting(true);
-    // Simulate save
-    await new Promise((r) => setTimeout(r, 900));
-    showToast("Product Created", `${form.name} has been added to the catalog.`, "success");
-    router.push("/admin/products");
+    
+    const colors = form.selectedColors
+      .map((name) => COLORS.find((c) => c.name === name))
+      .filter((c): c is { name: string; hex: string } => !!c);
+
+    const payload = {
+      name: form.name,
+      price: parseFloat(form.price) || 0,
+      originalPrice: parseFloat(form.originalPrice) || parseFloat(form.price) || 0,
+      category: form.category,
+      description: form.description,
+      inStock: form.inStock,
+      tag: form.tag,
+      sizes: form.selectedSizes,
+      colors,
+      image: images[0]?.preview || "",
+      images: images.map((img) => img.preview),
+      sku: "SKU-" + Math.floor(100000 + Math.random() * 900000)
+    };
+
+    fetch(getApiUrl("/products"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to add product");
+      })
+      .then(() => {
+        showToast("Product Created", `${form.name} has been added to the catalog.`, "success");
+        router.push("/admin/products");
+      })
+      .catch(err => {
+        showToast("Error", err.message || "Failed to create product.", "error");
+        setSubmitting(false);
+      });
   };
 
   const inputCls = "w-full bg-white border border-zinc-200 rounded-lg py-3 px-4 text-xs font-medium text-zinc-800 outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/10 transition-all placeholder:text-zinc-400";
@@ -96,7 +132,7 @@ export default function AddProductPage() {
       <AdminTopbar title="Add New Product" subtitle="Fill in product details and upload images" />
 
       <main className="flex-1 overflow-y-auto p-5 sm:p-8">
-        <form onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-6">
+        <form onSubmit={handleSubmit} className="max-w-full mx-auto space-y-6">
 
           {/* Back link */}
           <Link

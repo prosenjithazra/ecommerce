@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Edit2, Trash2, Save, X, GripVertical, Check } from "lucide-react";
+import { Plus, Edit2, Trash2, Save, X, Check } from "lucide-react";
 import { AdminTopbar } from "../AdminSidebar";
 import { useApp } from "../../../components/AppContext";
 

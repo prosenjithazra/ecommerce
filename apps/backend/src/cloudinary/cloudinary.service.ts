@@ -36,7 +36,7 @@ export class CloudinaryService {
 
   async uploadImage(base64Str: string): Promise<string> {
     if (!base64Str) return '';
-    
+
     // If it's already an uploaded HTTP link, return it as-is
     if (base64Str.startsWith('http://') || base64Str.startsWith('https://')) {
       return base64Str;
@@ -47,7 +47,9 @@ export class CloudinaryService {
       const uploadResponse = await cloudinary.uploader.upload(base64Str, {
         folder: 'my-turborepo-ecommerce',
       });
-      this.logger.log(`Successfully uploaded image: ${uploadResponse.secure_url}`);
+      this.logger.log(
+        `Successfully uploaded image: ${uploadResponse.secure_url}`,
+      );
       return uploadResponse.secure_url;
     } catch (error: any) {
       this.logger.error(`Cloudinary upload failed: ${error.message || error}`);

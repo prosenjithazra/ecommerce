@@ -74,15 +74,10 @@ export const Header: React.FC = () => {
   return (
     <>
       <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-sm border-b border-[#E8E2D6]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 h-[auto] flex items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <span className="font-extrabold text-xl tracking-tight text-[#4A453E]">
-              PRINT<span className="text-[#F9A37E]">HUB</span>
-            </span>
-            <span className="text-[9px] font-bold tracking-widest bg-[#E8E2D6] text-[#7A736A] px-1.5 py-0.5 rounded uppercase hidden sm:inline-block">
-              POD
-            </span>
+          <Link href="/" className="flex items-center flex-shrink-0">
+            <img src="/logoMainNew.png" alt="Kaiva Fashion Logo" className="h-10 md:h-14 w-auto object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.15)]" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -116,7 +111,7 @@ export const Header: React.FC = () => {
             {/* Wishlist */}
             <Link
               href="/wishlist"
-              className="p-2 text-[#7A736A] hover:text-[#F9A37E] transition-colors relative"
+              className="hidden md:inline-flex p-2 text-[#7A736A] hover:text-[#F9A37E] transition-colors relative"
               aria-label="Wishlist"
             >
               <Heart className="w-5 h-5" />
@@ -130,7 +125,7 @@ export const Header: React.FC = () => {
             {/* Cart */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="p-2 text-[#7A736A] hover:text-[#F9A37E] transition-colors relative"
+              className="hidden md:inline-flex p-2 text-[#7A736A] hover:text-[#F9A37E] transition-colors relative"
               aria-label="Cart"
             >
               <ShoppingBag className="w-5 h-5" />
@@ -196,7 +191,7 @@ export const Header: React.FC = () => {
             </button>
 
             <p className="text-xs font-bold tracking-widest uppercase text-[#A8C69F] mb-3">
-              Search PrintHub
+              Search Kaiva Fashion
             </p>
             <form onSubmit={handleSearchSubmit} className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A8C69F]" />
@@ -258,9 +253,9 @@ export const Header: React.FC = () => {
           />
           <div className="relative w-72 bg-white h-full flex flex-col shadow-2xl animate-slide-from-left">
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#E8E2D6]">
-              <span className="font-extrabold text-lg text-[#4A453E]">
-                PRINT<span className="text-[#F9A37E]">HUB</span>
-              </span>
+              <div className="flex items-center">
+                <img src="/logoMainNew.png" alt="Kaiva Fashion Logo" className="h-9 w-auto object-contain" />
+              </div>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="p-1.5 rounded-lg bg-[#E8E2D6] text-[#7A736A]"

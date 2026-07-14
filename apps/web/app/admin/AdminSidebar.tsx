@@ -17,6 +17,10 @@ import {
   Bell,
   ChevronRight,
   Image,
+  Mail,
+  Settings,
+  Newspaper,
+  Instagram,
 } from "lucide-react";
 import { useApp } from "../../components/AppContext";
 
@@ -27,6 +31,11 @@ const mainMenuItems = [
   { href: "/admin/orders", label: "Orders", icon: Sliders, exact: false },
   { href: "/admin/users", label: "Users", icon: Users, exact: false },
   { href: "/admin/banners", label: "Home Banners", icon: Image, exact: false },
+  { href: "/admin/about", label: "About Us Page", icon: FileText, exact: false },
+  { href: "/admin/contact", label: "Contact Queries", icon: Mail, exact: false },
+  { href: "/admin/newsletter", label: "Newsletter", icon: Newspaper, exact: false },
+  { href: "/admin/gallery", label: "Gallery (#Wear)", icon: Instagram, exact: false },
+  { href: "/admin/settings", label: "Store Settings", icon: Settings, exact: false },
 ];
 
 const policyMenuItems = [
@@ -73,11 +82,8 @@ export function AdminSidebar() {
       {/* Brand */}
       <div className="px-5 py-6 border-b border-zinc-800 flex items-center justify-between flex-shrink-0">
         <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#F9A37E] to-[#e8855a] flex items-center justify-center shadow-lg shadow-[#F9A37E]/30">
-            <span className="text-white font-black text-base leading-none">P</span>
-          </div>
+          <img src="/logoMainNew.png" alt="Kaiva Fashion Logo" className="h-9 w-auto object-contain brightness-0 invert" />
           <div className="leading-tight">
-            <span className="font-black text-white text-sm tracking-tight block">PRINTHUB</span>
             <span className="text-[#F9A37E] text-[9px] font-extrabold tracking-[0.2em] block">ADMIN CONSOLE</span>
           </div>
         </Link>
@@ -121,7 +127,7 @@ export function AdminSidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <span className="font-extrabold text-white text-xs block leading-tight truncate">{currentUser?.name || "Administrator"}</span>
-            <span className="text-zinc-500 text-[10px] block leading-tight truncate">{currentUser?.email || "admin@printhub.com"}</span>
+            <span className="text-zinc-500 text-[10px] block leading-tight truncate">{currentUser?.email || "admin@kaivafashion.com"}</span>
           </div>
           <button
             onClick={() => { logout(); router.push("/"); }}

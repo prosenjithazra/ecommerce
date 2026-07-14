@@ -1,15 +1,14 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useApp } from '../../../components/AppContext';
 import { Breadcrumb, StatusBadge, ConfirmDialog } from '../../../components/UIComponents';
-import { Download, Calendar, Truck, ArrowLeft } from 'lucide-react';
+import { Download, Calendar, Truck } from 'lucide-react';
 import Link from 'next/link';
 
 export default function OrderDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const { orders, cancelOrder } = useApp();
   const [cancelOpen, setCancelOpen] = useState(false);
 
@@ -32,45 +31,46 @@ export default function OrderDetailPage() {
   const isCancellable = order.status === 'Pending';
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pb-16">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pb-12 sm:pb-16">
       <Breadcrumb items={[{ name: "My Orders", href: "/orders" }, { name: order.id }]} />
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-909 dark:text-white tracking-tight">{order.id}</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-909 dark:text-white tracking-tight" style={{
+                fontFamily: "'Faculty Glyphic', sans-serif",}}>{order.id}</h1>
             <StatusBadge status={order.status} />
           </div>
           <p className="text-xs text-zinc-450 flex items-center gap-1.5 mt-1">
             <Calendar className="w-4 h-4" /> Ordered on {order.date}
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2 sm:gap-3">
           <button
             onClick={() => alert("Downloading PDF Invoice...")}
-            className="border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-extrabold text-xs py-2.5 px-4 rounded-lg transition-all flex items-center gap-1.5"
+            className="border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-extrabold text-xs py-2.5 px-3 sm:px-4 rounded-lg transition-all flex items-center gap-1.5"
           >
             <Download className="w-4 h-4" /> Invoice
           </button>
           <Link
             href={`/orders/${order.id}/track`}
-            className="bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-2.5 px-4 rounded-lg transition-all flex items-center gap-1.5"
+            className="bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-2.5 px-3 sm:px-4 rounded-lg transition-all flex items-center gap-1.5"
           >
             <Truck className="w-4 h-4" /> Track Shipment
           </Link>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
         
         {/* Left 2 Columns: Items & Address */}
-        <div className="md:col-span-2 space-y-6">
+        <div className="md:col-span-2 space-y-4 sm:space-y-6">
           {/* Order Items */}
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-6 space-y-4">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-4 sm:p-6 space-y-3 sm:space-y-4">
             <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white">Items in this shipment</h3>
             <div className="divide-y divide-zinc-150 dark:divide-zinc-800">
               {order.items.map((item, index) => (
-                <div key={index} className="flex gap-4 py-4 first:pt-0 last:pb-0">
+                <div key={index} className="flex gap-3 sm:gap-4 py-3 sm:py-4 first:pt-0 last:pb-0">
                   <div className="w-14 h-14 bg-zinc-50 dark:bg-zinc-800 rounded-lg overflow-hidden flex-shrink-0">
                     <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                   </div>
@@ -89,20 +89,20 @@ export default function OrderDetailPage() {
           </div>
 
           {/* Delivery destination */}
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-6 space-y-3 text-xs">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-4 sm:p-6 space-y-2.5 sm:space-y-3 text-xs">
             <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white">Shipping Information</h3>
             <div className="space-y-1 text-zinc-500 dark:text-zinc-400">
               <p className="font-extrabold text-zinc-850 dark:text-zinc-250">{order.address.fullName}</p>
               <p>{order.address.street}</p>
               <p>{order.address.city}, {order.address.state} {order.address.zip}, {order.address.country}</p>
-              <p className="pt-2">Phone: {order.address.phone}</p>
+              <p className="pt-1.5 sm:pt-2">Phone: {order.address.phone}</p>
             </div>
           </div>
         </div>
 
         {/* Right Column: Payment summaries */}
-        <div className="space-y-6">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-6 shadow space-y-4 text-xs">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-4 sm:p-6 shadow space-y-3 sm:space-y-4 text-xs">
             <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white pb-2 border-b border-zinc-150">Payment Breakdown</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-zinc-500">
@@ -128,7 +128,7 @@ export default function OrderDetailPage() {
           {isCancellable && (
             <button
               onClick={() => setCancelOpen(true)}
-              className="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400 py-3 rounded-lg text-xs font-extrabold transition-all"
+              className="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400 py-2.5 sm:py-3 rounded-lg text-xs font-extrabold transition-all"
             >
               Cancel Order
             </button>

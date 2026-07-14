@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { ShoppingBag, Trash2, Tag, Calendar, ShieldCheck, Minus, Plus } from 'lucide-react';
 import { useApp } from '../../components/AppContext';
-import { Breadcrumb, EmptyState, Price } from '../../components/UIComponents';
+import { Breadcrumb, EmptyState } from '../../components/UIComponents';
 import { CouponCard } from '../../components/InfoCards';
 
 export default function CartPage() {
@@ -34,7 +34,7 @@ export default function CartPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-12 md:pb-16">
       <Breadcrumb items={[{ name: "Shopping Cart" }]} />
       <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A453E] tracking-tight">Shopping Cart</h1>
 
@@ -102,7 +102,7 @@ export default function CartPage() {
 
           {/* Order Summary */}
           <div className="space-y-4">
-            <div className="bg-white border border-[#E8E2D6] rounded-lg p-5 space-y-5 shadow-sm">
+            <div className="bg-white border border-[#E8E2D6] rounded-lg p-3 sm:p-5 space-y-5 shadow-sm">
               <h3 className="font-extrabold text-base text-[#4A453E] pb-3 border-b border-[#E8E2D6]">Order Summary</h3>
 
               {/* Coupon input */}
@@ -126,16 +126,16 @@ export default function CartPage() {
                   <span className="text-[#7A736A]">Cart Subtotal</span>
                   <span className="font-extrabold text-[#4A453E]">₹{subtotal.toFixed(2)}</span>
                 </div>
+                 <div className="flex justify-between">
+                  <span className="text-[#7A736A]">Tax / GST (18%)</span>
+                  <span className="font-extrabold text-[#4A453E]">₹{tax.toFixed(2)}</span>
+                </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-emerald-600 font-bold">
                     <span>Coupon Discount</span>
                     <span>-₹{discountAmount.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between">
-                  <span className="text-[#7A736A]">Tax / GST (18%)</span>
-                  <span className="font-extrabold text-[#4A453E]">₹{tax.toFixed(2)}</span>
-                </div>
                 <div className="flex justify-between">
                   <span className="text-[#7A736A]">Standard Shipping</span>
                   <span className="font-extrabold text-[#A8C69F]">{shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}</span>

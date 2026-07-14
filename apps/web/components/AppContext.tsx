@@ -131,7 +131,7 @@ interface AppContextType {
   toasts: ToastMessage[];
   searchQuery: string;
   isDarkMode: boolean;
-  currentUser: { name: string; email: string; phone?: string; id?: string; role?: string; avatar?: string } | null;
+  currentUser: { name: string; email: string; phone?: string; id?: string; role?: string; avatar?: string; preferences?: any } | null;
   setSearchQuery: (q: string) => void;
   toggleDarkMode: () => void; // kept for backward compat, no-op
   showToast: (title: string, message: string, type?: 'success' | 'error' | 'info') => void;
@@ -152,7 +152,18 @@ interface AppContextType {
   logout: () => void;
   loginUser: (email: string, password?: string) => Promise<boolean>;
   registerUser: (name: string, email: string, password: string, phone?: string) => Promise<boolean>;
-  updateUserProfile: (name: string, avatar?: string) => Promise<boolean>;
+  updateUserProfile: (name: string, avatar?: string, phone?: string) => Promise<boolean>;
+  updateUserPreferences: (preferences: any) => Promise<boolean>;
+  companySettings: {
+    email: string;
+    phone: string;
+    address: string;
+    hours: string;
+    twitterUrl: string;
+    instagramUrl: string;
+    facebookUrl: string;
+  };
+  updateCompanySettings: (data: any) => Promise<boolean>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -296,7 +307,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [searchQuery, setSearchQuery] = useState("");
   const isDarkMode = false; // dark mode removed
   const toggleDarkMode = () => {}; // no-op kept for backward compat
-  const [currentUser, setCurrentUser] = useState<{ name: string; email: string; phone?: string; id?: string; role?: string; avatar?: string } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ name: string; email: string; phone?: string; id?: string; role?: string; avatar?: string; preferences?: any } | null>(null);
+  const [companySettings, setCompanySettings] = useState({
+    email: 'support@kaivafashion.com',
+    phone: '+1 555-0199',
+    address: '123 Creative St, New York, NY 10001',
+    hours: 'Mon - Fri, 9am - 6pm EST',
+    twitterUrl: 'https://twitter.com/kaiva',
+    instagramUrl: 'https://instagram.com/kaiva',
+    facebookUrl: 'https://facebook.com/kaiva',
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -317,14 +337,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           email: user.email,
           role: user.role,
           avatar: user.avatar,
-          phone: "+1 555-0199"
+          phone: user.phone || "",
+          preferences: user.preferences || {}
         });
+        if (user.addresses && user.addresses.length > 0) {
+          setAddresses(user.addresses);
+        }
       })
       .catch(() => {
         localStorage.removeItem("token");
         setCurrentUser(null);
       });
     }
+
+    // Load global settings
+    fetch(getApiUrl("/settings"))
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to load settings");
+      })
+      .then(data => {
+        if (data) {
+          setCompanySettings(data);
+        }
+      })
+      .catch(err => console.warn("Could not load global settings, using defaults.", err));
   }, []);
 
   // Toast System
@@ -390,14 +427,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const isInWishlist = (productId: string) => wishlist.some(p => p.id === productId);
 
   // Address operations
+  const syncAddresses = (updatedAddresses: Address[]) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    fetch(getApiUrl("/user/profile/update"), {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ addresses: updatedAddresses })
+    })
+    .catch(err => console.error("Error syncing addresses:", err));
+  };
+
   const addAddress = (address: Omit<Address, 'id'>) => {
     const id = Math.random().toString(36).substring(7);
-    const newAddress: Address = { ...address, id };
-    if (address.isDefault) {
-      setAddresses(prev => prev.map(a => ({ ...a, isDefault: false })).concat(newAddress));
-    } else {
-      setAddresses(prev => [...prev, newAddress]);
-    }
+    setAddresses(prev => {
+      let next = [...prev, { ...address, id }];
+      if (address.isDefault) {
+        next = next.map(a => a.id !== id ? { ...a, isDefault: false } : a);
+      }
+      syncAddresses(next);
+      return next;
+    });
     showToast("Address Saved", "Address added successfully.", "success");
   };
 
@@ -407,18 +460,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (address.isDefault) {
         next = next.map(a => a.id !== address.id ? { ...a, isDefault: false } : a);
       }
+      syncAddresses(next);
       return next;
     });
     showToast("Address Updated", "Changes saved successfully.", "success");
   };
 
   const deleteAddress = (id: string) => {
-    setAddresses(prev => prev.filter(a => a.id !== id));
+    setAddresses(prev => {
+      const next = prev.filter(a => a.id !== id);
+      syncAddresses(next);
+      return next;
+    });
     showToast("Address Deleted", "The address has been removed.", "info");
   };
 
   const setDefaultAddress = (id: string) => {
-    setAddresses(prev => prev.map(a => ({ ...a, isDefault: a.id === id })));
+    setAddresses(prev => {
+      const next = prev.map(a => ({ ...a, isDefault: a.id === id }));
+      syncAddresses(next);
+      return next;
+    });
     showToast("Default Address Set", "Your primary address was updated.", "success");
   };
 
@@ -564,7 +626,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const updateUserProfile = async (name: string, avatar?: string): Promise<boolean> => {
+  const updateUserProfile = async (name: string, avatar?: string, phone?: string): Promise<boolean> => {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(getApiUrl("/user/profile/update"), {
@@ -573,7 +635,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ name, avatar })
+        body: JSON.stringify({ name, avatar, phone })
       });
       const data = await res.json();
       if (!res.ok) {
@@ -586,12 +648,66 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         email: data.email,
         role: data.role,
         avatar: data.avatar,
-        phone: "+1 555-0199"
+        phone: data.phone || "",
+        preferences: data.preferences || {}
       });
       showToast("Profile Updated", "Your changes have been saved successfully.", "success");
       return true;
     } catch (err) {
       showToast("Connection Error", "Could not connect to the profile update server.", "error");
+      return false;
+    }
+  };
+
+  const updateUserPreferences = async (preferences: any): Promise<boolean> => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(getApiUrl("/user/profile/update"), {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ preferences })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast("Update Failed", data.message || "Failed to update preferences", "error");
+        return false;
+      }
+      setCurrentUser(prev => prev ? {
+        ...prev,
+        preferences: data.preferences
+      } : null);
+      showToast("Preferences Updated", "Your preference settings have been saved.", "success");
+      return true;
+    } catch (err) {
+      showToast("Connection Error", "Could not connect to the profile update server.", "error");
+      return false;
+    }
+  };
+
+  const updateCompanySettings = async (data: any): Promise<boolean> => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(getApiUrl("/settings"), {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      });
+      const updated = await res.json();
+      if (!res.ok) {
+        showToast("Update Failed", updated.message || "Failed to update company settings", "error");
+        return false;
+      }
+      setCompanySettings(updated);
+      showToast("Settings Saved", "Company settings updated successfully.", "success");
+      return true;
+    } catch (err) {
+      showToast("Connection Error", "Could not connect to settings update server.", "error");
       return false;
     }
   };
@@ -628,7 +744,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       logout,
       loginUser,
       registerUser,
-      updateUserProfile
+      updateUserProfile,
+      updateUserPreferences,
+      companySettings,
+      updateCompanySettings
     }}>
       {children}
     </AppContext.Provider>

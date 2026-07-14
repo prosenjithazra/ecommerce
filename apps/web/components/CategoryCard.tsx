@@ -5,13 +5,19 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
 interface CategoryCardProps {
-  name: string;
-  image: string;
-  count: number;
-  href: string;
+  name?: string;
+  image?: string;
+  count?: number;
+  href?: string;
+  loading?: boolean;
 }
 
-export const CategoryCard: React.FC<CategoryCardProps> = ({ name, image, count, href }) => {
+export const CategoryCard: React.FC<CategoryCardProps> = ({ name, image, count, href, loading }) => {
+  if (loading || !name || !image || !href) {
+    return (
+      <div className="relative block aspect-[4/3] rounded-lg overflow-hidden bg-[#E8E2D6] shadow-sm border border-[#E8E2D6] skeleton-shimmer" />
+    );
+  }
   return (
     <Link href={href} className="group relative block aspect-[4/3] rounded-lg overflow-hidden bg-[#E8E2D6] shadow-sm border border-[#E8E2D6]">
       <img

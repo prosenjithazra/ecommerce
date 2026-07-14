@@ -7,14 +7,35 @@ import { Product, useApp } from './AppContext';
 import { Modal } from './Modal';
 
 interface ProductCardProps {
-  product: Product;
+  product?: Product;
+  loading?: boolean;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, loading }) => {
   const { toggleWishlist, isInWishlist, addToCart } = useApp();
   const [quickViewOpen, setQuickViewOpen] = useState(false);
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0] || 'M');
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]?.name || 'White');
+  const [selectedSize, setSelectedSize] = useState(product?.sizes[0] || 'M');
+  const [selectedColor, setSelectedColor] = useState(product?.colors[0]?.name || 'White');
+
+  if (loading || !product) {
+    return (
+      <div className="flex flex-col bg-white border border-[#E8E2D6] rounded-lg overflow-hidden shadow-sm">
+        {/* Pulsing Image area */}
+        <div className="relative aspect-square w-full skeleton-shimmer" />
+        
+        {/* Pulsing Card info */}
+        <div className="p-3 space-y-2.5">
+          <div className="h-2 w-1/4 rounded skeleton-shimmer" />
+          <div className="h-4.5 w-3/4 rounded skeleton-shimmer" />
+          <div className="h-3 w-1/3 rounded skeleton-shimmer" />
+          <div className="flex justify-between items-center pt-2">
+            <div className="h-4.5 w-1/4 rounded skeleton-shimmer" />
+            <div className="h-3 w-1/5 rounded skeleton-shimmer" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const isSaved = isInWishlist(product.id);
   const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);

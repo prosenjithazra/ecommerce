@@ -3,13 +3,13 @@
 import React from 'react';
 import Link from 'next/link';
 import { Heart, ShoppingBag, Trash2 } from 'lucide-react';
-import { useApp } from '../../components/AppContext';
+import { useApp, Product } from '../../components/AppContext';
 import { Breadcrumb, EmptyState, Price } from '../../components/UIComponents';
 
 export default function WishlistPage() {
   const { wishlist, toggleWishlist, addToCart } = useApp();
 
-  const handleMoveToCart = (item: any) => {
+  const handleMoveToCart = (item: Product) => {
     addToCart({
       productId: item.id, name: item.name, price: item.price,
       quantity: 1, image: item.image,
@@ -19,7 +19,7 @@ export default function WishlistPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-12 md:pb-16">
       <Breadcrumb items={[{ name: "Wishlist" }]} />
 
       <div>

@@ -7,17 +7,17 @@ import { ChevronRight, Home, EyeOff, X, ArrowLeft, ArrowRight, Star, AlertTriang
 /* 1. BREADCRUMB */
 interface BreadcrumbItem { name: string; href?: string; }
 export const Breadcrumb: React.FC<{ items: BreadcrumbItem[] }> = ({ items }) => (
-  <nav className="flex items-center gap-1.5 text-xs text-[#A89B8A] py-4 overflow-x-auto whitespace-nowrap">
+  <nav className="flex items-center gap-1.5 text-xs text-[#A89B8A] pt-8 sm:pt-10 pb-2 sm:pb-4 overflow-x-auto whitespace-nowrap">
     <Link href="/" className="hover:text-[#4A453E] flex items-center gap-1 transition-colors">
-      <Home className="w-3.5 h-3.5" />
+      <Home className="w-4.5 h-4.5" />
     </Link>
     {items.map((item, index) => (
       <React.Fragment key={index}>
-        <ChevronRight className="w-3 h-3 flex-shrink-0" />
+        <ChevronRight className="w-4 h-4 flex-shrink-0" />
         {item.href ? (
           <Link href={item.href} className="hover:text-[#4A453E] transition-colors font-medium">{item.name}</Link>
         ) : (
-          <span className="text-[#4A453E] font-semibold truncate">{item.name}</span>
+          <span className="text-[#4A453E] font-semibold text-sm truncate">{item.name}</span>
         )}
       </React.Fragment>
     ))}
@@ -53,12 +53,12 @@ export const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages,
 /* 3. EMPTY STATE */
 interface EmptyStateProps { title: string; description: string; actionText?: string; actionHref?: string; icon?: React.ReactNode; }
 export const EmptyState: React.FC<EmptyStateProps> = ({ title, description, actionText, actionHref, icon }) => (
-  <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-[#E8E2D6] rounded-lg max-w-md mx-auto py-12">
-    <div className="w-16 h-16 bg-[#E8E2D6] text-[#A89B8A] rounded-full flex items-center justify-center mb-5">
+  <div className="w-full flex flex-col items-center justify-center text-center p-8 md:p-12 bg-white dark:bg-zinc-900 border border-zinc-150/80 dark:border-zinc-800/80 rounded-2xl shadow-xl shadow-zinc-150/20 dark:shadow-none py-14">
+    <div className="w-16 h-16 bg-[#FBD5C1]/40 text-[#E8855A] rounded-full flex items-center justify-center mb-5 animate-subtle-bounce">
       {icon || <EyeOff className="w-8 h-8" />}
     </div>
-    <h3 className="font-extrabold text-lg text-[#4A453E] tracking-tight">{title}</h3>
-    <p className="text-xs text-[#7A736A] max-w-xs mt-2 leading-relaxed">{description}</p>
+    <h3 className="font-extrabold text-lg text-[#4A453E] dark:text-white tracking-tight">{title}</h3>
+    <p className="text-xs text-[#7A736A] dark:text-zinc-400 max-w-sm mt-2 leading-relaxed">{description}</p>
     {actionText && actionHref && (
       <Link href={actionHref} className="mt-6 bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25">
         {actionText}

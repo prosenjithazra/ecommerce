@@ -14,7 +14,7 @@ export default function TermsPage() {
 
         <section className="space-y-3">
           <h2 className="text-base font-extrabold text-zinc-900 dark:text-white">1. User Agreement</h2>
-          <p>By accessing PrintHub and utilizing our design tools or placing purchase orders, you agree to comply with our platform terms. You verify that you are at least 18 years old or are using the storefront under guardian supervision.</p>
+          <p>By accessing Kaiva Fashion and utilizing our design tools or placing purchase orders, you agree to comply with our platform terms. You verify that you are at least 18 years old or are using the storefront under guardian supervision.</p>
         </section>
 
         <section className="space-y-3">
@@ -24,7 +24,7 @@ export default function TermsPage() {
 
         <section className="space-y-3">
           <h2 className="text-base font-extrabold text-zinc-900 dark:text-white">3. Custom Order Fulfillment</h2>
-          <p>Because items are printed on demand based on your sizing and design layout, orders cannot be changed or cancelled once they enter the "Processing & Print" stage. Sizing details are provided inside each product page; please check them before confirming transactions.</p>
+          <p>Because items are printed on demand based on your sizing and design layout, orders cannot be changed or cancelled once they enter the &ldquo;Processing &amp; Print&rdquo; stage. Sizing details are provided inside each product page; please check them before confirming transactions.</p>
         </section>
       </article>
     </div>

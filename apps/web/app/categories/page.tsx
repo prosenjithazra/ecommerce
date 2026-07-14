@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Breadcrumb, Pagination, Select } from '../../components/UIComponents';
 import { CategoryCard } from '../../components/CategoryCard';
-import { Filter, SlidersHorizontal, Search, RotateCcw } from 'lucide-react';
+import { SlidersHorizontal, Search, RotateCcw } from 'lucide-react';
 
 export default function CategoriesPage() {
   const [search, setSearch] = useState("");

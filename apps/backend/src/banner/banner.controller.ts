@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { BannerService } from './banner.service';
 import { CreateBannerDto } from './dto/create-banner.dto';
 import { AuthGuard } from '../user/auth.guard';
@@ -26,7 +35,10 @@ export class BannerController {
 
   @UseGuards(AuthGuard)
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateBannerDto: Partial<CreateBannerDto>) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateBannerDto: Partial<CreateBannerDto>,
+  ) {
     return this.bannerService.update(id, updateBannerDto);
   }
 

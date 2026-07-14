@@ -1,4 +1,13 @@
-import { Controller, Post, Get, Put, Body, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Put,
+  Body,
+  UseGuards,
+  Request,
+  Param,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
@@ -34,12 +43,27 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Put('profile/update')
-  async updateProfile(@Request() req: RequestWithUser, @Body() updateDto: Partial<CreateUserDto>) {
+  async updateProfile(
+    @Request() req: RequestWithUser,
+    @Body() updateDto: Partial<CreateUserDto>,
+  ) {
     return this.userService.updateProfile(req.user.id, updateDto);
   }
 
   @Get()
   async findAll() {
     return this.userService.findAll();
+  }
+
+  @UseGuards(AuthGuard)
+  @Put(':id/status')
+  async toggleStatus(@Param('id') id: string) {
+    return this.userService.toggleStatus(id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('profile/change-password')
+  async changePassword(@Request() req: RequestWithUser, @Body() body: any) {
+    return this.userService.changePassword(req.user.id, body.current, body.new);
   }
 }

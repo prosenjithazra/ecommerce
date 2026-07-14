@@ -24,7 +24,7 @@ export default function PrivacyPage() {
 
         <section className="space-y-3">
           <h2 className="text-base font-extrabold text-zinc-900 dark:text-white">3. Image & Asset Ownership</h2>
-          <p>You retain 100% intellectual property ownership of all custom texts and design images you upload onto the PrintHub workspace. We hold assets temporarily in secure cache memory to print onto physical blanks before deleting them according to security compliance.</p>
+          <p>You retain 100% intellectual property ownership of all custom texts and design images you upload onto the Kaiva Fashion workspace. We hold assets temporarily in secure cache memory to print onto physical blanks before deleting them according to security compliance.</p>
         </section>
 
         <section className="space-y-3">

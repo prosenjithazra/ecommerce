@@ -3,9 +3,9 @@
 import React, { useState } from 'react';
 import { Breadcrumb, Pagination, Drawer, Select } from '../../components/UIComponents';
 import { ProductCard } from '../../components/ProductCard';
-import { SlidersHorizontal, Search, RotateCcw, Paintbrush } from 'lucide-react';
+import { SlidersHorizontal, Search, RotateCcw } from 'lucide-react';
 import { Product } from '../../components/AppContext';
-import Link from 'next/link';
+
 
 const INITIAL_PRODUCTS: Product[] = [
   {
@@ -62,6 +62,12 @@ export default function ProductsPage() {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 900);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filterColors = ["White", "Black", "Grey", "Blue", "Green", "Red"];
   const filterSizes = ["S", "M", "L", "XL", "XXL"];
@@ -138,7 +144,7 @@ export default function ProductsPage() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-12 md:pb-16">
       <Breadcrumb items={[{ name: "Products" }]} />
 
       <div>
@@ -189,7 +195,11 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          {filteredProducts.length === 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 grid-cols-mobile-single">
+              {Array(6).fill(0).map((_, i) => <ProductCard key={i} loading={true} />)}
+            </div>
+          ) : filteredProducts.length === 0 ? (
             <div className="p-12 text-center border-2 border-dashed border-[#E8E2D6] rounded-lg">
               <span className="text-sm font-bold text-[#A89B8A]">No products match your filters.</span>
             </div>

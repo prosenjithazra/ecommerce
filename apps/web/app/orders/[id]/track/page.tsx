@@ -32,7 +32,7 @@ export default function TrackOrderPage() {
   ];
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pb-16">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-8 pb-8 sm:pb-16">
       <Breadcrumb items={[{ name: "My Orders", href: "/orders" }, { name: order.id, href: `/orders/${order.id}` }, { name: "Track" }]} />
 
       <div className="space-y-1">
@@ -48,25 +48,29 @@ export default function TrackOrderPage() {
       </div>
 
       {/* Main timeline tracker */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-6 sm:p-10 shadow">
-        <div className="relative border-l border-zinc-200 dark:border-zinc-800 ml-3 pl-8 space-y-8 py-2">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-3 sm:p-10 shadow">
+        <div className="relative border-l border-zinc-200 dark:border-zinc-800 ml-2 sm:ml-3 pl-4 sm:pl-6 sm:pl-8 space-y-5 sm:space-y-8 py-1 sm:py-2">
           
           {timeline.map((step, index) => (
             <div key={index} className="relative">
               {/* Timeline circle icon */}
-              <span className={`absolute -left-[45px] top-1.5 w-8 h-8 rounded-full flex items-center justify-center border-2 bg-white dark:bg-zinc-900 ${step.done ? 'border-emerald-500 text-emerald-500' : 'border-zinc-200 text-zinc-300 dark:border-zinc-800'}`}>
-                {step.done ? <CheckCircle2 className="w-5 h-5 fill-white dark:fill-zinc-900" /> : <Clock className="w-4 h-4" />}
+              <span className={`absolute -left-[32px] sm:-left-[45px] top-0 sm:top-1.5 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-white dark:bg-zinc-900 ${step.done ? 'text-emerald-500' : 'text-zinc-300 dark:border-zinc-800'}`}>
+                {step.done ? (
+                  <CheckCircle2 className="w-3.5 h-3.5 sm:w-5 sm:h-5 fill-white dark:fill-zinc-900" />
+                ) : (
+                  <Clock className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                )}
               </span>
 
               {/* Step info */}
               <div className="space-y-1">
-                <div className="flex flex-wrap items-baseline gap-2">
-                  <h4 className={`font-extrabold text-sm ${step.done ? 'text-zinc-900 dark:text-white' : 'text-zinc-400'}`}>
+                <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
+                  <h4 className={`font-extrabold text-xs sm:text-sm ${step.done ? 'text-zinc-909 dark:text-white' : 'text-zinc-400'}`}>
                     {step.status}
                   </h4>
-                  <span className="text-[10px] text-zinc-400 font-medium">{step.date}</span>
+                  <span className="text-[9px] sm:text-[10px] text-zinc-400 font-medium">{step.date}</span>
                 </div>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-normal max-w-lg">
+                <p className="text-[11px] sm:text-xs text-zinc-550 dark:text-zinc-400 leading-normal max-w-lg">
                   {step.desc}
                 </p>
               </div>
@@ -77,7 +81,7 @@ export default function TrackOrderPage() {
       </div>
 
       {/* Delivery Summary destination */}
-      <div className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-150 dark:border-zinc-800 rounded-lg p-6 flex gap-4 items-start">
+      <div className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-150 dark:border-zinc-800 rounded-lg p-3 sm:p-4 sm:p-6 flex gap-3 sm:gap-4 items-start">
         <MapPin className="w-6 h-6 text-indigo-500 mt-0.5 flex-shrink-0" />
         <div className="text-xs space-y-1">
           <span className="font-extrabold text-zinc-900 dark:text-white block">Delivery Destination</span>

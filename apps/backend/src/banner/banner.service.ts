@@ -37,9 +37,11 @@ export class BannerService {
     banner.headline2 = dto.headline2;
     banner.headline2Color = dto.headline2Color || '#F9A37E';
     banner.sub = dto.sub || '';
-    
+
     if (dto.productImg) {
-      banner.productImg = await this.cloudinaryService.uploadImage(dto.productImg);
+      banner.productImg = await this.cloudinaryService.uploadImage(
+        dto.productImg,
+      );
     } else {
       banner.productImg = '';
     }
@@ -66,7 +68,10 @@ export class BannerService {
     return this.bannerRepository.save(banner);
   }
 
-  async update(id: string, dto: Partial<CreateBannerDto>): Promise<BannerEntity> {
+  async update(
+    id: string,
+    dto: Partial<CreateBannerDto>,
+  ): Promise<BannerEntity> {
     const banner = await this.bannerRepository.findOne({ where: { id } });
     if (!banner) {
       throw new NotFoundException('Banner slide not found');
@@ -75,18 +80,24 @@ export class BannerService {
     if (dto.badge !== undefined) banner.badge = dto.badge;
     if (dto.headline1 !== undefined) banner.headline1 = dto.headline1;
     if (dto.headline2 !== undefined) banner.headline2 = dto.headline2;
-    if (dto.headline2Color !== undefined) banner.headline2Color = dto.headline2Color;
+    if (dto.headline2Color !== undefined)
+      banner.headline2Color = dto.headline2Color;
     if (dto.sub !== undefined) banner.sub = dto.sub;
-    
+
     if (dto.productImg !== undefined) {
-      banner.productImg = await this.cloudinaryService.uploadImage(dto.productImg);
+      banner.productImg = await this.cloudinaryService.uploadImage(
+        dto.productImg,
+      );
     }
 
     if (dto.bgImg !== undefined) {
-      banner.bgImg = dto.bgImg ? await this.cloudinaryService.uploadImage(dto.bgImg) : '';
+      banner.bgImg = dto.bgImg
+        ? await this.cloudinaryService.uploadImage(dto.bgImg)
+        : '';
     }
 
-    if (dto.headline1Color !== undefined) banner.headline1Color = dto.headline1Color;
+    if (dto.headline1Color !== undefined)
+      banner.headline1Color = dto.headline1Color;
     if (dto.subColor !== undefined) banner.subColor = dto.subColor;
     if (dto.badgeColor !== undefined) banner.badgeColor = dto.badgeColor;
     if (dto.overlayColor !== undefined) banner.overlayColor = dto.overlayColor;

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { DollarSign, ShoppingBag, Users, Layers, TrendingUp, TrendingDown, Package, AlertCircle, ArrowRight } from "lucide-react";
 import { AdminTopbar } from "./AdminSidebar";
-import { useApp } from "../../components/AppContext";
 
 const stats = [
   { label: "Total Revenue", value: "₹1,24,492", sub: "+14.5% this week", icon: DollarSign, up: true, color: "from-emerald-500 to-emerald-600" },

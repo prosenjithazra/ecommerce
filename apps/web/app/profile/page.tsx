@@ -4,12 +4,25 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useApp, Address } from '../../components/AppContext';
 import { Breadcrumb } from '../../components/UIComponents';
-import { User, MapPin, ShieldAlert, KeyRound, Sliders, LogOut, LayoutDashboard, Upload, Camera } from 'lucide-react';
+import { User, MapPin, ShieldAlert, KeyRound, Sliders, LogOut, LayoutDashboard, Upload, Camera, X } from 'lucide-react';
 import { AddressCard } from '../../components/InfoCards';
+import { getApiUrl } from '../../components/ApiConfig';
 
 export default function ProfilePage() {
-  const { currentUser, logout, addresses, deleteAddress, setDefaultAddress, addAddress, updateAddress, isDarkMode, toggleDarkMode, showToast, updateUserProfile } = useApp();
+  const { 
+    currentUser, 
+    logout, 
+    addresses, 
+    deleteAddress, 
+    setDefaultAddress, 
+    addAddress, 
+    updateAddress, 
+    showToast, 
+    updateUserProfile,
+    updateUserPreferences
+  } = useApp();
   const [activeTab, setActiveTab] = useState<'info' | 'address' | 'password' | 'preferences'>('info');
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Personal Info Form
   const [name, setName] = useState(currentUser?.name || "Jane Doe");
@@ -19,11 +32,18 @@ export default function ProfilePage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Preferences form state
+  const [prefOrderEmail, setPrefOrderEmail] = useState(currentUser?.preferences?.orderEmail ?? true);
+  const [prefNewsletter, setPrefNewsletter] = useState(currentUser?.preferences?.newsletter ?? false);
+
   useEffect(() => {
     if (currentUser) {
       setName(currentUser.name);
       setEmail(currentUser.email);
+      setPhone(currentUser.phone || "");
       setAvatar(currentUser.avatar || "");
+      setPrefOrderEmail(currentUser.preferences?.orderEmail ?? true);
+      setPrefNewsletter(currentUser.preferences?.newsletter ?? false);
     }
   }, [currentUser]);
 
@@ -37,7 +57,7 @@ export default function ProfilePage() {
 
   const handleUpdateInfo = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateUserProfile(name, avatar);
+    await updateUserProfile(name, avatar, phone);
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,11 +73,30 @@ export default function ProfilePage() {
   const handleUpdatePassword = (e: React.FormEvent) => {
     e.preventDefault();
     if (passwords.new !== passwords.confirm) {
-      alert("New passwords do not match!");
+      showToast("Error", "New passwords do not match!", "error");
       return;
     }
-    showToast("Password Updated", "Your security credentials have been updated.", "success");
-    setPasswords({ current: "", new: "", confirm: "" });
+    const token = localStorage.getItem("token");
+    fetch(getApiUrl("/user/profile/change-password"), {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ current: passwords.current, new: passwords.new })
+    })
+    .then(async res => {
+      const data = await res.json();
+      if (res.ok) {
+        showToast("Password Updated", "Your password has been changed successfully.", "success");
+        setPasswords({ current: "", new: "", confirm: "" });
+      } else {
+        throw new Error(data.message || "Failed to update password");
+      }
+    })
+    .catch(err => {
+      showToast("Error", err.message || "Could not change password.", "error");
+    });
   };
 
   const handleAddressSubmit = (e: React.FormEvent) => {
@@ -87,26 +126,102 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-8 pb-10 md:pb-16">
       <Breadcrumb items={[{ name: "My Profile" }]} />
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">Account Settings</h1>
-          <p className="text-xs text-zinc-400">Manage your credentials, shipping configurations, and preferences.</p>
+      {/* MOBILE SIDEBAR DRAWER OVERLAY */}
+      {isMobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden flex !m-0 top-0">
+          {/* Backdrop overlay */}
+          <div 
+            onClick={() => setIsMobileSidebarOpen(false)}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" 
+          />
+          {/* Drawer Content */}
+          <div className="relative w-72 max-w-[80vw] bg-white dark:bg-zinc-900 h-full flex flex-col p-5 shadow-2xl z-10 animate-slide-from-left">
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-200/50 dark:border-zinc-800">
+              <h3 className="font-extrabold text-sm text-zinc-800 dark:text-white">Account Menu</h3>
+              <button 
+                onClick={() => setIsMobileSidebarOpen(false)}
+                className="w-7 h-7 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center justify-center text-zinc-500"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto py-4 flex flex-col gap-1.5">
+              <button
+                onClick={() => { setActiveTab('info'); setIsMobileSidebarOpen(false); }}
+                className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-lg text-left transition-all ${activeTab === 'info' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
+              >
+                <User className="w-4 h-4" /> Personal Info
+              </button>
+              <button
+                onClick={() => { setActiveTab('address'); setIsMobileSidebarOpen(false); }}
+                className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-lg text-left transition-all ${activeTab === 'address' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
+              >
+                <MapPin className="w-4 h-4" /> Address Book
+              </button>
+              <button
+                onClick={() => { setActiveTab('password'); setIsMobileSidebarOpen(false); }}
+                className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-lg text-left transition-all ${activeTab === 'password' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
+              >
+                <KeyRound className="w-4 h-4" /> Change Password
+              </button>
+              <button
+                onClick={() => { setActiveTab('preferences'); setIsMobileSidebarOpen(false); }}
+                className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-lg text-left transition-all ${activeTab === 'preferences' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
+              >
+                <Sliders className="w-4 h-4" /> Preferences
+              </button>
+              
+              {currentUser?.role === 'admin' && (
+                <div className="border-t border-[#E8E2D6] my-1.5 pt-1.5">
+                  <Link
+                    href="/admin"
+                    onClick={() => setIsMobileSidebarOpen(false)}
+                    className="flex items-center gap-2.5 text-xs font-extrabold py-2.5 px-4 rounded-lg text-left transition-all text-[#F9A37E] hover:bg-[#FBD5C1]/10"
+                  >
+                    <LayoutDashboard className="w-4 h-4" /> Admin Console
+                  </Link>
+                </div>
+              )}
+
+              <div className="border-t border-zinc-200/50 dark:border-zinc-800 my-1.5 pt-1.5">
+                <button
+                  onClick={() => { logout(); setIsMobileSidebarOpen(false); }}
+                  className="w-full flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-lg text-left transition-all text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+                >
+                  <LogOut className="w-4 h-4" /> Log Out
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+      )}
+
+      {/* Mobile Drawer Trigger Button */}
+      <div className="lg:hidden">
         <button
-          onClick={logout}
-          className="text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 py-2.5 px-4 rounded-lg border border-red-200 dark:border-red-900/60 flex items-center gap-1.5 transition-all"
+          onClick={() => setIsMobileSidebarOpen(true)}
+          className="w-full flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-3.5 text-xs font-bold text-zinc-750 dark:text-zinc-300 shadow-sm hover:border-[#F9A37E] transition-colors"
         >
-          <LogOut className="w-4 h-4" /> Log Out
+          <span className="flex items-center gap-2">
+            {activeTab === 'info' && <><User className="w-4.5 h-4.5 text-[#E8855A]" /> Personal Info</>}
+            {activeTab === 'address' && <><MapPin className="w-4.5 h-4.5 text-[#E8855A]" /> Address Book</>}
+            {activeTab === 'password' && <><KeyRound className="w-4.5 h-4.5 text-[#E8855A]" /> Change Password</>}
+            {activeTab === 'preferences' && <><Sliders className="w-4.5 h-4.5 text-[#E8855A]" /> Preferences</>}
+          </span>
+          <span className="text-[10px] text-[#e8855a] font-extrabold uppercase tracking-wider flex items-center gap-1">
+            Menu ➔
+          </span>
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-8 items-start">
         
-        {/* Sidebar Tabs Select */}
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-4 flex flex-col gap-1.5">
+        {/* Sidebar Tabs Select - Desktop Only */}
+        <div className="hidden lg:flex bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-4 flex-col gap-1.5 w-full">
           <button
             onClick={() => setActiveTab('info')}
             className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-lg text-left transition-all ${activeTab === 'info' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
@@ -132,13 +247,24 @@ export default function ProfilePage() {
             <Sliders className="w-4 h-4" /> Preferences
           </button>
           
-          <div className="border-t border-[#E8E2D6] my-1.5 pt-1.5">
-            <Link
-              href="/admin"
-              className="flex items-center gap-2.5 text-xs font-extrabold py-2.5 px-4 rounded-lg text-left transition-all text-[#F9A37E] hover:bg-[#FBD5C1]/10"
+          {currentUser?.role === 'admin' && (
+            <div className="border-t border-[#E8E2D6] my-1.5 pt-1.5">
+              <Link
+                href="/admin"
+                className="flex items-center gap-2.5 text-xs font-extrabold py-2.5 px-4 rounded-lg text-left transition-all text-[#F9A37E] hover:bg-[#FBD5C1]/10"
+              >
+                <LayoutDashboard className="w-4 h-4" /> Admin Console
+              </Link>
+            </div>
+          )}
+
+          <div className="border-t border-zinc-200/50 dark:border-zinc-800 my-1.5 pt-1.5">
+            <button
+              onClick={logout}
+              className="w-full flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-lg text-left transition-all text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
             >
-              <LayoutDashboard className="w-4 h-4" /> Admin Console
-            </Link>
+              <LogOut className="w-4 h-4" /> Log Out
+            </button>
           </div>
         </div>
 
@@ -388,6 +514,38 @@ export default function ProfilePage() {
           {activeTab === 'preferences' && (
             <div className="space-y-8">
               <h3 className="font-extrabold text-base text-zinc-900 dark:text-white pb-3 border-b border-zinc-150">Preferences</h3>
+
+              <form onSubmit={(e) => { e.preventDefault(); updateUserPreferences({ orderEmail: prefOrderEmail, newsletter: prefNewsletter }); }} className="space-y-4">
+                <label className="flex items-start gap-3 cursor-pointer p-4 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={prefOrderEmail}
+                    onChange={(e) => setPrefOrderEmail(e.target.checked)}
+                    className="w-4 h-4 rounded border border-zinc-200 accent-[#F9A37E] mt-0.5"
+                  />
+                  <div>
+                    <span className="text-xs font-bold text-zinc-800 block">Order Status Emails</span>
+                    <span className="text-[10px] text-zinc-400 mt-1 block">Receive real-time automated updates regarding print statuses and courier delivery tracking.</span>
+                  </div>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer p-4 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={prefNewsletter}
+                    onChange={(e) => setPrefNewsletter(e.target.checked)}
+                    className="w-4 h-4 rounded border border-zinc-200 accent-[#F9A37E] mt-0.5"
+                  />
+                  <div>
+                    <span className="text-xs font-bold text-zinc-800 block">Marketing Newsletter</span>
+                    <span className="text-[10px] text-zinc-400 mt-1 block">Subscribe to our newsletter for exclusive drops, holiday sales, and special product customizer design ideas.</span>
+                  </div>
+                </label>
+
+                <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-colors shadow-sm">
+                  Save Preferences
+                </button>
+              </form>
 
               {/* Danger zone delete */}
               <div className="p-6 border border-red-200/50 bg-red-50/20 dark:border-red-950/40 dark:bg-red-950/10 rounded-lg space-y-4">

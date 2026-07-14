@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getApiUrl } from '../components/ApiConfig';
 import Link from 'next/link';
-import { ArrowRight, ChevronLeft, ChevronRight, Paintbrush, ShieldCheck, Sparkles, ShoppingBag, Flame, Truck, Layers, Leaf, Palette } from 'lucide-react';
+import { ArrowRight, Paintbrush, ShieldCheck, Sparkles, ShoppingBag, Flame, Truck, Layers, Leaf, Palette, Play } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { CategoryCard } from '../components/CategoryCard';
 import { ReviewCard } from '../components/InfoCards';
@@ -78,7 +78,26 @@ const INITIAL_PRODUCTS: Product[] = [
 ];
 
 /* ─── Hero Slides Data ─── */
-const HERO_SLIDES = [
+interface Slide {
+  id: number | string;
+  badge?: string;
+  headline1?: string;
+  headline2?: string;
+  headline2Color?: string;
+  sub?: string;
+  badges?: { icon: string; label: string }[];
+  bg?: string;
+  accent?: string;
+  textDark?: boolean;
+  productImg?: string;
+  bgImg?: string;
+  headline1Color?: string;
+  subColor?: string;
+  badgeColor?: string;
+  overlayColor?: string;
+}
+
+const HERO_SLIDES: Slide[] = [
   {
     id: 1,
     badge: "NEW COLLECTION",
@@ -133,7 +152,7 @@ const HERO_SLIDES = [
   },
 ];
 
-const FEATURE_ICONS: Record<string, any> = {
+const FEATURE_ICONS: Record<string, React.ElementType> = {
   "100% COTTON": Leaf,
   "HIGH QUALITY PRINT": Palette,
   "DURABLE & LONG LASTING": ShieldCheck,
@@ -147,11 +166,13 @@ const FEATURE_ICONS: Record<string, any> = {
 };
 
 function HeroBanner() {
-  const [slides, setSlides] = useState<any[]>(HERO_SLIDES);
+  const [slides, setSlides] = useState<Slide[]>(HERO_SLIDES);
   const [current, setCurrent] = useState(0);
   const [animKey, setAnimKey] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     fetch(getApiUrl("/banner"))
       .then(res => {
         if (res.ok) return res.json();
@@ -164,6 +185,9 @@ function HeroBanner() {
       })
       .catch(() => {
         // fallback quietly to HERO_SLIDES
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, []);
 
@@ -171,6 +195,58 @@ function HeroBanner() {
     setCurrent(idx);
     setAnimKey(k => k + 1);
   }, []);
+
+  if (loading) {
+    return (
+      <section className="relative overflow-hidden select-none min-h-[500px] sm:min-h-[580px] lg:min-h-[640px] flex items-center bg-[#F4F4F4]">
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
+          {/* Left Column Skeleton */}
+          <div className="space-y-6 text-center lg:text-left order-1">
+            {/* Badge */}
+            <div className="h-6 w-32 mx-auto lg:mx-0 rounded-[36px] bg-zinc-250 animate-pulse" />
+            
+            {/* Headlines */}
+            <div className="space-y-3">
+              <div className="h-12 sm:h-16 w-3/4 mx-auto lg:mx-0 rounded bg-zinc-250 animate-pulse" />
+              <div className="h-12 sm:h-16 w-1/2 mx-auto lg:mx-0 rounded bg-zinc-250 animate-pulse" />
+            </div>
+
+            {/* Subtitle */}
+            <div className="space-y-2 max-w-sm mx-auto lg:mx-0">
+              <div className="h-4 w-full rounded bg-zinc-250 animate-pulse" />
+              <div className="h-4 w-5/6 rounded bg-zinc-250 animate-pulse" />
+            </div>
+
+            {/* Feature Badges */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-1">
+              {[1, 2, 3].map((n) => (
+                <div key={n} className="flex flex-col items-center lg:items-start gap-2">
+                  <div className="w-6 h-6 rounded-full bg-zinc-250 animate-pulse" />
+                  <div className="h-3 w-16 rounded bg-zinc-250 animate-pulse" />
+                </div>
+              ))}
+            </div>
+
+            {/* Button */}
+            <div className="flex justify-center lg:justify-start pt-3">
+              <div className="h-12 w-40 rounded-md bg-zinc-250 animate-pulse" />
+            </div>
+          </div>
+
+          {/* Right Column Skeleton */}
+          <div className="flex items-center justify-center order-2">
+            <div className="w-64 h-64 sm:w-[380px] sm:h-[380px] lg:w-[450px] lg:h-[450px] rounded-full bg-zinc-200/60 animate-pulse flex items-center justify-center">
+              <img
+                src="/logoMainNew.png"
+                alt="Loading Logo"
+                className="w-28 sm:w-44 h-auto object-contain opacity-35 animate-pulse"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const slide = slides[current] || HERO_SLIDES[0]!;
   const slideBadges = slide.badges || (
@@ -237,15 +313,15 @@ function HeroBanner() {
       />
 
       {/* Content wrapper */}
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center relative" style={{ zIndex: 10 }}>
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center relative" style={{ zIndex: 10 }}>
 
         {/* ─── LEFT COLUMN: Text and Actions ─── */}
-        <div key={`content-${animKey}`} className="space-y-6 animate-slide-in-left text-center lg:text-left order-2 lg:order-1">
+        <div key={`content-${animKey}`} className="space-y-3 md:space-y-6 animate-slide-in-left text-center lg:text-left order-1 lg:order-1">
 
           {/* Chip Badge */}
           {slide.badge && (
             <span
-              className="inline-block text-[10px] font-black tracking-[0.2em] uppercase px-4 py-1.5 rounded-sm mb-1"
+              className="inline-block text-[10px] font-black tracking-[0.2em] uppercase px-4 py-1.5 rounded-[36px] mb-1"
               style={{ backgroundColor: badgeColor, color: '#fff' }}
             >
               {slide.badge}
@@ -253,11 +329,11 @@ function HeroBanner() {
           )}
 
           {/* Headlines */}
-          <div className="space-y-1">
+          <div className="space-y-[8px] md:space-y-1">
             <h1
-              className="text-5xl sm:text-[72px] lg:text-[80px] font-black leading-none tracking-tight normal"
+              className="text-3xl sm:text-[65px] lg:text-[70px] font-black leading-none tracking-tight normal"
               style={{
-                fontFamily: "'Arizonia', cursive",
+                fontFamily: "'Faculty Glyphic', sans-serif",
                 color: headline1Color,
                 textShadow: hasBgImg ? '0 2px 12px rgba(0,0,0,0.45)' : 'none',
               }}
@@ -265,9 +341,9 @@ function HeroBanner() {
               {slide.headline1}
             </h1>
             <h2
-              className="text-5xl sm:text-[72px] lg:text-[80px] font-black leading-none tracking-tight normal"
+              className="text-3xl sm:text-[65px] lg:text-[70px] font-black leading-none tracking-tight normal"
               style={{
-                fontFamily: "'Arizonia', cursive",
+                fontFamily: "'Faculty Glyphic', sans-serif",
                 color: slide.headline2Color || '#E5A93B',
                 textShadow: hasBgImg ? '0 2px 12px rgba(0,0,0,0.45)' : 'none',
               }}
@@ -286,7 +362,7 @@ function HeroBanner() {
 
           {/* Feature Badges */}
           <div className="flex flex-wrap items-center justify-center lg:justify-start gap-y-4 pt-1">
-            {slideBadges.map((b: any, idx: number) => {
+            {slideBadges.map((b: { icon: string; label: string }, idx: number) => {
               const labelKey = b.label.replace(/\n/g, ' ').trim().toUpperCase();
               const IconComp = FEATURE_ICONS[labelKey] || Leaf;
               const featureColor = hasBgImg || isDarkTheme ? '#e4e4e7' : '#3f3f46';
@@ -294,7 +370,7 @@ function HeroBanner() {
               return (
                 <div key={idx} className="flex items-center">
                   {idx > 0 && (
-                    <div className="hidden sm:block h-8 w-px mx-4" style={{ backgroundColor: dividerColor }} />
+                    <div className="block h-8 w-px mx-4" style={{ backgroundColor: dividerColor }} />
                   )}
                   <div className="flex flex-col items-center lg:items-start gap-1.5">
                     <IconComp className="w-5 h-5" style={{ color: featureColor }} strokeWidth={1.8} />
@@ -314,7 +390,7 @@ function HeroBanner() {
           <div className="flex justify-center lg:justify-start pt-3">
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 font-black text-sm px-8 py-4 text-white rounded-sm transition-all hover:scale-105 active:scale-95 shadow-lg"
+              className="inline-flex items-center gap-2 font-black text-xs md:text-sm px-6 py-3 md:px-8 md:py-4 text-white rounded-md transition-all hover:scale-105 active:scale-95 shadow-lg"
               style={{ backgroundColor: slide.accent || '#E5A93B' }}
             >
               SHOP NOW &rarr;
@@ -323,11 +399,11 @@ function HeroBanner() {
         </div>
 
         {/* ─── RIGHT COLUMN: Product Image ─── */}
-        <div key={`img-${animKey}`} className="relative flex items-center justify-center order-1 lg:order-2 animate-slide-in-right">
+        <div key={`img-${animKey}`} className="relative flex items-center justify-center order-2 lg:order-2 animate-slide-in-right">
           <img
             src={slide.productImg}
             alt={slide.headline1}
-            className="w-64 h-64 sm:w-[380px] sm:h-[380px] lg:w-[500px] lg:h-[500px] object-contain drop-shadow-2xl transition-all duration-700 ease-in-out hover:scale-105"
+            className="w-64 h-64 sm:w-[380px] sm:h-[380px] lg:w-full lg:h-full object-contain drop-shadow-2xl transition-all duration-700 ease-in-out hover:scale-105"
           />
         </div>
       </div>
@@ -353,9 +429,51 @@ function HeroBanner() {
   );
 }
 
+interface GalleryItem {
+  id: string;
+  mediaUrl: string;
+  link?: string;
+  mediaType: string;
+  isActive: boolean;
+}
+
+const DEFAULT_GALLERY: GalleryItem[] = [
+  { id: "g1", mediaUrl: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=500&auto=format&fit=crop&q=80", link: "https://instagram.com", mediaType: "image", isActive: true },
+  { id: "g2", mediaUrl: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=500&auto=format&fit=crop&q=80", link: "https://instagram.com", mediaType: "image", isActive: true },
+  { id: "g3", mediaUrl: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=500&auto=format&fit=crop&q=80", link: "https://instagram.com", mediaType: "image", isActive: true },
+  { id: "g4", mediaUrl: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=500&auto=format&fit=crop&q=80", link: "https://instagram.com", mediaType: "image", isActive: true },
+];
+
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<'trending' | 'best' | 'new'>('trending');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [_galleryLoading, setGalleryLoading] = useState(true);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 900);
+
+    setGalleryLoading(true);
+    fetch(getApiUrl("/gallery"))
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error("failed");
+      })
+      .then((data) => {
+        if (data && data.length > 0) {
+          setGallery(data);
+        }
+      })
+      .catch(() => {
+        // Fallback quietly
+      })
+      .finally(() => {
+        setGalleryLoading(false);
+      });
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const getFilteredProducts = () => {
     switch (activeTab) {
@@ -364,6 +482,8 @@ export default function HomePage() {
       default:     return INITIAL_PRODUCTS;
     }
   };
+
+  const activeGallery = gallery.length > 0 ? gallery.filter(item => item.isActive) : DEFAULT_GALLERY;
 
   const categories = [
     { name: "T-Shirts",    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80", count: 18, href: "/products" },
@@ -391,7 +511,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="space-y-12 sm:space-y-16 pb-16">
+    <div className="space-y-6 sm:space-y-16 pb-16">
 
       {/* ── HERO SLIDER ── */}
       <HeroBanner />
@@ -427,9 +547,13 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {categories.map((cat) => (
-            <CategoryCard key={cat.name} name={cat.name} image={cat.image} count={cat.count} href={cat.href} />
-          ))}
+          {loading ? (
+            Array(4).fill(0).map((_, i) => <CategoryCard key={i} loading={true} />)
+          ) : (
+            categories.map((cat) => (
+              <CategoryCard key={cat.name} name={cat.name} image={cat.image} count={cat.count} href={cat.href} />
+            ))
+          )}
         </div>
       </section>
 
@@ -459,9 +583,13 @@ export default function HomePage() {
           </div>
         </div>
         <Slider desktopCols={4}>
-          {getFilteredProducts().map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {loading ? (
+            Array(4).fill(0).map((_, i) => <ProductCard key={i} loading={true} />)
+          ) : (
+            getFilteredProducts().map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          )}
         </Slider>
       </section>
 
@@ -473,7 +601,7 @@ export default function HomePage() {
             <p className="text-xs text-[#7A736A] mt-1">From studio to your doorstep in 3 simple steps</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-            {processSteps.map((step, idx) => (
+            {processSteps.map((step, _idx) => (
               <div key={step.name} className="relative p-6 bg-white rounded-lg shadow-sm text-center">
                 <div className="w-12 h-12 bg-[#FBD5C1] text-[#F9A37E] rounded-lg flex items-center justify-center mx-auto mb-4">
                   {step.icon}
@@ -507,16 +635,45 @@ export default function HomePage() {
           <p className="text-xs text-[#7A736A] mt-1">Tag us on Instagram to get featured</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=500&auto=format&fit=crop&q=80",
-            "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=500&auto=format&fit=crop&q=80",
-            "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=500&auto=format&fit=crop&q=80",
-            "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=500&auto=format&fit=crop&q=80",
-          ].map((src, i) => (
-            <div key={i} className="aspect-square rounded-lg overflow-hidden group">
-              <img src={src} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-            </div>
-          ))}
+          {activeGallery.map((item, i) => {
+            const isVideo = item.mediaType === "video";
+            const cardMarkup = (
+              <div className="relative aspect-square rounded-lg overflow-hidden group bg-zinc-100 border border-zinc-200">
+                <img
+                  src={item.mediaUrl}
+                  alt={`Gallery ${i + 1}`}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                {isVideo && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
+                    <div className="w-10 h-10 bg-white/95 text-[#4A453E] rounded-full flex items-center justify-center shadow-md transform group-hover:scale-110 transition-transform duration-300">
+                      <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+
+            if (item.link) {
+              return (
+                <a
+                  key={item.id}
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block cursor-pointer"
+                >
+                  {cardMarkup}
+                </a>
+              );
+            }
+
+            return (
+              <div key={item.id}>
+                {cardMarkup}
+              </div>
+            );
+          })}
         </div>
       </section>
 

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,9 +8,22 @@ import { ProductsModule } from './products/products.module';
 import { UserEntity } from './user/entitites/user.entity';
 import { UserModule } from './user/user.module';
 import { CategoryModule } from './category/category.module';
+import { CategoryEntity } from './category/entities/category.entity';
 import { BannerEntity } from './banner/entities/banner.entity';
 import { BannerModule } from './banner/banner.module';
+import { ProductEntity } from './products/entities/product.entity';
+import { OrderEntity } from './orders/entities/order.entity';
+import { AboutEntity } from './about/entities/about.entity';
+import { AboutModule } from './about/about.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { ContactEntity } from './contact/entities/contact.entity';
+import { ContactModule } from './contact/contact.module';
+import { SettingsEntity } from './settings/entities/settings.entity';
+import { SettingsModule } from './settings/settings.module';
+import { NewsletterEntity } from './newsletter/entities/newsletter.entity';
+import { NewsletterModule } from './newsletter/newsletter.module';
+import { GalleryEntity } from './gallery/entities/gallery.entity';
+import { GalleryModule } from './gallery/gallery.module';
 
 @Module({
   imports: [
@@ -28,7 +40,18 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
           return {
             type: 'postgres',
             database: databaseUrl,
-            entities: [UserEntity, BannerEntity],
+            entities: [
+              UserEntity,
+              BannerEntity,
+              CategoryEntity,
+              ProductEntity,
+              OrderEntity,
+              AboutEntity,
+              ContactEntity,
+              SettingsEntity,
+              NewsletterEntity,
+              GalleryEntity,
+            ],
             autoLoadEntities: true,
             synchronize: true,
           };
@@ -37,7 +60,18 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
         return {
           type: 'postgres',
           url: databaseUrl,
-          entities: [UserEntity, BannerEntity],
+          entities: [
+            UserEntity,
+            BannerEntity,
+            CategoryEntity,
+            ProductEntity,
+            OrderEntity,
+            AboutEntity,
+            ContactEntity,
+            SettingsEntity,
+            NewsletterEntity,
+            GalleryEntity,
+          ],
           autoLoadEntities: true,
           synchronize: true,
           ssl:
@@ -52,7 +86,12 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     OrdersModule,
     CategoryModule,
     BannerModule,
+    AboutModule,
     CloudinaryModule,
+    ContactModule,
+    SettingsModule,
+    NewsletterModule,
+    GalleryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -14,8 +14,11 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "PrintHub - Premium Print-on-Demand Storefront",
+  title: "Kaiva Fashion - Premium Print-on-Demand Storefront",
   description: "Create and order premium custom-designed apparel, hoodies, and accessories instantly.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

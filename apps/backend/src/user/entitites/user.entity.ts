@@ -12,6 +12,12 @@ export class UserEntity {
   password: string;
   @Column({ nullable: true })
   avatar?: string;
+  @Column({ nullable: true })
+  phone?: string;
+  @Column({ type: 'json', nullable: true })
+  addresses?: any[];
+  @Column({ type: 'json', nullable: true })
+  preferences?: any;
   @Column()
   role: string;
   @Column()

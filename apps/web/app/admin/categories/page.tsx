@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useRef } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Plus, Edit2, Trash2, ArrowLeft, Save, Upload, X, Check, Search } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Plus, Edit2, Trash2, ArrowLeft, Save, Upload, X, Search } from "lucide-react";
 import { AdminTopbar } from "../AdminSidebar";
 import { useApp } from "../../../components/AppContext";
+import { getApiUrl } from "../../../components/ApiConfig";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const INITIAL_CATEGORIES = [
   { id: "c1", name: "T-Shirts", count: 18, slug: "t-shirts", image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300&auto=format&fit=crop&q=80", status: "Active" },
   { id: "c2", name: "Hoodies", count: 12, slug: "hoodies", image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=300&auto=format&fit=crop&q=80", status: "Active" },
@@ -45,7 +45,7 @@ function CategoryForm({ initial, onSave, onCancel }: {
   const inputCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3.5 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] transition-all placeholder:text-zinc-400";
 
   return (
-    <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm space-y-5 max-w-2xl">
+    <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm space-y-5 max-w-full">
       <div className="flex items-center justify-between">
         <h3 className="font-extrabold text-sm text-zinc-900">{initial?.name ? `Edit: ${initial.name}` : "Add New Category"}</h3>
         <button onClick={onCancel} className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400 transition-colors"><X className="w-4 h-4" /></button>
@@ -127,40 +127,122 @@ function CategoryForm({ initial, onSave, onCancel }: {
 
 export default function AdminCategoriesPage() {
   const { showToast } = useApp();
-  const [categories, setCategories] = useState<Category[]>(INITIAL_CATEGORIES);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [_loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [mode, setMode] = useState<"table" | "add" | "edit">("table");
   const [editTarget, setEditTarget] = useState<Category | null>(null);
+
+  useEffect(() => {
+    fetch(getApiUrl("/category"))
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to load categories");
+      })
+      .then(data => {
+        setCategories(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        showToast("Error", err.message || "Failed to load categories.", "error");
+        setCategories([]);
+        setLoading(false);
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filtered = categories.filter(
     (c) => c.name.toLowerCase().includes(search.toLowerCase()) || c.slug.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleAdd = (data: Omit<Category, "id">) => {
-    const id = "c" + (categories.length + 1);
-    setCategories([...categories, { id, ...data }]);
-    showToast("Category Added", `${data.name} was created.`, "success");
-    setMode("table");
+    fetch(getApiUrl("/category"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    })
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to add category");
+      })
+      .then(newCat => {
+        setCategories([...categories, newCat]);
+        showToast("Category Added", `${data.name} was created.`, "success");
+        setMode("table");
+      })
+      .catch(err => {
+        showToast("Error", err.message || "Failed to add category.", "error");
+      });
   };
 
   const handleEdit = (data: Omit<Category, "id">) => {
     if (!editTarget) return;
-    setCategories(categories.map((c) => c.id === editTarget.id ? { ...c, ...data } : c));
-    showToast("Category Updated", "Category changes saved.", "success");
-    setMode("table");
-    setEditTarget(null);
+    fetch(getApiUrl(`/category/${editTarget.id}`), {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    })
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to update category");
+      })
+      .then(updatedCat => {
+        setCategories(categories.map((c) => c.id === editTarget.id ? updatedCat : c));
+        showToast("Category Updated", "Category changes saved.", "success");
+        setMode("table");
+        setEditTarget(null);
+      })
+      .catch(err => {
+        showToast("Error", err.message || "Failed to update category.", "error");
+      });
   };
 
   const handleDelete = (id: string) => {
     const cat = categories.find((c) => c.id === id);
-    if (confirm(`Delete category "${cat?.name}"?`)) {
-      setCategories(categories.filter((c) => c.id !== id));
-      showToast("Deleted", `${cat?.name} removed.`, "info");
+    if (!cat) return;
+    if (confirm(`Delete category "${cat.name}"?`)) {
+      fetch(getApiUrl(`/category/${id}`), {
+        method: "DELETE"
+      })
+        .then(res => {
+          if (res.ok) {
+            setCategories(categories.filter((c) => c.id !== id));
+            showToast("Deleted", `${cat.name} removed.`, "info");
+          } else {
+            throw new Error("Failed to delete category");
+          }
+        })
+        .catch(err => {
+          showToast("Error", err.message || "Failed to delete category.", "error");
+        });
     }
   };
 
   const toggleStatus = (id: string) => {
-    setCategories(categories.map((c) => c.id === id ? { ...c, status: c.status === "Active" ? "Inactive" : "Active" } : c));
+    const cat = categories.find((c) => c.id === id);
+    if (!cat) return;
+    const nextStatus = cat.status === "Active" ? "Inactive" : "Active";
+    fetch(getApiUrl(`/category/${id}`), {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ status: nextStatus })
+    })
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to update category status");
+      })
+      .then(updatedCat => {
+        setCategories(categories.map((c) => c.id === id ? updatedCat : c));
+      })
+      .catch(err => {
+        showToast("Error", err.message || "Failed to update category status.", "error");
+      });
   };
 
   if (mode === "add" || mode === "edit") {

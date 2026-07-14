@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useApp, Product } from '../../components/AppContext';
+import { Product } from '../../components/AppContext';
 import { Breadcrumb, EmptyState } from '../../components/UIComponents';
 import { ProductCard } from '../../components/ProductCard';
 import { SearchBar } from '../../components/SearchBar';
@@ -63,7 +63,7 @@ function SearchPageContent() {
 
       <section className="space-y-4 max-w-xl">
         <h1 className="text-3xl font-extrabold text-zinc-909 dark:text-white tracking-tight">Search Results</h1>
-        <p className="text-xs text-zinc-400">Search details for: <span className="font-extrabold text-zinc-700 dark:text-zinc-300 font-mono">"{query || "All Products"}"</span></p>
+        <p className="text-xs text-zinc-400">Search details for: <span className="font-extrabold text-zinc-700 dark:text-zinc-300 font-mono">&ldquo;{query || "All Products"}&rdquo;</span></p>
       </section>
 
       {/* Central Searchbar input */}

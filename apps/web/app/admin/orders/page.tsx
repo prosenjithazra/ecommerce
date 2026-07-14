@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminTopbar } from "../AdminSidebar";
-import { Search, ChevronDown, Check } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
+import { useApp } from "../../../components/AppContext";
+import { getApiUrl } from "../../../components/ApiConfig";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const INITIAL_ORDERS = [
   { id: "ORD-9872", customer: "Jane Doe", email: "jane.doe@example.com", date: "2026-07-08", items: 2, total: 4598, status: "Delivered" },
   { id: "ORD-4819", customer: "Alex Mercer", email: "alex.mercer@gmail.com", date: "2026-07-12", items: 3, total: 8040, status: "Processing" },
@@ -21,10 +24,40 @@ const STATUS_STYLES: Record<string, string> = {
   Cancelled: "bg-red-50 text-red-600 border-red-100",
 };
 
+interface Order {
+  id: string;
+  customer: string;
+  email: string;
+  date: string;
+  items: number;
+  total: number;
+  status: string;
+}
+
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState(INITIAL_ORDERS);
+  const { showToast } = useApp();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("All");
+
+  useEffect(() => {
+    fetch(getApiUrl("/orders"))
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to load orders");
+      })
+      .then(data => {
+        setOrders(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        showToast("Error", err.message || "Failed to load orders.", "error");
+        setOrders([]);
+        setLoading(false);
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filtered = orders.filter((o) => {
     const matchSearch = o.id.toLowerCase().includes(search.toLowerCase()) || o.customer.toLowerCase().includes(search.toLowerCase());
@@ -33,8 +66,36 @@ export default function AdminOrdersPage() {
   });
 
   const updateStatus = (id: string, status: string) => {
-    setOrders((prev) => prev.map((o) => o.id === id ? { ...o, status } : o));
+    fetch(getApiUrl(`/orders/${id}`), {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ status })
+    })
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to update order status");
+      })
+      .then(updatedOrder => {
+        setOrders((prev) => prev.map((o) => o.id === id ? updatedOrder : o));
+        showToast("Status Updated", `Order ${id} status changed to ${status}.`, "success");
+      })
+      .catch(err => {
+        showToast("Error", err.message || "Failed to update status.", "error");
+      });
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col h-full overflow-hidden">
+        <AdminTopbar title="Orders" subtitle="Loading..." />
+        <main className="flex-1 flex items-center justify-center p-8 bg-[#FDFAF6]">
+          <Loader2 className="w-8 h-8 text-[#F9A37E] animate-spin" />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full overflow-hidden">

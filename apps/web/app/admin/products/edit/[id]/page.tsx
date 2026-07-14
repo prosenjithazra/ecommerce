@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Upload, X, ImagePlus, Save, Package } from "lucide-react";
+import { ArrowLeft, Upload, X, ImagePlus, Save, Package, Loader2 } from "lucide-react";
 import { AdminTopbar } from "../../../AdminSidebar";
 import { useApp } from "../../../../../components/AppContext";
+import { getApiUrl } from "../../../../../components/ApiConfig";
 
 const PRODUCT_DB: Record<string, { name: string; price: string; originalPrice: string; category: string; description: string; inStock: boolean; tag: string; images: string[]; selectedSizes: string[]; selectedColors: string[] }> = {
   p1: { name: "Premium Soft Cotton Tee", price: "2549", originalPrice: "3399", category: "T-Shirts", description: "Tailored with a modern fit and crafted from ultra-soft combed cotton.", inStock: true, tag: "Best Seller", images: ["https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=200&auto=format&fit=crop&q=80"], selectedSizes: ["S", "M", "L", "XL"], selectedColors: ["White", "Black"] },
@@ -27,21 +28,48 @@ export default function EditProductPage() {
   const id = params.id as string;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const existing = PRODUCT_DB[id];
   const [form, setForm] = useState({
-    name: existing?.name || "",
-    price: existing?.price || "",
-    originalPrice: existing?.originalPrice || "",
-    category: existing?.category || "T-Shirts",
-    description: existing?.description || "",
-    inStock: existing?.inStock ?? true,
-    selectedSizes: existing?.selectedSizes || ([] as string[]),
-    selectedColors: existing?.selectedColors || ([] as string[]),
-    tag: existing?.tag || "",
+    name: "",
+    price: "",
+    originalPrice: "",
+    category: "T-Shirts",
+    description: "",
+    inStock: true,
+    selectedSizes: [] as string[],
+    selectedColors: [] as string[],
+    tag: "",
   });
-  const [existingImages] = useState<string[]>(existing?.images || []);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newImages, setNewImages] = useState<{ file: File; preview: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(getApiUrl(`/products/${id}`))
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to load product details");
+      })
+      .then(product => {
+        setForm({
+          name: product.name,
+          price: String(product.price),
+          originalPrice: String(product.originalPrice),
+          category: product.category,
+          description: product.description || "",
+          inStock: product.inStock,
+          selectedSizes: product.sizes || [],
+          selectedColors: (product.colors || []).map((c: any) => c.name),
+          tag: product.tag || "",
+        });
+        setExistingImages(product.images || [product.image].filter(Boolean));
+        setLoading(false);
+      })
+      .catch(err => {
+        showToast("Error", err.message || "Failed to load product details.", "error");
+        setLoading(false);
+      });
+  }, [id]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -62,19 +90,65 @@ export default function EditProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 800));
-    showToast("Product Updated", `${form.name} has been updated.`, "success");
-    router.push("/admin/products");
+    
+    const colors = form.selectedColors
+      .map((name) => COLORS.find((c) => c.name === name))
+      .filter((c): c is { name: string; hex: string } => !!c);
+
+    const payload = {
+      name: form.name,
+      price: parseFloat(form.price) || 0,
+      originalPrice: parseFloat(form.originalPrice) || parseFloat(form.price) || 0,
+      category: form.category,
+      description: form.description,
+      inStock: form.inStock,
+      tag: form.tag,
+      sizes: form.selectedSizes,
+      colors,
+      image: newImages[0]?.preview || existingImages[0] || "",
+      images: [...existingImages, ...newImages.map((img) => img.preview)]
+    };
+
+    fetch(getApiUrl(`/products/${id}`), {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to update product");
+      })
+      .then(() => {
+        showToast("Product Updated", `${form.name} has been updated.`, "success");
+        router.push("/admin/products");
+      })
+      .catch(err => {
+        showToast("Error", err.message || "Failed to update product.", "error");
+        setSubmitting(false);
+      });
   };
 
   const inputCls = "w-full bg-white border border-zinc-200 rounded-lg py-3 px-4 text-xs font-medium text-zinc-800 outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/10 transition-all placeholder:text-zinc-400";
   const labelCls = "block text-xs font-extrabold text-zinc-600 mb-1.5";
 
+  if (loading) {
+    return (
+      <div className="flex flex-col h-full overflow-hidden">
+        <AdminTopbar title="Edit Product" subtitle="Loading..." />
+        <main className="flex-1 flex items-center justify-center p-8 bg-[#FDFAF6]">
+          <Loader2 className="w-8 h-8 text-[#F9A37E] animate-spin" />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <AdminTopbar title="Edit Product" subtitle={form.name || "Loading..."} />
       <main className="flex-1 overflow-y-auto p-5 sm:p-8">
-        <form onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-6">
+        <form onSubmit={handleSubmit} className="max-w-full mx-auto space-y-6">
           <Link href="/admin/products" className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-[#F9A37E] transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Products
           </Link>
