@@ -4,11 +4,21 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '../../components/AppContext';
 import { Breadcrumb } from '../../components/UIComponents';
+import { CustomGarmentPreview } from '../../components/CustomGarmentPreview';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, addresses, addAddress } = useApp();
-  const [selectedAddressId, setSelectedAddressId] = useState(addresses[0]?.id || "");
+  const { cart, addresses, addAddress, currentUser, profileLoading } = useApp();
+
+  React.useEffect(() => {
+    if (profileLoading) return;
+    const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+    if (!token && !currentUser) {
+      router.push('/login');
+    }
+  }, [currentUser, profileLoading, router]);
+
+  const [selectedAddressId, setSelectedAddressId] = useState("");
   const [sameAsBilling, setSameAsBilling] = useState(true);
   const [shippingMethod, setShippingMethod] = useState<'standard' | 'express'>('standard');
   const [gstNumber, setGstNumber] = useState("");
@@ -17,6 +27,34 @@ export default function CheckoutPage() {
   const [newAddr, setNewAddr] = useState({
     fullName: "", street: "", city: "", state: "", zip: "", country: "United States", phone: ""
   });
+
+  React.useEffect(() => {
+    if (addresses.length > 0 && !selectedAddressId) {
+      const def = addresses.find(a => a.isDefault) || addresses[0];
+      if (def) setSelectedAddressId(def.id);
+    }
+  }, [addresses, selectedAddressId]);
+
+  if (profileLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-16 pt-8">
+        <div className="h-4 w-48 bg-zinc-200 animate-pulse rounded" />
+        <div className="h-8 w-32 bg-zinc-200 animate-pulse rounded" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="h-40 w-full bg-white border border-[#E8E2D6] rounded-lg p-5 animate-pulse space-y-3">
+              <div className="h-4 w-1/4 bg-zinc-200 rounded" />
+              <div className="h-10 w-full bg-zinc-100 rounded" />
+            </div>
+          </div>
+          <div className="h-60 w-full bg-white border border-[#E8E2D6] rounded-lg p-5 animate-pulse space-y-4">
+            <div className="h-6 w-1/2 bg-zinc-200 rounded" />
+            <div className="h-12 w-full bg-zinc-100 rounded" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const tax = subtotal * 0.18;
@@ -177,9 +215,12 @@ export default function CheckoutPage() {
             {cart.map(item => (
               <div key={item.id} className="flex gap-3 justify-between items-center text-xs">
                 <div className="flex gap-2 items-center min-w-0">
-                  <div className="w-9 h-9 bg-[#E8E2D6] rounded-lg overflow-hidden flex-shrink-0">
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                  </div>
+                  <CustomGarmentPreview
+                    customDesign={item.customDesign}
+                    defaultImage={item.image}
+                    view="front"
+                    className="w-9 h-9"
+                  />
                   <span className="font-bold text-[#4A453E] truncate">
                     {item.name} <span className="text-[10px] text-[#A89B8A]">×{item.quantity}</span>
                   </span>

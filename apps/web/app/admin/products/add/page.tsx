@@ -219,21 +219,23 @@ export default function AddProductPage() {
 
                 <div>
                   <label className={labelCls}>Product Tag</label>
-                  <select
-                    value={form.tag}
-                    onChange={(e) => setForm((p) => ({ ...p, tag: e.target.value }))}
-                    className={inputCls}
-                  >
-                    <option value="">No Tag</option>
-                    <option value="Best Seller">Best Seller</option>
-                    <option value="New">New Arrival</option>
-                    <option value="Sale">On Sale</option>
-                    <option value="Eco">Eco Friendly</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={form.tag}
+                      onChange={(e) => setForm((p) => ({ ...p, tag: e.target.value }))}
+                      className="w-full bg-white border border-zinc-200 rounded-lg py-3 pl-4 pr-10 text-xs font-semibold text-zinc-800 outline-none focus:border-[#F9A37E] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer"
+                    >
+                      <option value="">No Tag</option>
+                      <option value="Best Seller">Best Seller</option>
+                      <option value="New">New Arrival</option>
+                      <option value="Sale">On Sale</option>
+                      <option value="Eco">Eco Friendly</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
-
+ 
             {/* RIGHT COLUMN: Details */}
             <div className="lg:col-span-3 space-y-4">
               {/* Basic Info */}
@@ -241,7 +243,7 @@ export default function AddProductPage() {
                 <h3 className="font-extrabold text-sm text-zinc-800 flex items-center gap-2">
                   <Package className="w-4 h-4 text-[#F9A37E]" /> Product Details
                 </h3>
-
+ 
                 <div>
                   <label className={labelCls}>Product Name <span className="text-red-400">*</span></label>
                   <input
@@ -253,7 +255,7 @@ export default function AddProductPage() {
                     className={inputCls}
                   />
                 </div>
-
+ 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className={labelCls}>Selling Price (₹) <span className="text-red-400">*</span></label>
@@ -281,18 +283,20 @@ export default function AddProductPage() {
                     />
                   </div>
                 </div>
-
+ 
                 <div>
                   <label className={labelCls}>Category <span className="text-red-400">*</span></label>
-                  <select
-                    value={form.category}
-                    onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
-                    className={inputCls}
-                  >
-                    {CATEGORIES.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={form.category}
+                      onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
+                      className="w-full bg-white border border-zinc-200 rounded-lg py-3 pl-4 pr-10 text-xs font-semibold text-zinc-800 outline-none focus:border-[#F9A37E] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer"
+                    >
+                      {CATEGORIES.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 <div>

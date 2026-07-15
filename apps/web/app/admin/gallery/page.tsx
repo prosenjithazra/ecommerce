@@ -75,17 +75,29 @@ function GalleryForm({ initial, onSave, onCancel }: {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Media Type</label>
-            <select value={mediaType} onChange={(e) => setMediaType(e.target.value)} className={inputCls}>
-              <option value="image">Image Post</option>
-              <option value="video">Video Reel / YouTube</option>
-            </select>
+            <div className="relative">
+              <select
+                value={mediaType}
+                onChange={(e) => setMediaType(e.target.value)}
+                className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 pl-3.5 pr-10 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer font-bold"
+              >
+                <option value="image">Image Post</option>
+                <option value="video">Video Reel / YouTube</option>
+              </select>
+            </div>
           </div>
           <div>
             <label className={labelCls}>Status</label>
-            <select value={isActive ? "true" : "false"} onChange={(e) => setIsActive(e.target.value === "true")} className={inputCls}>
-              <option value="true">Active (Show)</option>
-              <option value="false">Inactive (Hide)</option>
-            </select>
+            <div className="relative">
+              <select
+                value={isActive ? "true" : "false"}
+                onChange={(e) => setIsActive(e.target.value === "true")}
+                className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 pl-3.5 pr-10 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer font-bold"
+              >
+                <option value="true">Active (Show)</option>
+                <option value="false">Inactive (Hide)</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>

@@ -1,39 +1,104 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useApp } from '../../../../components/AppContext';
 import { Breadcrumb } from '../../../../components/UIComponents';
-import { Truck, CheckCircle2, Clock, MapPin } from 'lucide-react';
+import { Truck, CheckCircle2, Clock, MapPin, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { getApiUrl } from '../../../../components/ApiConfig';
 
 export default function TrackOrderPage() {
   const params = useParams();
   const { orders } = useApp();
+  const [order, setOrder] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const orderId = (params?.id as string) || "";
-  const order = orders.find(o => o.id === orderId);
+
+  useEffect(() => {
+    // 1. Look in context orders
+    const found = orders.find(o => o.id === orderId);
+    if (found) {
+      setOrder(found);
+      setLoading(false);
+      return;
+    }
+
+    // 2. Fetch directly from backend
+    setLoading(true);
+    fetch(getApiUrl(`/orders/${orderId}`))
+      .then(res => {
+        if (!res.ok) throw new Error("Order not found");
+        return res.text().then(text => text ? JSON.parse(text) : null);
+      })
+      .then(o => {
+        if (!o) {
+          setOrder(null);
+          setLoading(false);
+          return;
+        }
+        // Map backend order structure
+        const mapped = {
+          id: o.id,
+          date: o.date || new Date(o.createdAt).toLocaleDateString(),
+          status: o.status,
+          total: Number(o.total || 0),
+          address: o.itemsJson && Array.isArray(o.itemsJson) && o.itemsJson[0]?.address ? o.itemsJson[0].address : {
+            id: 'default', fullName: o.customer || 'Customer', street: 'Address details on invoice', city: '', state: '', zip: '', country: '', phone: '', isDefault: true
+          },
+          paymentMethod: o.paymentMethod || 'CARD',
+          paymentId: o.paymentId,
+          paymentStatus: o.paymentStatus,
+          trackingNumber: o.trackingNumber,
+          trackingTimeline: o.trackingTimeline,
+          cancelReason: o.cancelReason,
+          returnReason: o.returnReason,
+          itemsJson: o.itemsJson,
+          email: o.email
+        };
+        setOrder(mapped);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Error fetching tracking info:", err);
+        setOrder(null);
+        setLoading(false);
+      });
+  }, [orderId, orders]);
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-32 flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="w-8 h-8 text-[#F9A37E] animate-spin" />
+        <p className="text-xs text-zinc-450 font-bold">Loading tracking information...</p>
+      </div>
+    );
+  }
 
   if (!order) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center space-y-4">
         <h2 className="text-xl font-bold">Order not found</h2>
-        <Link href="/orders" className="text-indigo-600 hover:underline">Back to Orders</Link>
+        <Link href="/profile" className="text-indigo-650 hover:underline">Back to Profile</Link>
       </div>
     );
   }
 
-  // Fallback default timeline if not populated
+  // Calculate timeline progress dynamically
+  const statusOrder = ["Pending", "Processing", "Shipped", "Delivered"];
+  const currentIdx = statusOrder.indexOf(order.status);
+
   const timeline = order.trackingTimeline || [
-    { status: "Order Placed", date: order.date, desc: "Order confirmed and logged.", done: true },
-    { status: "Processing & Print", date: "Estimated Tomorrow", desc: "Design printing onto base blank.", done: false },
-    { status: "Shipped", date: "Estimated 2 days", desc: "Dispatched via DHL Express.", done: false },
-    { status: "Delivered", date: "Estimated 5 days", desc: "Package delivered at doorstep.", done: false }
+    { status: "Order Placed", date: order.date, desc: "Order confirmed and logged.", done: currentIdx >= 0 || order.status === 'Cancelled' || order.status === 'Returned' },
+    { status: "Processing & Print", date: "Estimated Tomorrow", desc: "Design printing onto base blank.", done: currentIdx >= 1 },
+    { status: "Shipped", date: "Estimated 2 days", desc: "Dispatched via courier partner.", done: currentIdx >= 2 },
+    { status: "Delivered", date: "Estimated 5 days", desc: "Package delivered at doorstep.", done: currentIdx >= 3 }
   ];
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-8 pb-8 sm:pb-16">
-      <Breadcrumb items={[{ name: "My Orders", href: "/orders" }, { name: order.id, href: `/orders/${order.id}` }, { name: "Track" }]} />
+      <Breadcrumb items={[{ name: "My Profile", href: "/profile" }, { name: `Order ${order.id}`, href: `/orders/${order.id}` }, { name: "Track" }]} />
 
       <div className="space-y-1">
         <span className="text-[10px] font-extrabold text-indigo-500 uppercase tracking-wider flex items-center gap-1">
@@ -47,14 +112,26 @@ export default function TrackOrderPage() {
         </p>
       </div>
 
+      {order.status === 'Cancelled' && (
+        <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs font-bold">
+          ⚠️ Notice: This order has been Cancelled.
+        </div>
+      )}
+
+      {order.status === 'Returned' && (
+        <div className="p-4 bg-violet-50 border border-violet-200 text-violet-750 rounded-lg text-xs font-bold">
+          ℹ️ Notice: This order has been Returned.
+        </div>
+      )}
+
       {/* Main timeline tracker */}
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-3 sm:p-10 shadow">
         <div className="relative border-l border-zinc-200 dark:border-zinc-800 ml-2 sm:ml-3 pl-4 sm:pl-6 sm:pl-8 space-y-5 sm:space-y-8 py-1 sm:py-2">
           
-          {timeline.map((step, index) => (
+          {timeline.map((step: any, index: number) => (
             <div key={index} className="relative">
               {/* Timeline circle icon */}
-              <span className={`absolute -left-[32px] sm:-left-[45px] top-0 sm:top-1.5 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-white dark:bg-zinc-900 ${step.done ? 'text-emerald-500' : 'text-zinc-300 dark:border-zinc-800'}`}>
+              <span className={`absolute -left-[32px] sm:-left-[54px] top-0 sm:top-1.5 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-white dark:bg-zinc-900 ${step.done ? 'text-emerald-500' : 'text-zinc-300 dark:border-zinc-800'}`}>
                 {step.done ? (
                   <CheckCircle2 className="w-3.5 h-3.5 sm:w-5 sm:h-5 fill-white dark:fill-zinc-900" />
                 ) : (
@@ -65,7 +142,7 @@ export default function TrackOrderPage() {
               {/* Step info */}
               <div className="space-y-1">
                 <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
-                  <h4 className={`font-extrabold text-xs sm:text-sm ${step.done ? 'text-zinc-909 dark:text-white' : 'text-zinc-400'}`}>
+                  <h4 className={`font-extrabold text-xs sm:text-sm ${step.done ? 'text-zinc-900 dark:text-white' : 'text-zinc-400'}`}>
                     {step.status}
                   </h4>
                   <span className="text-[9px] sm:text-[10px] text-zinc-400 font-medium">{step.date}</span>
@@ -85,8 +162,8 @@ export default function TrackOrderPage() {
         <MapPin className="w-6 h-6 text-indigo-500 mt-0.5 flex-shrink-0" />
         <div className="text-xs space-y-1">
           <span className="font-extrabold text-zinc-900 dark:text-white block">Delivery Destination</span>
-          <p className="text-zinc-500 dark:text-zinc-400">{order.address.fullName}</p>
-          <p className="text-zinc-550 dark:text-zinc-400">{order.address.street}, {order.address.city}, {order.address.state} {order.address.zip}</p>
+          <p className="text-zinc-500 dark:text-zinc-400">{order.address?.fullName || "Guest"}</p>
+          <p className="text-zinc-550 dark:text-zinc-400">{order.address?.street}, {order.address?.city}, {order.address?.state} {order.address?.zip}</p>
         </div>
       </div>
     </div>

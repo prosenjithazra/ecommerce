@@ -1,30 +1,75 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { DollarSign, ShoppingBag, Users, Layers, TrendingUp, TrendingDown, Package, AlertCircle, ArrowRight } from "lucide-react";
+import { DollarSign, ShoppingBag, Users, Layers, TrendingUp, Package, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
 import { AdminTopbar } from "./AdminSidebar";
-
-const stats = [
-  { label: "Total Revenue", value: "₹1,24,492", sub: "+14.5% this week", icon: DollarSign, up: true, color: "from-emerald-500 to-emerald-600" },
-  { label: "Total Orders", value: "142", sub: "12 pending fulfilment", icon: ShoppingBag, up: true, color: "from-[#F9A37E] to-[#e8855a]" },
-  { label: "Registered Users", value: "38", sub: "+3 this week", icon: Users, up: true, color: "from-violet-500 to-violet-600" },
-  { label: "Product Catalog", value: "24 SKUs", sub: "3 out of stock", icon: Layers, up: false, color: "from-sky-500 to-sky-600" },
-];
-
-const recentOrders = [
-  { id: "ORD-9872", customer: "Jane Doe", total: "₹4,598", status: "Delivered", date: "2026-07-08" },
-  { id: "ORD-4819", customer: "Alex Mercer", total: "₹8,040", status: "Processing", date: "2026-07-12" },
-  { id: "ORD-2391", customer: "Sarah Connor", total: "₹2,299", status: "Pending", date: "2026-07-13" },
-];
+import { getApiUrl } from "../../components/ApiConfig";
+import { useApp } from "../../components/AppContext";
 
 const statusColors: Record<string, string> = {
   Delivered: "bg-emerald-50 text-emerald-700 border-emerald-100",
   Processing: "bg-amber-50 text-amber-700 border-amber-100",
   Pending: "bg-zinc-100 text-zinc-600 border-zinc-200",
-  Cancelled: "bg-red-50 text-red-600 border-red-100",
+  Shipped: "bg-sky-50 text-sky-700 border-sky-100",
+  Cancelled: "bg-red-50 text-red-650 border-red-100",
+  Returned: "bg-violet-50 text-violet-700 border-violet-100",
 };
 
 export default function AdminDashboardPage() {
+  const { showToast } = useApp();
+  const [orders, setOrders] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      fetch(getApiUrl("/orders")).then(r => r.ok ? r.json() : []),
+      fetch(getApiUrl("/products")).then(r => r.ok ? r.json() : []),
+      fetch(getApiUrl("/user")).then(r => r.ok ? r.json() : []),
+    ])
+      .then(([ordersData, productsData, usersData]) => {
+        setOrders(ordersData);
+        setProducts(productsData);
+        setUsers(usersData);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Dashboard fetch failed:", err);
+        showToast("Error", "Failed to load real-time statistics.", "error");
+        setLoading(false);
+      });
+  }, [showToast]);
+
+  // Calculations
+  const nonCancelledOrders = orders.filter(o => o.status !== "Cancelled" && o.status !== "Returned");
+  const totalRevenue = nonCancelledOrders.reduce((sum, o) => sum + Number(o.total || 0), 0);
+  const pendingCount = orders.filter(o => o.status === "Pending" || o.status === "Processing").length;
+
+  const stats = [
+    { label: "Total Revenue", value: `₹${totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: "Revenue from active orders", icon: DollarSign, up: true, color: "from-emerald-500 to-emerald-600" },
+    { label: "Total Orders", value: orders.length.toString(), sub: `${pendingCount} pending fulfillment`, icon: ShoppingBag, up: true, color: "from-[#F9A37E] to-[#e8855a]" },
+    { label: "Registered Users", value: users.length.toString(), sub: "Total customer accounts", icon: Users, up: true, color: "from-violet-500 to-violet-600" },
+    { label: "Product Catalog", value: `${products.length} SKUs`, sub: "Active listed items", icon: Layers, up: true, color: "from-sky-500 to-sky-600" },
+  ];
+
+  // Slice last 5 orders
+  const recentOrders = [...orders]
+    .sort((a, b) => new Date(b.createdAt || b.date || 0).getTime() - new Date(a.createdAt || a.date || 0).getTime())
+    .slice(0, 5);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col h-full overflow-hidden">
+        <AdminTopbar title="Dashboard Overview" subtitle="Loading..." />
+        <main className="flex-1 flex items-center justify-center p-8 bg-[#FDFAF6]">
+          <Loader2 className="w-8 h-8 text-[#F9A37E] animate-spin" />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <AdminTopbar title="Dashboard Overview" subtitle="Welcome back, your store is performing well" />
@@ -41,8 +86,8 @@ export default function AdminDashboardPage() {
                   <div>
                     <p className="text-xs font-semibold text-zinc-400 mb-1">{s.label}</p>
                     <p className="text-2xl font-black text-zinc-900">{s.value}</p>
-                    <p className={`text-[10px] font-bold mt-1 flex items-center gap-1 ${s.up ? "text-emerald-600" : "text-red-500"}`}>
-                      {s.up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                    <p className="text-[10px] font-bold mt-1 flex items-center gap-1 text-emerald-600">
+                      <TrendingUp className="w-3 h-3" />
                       {s.sub}
                     </p>
                   </div>
@@ -66,20 +111,31 @@ export default function AdminDashboardPage() {
                 View All <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
-            <div className="divide-y divide-zinc-100">
-              {recentOrders.map((o) => (
-                <div key={o.id} className="px-6 py-3.5 flex items-center gap-4 hover:bg-zinc-50 transition-colors">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-extrabold text-zinc-800">{o.id}</p>
-                    <p className="text-[10px] text-zinc-400 font-medium">{o.customer} · {o.date}</p>
+            
+            {recentOrders.length === 0 ? (
+              <div className="p-8 text-center text-zinc-400 text-xs italic">
+                No orders received yet.
+              </div>
+            ) : (
+              <div className="divide-y divide-zinc-100">
+                {recentOrders.map((o) => (
+                  <div key={o.id} className="px-6 py-3.5 flex items-center gap-4 hover:bg-zinc-50 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-extrabold text-zinc-800 truncate">{o.id}</p>
+                      <p className="text-[10px] text-zinc-400 font-medium truncate">
+                        {o.customer || o.email || "Guest User"} · {o.date || new Date(o.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <span className="font-extrabold text-xs text-zinc-900">
+                      ₹{Number(o.total || 0).toLocaleString('en-IN', { minimumFractionDigits: 0 })}
+                    </span>
+                    <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full border uppercase tracking-wide ${statusColors[o.status] || "bg-zinc-100 text-zinc-600"}`}>
+                      {o.status}
+                    </span>
                   </div>
-                  <span className="font-extrabold text-xs text-zinc-900">{o.total}</span>
-                  <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full border uppercase tracking-wide ${statusColors[o.status]}`}>
-                    {o.status}
-                  </span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Quick Nav Tiles */}

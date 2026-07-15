@@ -6,7 +6,7 @@ import { AdminTopbar } from "../AdminSidebar";
 import { useApp } from "../../../components/AppContext";
 
 export default function AdminSettingsPage() {
-  const { companySettings, updateCompanySettings } = useApp();
+  const { companySettings, updateCompanySettings, settingsLoading } = useApp();
   const [formData, setFormData] = useState({
     email: "",
     phone: "",
@@ -15,6 +15,9 @@ export default function AdminSettingsPage() {
     twitterUrl: "",
     instagramUrl: "",
     facebookUrl: "",
+    customTshirtPrice: 599,
+    customPoloPrice: 799,
+    customShirtPrice: 999,
   });
   const [saving, setSaving] = useState(false);
 
@@ -28,6 +31,9 @@ export default function AdminSettingsPage() {
         twitterUrl: companySettings.twitterUrl || "",
         instagramUrl: companySettings.instagramUrl || "",
         facebookUrl: companySettings.facebookUrl || "",
+        customTshirtPrice: companySettings.customTshirtPrice || 599,
+        customPoloPrice: companySettings.customPoloPrice || 799,
+        customShirtPrice: companySettings.customShirtPrice || 999,
       });
     }
   }, [companySettings]);
@@ -39,6 +45,42 @@ export default function AdminSettingsPage() {
     setSaving(false);
   };
 
+  if (settingsLoading) {
+    return (
+      <div className="flex flex-col h-full overflow-hidden">
+        <AdminTopbar title="Store Settings" subtitle="Loading configuration..." />
+        <main className="flex-1 overflow-y-auto p-5 sm:p-8 bg-zinc-50/50 space-y-6">
+          <div className="max-w-4xl mx-auto bg-white border border-zinc-200 rounded-lg shadow-sm p-6 sm:p-8 space-y-8 animate-pulse">
+            <div className="space-y-2">
+              <div className="h-4 w-1/4 bg-zinc-200 rounded" />
+              <div className="h-3 w-1/2 bg-zinc-100 rounded" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="space-y-1.5">
+                  <div className="h-3 w-1/3 bg-zinc-200 rounded" />
+                  <div className="h-10 w-full bg-zinc-50 border border-zinc-100 rounded-lg" />
+                </div>
+              ))}
+            </div>
+            <div className="border-t border-zinc-150 pt-8 space-y-2">
+              <div className="h-4 w-1/4 bg-zinc-200 rounded" />
+              <div className="h-3 w-1/2 bg-zinc-100 rounded" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="space-y-1.5">
+                    <div className="h-3 w-1/2 bg-zinc-200 rounded" />
+                    <div className="h-10 w-full bg-zinc-50 border border-zinc-100 rounded-lg" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <AdminTopbar title="Store Settings" subtitle="Configure global storefront metadata, contact cards, and social handles" />
@@ -48,9 +90,17 @@ export default function AdminSettingsPage() {
           
           {/* Main Card */}
           <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-6 sm:p-8 space-y-8">
-            <div>
-              <h3 className="font-extrabold text-sm text-[#4A453E] uppercase tracking-wider mb-1">Contact Details</h3>
-              <p className="text-xs text-zinc-450">These values populate in the footer, contact page cards, and header banners dynamically.</p>
+            <div className="flex justify-between items-start gap-2 flex-wrap">
+              <div>
+                <h3 className="font-extrabold text-sm text-[#4A453E] uppercase tracking-wider mb-1">Contact Details</h3>
+                <p className="text-xs text-zinc-450">These values populate in the footer, contact page cards, and header banners dynamically.</p>
+              </div>
+              {useApp().settingsResponseTime !== null && (
+                <span className="text-[9px] font-extrabold text-zinc-400 bg-zinc-50 border border-zinc-200 rounded-full px-2.5 py-1 tracking-wider uppercase flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                  API Latency: {useApp().settingsResponseTime}ms
+                </span>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -161,6 +211,61 @@ export default function AdminSettingsPage() {
                     value={formData.facebookUrl}
                     onChange={(e) => setFormData({ ...formData, facebookUrl: e.target.value })}
                     placeholder="https://facebook.com/kaiva"
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-zinc-150 pt-8">
+              <h3 className="font-extrabold text-sm text-[#4A453E] uppercase tracking-wider mb-1">Custom Design Garment Prices</h3>
+              <p className="text-xs text-zinc-450 mb-6">Set base pricing (in ₹) for custom blank items in the online design creator studio workspace.</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* T-Shirt Price */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-zinc-650">
+                    Custom T-Shirt Base Price (₹)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    value={formData.customTshirtPrice}
+                    onChange={(e) => setFormData({ ...formData, customTshirtPrice: parseInt(e.target.value) || 0 })}
+                    placeholder="599"
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
+                  />
+                </div>
+
+                {/* Polo Price */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-zinc-650">
+                    Custom Polo Base Price (₹)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    value={formData.customPoloPrice}
+                    onChange={(e) => setFormData({ ...formData, customPoloPrice: parseInt(e.target.value) || 0 })}
+                    placeholder="799"
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
+                  />
+                </div>
+
+                {/* Shirt Price */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-zinc-650">
+                    Custom Casual Shirt Base Price (₹)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    value={formData.customShirtPrice}
+                    onChange={(e) => setFormData({ ...formData, customShirtPrice: parseInt(e.target.value) || 0 })}
+                    placeholder="999"
                     className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
                   />
                 </div>

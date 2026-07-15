@@ -3,79 +3,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getApiUrl } from '../components/ApiConfig';
 import Link from 'next/link';
-import { ArrowRight, Paintbrush, ShieldCheck, Sparkles, ShoppingBag, Flame, Truck, Layers, Leaf, Palette, Play } from 'lucide-react';
+import { ArrowRight, Paintbrush, ShieldCheck, Sparkles, ShoppingBag, Flame, Truck, Layers, Leaf, Palette, Play, SlidersHorizontal } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { CategoryCard } from '../components/CategoryCard';
 import { ReviewCard } from '../components/InfoCards';
 import { Product } from '../components/AppContext';
-import { Slider } from '../components/UIComponents';
+import { Slider, EmptyState } from '../components/UIComponents';
 
-const INITIAL_PRODUCTS: Product[] = [
-  {
-    id: "p1",
-    name: "Premium Soft Cotton Tee",
-    price: 29.99,
-    originalPrice: 39.99,
-    rating: 4.8,
-    reviewsCount: 124,
-    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80"],
-    category: "T-Shirts",
-    tag: "Best Seller",
-    description: "Tailored with a modern fit and crafted from ultra-soft combed cotton, this premium t-shirt is the perfect base for your high-quality custom prints.",
-    colors: [{ name: "White", hex: "#ffffff" }, { name: "Black", hex: "#0f172a" }],
-    sizes: ["S", "M", "L", "XL"],
-    inStock: true
-  },
-  {
-    id: "p2",
-    name: "Heavyweight Fleece Hoodie",
-    price: 49.99,
-    originalPrice: 59.99,
-    rating: 4.9,
-    reviewsCount: 88,
-    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&auto=format&fit=crop&q=80"],
-    category: "Hoodies",
-    tag: "New",
-    description: "Stay warm in style. Heavy fleece hoodie with comfortable boxy fit and double-stitched kangaroo pocket.",
-    colors: [{ name: "Black", hex: "#0f172a" }, { name: "Sand", hex: "#e2e8f0" }],
-    sizes: ["M", "L", "XL"],
-    inStock: true
-  },
-  {
-    id: "p3",
-    name: "Classic Organic Crewneck",
-    price: 34.99,
-    originalPrice: 44.99,
-    rating: 4.7,
-    reviewsCount: 52,
-    image: "https://images.unsplash.com/photo-1578932750294-f5075e85f44a?w=800&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1578932750294-f5075e85f44a?w=800&auto=format&fit=crop&q=80"],
-    category: "Sweatshirts",
-    tag: "Eco",
-    description: "100% certified organic cotton crewneck with cozy brushed interior and premium flatlock seams.",
-    colors: [{ name: "Heather Grey", hex: "#94a3b8" }],
-    sizes: ["S", "M", "L", "XL"],
-    inStock: true
-  },
-  {
-    id: "p4",
-    name: "Premium Canvas Tote Bag",
-    price: 19.99,
-    originalPrice: 24.99,
-    rating: 4.6,
-    reviewsCount: 31,
-    image: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80"],
-    category: "Accessories",
-    tag: "Essential",
-    description: "Heavy canvas material with reinforced shoulder straps. The perfect blank canvas for your design.",
-    colors: [{ name: "Natural", hex: "#f8fafc" }],
-    sizes: ["One Size"],
-    inStock: true
-  }
-];
+// Dynamic catalog fetching active
 
 /* ─── Hero Slides Data ─── */
 interface Slide {
@@ -450,6 +385,10 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [_galleryLoading, setGalleryLoading] = useState(true);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
 
   React.useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 900);
@@ -472,25 +411,56 @@ export default function HomePage() {
         setGalleryLoading(false);
       });
 
+    setCategoriesLoading(true);
+    fetch(getApiUrl("/category"))
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("failed");
+      })
+      .then(data => {
+        if (data && data.length > 0) {
+          const mapped = data.map((c: any) => ({
+            name: c.name,
+            image: c.image || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80",
+            count: c.count || 0,
+            href: `/products?category=${encodeURIComponent(c.name)}`,
+          }));
+          setCategories(mapped);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        setCategoriesLoading(false);
+      });
+
+    setProductsLoading(true);
+    fetch(getApiUrl("/products"))
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("failed");
+      })
+      .then(data => {
+        if (data && data.length > 0) {
+          setProducts(data);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        setProductsLoading(false);
+      });
+
     return () => clearTimeout(timer);
   }, []);
 
   const getFilteredProducts = () => {
     switch (activeTab) {
-      case 'best': return INITIAL_PRODUCTS.filter(p => p.tag === 'Best Seller');
-      case 'new':  return INITIAL_PRODUCTS.filter(p => p.tag === 'New' || p.tag === 'Eco');
-      default:     return INITIAL_PRODUCTS;
+      case 'best': return products.filter(p => p.tag === 'Best Seller');
+      case 'new':  return products.filter(p => p.tag === 'New' || p.tag === 'Eco');
+      default:     return products;
     }
   };
 
   const activeGallery = gallery.length > 0 ? gallery.filter(item => item.isActive) : DEFAULT_GALLERY;
-
-  const categories = [
-    { name: "T-Shirts",    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80", count: 18, href: "/products" },
-    { name: "Hoodies",     image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500&auto=format&fit=crop&q=80", count: 12, href: "/products" },
-    { name: "Accessories", image: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=80", count: 9,  href: "/products" },
-    { name: "Drinkware",   image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop&q=80", count: 6,  href: "/products" },
-  ];
 
   const processSteps = [
     { step: "01", name: "Select Product",      icon: <ShoppingBag className="w-5 h-5" />, desc: "Choose from premium blank tees, hoodies, and accessories." },
@@ -546,15 +516,25 @@ export default function HomePage() {
             View all <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {loading ? (
-            Array(4).fill(0).map((_, i) => <CategoryCard key={i} loading={true} />)
-          ) : (
-            categories.map((cat) => (
+        {categoriesLoading || loading ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {Array(4).fill(0).map((_, i) => <CategoryCard key={i} loading={true} />)}
+          </div>
+        ) : categories.length === 0 ? (
+          <div className="w-full py-4">
+            <EmptyState
+              title="No categories found"
+              description="Our blanks categories collection is currently empty. Please check back later!"
+              icon={<SlidersHorizontal className="w-8 h-8 text-[#F9A37E]" />}
+            />
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {categories.map((cat) => (
               <CategoryCard key={cat.name} name={cat.name} image={cat.image} count={cat.count} href={cat.href} />
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* ── PRODUCT TABS ── */}
@@ -582,15 +562,25 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-        <Slider desktopCols={4}>
-          {loading ? (
-            Array(4).fill(0).map((_, i) => <ProductCard key={i} loading={true} />)
-          ) : (
-            getFilteredProducts().map((product) => (
+        {productsLoading || loading ? (
+          <Slider desktopCols={4}>
+            {Array(4).fill(0).map((_, i) => <ProductCard key={i} loading={true} />)}
+          </Slider>
+        ) : getFilteredProducts().length === 0 ? (
+          <div className="w-full py-4">
+            <EmptyState
+              title="No featured products found"
+              description="Our custom print blanks catalog is temporarily offline. Please check back shortly!"
+              icon={<ShoppingBag className="w-8 h-8 text-[#A8C69F]" />}
+            />
+          </div>
+        ) : (
+          <Slider desktopCols={4}>
+            {getFilteredProducts().map((product) => (
               <ProductCard key={product.id} product={product} />
-            ))
-          )}
-        </Slider>
+            ))}
+          </Slider>
+        )}
       </section>
 
       {/* ── HOW IT WORKS ── */}

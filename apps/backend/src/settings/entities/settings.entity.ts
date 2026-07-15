@@ -26,6 +26,15 @@ export class SettingsEntity {
   @Column({ nullable: false, default: 'https://facebook.com/kaiva' })
   facebookUrl: string;
 
+  @Column({ type: 'int', nullable: false, default: 599 })
+  customTshirtPrice: number;
+
+  @Column({ type: 'int', nullable: false, default: 799 })
+  customPoloPrice: number;
+
+  @Column({ type: 'int', nullable: false, default: 999 })
+  customShirtPrice: number;
+
   @Column({ nullable: true })
   updatedAt: Date;
 }

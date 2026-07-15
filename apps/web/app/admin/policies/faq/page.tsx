@@ -143,9 +143,15 @@ export default function AdminFaqPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="sm:col-span-1">
                         <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Category</label>
-                        <select value={editForm.category} onChange={(e) => setEditForm((p) => ({ ...p, category: e.target.value }))} className={inputCls}>
-                          {CATEGORIES.filter((c) => c !== "All").map((c) => <option key={c} value={c}>{c}</option>)}
-                        </select>
+                        <div className="relative">
+                          <select
+                            value={editForm.category}
+                            onChange={(e) => setEditForm((p) => ({ ...p, category: e.target.value }))}
+                            className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 pl-3.5 pr-10 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer font-bold"
+                          >
+                            {CATEGORIES.filter((c) => c !== "All").map((c) => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                        </div>
                       </div>
                       <div className="sm:col-span-2">
                         <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Question</label>
@@ -193,7 +199,7 @@ export default function AdminFaqPage() {
               </div>
             ))}
           </div>
-
+ 
           {/* Add New FAQ Row */}
           {addingNew && (
             <div className="px-5 py-4 space-y-3 border-t border-zinc-100 bg-emerald-50/30 border-l-4 border-l-emerald-400">
@@ -201,9 +207,15 @@ export default function AdminFaqPage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Category</label>
-                  <select value={newForm.category} onChange={(e) => setNewForm((p) => ({ ...p, category: e.target.value }))} className={inputCls}>
-                    {CATEGORIES.filter((c) => c !== "All").map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={newForm.category}
+                      onChange={(e) => setNewForm((p) => ({ ...p, category: e.target.value }))}
+                      className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 pl-3.5 pr-10 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer font-bold"
+                    >
+                      {CATEGORIES.filter((c) => c !== "All").map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
                 </div>
                 <div className="sm:col-span-2">
                   <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Question *</label>

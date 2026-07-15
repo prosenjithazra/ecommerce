@@ -29,6 +29,9 @@ export class SettingsService implements OnModuleInit {
           twitterUrl: 'https://twitter.com/kaiva',
           instagramUrl: 'https://instagram.com/kaiva',
           facebookUrl: 'https://facebook.com/kaiva',
+          customTshirtPrice: 599,
+          customPoloPrice: 799,
+          customShirtPrice: 999,
           updatedAt: new Date(),
         });
         await this.settingsRepository.save(settings);
@@ -54,6 +57,9 @@ export class SettingsService implements OnModuleInit {
         twitterUrl: 'https://twitter.com/kaiva',
         instagramUrl: 'https://instagram.com/kaiva',
         facebookUrl: 'https://facebook.com/kaiva',
+        customTshirtPrice: 599,
+        customPoloPrice: 799,
+        customShirtPrice: 999,
         updatedAt: new Date(),
       };
     }
@@ -75,6 +81,9 @@ export class SettingsService implements OnModuleInit {
     if (data.instagramUrl !== undefined)
       settings.instagramUrl = data.instagramUrl;
     if (data.facebookUrl !== undefined) settings.facebookUrl = data.facebookUrl;
+    if (data.customTshirtPrice !== undefined) settings.customTshirtPrice = Number(data.customTshirtPrice);
+    if (data.customPoloPrice !== undefined) settings.customPoloPrice = Number(data.customPoloPrice);
+    if (data.customShirtPrice !== undefined) settings.customShirtPrice = Number(data.customShirtPrice);
     settings.updatedAt = new Date();
     return this.settingsRepository.save(settings);
   }

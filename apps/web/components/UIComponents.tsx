@@ -53,7 +53,7 @@ export const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages,
 /* 3. EMPTY STATE */
 interface EmptyStateProps { title: string; description: string; actionText?: string; actionHref?: string; icon?: React.ReactNode; }
 export const EmptyState: React.FC<EmptyStateProps> = ({ title, description, actionText, actionHref, icon }) => (
-  <div className="w-full flex flex-col items-center justify-center text-center p-8 md:p-12 bg-white dark:bg-zinc-900 border border-zinc-150/80 dark:border-zinc-800/80 rounded-2xl shadow-xl shadow-zinc-150/20 dark:shadow-none py-14">
+  <div className="w-full flex flex-col items-center justify-center text-center p-8 md:p-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 py-14 animate-fade-in-up">
     <div className="w-16 h-16 bg-[#FBD5C1]/40 text-[#E8855A] rounded-full flex items-center justify-center mb-5 animate-subtle-bounce">
       {icon || <EyeOff className="w-8 h-8" />}
     </div>
@@ -145,13 +145,14 @@ export const Price: React.FC<{ value: number; original?: number; size?: 'sm' | '
 );
 
 /* 7. STATUS BADGE */
-export const StatusBadge: React.FC<{ status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled' | 'Success' | 'Refunded' }> = ({ status }) => {
+export const StatusBadge: React.FC<{ status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled' | 'Success' | 'Refunded' | 'Returned' }> = ({ status }) => {
   const getColors = () => {
     switch (status) {
       case 'Delivered': case 'Success':   return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       case 'Cancelled': case 'Refunded':  return 'bg-rose-50 text-rose-600 border-rose-200';
       case 'Shipped':                     return 'bg-blue-50 text-blue-600 border-blue-200';
       case 'Processing':                  return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'Returned':                    return 'bg-violet-50 text-violet-700 border-violet-200';
       default:                            return 'bg-[#E8E2D6] text-[#7A736A] border-[#D4CCC0]';
     }
   };
@@ -293,19 +294,20 @@ export const Select: React.FC<SelectProps> = ({ value, onChange, options, placeh
 
 /* 12. RESPONSIVE SLIDER (Shadcn/Swiper style) */
 interface SliderProps {
-  children: React.ReactNode[];
+  children: React.ReactNode;
   desktopCols?: 3 | 4;
 }
 
 export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = React.useState(0);
+  const childrenArray = React.Children.toArray(children);
 
   const handleScroll = () => {
     if (scrollRef.current) {
       const { scrollLeft, clientWidth } = scrollRef.current;
       const index = Math.round(scrollLeft / (clientWidth * 0.666));
-      setActiveIndex(Math.min(index, children.length - 1));
+      setActiveIndex(Math.min(index, childrenArray.length - 1));
     }
   };
 
@@ -329,16 +331,16 @@ export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => 
         onScroll={handleScroll}
         className={containerClass}
       >
-        {children.map((child, idx) => (
+        {childrenArray.map((child, idx) => (
           <div key={idx} className={itemClass}>
             {child}
           </div>
         ))}
       </div>
 
-      {children.length > 1 && (
+      {childrenArray.length > 1 && (
         <div className={`flex justify-center gap-1.5 mt-2 ${controlsVisibilityClass}`}>
-          {Array.from({ length: children.length }).map((_, idx) => (
+          {Array.from({ length: childrenArray.length }).map((_, idx) => (
             <button
               key={idx}
               onClick={() => {

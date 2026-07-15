@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Copy, MapPin, Truck, Calendar, Download, FileText, CheckCircle2 } from 'lucide-react';
 import { Address, Order, Transaction, useApp } from './AppContext';
 import { StatusBadge, Rating, Price } from './UIComponents';
+import { CustomGarmentPreview } from './CustomGarmentPreview';
 
 /* 1. PRODUCT GALLERY */
 export const ProductGallery: React.FC<{ images: string[]; name: string }> = ({ images, name }) => {
@@ -148,9 +149,12 @@ export const OrderCard: React.FC<{ order: Order; onViewDetails: (id: string) => 
         </div>
       </div>
       <div className="flex gap-3">
-        <div className="w-14 h-14 bg-[#E8E2D6] rounded-lg overflow-hidden flex-shrink-0">
-          <img src={order.items[0]?.image} alt={order.items[0]?.name} className="w-full h-full object-cover" />
-        </div>
+        <CustomGarmentPreview
+          customDesign={order.itemsJson && Array.isArray(order.itemsJson) ? order.itemsJson[0]?.customDesign : undefined}
+          defaultImage={order.items[0]?.image}
+          view="front"
+          className="w-14 h-14"
+        />
         <div className="flex-1 min-w-0">
           <h4 className="font-bold text-xs text-[#4A453E] truncate">{order.items[0]?.name}</h4>
           <p className="text-[10px] text-[#A89B8A] mt-0.5">

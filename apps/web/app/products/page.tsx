@@ -1,60 +1,16 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Breadcrumb, Pagination, Drawer, Select } from '../../components/UIComponents';
+import React, { useState, useEffect } from 'react';
+import { Breadcrumb, Pagination, Drawer, Select, EmptyState } from '../../components/UIComponents';
 import { ProductCard } from '../../components/ProductCard';
 import { SlidersHorizontal, Search, RotateCcw } from 'lucide-react';
 import { Product } from '../../components/AppContext';
-
-
-const INITIAL_PRODUCTS: Product[] = [
-  {
-    id: "p1",
-    name: "Premium Soft Cotton Tee",
-    price: 29.99, originalPrice: 39.99, rating: 4.8, reviewsCount: 124,
-    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80"],
-    category: "T-Shirts", tag: "Best Seller",
-    description: "Ultra-soft combed cotton t-shirt — perfect base for premium custom prints.",
-    colors: [{ name: "White", hex: "#ffffff" }, { name: "Black", hex: "#0f172a" }],
-    sizes: ["S", "M", "L", "XL"], inStock: true
-  },
-  {
-    id: "p2",
-    name: "Heavyweight Fleece Hoodie",
-    price: 49.99, originalPrice: 59.99, rating: 4.9, reviewsCount: 88,
-    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&auto=format&fit=crop&q=80"],
-    category: "Hoodies", tag: "New",
-    description: "Heavy fleece hoodie with comfortable boxy fit and double-stitched kangaroo pocket.",
-    colors: [{ name: "Black", hex: "#0f172a" }, { name: "Sand", hex: "#e2e8f0" }],
-    sizes: ["M", "L", "XL"], inStock: true
-  },
-  {
-    id: "p3",
-    name: "Classic Organic Crewneck",
-    price: 34.99, originalPrice: 44.99, rating: 4.7, reviewsCount: 52,
-    image: "https://images.unsplash.com/photo-1578932750294-f5075e85f44a?w=800&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1578932750294-f5075e85f44a?w=800&auto=format&fit=crop&q=80"],
-    category: "Sweatshirts", tag: "Eco",
-    description: "100% certified organic cotton crewneck with cozy brushed interior.",
-    colors: [{ name: "Heather Grey", hex: "#94a3b8" }],
-    sizes: ["S", "M", "L", "XL"], inStock: true
-  },
-  {
-    id: "p4",
-    name: "Premium Canvas Tote Bag",
-    price: 19.99, originalPrice: 24.99, rating: 4.6, reviewsCount: 31,
-    image: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80"],
-    category: "Accessories", tag: "Essential",
-    description: "Heavy canvas material with reinforced straps. Perfect blank canvas for your design.",
-    colors: [{ name: "Natural", hex: "#f8fafc" }],
-    sizes: ["One Size"], inStock: true
-  }
-];
+import { getApiUrl } from '../../components/ApiConfig';
 
 export default function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("popular");
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -62,11 +18,23 @@ export default function ProductsPage() {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 900);
-    return () => clearTimeout(timer);
+  const PRODUCTS_PER_PAGE = 9;
+
+  useEffect(() => {
+    fetch(getApiUrl("/products"))
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to load products");
+      })
+      .then(data => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Error loading products:", err);
+        setLoading(false);
+      });
   }, []);
 
   const filterColors = ["White", "Black", "Grey", "Blue", "Green", "Red"];
@@ -76,11 +44,48 @@ export default function ProductsPage() {
     setSelectedColors(prev => prev.includes(color) ? prev.filter(c => c !== color) : [...prev, color]);
   const handleSizeToggle = (size: string) =>
     setSelectedSizes(prev => prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]);
+  
   const handleReset = () => {
-    setSearch(""); setSelectedColors([]); setSelectedSizes([]); setInStockOnly(false); setSort("popular");
+    setSearch(""); 
+    setSelectedColors([]); 
+    setSelectedSizes([]); 
+    setInStockOnly(false); 
+    setSort("popular");
   };
 
-  const filteredProducts = INITIAL_PRODUCTS.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+  // Reset page to 1 on search or filter change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, sort, selectedColors, selectedSizes, inStockOnly]);
+
+  // Filter products dynamically
+  const filteredProducts = products.filter(p => {
+    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || 
+                        p.description?.toLowerCase().includes(search.toLowerCase());
+    
+    const matchStock = !inStockOnly || p.inStock;
+    
+    const matchColor = selectedColors.length === 0 || 
+                       p.colors?.some(c => selectedColors.includes(c.name));
+                       
+    const matchSize = selectedSizes.length === 0 || 
+                      p.sizes?.some(s => selectedSizes.includes(s));
+                      
+    return matchSearch && matchStock && matchColor && matchSize;
+  });
+
+  // Sort products dynamically
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    if (sort === "price-low") return a.price - b.price;
+    if (sort === "price-high") return b.price - a.price;
+    if (sort === "rating") return b.rating - a.rating;
+    return 0; // Default popularity
+  });
+
+  // Dynamic pagination calculations
+  const totalPages = Math.ceil(sortedProducts.length / PRODUCTS_PER_PAGE) || 1;
+  const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+  const paginatedProducts = sortedProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
 
   const FilterContent = () => (
     <>
@@ -143,6 +148,24 @@ export default function ProductsPage() {
     </>
   );
 
+  // Full-width empty state when the product catalog is completely empty
+  if (!loading && products.length === 0) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-12 md:pb-16">
+        <Breadcrumb items={[{ name: "Products" }]} />
+        <div className="w-full">
+          <EmptyState
+            title="No Products Available"
+            description="Our print-ready blanks catalog is currently empty. Please check back later or add products via the admin portal."
+            actionText="Go back Home"
+            actionHref="/"
+            icon={<Search className="w-8 h-8" />}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-12 md:pb-16">
       <Breadcrumb items={[{ name: "Products" }]} />
@@ -170,12 +193,12 @@ export default function ProductsPage() {
         {/* Product Grid */}
         <div className="lg:col-span-3 space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <span className="text-xs font-bold text-[#A89B8A]">{filteredProducts.length} Products Found</span>
+            <span className="text-xs font-bold text-[#A89B8A]">{sortedProducts.length} Products Found</span>
             <div className="flex items-center gap-2 w-full sm:w-auto">
               {/* Mobile Filter Button */}
               <button
                 onClick={() => setIsFilterDrawerOpen(true)}
-                className="flex-none flex items-center justify-center gap-1.5 border border-[#E8E2D6] hover:border-[#A89B8A] bg-white rounded-lg py-2 px-3.5 text-xs font-bold text-[#4A453E] transition-all hover:scale-[1.02]"
+                className="flex-none flex lg:hidden items-center justify-center gap-1.5 border border-[#E8E2D6] hover:border-[#A89B8A] bg-white rounded-lg py-2 px-3.5 text-xs font-bold text-[#4A453E] transition-all hover:scale-[1.02]"
               >
                 <SlidersHorizontal className="w-3.5 h-3.5 text-[#F9A37E]" /> Filters
               </button>
@@ -199,17 +222,25 @@ export default function ProductsPage() {
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 grid-cols-mobile-single">
               {Array(6).fill(0).map((_, i) => <ProductCard key={i} loading={true} />)}
             </div>
-          ) : filteredProducts.length === 0 ? (
-            <div className="p-12 text-center border-2 border-dashed border-[#E8E2D6] rounded-lg">
-              <span className="text-sm font-bold text-[#A89B8A]">No products match your filters.</span>
+          ) : paginatedProducts.length === 0 ? (
+            <div className="lg:col-span-3">
+              <EmptyState
+                title="No products found"
+                description="We couldn't find any products matching your search or filters. Try checking your spelling or adjusting options."
+                actionText="Reset Filters"
+                actionHref="/products"
+                icon={<Search className="w-8 h-8" />}
+              />
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 grid-cols-mobile-single">
-              {filteredProducts.map(prod => <ProductCard key={prod.id} product={prod} />)}
+              {paginatedProducts.map(prod => <ProductCard key={prod.id} product={prod} />)}
             </div>
           )}
 
-          <Pagination currentPage={currentPage} totalPages={3} onPageChange={(p) => setCurrentPage(p)} />
+          {totalPages > 1 && (
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={(p) => setCurrentPage(p)} />
+          )}
         </div>
       </section>
 
@@ -221,7 +252,7 @@ export default function ProductsPage() {
       >
         <div className="space-y-6 pt-2">
           <div className="flex justify-between items-center border-b border-[#E8E2D6] pb-4">
-            <span className="text-xs font-bold text-[#7A736A]">{filteredProducts.length} results</span>
+            <span className="text-xs font-bold text-[#7A736A]">{sortedProducts.length} results</span>
             <button onClick={handleReset} className="text-[10px] font-bold text-[#A89B8A] hover:text-[#F9A37E] flex items-center gap-1 transition-colors">
               <RotateCcw className="w-3.5 h-3.5" /> Reset Filters
             </button>

@@ -12,7 +12,8 @@ export class ProductsService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.seedProducts();
+    // Disable automatic seeding as per user request to manage products dynamically only
+    // await this.seedProducts();
   }
 
   private async seedProducts() {

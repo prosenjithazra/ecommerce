@@ -43,6 +43,7 @@ function CategoryForm({ initial, onSave, onCancel }: {
   };
 
   const inputCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3.5 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] transition-all placeholder:text-zinc-400";
+  const selectCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 pl-3.5 pr-10 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer font-bold";
 
   return (
     <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm space-y-5 max-w-full">
@@ -91,10 +92,12 @@ function CategoryForm({ initial, onSave, onCancel }: {
             </div>
             <div>
               <label className="block text-[9px] font-black uppercase text-zinc-500 tracking-widest mb-1.5">Visibility</label>
-              <select value={status} onChange={(e) => setStatus(e.target.value)} className={inputCls}>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
+              <div className="relative">
+                <select value={status} onChange={(e) => setStatus(e.target.value)} className={selectCls}>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>

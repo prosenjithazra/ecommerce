@@ -2,26 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { AdminTopbar } from "../AdminSidebar";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, X, ShoppingBag, Mail, Calendar, CreditCard, Tag, Download, ExternalLink } from "lucide-react";
 import { useApp } from "../../../components/AppContext";
 import { getApiUrl } from "../../../components/ApiConfig";
+import { CustomGarmentPreview } from "../../../components/CustomGarmentPreview";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const INITIAL_ORDERS = [
-  { id: "ORD-9872", customer: "Jane Doe", email: "jane.doe@example.com", date: "2026-07-08", items: 2, total: 4598, status: "Delivered" },
-  { id: "ORD-4819", customer: "Alex Mercer", email: "alex.mercer@gmail.com", date: "2026-07-12", items: 3, total: 8040, status: "Processing" },
-  { id: "ORD-2391", customer: "Sarah Connor", email: "s.connor@cyberdyne.org", date: "2026-07-13", items: 1, total: 2299, status: "Pending" },
-  { id: "ORD-1104", customer: "Mark Wells", email: "mark.w@example.com", date: "2026-07-11", items: 4, total: 12840, status: "Shipped" },
-  { id: "ORD-7761", customer: "Priya Sharma", email: "priya.s@gmail.com", date: "2026-07-09", items: 1, total: 1699, status: "Cancelled" },
-];
-
-const STATUS_OPTIONS = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
+const STATUS_OPTIONS = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Returned"];
 const STATUS_STYLES: Record<string, string> = {
   Delivered: "bg-emerald-50 text-emerald-700 border-emerald-100",
   Processing: "bg-amber-50 text-amber-700 border-amber-100",
   Pending: "bg-zinc-100 text-zinc-600 border-zinc-200",
   Shipped: "bg-sky-50 text-sky-700 border-sky-100",
-  Cancelled: "bg-red-50 text-red-600 border-red-100",
+  Cancelled: "bg-red-50 text-red-650 border-red-100",
+  Returned: "bg-violet-50 text-violet-700 border-violet-100",
 };
 
 interface Order {
@@ -32,6 +25,12 @@ interface Order {
   items: number;
   total: number;
   status: string;
+  itemsJson?: any;
+  paymentMethod?: string;
+  paymentId?: string;
+  paymentStatus?: string;
+  cancelReason?: string;
+  returnReason?: string;
 }
 
 export default function AdminOrdersPage() {
@@ -40,6 +39,10 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("All");
+  
+  // Selected order details drawer state
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showRawJson, setShowRawJson] = useState(false);
 
   useEffect(() => {
     fetch(getApiUrl("/orders"))
@@ -78,7 +81,13 @@ export default function AdminOrdersPage() {
         throw new Error("Failed to update order status");
       })
       .then(updatedOrder => {
-        setOrders((prev) => prev.map((o) => o.id === id ? updatedOrder : o));
+        setOrders((prev) => prev.map((o) => o.id === id ? { ...o, status: updatedOrder.status } : o));
+        
+        // Update selectedOrder if open
+        if (selectedOrder?.id === id) {
+          setSelectedOrder(prev => prev ? { ...prev, status } : null);
+        }
+        
         showToast("Status Updated", `Order ${id} status changed to ${status}.`, "success");
       })
       .catch(err => {
@@ -98,7 +107,7 @@ export default function AdminOrdersPage() {
   }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden relative">
       <AdminTopbar title="Orders" subtitle={`${orders.length} total orders`} />
       <main className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-6">
 
@@ -128,7 +137,7 @@ export default function AdminOrdersPage() {
         </div>
 
         {/* Summary Badges */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
           {STATUS_OPTIONS.map((s) => {
             const count = orders.filter((o) => o.status === s).length;
             return (
@@ -155,7 +164,11 @@ export default function AdminOrdersPage() {
               </thead>
               <tbody className="divide-y divide-zinc-100">
                 {filtered.map((o) => (
-                  <tr key={o.id} className="hover:bg-zinc-50 transition-colors">
+                  <tr 
+                    key={o.id} 
+                    className="hover:bg-zinc-50 transition-colors cursor-pointer"
+                    onClick={() => setSelectedOrder(o)}
+                  >
                     <td className="py-4 px-5 font-extrabold text-zinc-900">{o.id}</td>
                     <td className="py-4 px-5">
                       <span className="font-bold text-zinc-900 block">{o.customer}</span>
@@ -169,14 +182,16 @@ export default function AdminOrdersPage() {
                         {o.status}
                       </span>
                     </td>
-                    <td className="py-4 px-5">
-                      <select
-                        value={o.status}
-                        onChange={(e) => updateStatus(o.id, e.target.value)}
-                        className="bg-zinc-50 border border-zinc-200 rounded-lg py-1.5 px-2.5 text-[10px] font-bold text-zinc-700 outline-none hover:border-[#F9A37E] transition-colors cursor-pointer"
-                      >
-                        {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-                      </select>
+                    <td className="py-4 px-5" onClick={(e) => e.stopPropagation()}>
+                      <div className="relative inline-block w-28">
+                        <select
+                          value={o.status}
+                          onChange={(e) => updateStatus(o.id, e.target.value)}
+                          className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-1.5 pl-2.5 pr-8 text-[10px] font-black text-zinc-700 outline-none hover:border-[#F9A37E] transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1rem_1rem] bg-[right_0.4rem_center] bg-no-repeat"
+                        >
+                          {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -188,6 +203,240 @@ export default function AdminOrdersPage() {
           )}
         </div>
       </main>
+
+      {/* ── DETAILED ORDER OVERLAY DRAWER ── */}
+      {selectedOrder && (
+        <div className="absolute inset-0 z-30 flex justify-end">
+          <div 
+            className="absolute inset-0 bg-black/30 transition-opacity" 
+            onClick={() => { setSelectedOrder(null); setShowRawJson(false); }} 
+          />
+          <div className="relative w-full max-w-md bg-white h-full flex flex-col shadow-2xl border-l border-zinc-200 animate-slide-in-right">
+            
+            {/* Header */}
+            <div className="p-5 border-b border-zinc-150 flex items-center justify-between">
+              <div>
+                <h3 className="font-extrabold text-sm text-zinc-900">Order Details</h3>
+                <p className="text-[10px] text-zinc-400 font-bold mt-0.5">{selectedOrder.id}</p>
+              </div>
+              <button 
+                onClick={() => { setSelectedOrder(null); setShowRawJson(false); }}
+                className="p-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-500 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Content Body */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-6">
+              
+              {/* Order Status Control */}
+              <div className="bg-[#FDFAF6] border border-zinc-200 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-extrabold text-zinc-400 uppercase">Current Status</span>
+                  <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full border uppercase tracking-wide ${STATUS_STYLES[selectedOrder.status]}`}>
+                    {selectedOrder.status}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-zinc-650">Change Status:</span>
+                  <div className="relative flex-1">
+                    <select
+                      value={selectedOrder.status}
+                      onChange={(e) => updateStatus(selectedOrder.id, e.target.value)}
+                      className="w-full bg-white border border-zinc-200 rounded-lg py-2 pl-3 pr-10 text-xs font-bold text-zinc-700 outline-none hover:border-[#F9A37E] transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat"
+                    >
+                      {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Conditional cancellation details */}
+                {selectedOrder.status === 'Cancelled' && selectedOrder.cancelReason && (
+                  <div className="border-t border-red-100/60 pt-2.5 text-[10px] font-bold text-red-600 bg-red-50/20 p-2.5 rounded-lg border border-red-100/40">
+                    Reason for Cancellation: <span className="font-extrabold text-red-705">{selectedOrder.cancelReason}</span>
+                  </div>
+                )}
+
+                {/* Conditional return details */}
+                {selectedOrder.status === 'Returned' && selectedOrder.returnReason && (
+                  <div className="border-t border-violet-100/60 pt-2.5 text-[10px] font-bold text-violet-650 bg-violet-50/20 p-2.5 rounded-lg border border-violet-100/40">
+                    Reason for Return: <span className="font-extrabold text-violet-700">{selectedOrder.returnReason}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Customer Info */}
+              <div className="space-y-2.5">
+                <h4 className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider">Customer Info</h4>
+                <div className="space-y-2 text-xs font-medium text-zinc-700">
+                  <div className="flex items-center gap-2.5">
+                    <ShoppingBag className="w-4 h-4 text-zinc-400" />
+                    <span>{selectedOrder.customer}</span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Mail className="w-4 h-4 text-zinc-400" />
+                    <span>{selectedOrder.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Calendar className="w-4 h-4 text-zinc-400" />
+                    <span>Ordered on {selectedOrder.date}</span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <CreditCard className="w-4 h-4 text-zinc-400" />
+                    <span className="font-extrabold">Total paid: ₹{selectedOrder.total.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Details */}
+              <div className="bg-[#FDFAF6] border border-zinc-200 rounded-xl p-4 space-y-3">
+                <h4 className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider">Payment Details</h4>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <span className="text-[10px] text-zinc-400 block font-bold">Method</span>
+                    <span className="font-extrabold text-zinc-800 uppercase">
+                      {selectedOrder.paymentMethod === 'COD' ? 'COD' : 'Online'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-zinc-400 block font-bold">Status</span>
+                    <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full border uppercase tracking-wide inline-block ${
+                      selectedOrder.paymentStatus === 'Paid' || selectedOrder.paymentStatus === 'Success'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                        : selectedOrder.paymentStatus === 'Refunded'
+                        ? 'bg-amber-50 text-amber-700 border-amber-100'
+                        : 'bg-zinc-100 text-zinc-600 border-zinc-200'
+                    }`}>
+                      {selectedOrder.paymentStatus || 'Pending'}
+                    </span>
+                  </div>
+                  {selectedOrder.paymentId && (
+                    <div className="col-span-2 border-t border-zinc-200/60 pt-2">
+                      <span className="text-[10px] text-zinc-450 block font-bold">Transaction / Payment ID</span>
+                      <span className="font-mono text-xs text-zinc-700 select-all">{selectedOrder.paymentId}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Items List */}
+              <div className="space-y-3 pt-2">
+                <h4 className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider">Items in Order</h4>
+                
+                {selectedOrder.itemsJson && Array.isArray(selectedOrder.itemsJson) ? (
+                  <div className="space-y-3">
+                    {selectedOrder.itemsJson.map((item: any, i: number) => {
+                      const designStr = item.customDesign?.baseImage;
+                      let designMeta = null;
+                      if (designStr) {
+                        try {
+                          designMeta = JSON.parse(designStr);
+                        } catch (err) {
+                          console.warn("Error parsing design meta:", err);
+                        }
+                      }
+
+                      return (
+                        <div key={i} className="border border-zinc-200 rounded-xl p-3 bg-white space-y-3">
+                          <div className="flex gap-3">
+                            <CustomGarmentPreview
+                              customDesign={item.customDesign}
+                              defaultImage={item.image}
+                              view="front"
+                              className="w-12 h-12"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <h5 className="font-extrabold text-xs text-zinc-800 truncate">{item.name}</h5>
+                              <p className="text-[10px] text-zinc-400 mt-0.5">
+                                Size: <span className="font-bold text-zinc-650">{item.size}</span> · Qty: <span className="font-bold text-zinc-650">{item.quantity}</span>
+                              </p>
+                              <p className="text-xs font-black text-zinc-900 mt-1">₹{(item.price * item.quantity).toLocaleString()}</p>
+                            </div>
+                          </div>
+
+                          {/* Dynamic Custom Mockups */}
+                          {designMeta && (
+                            <div className="p-3 bg-zinc-50 rounded-lg border border-dashed border-zinc-200 space-y-3">
+                              <div className="flex items-center gap-1.5 text-[9px] font-extrabold text-[#e8855a] uppercase">
+                                <Tag className="w-3.5 h-3.5" />
+                                <span>Custom Print Specifications</span>
+                              </div>
+                              
+                              {/* Side-by-side composite previews */}
+                              <div className="flex justify-center">
+                                <CustomGarmentPreview
+                                  customDesign={item.customDesign}
+                                  defaultImage={item.image}
+                                  view="both"
+                                  className="w-20 h-20"
+                                />
+                              </div>
+
+                              {/* Specs summary */}
+                              <div className="text-[9px] text-zinc-500 space-y-1 border-t border-zinc-150 pt-2 font-medium">
+                                <p>Garment style: <span className="font-bold capitalize text-zinc-700">{designMeta.productType}</span></p>
+                                <p>Color: <span className="font-bold text-zinc-700">{designMeta.color}</span> ({designMeta.colorHex})</p>
+                              </div>
+
+                              {/* Standalone original graphics download panel */}
+                              <div className="border-t border-zinc-150 pt-2.5 space-y-2">
+                                <p className="text-[8px] font-black uppercase text-zinc-400 tracking-wider">Original Graphic Files (Original Resolution)</p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                                  {designMeta.front?.imageUrl && (
+                                    <div className="p-2 border border-zinc-200 rounded-lg bg-white flex flex-col items-center gap-1.5">
+                                      <span className="text-[8px] font-bold text-zinc-400 uppercase">Front Artwork</span>
+                                      <div className="w-12 h-12 border border-zinc-150 rounded flex items-center justify-center bg-zinc-50 overflow-hidden">
+                                        <img src={designMeta.front.imageUrl} className="w-full h-full object-contain" alt="" />
+                                      </div>
+                                      <a
+                                        href={designMeta.front.imageUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-extrabold text-[8px] py-1 rounded border border-indigo-150 flex items-center justify-center gap-1"
+                                      >
+                                        <Download className="w-2.5 h-2.5" />
+                                        Download Original
+                                      </a>
+                                    </div>
+                                  )}
+                                  {designMeta.back?.imageUrl && (
+                                    <div className="p-2 border border-zinc-200 rounded-lg bg-white flex flex-col items-center gap-1.5">
+                                      <span className="text-[8px] font-bold text-zinc-400 uppercase">Back Artwork</span>
+                                      <div className="w-12 h-12 border border-zinc-150 rounded flex items-center justify-center bg-zinc-50 overflow-hidden">
+                                        <img src={designMeta.back.imageUrl} className="w-full h-full object-contain" alt="" />
+                                      </div>
+                                      <a
+                                        href={designMeta.back.imageUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-extrabold text-[8px] py-1 rounded border border-indigo-150 flex items-center justify-center gap-1"
+                                      >
+                                        <Download className="w-2.5 h-2.5" />
+                                        Download Original
+                                      </a>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-xs text-zinc-400 italic">No item details saved. Standard order format.</p>
+                )}
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -1,11 +1,15 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Breadcrumb, Pagination, Select } from '../../components/UIComponents';
+import React, { useState, useEffect } from 'react';
+import { Breadcrumb, Pagination, Select, EmptyState } from '../../components/UIComponents';
 import { CategoryCard } from '../../components/CategoryCard';
 import { SlidersHorizontal, Search, RotateCcw } from 'lucide-react';
+import { getApiUrl } from '../../components/ApiConfig';
 
 export default function CategoriesPage() {
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("popular");
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -14,14 +18,27 @@ export default function CategoriesPage() {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const categories = [
-    { name: "Premium T-Shirts", image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80", count: 18, href: "/products" },
-    { name: "Cozy Hoodies", image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&auto=format&fit=crop&q=80", count: 12, href: "/products" },
-    { name: "Merchandise Tote Bags", image: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80", count: 9, href: "/products" },
-    { name: "Premium Drinkware", image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=800&auto=format&fit=crop&q=80", count: 6, href: "/products" },
-    { name: "Comfortable Sweatshirts", image: "https://images.unsplash.com/photo-1578932750294-f5075e85f44a?w=800&auto=format&fit=crop&q=80", count: 8, href: "/products" },
-    { name: "Embroidered Caps", image: "https://images.unsplash.com/photo-1534215754734-18e55d13e346?w=800&auto=format&fit=crop&q=80", count: 11, href: "/products" }
-  ];
+  useEffect(() => {
+    fetch(getApiUrl("/category"))
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to load categories");
+      })
+      .then(data => {
+        const mapped = data.map((c: any) => ({
+          name: c.name,
+          image: c.image || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80",
+          count: c.count || 0,
+          href: `/products?category=${encodeURIComponent(c.name)}`
+        }));
+        setCategories(mapped);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Error loading categories:", err);
+        setLoading(false);
+      });
+  }, []);
 
   const filterColors = ["White", "Black", "Grey", "Blue", "Green", "Red"];
   const filterSizes = ["S", "M", "L", "XL", "XXL"];
@@ -51,6 +68,24 @@ export default function CategoriesPage() {
   const filteredCategories = categories.filter(cat => 
     cat.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Full-width empty state when the categories catalog is completely empty
+  if (!loading && categories.length === 0) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pb-16">
+        <Breadcrumb items={[{ name: "Categories Listing" }]} />
+        <div className="w-full">
+          <EmptyState
+            title="No Categories Available"
+            description="Our product categories listing is currently empty. Please check back later!"
+            actionText="Go back Home"
+            actionHref="/"
+            icon={<SlidersHorizontal className="w-8 h-8 text-indigo-500" />}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pb-16">
@@ -100,7 +135,7 @@ export default function CategoriesPage() {
                 onChange={(e) => setInStockOnly(e.target.checked)}
                 className="w-4 h-4 border border-zinc-200 dark:border-zinc-700 rounded bg-zinc-50 dark:bg-zinc-850 accent-indigo-600"
               />
-              <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">In stock only</span>
+              <span className="text-xs text-zinc-505 dark:text-zinc-400 font-medium">In stock only</span>
             </label>
           </div>
 
@@ -185,7 +220,11 @@ export default function CategoriesPage() {
           </div>
 
           {/* Grids */}
-          {filteredCategories.length === 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array(6).fill(0).map((_, i) => <CategoryCard key={i} loading={true} />)}
+            </div>
+          ) : filteredCategories.length === 0 ? (
             <div className="p-12 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg">
               <span className="text-sm font-bold text-zinc-500">No categories match your filters.</span>
             </div>

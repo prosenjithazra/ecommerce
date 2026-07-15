@@ -23,6 +23,24 @@ export class OrderEntity {
   @Column({ default: 'Pending' })
   status: string;
 
+  @Column({ type: 'json', nullable: true })
+  itemsJson: any;
+
+  @Column({ type: 'varchar', nullable: true })
+  paymentMethod: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  paymentId: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  paymentStatus: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  cancelReason: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  returnReason: string | null;
+
   @Column()
   createdAt: Date;
 

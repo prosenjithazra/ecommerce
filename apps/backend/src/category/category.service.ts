@@ -12,7 +12,8 @@ export class CategoryService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.seedCategories();
+    // Disable automatic seeding as per user request to manage categories dynamically only
+    // await this.seedCategories();
   }
 
   private async seedCategories() {

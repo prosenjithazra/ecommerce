@@ -1,32 +1,135 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '../../components/AppContext';
 import { Breadcrumb, EmptyState } from '../../components/UIComponents';
 import { OrderCard } from '../../components/InfoCards';
-import { ShoppingBag, Search } from 'lucide-react';
+import { ShoppingBag, Search, Loader2 } from 'lucide-react';
+import { getApiUrl } from '../../components/ApiConfig';
 
 export default function OrdersPage() {
   const router = useRouter();
-  const { orders } = useApp();
+  const { currentUser } = useApp();
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'All' | 'Pending' | 'Processing' | 'Shipped' | 'Delivered'>('All');
   const [searchQuery, setSearchQuery] = useState("");
+  const [responseTime, setResponseTime] = useState<number | null>(null);
+
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+    if (!token && !currentUser) {
+      router.push('/login');
+      return;
+    }
+
+    if (currentUser?.email) {
+      setLoading(true);
+      const startTime = performance.now();
+      fetch(getApiUrl(`/orders?email=${encodeURIComponent(currentUser.email)}`))
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to load orders");
+          return res.text().then(text => text ? JSON.parse(text) : []);
+        })
+        .then((data) => {
+          setResponseTime(Math.round(performance.now() - startTime));
+          // Map backend order structure
+          const mapped = data.map((o: any) => ({
+            id: o.id,
+            date: o.date || new Date(o.createdAt).toLocaleDateString(),
+            status: o.status,
+            total: Number(o.total || 0),
+            address: o.itemsJson && Array.isArray(o.itemsJson) && o.itemsJson[0]?.address ? o.itemsJson[0].address : {
+              id: 'default', fullName: o.customer || 'Customer', street: 'Address details on invoice', city: '', state: '', zip: '', country: '', phone: '', isDefault: true
+            },
+            paymentMethod: o.paymentMethod || 'CARD',
+            paymentId: o.paymentId,
+            paymentStatus: o.paymentStatus,
+            trackingNumber: o.trackingNumber,
+            trackingTimeline: o.trackingTimeline,
+            cancelReason: o.cancelReason,
+            returnReason: o.returnReason,
+            items: o.itemsJson && Array.isArray(o.itemsJson) ? o.itemsJson.map((it: any) => ({
+              productId: it.productId,
+              name: it.name,
+              price: Number(it.price || 0),
+              quantity: Number(it.quantity || 1),
+              image: it.image,
+              size: it.size,
+              color: it.color,
+              colorHex: it.colorHex,
+              category: it.category,
+              customDesign: it.customDesign
+            })) : [
+              { productId: 'standard', name: 'Order Item', price: o.total, quantity: o.items || 1, image: '/logoMainNew.png', size: 'M', color: 'White' }
+            ],
+            itemsJson: o.itemsJson,
+            email: o.email
+          }));
+          setOrders(mapped);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error("Error loading user orders:", err);
+          setLoading(false);
+        });
+    }
+  }, [currentUser, router]);
 
   const filteredOrders = orders.filter(order => {
     const matchesStatus = statusFilter === 'All' || order.status === statusFilter;
     const matchesQuery = order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.items.some(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+      order.items.some((item: any) => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesStatus && matchesQuery;
   });
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12 space-y-6">
+        <div className="space-y-2">
+          <div className="h-6 w-48 bg-zinc-200 animate-pulse rounded" />
+          <div className="h-4 w-32 bg-zinc-100 animate-pulse rounded" />
+        </div>
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="border border-zinc-150 rounded-xl p-5 bg-white space-y-4 animate-pulse">
+              <div className="flex justify-between items-center pb-3 border-b border-zinc-100">
+                <div className="space-y-1">
+                  <div className="h-3.5 w-32 bg-zinc-200 rounded" />
+                  <div className="h-3 w-24 bg-zinc-150 rounded" />
+                </div>
+                <div className="h-6 w-16 bg-zinc-100 rounded-full" />
+              </div>
+              <div className="flex gap-4">
+                <div className="w-16 h-16 bg-zinc-200 rounded-lg" />
+                <div className="flex-1 space-y-2 py-1">
+                  <div className="h-4 w-3/4 bg-zinc-200 rounded" />
+                  <div className="h-3 w-1/4 bg-zinc-150 rounded" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-12 md:pb-16">
       <Breadcrumb items={[{ name: "My Orders" }]} />
 
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A453E] tracking-tight">Order History</h1>
-        <p className="text-xs text-[#A89B8A] mt-1">View and track all your print-on-demand orders.</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A453E] tracking-tight">Order History</h1>
+          <p className="text-xs text-[#A89B8A] mt-1">View and track all your print-on-demand orders.</p>
+        </div>
+        {responseTime !== null && (
+          <span className="text-[10px] font-extrabold text-zinc-400 bg-zinc-100 border border-zinc-200/60 rounded-full px-2.5 py-1 tracking-wider uppercase flex items-center gap-1 animate-fade-in">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+            API Latency: {responseTime}ms
+          </span>
+        )}
       </div>
 
       {/* Filters + Search */}

@@ -49,10 +49,10 @@ export const Footer: React.FC = () => {
 
   const footerLinks = {
     shop: [
+      { name: "Design Studio", href: "/custom" },
       { name: "T-Shirts",     href: "/products" },
       { name: "Hoodies",      href: "/products" },
-      { name: "Accessories",  href: "/products" },
-      { name: "Best Sellers", href: "/products" }
+      { name: "Accessories",  href: "/products" }
     ],
     company: [
       { name: "About Us",          href: "/about" },

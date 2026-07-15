@@ -1,6 +1,8 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
+import * as crypto from 'crypto';
 import { OrderEntity } from './entities/order.entity';
 
 @Injectable()
@@ -8,10 +10,12 @@ export class OrdersService implements OnModuleInit {
   constructor(
     @InjectRepository(OrderEntity)
     private readonly orderRepository: Repository<OrderEntity>,
+    private readonly configService: ConfigService,
   ) {}
 
   async onModuleInit() {
-    await this.seedOrders();
+    // Disable automatic seeding as per user request to manage orders dynamically only
+    // await this.seedOrders();
   }
 
   private async seedOrders() {
@@ -87,7 +91,13 @@ export class OrdersService implements OnModuleInit {
     }
   }
 
-  async findAll(): Promise<OrderEntity[]> {
+  async findAll(email?: string): Promise<OrderEntity[]> {
+    if (email) {
+      return this.orderRepository.find({
+        where: { email },
+        order: { createdAt: 'DESC' },
+      });
+    }
     return this.orderRepository.find({ order: { createdAt: 'DESC' } });
   }
 
@@ -105,6 +115,10 @@ export class OrdersService implements OnModuleInit {
     order.items = data.items ?? 1;
     order.total = Number(data.total) || 0;
     order.status = data.status || 'Pending';
+    order.itemsJson = data.itemsJson || null;
+    order.paymentMethod = data.paymentMethod || 'Pending';
+    order.paymentId = data.paymentId || null;
+    order.paymentStatus = data.paymentStatus || 'Pending';
     order.createdAt = now;
     order.updatedAt = now;
     return this.orderRepository.save(order);
@@ -115,8 +129,86 @@ export class OrdersService implements OnModuleInit {
     if (!order) throw new Error('Order not found');
 
     if (data.status !== undefined) order.status = data.status;
+    if (data.paymentMethod !== undefined) order.paymentMethod = data.paymentMethod;
+    if (data.paymentId !== undefined) order.paymentId = data.paymentId;
+    if (data.paymentStatus !== undefined) order.paymentStatus = data.paymentStatus;
+    if (data.cancelReason !== undefined) order.cancelReason = data.cancelReason;
+    if (data.returnReason !== undefined) order.returnReason = data.returnReason;
     order.updatedAt = new Date();
 
     return this.orderRepository.save(order);
+  }
+
+  async createRazorpayOrder(amount: number) {
+    const keyId = this.configService.get<string>('RAZORPAY_KEY_ID');
+    const keySecret = this.configService.get<string>('RAZORPAY_KEY_SECRET');
+
+    // Convert amount to paise (subunit)
+    const amountInPaise = Math.round(amount * 100);
+
+    if (!keyId || !keySecret) {
+      console.log('Razorpay keys not configured. Simulating order creation...');
+      const simulatedId = 'order_sim_' + Math.random().toString(36).substring(2, 12);
+      return {
+        id: simulatedId,
+        amount: amountInPaise,
+        currency: 'INR',
+        key: 'rzp_test_simulated_key',
+        simulated: true,
+      };
+    }
+
+    try {
+      const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+      const response = await fetch('https://api.razorpay.com/v1/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${auth}`,
+        },
+        body: JSON.stringify({
+          amount: amountInPaise,
+          currency: 'INR',
+          receipt: 'receipt_order_' + Date.now(),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Razorpay API error: ${errorText}`);
+      }
+
+      const orderData = await response.json();
+      return {
+        id: orderData.id,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        key: keyId,
+        simulated: false,
+      };
+    } catch (error) {
+      console.error('Error creating Razorpay order:', error);
+      throw error;
+    }
+  }
+
+  async verifyRazorpayPayment(
+    razorpayOrderId: string,
+    razorpayPaymentId: string,
+    razorpaySignature: string,
+  ): Promise<boolean> {
+    const keySecret = this.configService.get<string>('RAZORPAY_KEY_SECRET');
+
+    if (!keySecret || razorpayOrderId.startsWith('order_sim_')) {
+      console.log('Skipping Razorpay signature verification (Sandbox mode)');
+      return true;
+    }
+
+    const generatedSignature = crypto
+      .createHmac('sha256', keySecret)
+      .update(`${razorpayOrderId}|${razorpayPaymentId}`)
+      .digest('hex');
+
+    return generatedSignature === razorpaySignature;
   }
 }

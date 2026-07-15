@@ -2,13 +2,24 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ShoppingBag, Trash2, Tag, Calendar, ShieldCheck, Minus, Plus } from 'lucide-react';
 import { useApp } from '../../components/AppContext';
 import { Breadcrumb, EmptyState } from '../../components/UIComponents';
 import { CouponCard } from '../../components/InfoCards';
+import { CustomGarmentPreview } from '../../components/CustomGarmentPreview';
 
 export default function CartPage() {
-  const { cart, removeFromCart, updateCartQty, showToast } = useApp();
+  const router = useRouter();
+  const { cart, removeFromCart, updateCartQty, showToast, currentUser, profileLoading } = useApp();
+
+  React.useEffect(() => {
+    if (profileLoading) return;
+    const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+    if (!token && !currentUser) {
+      router.push('/login');
+    }
+  }, [currentUser, profileLoading, router]);
   const [couponCode, setCouponCode] = useState("");
   const [discountAmount, setDiscountAmount] = useState(0);
 
@@ -53,9 +64,12 @@ export default function CartPage() {
           <div className="lg:col-span-2 space-y-3">
             {cart.map((item) => (
               <div key={item.id} className="p-3 sm:p-4 border border-[#E8E2D6] bg-white rounded-lg flex gap-3 sm:gap-4 hover:shadow-sm transition-shadow">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg overflow-hidden flex-shrink-0">
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                </div>
+                <CustomGarmentPreview
+                  customDesign={item.customDesign}
+                  defaultImage={item.image}
+                  view="both"
+                  className="w-14 h-14 sm:w-16 sm:h-16"
+                />
                 <div className="flex-1 min-w-0 flex flex-col justify-between">
                   <div>
                     <div className="flex items-start justify-between gap-2">

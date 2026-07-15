@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getApiUrl } from './ApiConfig';
+import { useRouter } from 'next/navigation';
 
 // Interfaces
 export interface TextLayer {
@@ -86,13 +87,19 @@ export interface OrderItem {
 export interface Order {
   id: string;
   date: string;
-  status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+  status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled' | 'Returned';
   items: OrderItem[];
   total: number;
   address: Address;
   paymentMethod: string;
+  paymentId?: string;
+  paymentStatus?: string;
   trackingNumber?: string;
   trackingTimeline?: { status: string; date: string; desc: string; done: boolean }[];
+  itemsJson?: any;
+  email?: string;
+  cancelReason?: string;
+  returnReason?: string;
 }
 
 export interface Transaction {
@@ -146,8 +153,9 @@ interface AppContextType {
   updateAddress: (address: Address) => void;
   deleteAddress: (id: string) => void;
   setDefaultAddress: (id: string) => void;
-  createOrder: (address: Address, paymentMethod: string) => Order;
-  cancelOrder: (id: string) => void;
+  createOrder: (address: Address, paymentMethod: string, paymentId?: string, paymentStatus?: string) => Order;
+  cancelOrder: (id: string, reason: string) => Promise<boolean>;
+  returnOrder: (id: string, reason: string) => Promise<boolean>;
   markNotificationsAsRead: () => void;
   logout: () => void;
   loginUser: (email: string, password?: string) => Promise<boolean>;
@@ -162,7 +170,13 @@ interface AppContextType {
     twitterUrl: string;
     instagramUrl: string;
     facebookUrl: string;
+    customTshirtPrice: number;
+    customPoloPrice: number;
+    customShirtPrice: number;
   };
+  settingsLoading: boolean;
+  profileLoading: boolean;
+  settingsResponseTime: number | null;
   updateCompanySettings: (data: any) => Promise<boolean>;
 }
 
@@ -221,6 +235,7 @@ const INITIAL_PRODUCTS: Product[] = [
 ];
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([
@@ -308,6 +323,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const isDarkMode = false; // dark mode removed
   const toggleDarkMode = () => {}; // no-op kept for backward compat
   const [currentUser, setCurrentUser] = useState<{ name: string; email: string; phone?: string; id?: string; role?: string; avatar?: string; preferences?: any } | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+  const [settingsResponseTime, setSettingsResponseTime] = useState<number | null>(null);
   const [companySettings, setCompanySettings] = useState({
     email: 'support@kaivafashion.com',
     phone: '+1 555-0199',
@@ -316,11 +334,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     twitterUrl: 'https://twitter.com/kaiva',
     instagramUrl: 'https://instagram.com/kaiva',
     facebookUrl: 'https://facebook.com/kaiva',
+    customTshirtPrice: 599,
+    customPoloPrice: 799,
+    customShirtPrice: 999,
   });
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
+      setProfileLoading(true);
       fetch(getApiUrl("/user/profile"), {
         headers: {
           Authorization: `Bearer ${token}`
@@ -343,26 +365,118 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (user.addresses && user.addresses.length > 0) {
           setAddresses(user.addresses);
         }
+        setProfileLoading(false);
       })
       .catch(() => {
         localStorage.removeItem("token");
         setCurrentUser(null);
+        setProfileLoading(false);
       });
     }
 
     // Load global settings
+    setSettingsLoading(true);
+    const settingsStart = performance.now();
     fetch(getApiUrl("/settings"))
       .then(res => {
         if (res.ok) return res.json();
         throw new Error("Failed to load settings");
       })
       .then(data => {
+        setSettingsResponseTime(Math.round(performance.now() - settingsStart));
         if (data) {
           setCompanySettings(data);
         }
+        setSettingsLoading(false);
       })
-      .catch(err => console.warn("Could not load global settings, using defaults.", err));
+      .catch(err => {
+        console.warn("Could not load global settings, using defaults.", err);
+        setSettingsResponseTime(Math.round(performance.now() - settingsStart));
+        setSettingsLoading(false);
+      });
   }, []);
+
+  // Sync cart and wishlist with localStorage to persist on reload
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedCart = localStorage.getItem("cart");
+      if (storedCart) {
+        try {
+          setCart(JSON.parse(storedCart));
+        } catch (e) {
+          console.error("Failed to parse stored cart", e);
+        }
+      }
+      const storedWishlist = localStorage.getItem("wishlist");
+      if (storedWishlist) {
+        try {
+          setWishlist(JSON.parse(storedWishlist));
+        } catch (e) {
+          console.error("Failed to parse stored wishlist", e);
+        }
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("cart", JSON.stringify(cart));
+    }
+  }, [cart]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("wishlist", JSON.stringify(wishlist));
+    }
+  }, [wishlist]);
+
+  useEffect(() => {
+    if (currentUser?.email) {
+      fetch(getApiUrl("/orders"))
+        .then(res => {
+          if (res.ok) return res.json();
+          throw new Error("Failed to load orders");
+        })
+        .then(data => {
+          const userOrders = data
+            .filter((o: any) => o.email === currentUser.email)
+            .map((o: any) => ({
+              id: o.id,
+              date: o.date || new Date(o.createdAt).toLocaleDateString(),
+              status: o.status,
+              total: Number(o.total || 0),
+              address: o.itemsJson && Array.isArray(o.itemsJson) && o.itemsJson[0]?.address ? o.itemsJson[0].address : {
+                id: 'default', fullName: o.customer || 'Customer', street: 'Address details on invoice', city: '', state: '', zip: '', country: '', phone: '', isDefault: true
+              },
+              paymentMethod: o.paymentMethod || 'CARD',
+              paymentId: o.paymentId,
+              paymentStatus: o.paymentStatus,
+              trackingNumber: o.trackingNumber,
+              trackingTimeline: o.trackingTimeline,
+              cancelReason: o.cancelReason,
+              returnReason: o.returnReason,
+              items: o.itemsJson && Array.isArray(o.itemsJson) ? o.itemsJson.map((it: any) => ({
+                productId: it.productId,
+                name: it.name,
+                price: Number(it.price || 0),
+                quantity: Number(it.quantity || 1),
+                image: it.image,
+                size: it.size,
+                color: it.color,
+                colorHex: it.colorHex,
+                category: it.category,
+                customDesign: it.customDesign
+              })) : [
+                { productId: 'standard', name: 'Order Item', price: o.total, quantity: o.items || 1, image: '/logoMainNew.png', size: 'M', color: 'White' }
+              ],
+              itemsJson: o.itemsJson,
+              email: o.email
+            }));
+          setOrders(userOrders);
+        })
+        .catch(err => console.error("Error loading user orders from DB:", err));
+    }
+  }, [currentUser]);
 
   // Toast System
   const showToast = (title: string, message: string, type: 'success' | 'error' | 'info' = 'success') => {
@@ -379,6 +493,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Cart operations
   const addToCart = (item: Omit<CartItem, 'id'>) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+    if (!token && !currentUser) {
+      showToast("Login Required", "Please login first to access design customizer and add products.", "error");
+      router.push("/login");
+      return;
+    }
     const id = Math.random().toString(36).substring(7);
     setCart(prev => {
       // Check if identical item (same product, size, color, and without customization) already in cart
@@ -485,7 +605,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Orders
-  const createOrder = (address: Address, paymentMethod: string) => {
+  const createOrder = (address: Address, paymentMethod: string, paymentId?: string, paymentStatus?: string) => {
     const orderId = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
     const items: OrderItem[] = cart.map(c => ({
       productId: c.productId,
@@ -509,6 +629,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       total,
       address,
       paymentMethod,
+      paymentId: paymentId || undefined,
+      paymentStatus: paymentStatus || "Pending",
       trackingNumber: `TRK-${Math.floor(10000000 + Math.random() * 90000000)}`,
       trackingTimeline: [
         { status: "Order Placed", date: "Just now", desc: "Your order has been logged and confirmed.", done: true },
@@ -522,7 +644,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `TXN-${Math.floor(100000 + Math.random() * 900000)}`,
       date: newOrder.date,
       amount: total,
-      status: "Success",
+      status: (paymentStatus === "Paid" || paymentStatus === "Success") ? "Success" : "Pending",
       type: "Payment",
       orderId: orderId,
       invoiceUrl: "#"
@@ -530,6 +652,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setOrders(prev => [newOrder, ...prev]);
     setTransactions(prev => [newTxn, ...prev]);
+
+    // Save order to PostgreSQL database
+    fetch(getApiUrl("/orders"), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: orderId,
+        customer: address.fullName,
+        email: currentUser?.email || "guest@example.com",
+        date: newOrder.date,
+        items: items.length,
+        total: total,
+        status: "Pending",
+        itemsJson: cart,
+        paymentMethod: paymentMethod,
+        paymentId: paymentId || null,
+        paymentStatus: paymentStatus || "Pending"
+      })
+    })
+    .then(res => {
+      if (!res.ok) throw new Error("Failed to save order to database");
+      return res.json();
+    })
+    .then(data => {
+      console.log("Order saved to database successfully:", data);
+    })
+    .catch(err => {
+      console.error("Error saving order to database:", err);
+    });
 
     // Dispatch order sync to Qikink Print-on-Demand partner API
     fetch('/api/qikink/order', {
@@ -541,7 +694,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         orderId,
         address,
         cart,
-        gateway: 'PREPAID',
+        gateway: paymentMethod.toUpperCase().includes('COD') ? 'COD' : 'PREPAID',
         total
       })
     })
@@ -562,10 +715,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return newOrder;
   };
 
-  const cancelOrder = (id: string) => {
-    setOrders(prev => prev.map(o => o.id === id ? { ...o, status: "Cancelled" as const } : o));
-    setTransactions(prev => prev.map(t => t.orderId === id ? { ...t, status: "Refunded" as const, type: "Refund" as const } : t));
-    showToast("Order Cancelled", "Your order was successfully cancelled and refunded.", "info");
+  const cancelOrder = async (id: string, reason: string): Promise<boolean> => {
+    try {
+      const res = await fetch(getApiUrl(`/orders/${id}`), {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "Cancelled", cancelReason: reason })
+      });
+      if (!res.ok) throw new Error("Failed to cancel order on backend");
+
+      setOrders(prev => prev.map(o => o.id === id ? { ...o, status: "Cancelled" as const, cancelReason: reason } : o));
+      setTransactions(prev => prev.map(t => t.orderId === id ? { ...t, status: "Refunded" as const, type: "Refund" as const } : t));
+      showToast("Order Cancelled", "Your order has been cancelled. 20% processing fee has been deducted.", "success");
+      return true;
+    } catch (err: any) {
+      showToast("Error", err.message || "Failed to cancel order.", "error");
+      return false;
+    }
+  };
+
+  const returnOrder = async (id: string, reason: string): Promise<boolean> => {
+    try {
+      const res = await fetch(getApiUrl(`/orders/${id}`), {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "Returned", returnReason: reason })
+      });
+      if (!res.ok) throw new Error("Failed to register return on backend");
+
+      setOrders(prev => prev.map(o => o.id === id ? { ...o, status: "Returned" as const, returnReason: reason } : o));
+      showToast("Return Processed", "Return request submitted. Our pickup agent will contact you soon.", "success");
+      return true;
+    } catch (err: any) {
+      showToast("Error", err.message || "Failed to submit return request.", "error");
+      return false;
+    }
   };
 
   const markNotificationsAsRead = () => {
@@ -575,7 +759,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const logout = () => {
     localStorage.removeItem("token");
     setCurrentUser(null);
+    setCart([]);
     showToast("Logged Out", "You have been logged out of your account.", "info");
+    router.push("/");
   };
 
   const loginUser = async (email: string, password?: string): Promise<boolean> => {
@@ -740,6 +926,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setDefaultAddress,
       createOrder,
       cancelOrder,
+      returnOrder,
       markNotificationsAsRead,
       logout,
       loginUser,
@@ -747,6 +934,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updateUserProfile,
       updateUserPreferences,
       companySettings,
+      settingsLoading,
+      profileLoading,
+      settingsResponseTime,
       updateCompanySettings
     }}>
       {children}

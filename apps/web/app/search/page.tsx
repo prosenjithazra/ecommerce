@@ -7,48 +7,33 @@ import { Breadcrumb, EmptyState } from '../../components/UIComponents';
 import { ProductCard } from '../../components/ProductCard';
 import { SearchBar } from '../../components/SearchBar';
 import { Search } from 'lucide-react';
-
-const INITIAL_PRODUCTS: Product[] = [
-  {
-    id: "p1",
-    name: "Premium Soft Cotton Tee",
-    price: 29.99,
-    originalPrice: 39.99,
-    rating: 4.8,
-    reviewsCount: 124,
-    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80"],
-    category: "T-Shirts",
-    tag: "Best Seller",
-    description: "Tailored with a modern fit...",
-    colors: [{ name: "White", hex: "#ffffff" }],
-    sizes: ["S", "M", "L"],
-    inStock: true
-  },
-  {
-    id: "p2",
-    name: "Heavyweight Fleece Hoodie",
-    price: 49.99,
-    originalPrice: 59.99,
-    rating: 4.9,
-    reviewsCount: 88,
-    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&auto=format&fit=crop&q=80"],
-    category: "Hoodies",
-    tag: "New",
-    description: "Cozy fleece hoodie...",
-    colors: [{ name: "Black", hex: "#0f172a" }],
-    sizes: ["M", "L", "XL"],
-    inStock: true
-  }
-];
+import { getApiUrl } from '../../components/ApiConfig';
 
 function SearchPageContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams?.get('q') || "";
   const [query, setQuery] = useState(initialQuery);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredProducts = INITIAL_PRODUCTS.filter(p => 
+  useEffect(() => {
+    setLoading(true);
+    fetch(getApiUrl("/products"))
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to load products");
+      })
+      .then(data => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Error loading search products:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(query.toLowerCase()) || 
     p.category.toLowerCase().includes(query.toLowerCase())
   );
@@ -71,7 +56,17 @@ function SearchPageContent() {
         <SearchBar initialValue={query} />
       </section>
 
-      {filteredProducts.length === 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
+          {Array(4).fill(0).map((_, i) => (
+            <div key={i} className="border border-zinc-200 rounded-lg p-4 space-y-4">
+              <div className="aspect-square bg-zinc-200 rounded-lg w-full" />
+              <div className="h-4 bg-zinc-200 rounded w-3/4" />
+              <div className="h-3 bg-zinc-200 rounded w-1/2" />
+            </div>
+          ))}
+        </div>
+      ) : filteredProducts.length === 0 ? (
         <EmptyState
           title="No search results"
           description={`We couldn't find any premium blanks matching "${query}". Try standard queries like "T-shirt" or "Hoodie".`}

@@ -1,56 +1,14 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ShoppingBag, Heart, ShieldCheck, Truck, RefreshCw, Minus, Plus } from 'lucide-react';
 import { useApp, Product } from '../../../components/AppContext';
 import { ProductGallery, ReviewCard } from '../../../components/InfoCards';
 import { ProductCard } from '../../../components/ProductCard';
-import { Breadcrumb, Price, Rating, Slider } from '../../../components/UIComponents';
+import { Breadcrumb, Price, Rating, Slider, SkeletonLoader, EmptyState } from '../../../components/UIComponents';
 import { StickyAddToCart } from '../../../components/StickyAddToCart';
-
-const PRODUCTS_DB: Record<string, Product> = {
-  p1: {
-    id: "p1",
-    name: "Premium Soft Cotton Tee",
-    price: 29.99, originalPrice: 39.99, rating: 4.8, reviewsCount: 124,
-    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=800&auto=format&fit=crop&q=80"
-    ],
-    category: "T-Shirts", tag: "Best Seller",
-    description: "Tailored with a modern fit and crafted from ultra-soft combed cotton, this premium t-shirt is designed to be the perfect base for your high-quality custom prints. Featuring reinforced stitching and a premium ribbed collar that holds its shape.",
-    colors: [
-      { name: "White", hex: "#ffffff" },
-      { name: "Black", hex: "#0f172a" },
-      { name: "Heather Grey", hex: "#94a3b8" },
-      { name: "Navy Blue", hex: "#1e3a8a" }
-    ],
-    sizes: ["S", "M", "L", "XL", "XXL"],
-    inStock: true
-  },
-  p2: {
-    id: "p2",
-    name: "Heavyweight Fleece Hoodie",
-    price: 49.99, originalPrice: 59.99, rating: 4.9, reviewsCount: 88,
-    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&auto=format&fit=crop&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=800&auto=format&fit=crop&q=80"
-    ],
-    category: "Hoodies", tag: "New",
-    description: "Stay warm in style. This heavy fleece hoodie offers a comfortable boxy fit, lined hood, double-stitched kangaroo pocket, and premium cuffs. Ideal for bold back designs and cozy vibes.",
-    colors: [
-      { name: "Black", hex: "#0f172a" },
-      { name: "Sand", hex: "#e2e8f0" },
-      { name: "Forest Green", hex: "#14532d" }
-    ],
-    sizes: ["M", "L", "XL", "XXL"],
-    inStock: true
-  }
-};
+import { getApiUrl } from '../../../components/ApiConfig';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -58,24 +16,64 @@ export default function ProductDetailPage() {
   const { addToCart, toggleWishlist, isInWishlist } = useApp();
 
   const id = (params?.id as string) || "p1";
-  const product = (PRODUCTS_DB[id] || PRODUCTS_DB.p1) as Product;
+  
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]?.name || "White");
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0] || "M");
+  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'desc' | 'print' | 'ship'>('desc');
 
-  const isSaved = isInWishlist(product.id);
+  // Load product details
+  useEffect(() => {
+    setLoading(true);
+    fetch(getApiUrl(`/products/${id}`))
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to load product details");
+      })
+      .then(data => {
+        setProduct(data);
+        if (data.colors && data.colors.length > 0) {
+          setSelectedColor(data.colors[0].name);
+        }
+        if (data.sizes && data.sizes.length > 0) {
+          setSelectedSize(data.sizes[0]);
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Error fetching product details:", err);
+        setLoading(false);
+      });
+  }, [id]);
+
+  // Load related products
+  useEffect(() => {
+    fetch(getApiUrl("/products"))
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setRelatedProducts(data.filter(p => p.id !== id));
+        }
+      })
+      .catch(err => console.error("Error loading related products:", err));
+  }, [id]);
+
+  const isSaved = product ? isInWishlist(product.id) : false;
 
   const handleAddToCart = () => {
+    if (!product) return;
     addToCart({
       productId: product.id,
       name: product.name,
       price: product.price,
       quantity,
       image: product.image,
-      size: selectedSize,
-      color: selectedColor
+      size: selectedSize || "M",
+      color: selectedColor || "White"
     });
   };
 
@@ -84,7 +82,27 @@ export default function ProductDetailPage() {
     router.push('/cart');
   };
 
-  const relatedProducts = Object.values(PRODUCTS_DB).filter(p => p.id !== product.id);
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-16 flex items-center justify-center">
+        <SkeletonLoader type="detail" />
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-16 text-center">
+        <EmptyState
+          title="Product Not Found"
+          description="The product you are looking for does not exist or has been removed from our catalog."
+          actionText="Browse Blanks Catalog"
+          actionHref="/products"
+          icon={<ShoppingBag className="w-8 h-8 text-[#A8C69F]" />}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-5 pb-12 sm:pb-24">
@@ -94,7 +112,7 @@ export default function ProductDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-12 items-start">
 
         {/* Gallery */}
-        <ProductGallery images={product.images} name={product.name} />
+        <ProductGallery images={product.images || [product.image]} name={product.name} />
 
         {/* Product Info */}
         <div className="space-y-3.5 sm:space-y-5">
@@ -118,9 +136,9 @@ export default function ProductDetailPage() {
 
           {/* Rating */}
           <div className="flex items-center gap-2">
-            <Rating value={product.rating} />
-            <span className="text-xs font-bold text-[#4A453E]">{product.rating}</span>
-            <span className="text-xs text-[#A89B8A]">({product.reviewsCount} verified reviews)</span>
+            <Rating value={product.rating || 5} />
+            <span className="text-xs font-bold text-[#4A453E]">{product.rating || 5}</span>
+            <span className="text-xs text-[#A89B8A]">({product.reviewsCount || 0} verified reviews)</span>
           </div>
 
           {/* Price */}
@@ -129,53 +147,57 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Color picker */}
-          <div className="space-y-2">
-            <span className="text-xs font-bold text-[#4A453E]">
-              Color: <span className="text-[#F9A37E]">{selectedColor}</span>
-            </span>
-            <div className="flex gap-2.5">
-              {product.colors.map(color => (
-                <button
-                  key={color.name}
-                  onClick={() => setSelectedColor(color.name)}
-                  className={`w-7 h-7 rounded-full border-2 transition-all hover:scale-105 ${
-                    selectedColor === color.name
-                      ? 'border-[#F9A37E] scale-110 shadow-md shadow-[#F9A37E]/30'
-                      : 'border-[#E8E2D6]'
-                  }`}
-                  style={{ backgroundColor: color.hex }}
-                  title={color.name}
-                />
-              ))}
+          {product.colors && product.colors.length > 0 && (
+            <div className="space-y-2">
+              <span className="text-xs font-bold text-[#4A453E]">
+                Color: <span className="text-[#F9A37E]">{selectedColor}</span>
+              </span>
+              <div className="flex gap-2.5">
+                {product.colors.map(color => (
+                  <button
+                    key={color.name}
+                    onClick={() => setSelectedColor(color.name)}
+                    className={`w-7 h-7 rounded-full border-2 transition-all hover:scale-105 ${
+                      selectedColor === color.name
+                        ? 'border-[#F9A37E] scale-110 shadow-md shadow-[#F9A37E]/30'
+                        : 'border-[#E8E2D6]'
+                    }`}
+                    style={{ backgroundColor: color.hex }}
+                    title={color.name}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Size selection */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-[#4A453E]">
-                Size: <span className="text-[#F9A37E] uppercase">{selectedSize}</span>
-              </span>
-              <button className="text-xs font-bold text-[#A89B8A] hover:text-[#F9A37E] transition-colors">
-                Size Chart
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {product.sizes.map(size => (
-                <button
-                  key={size}
-                  onClick={() => setSelectedSize(size)}
-                  className={`min-w-10 h-10 px-3 rounded-lg text-xs font-extrabold border transition-all ${
-                    selectedSize === size
-                      ? 'bg-[#4A453E] text-white border-[#4A453E]'
-                      : 'bg-transparent text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
-                  }`}
-                >
-                  {size}
+          {product.sizes && product.sizes.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold text-[#4A453E]">
+                  Size: <span className="text-[#F9A37E] uppercase">{selectedSize}</span>
+                </span>
+                <button className="text-xs font-bold text-[#A89B8A] hover:text-[#F9A37E] transition-colors">
+                  Size Chart
                 </button>
-              ))}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {product.sizes.map(size => (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`min-w-10 h-10 px-3 rounded-lg text-xs font-extrabold border transition-all ${
+                      selectedSize === size
+                        ? 'bg-[#4A453E] text-white border-[#4A453E]'
+                        : 'bg-transparent text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Quantity */}
           <div className="space-y-2">
@@ -265,7 +287,7 @@ export default function ProductDetailPage() {
             );
           })}
         </div>
-        <div className="text-sm text-[#7A736A] leading-relaxed max-w-3xl">
+        <div className="text-sm text-[#7A736A] leading-relaxed max-w-3xl font-medium">
           {activeTab === 'desc' && <p>{product.description}</p>}
           {activeTab === 'print' && (
             <p>We use high-fidelity Direct-To-Garment (DTG) digital printing with ecological, water-based inks that penetrate deep into the fibers. Crisp designs that won&apos;t peel, crack, or flake — even after multiple machine washes.</p>
@@ -287,18 +309,20 @@ export default function ProductDetailPage() {
       </section>
 
       {/* ── Related Products ── */}
-      <section className="space-y-3 pt-3.5 sm:pt-10 border-t border-[#E8E2D6]">
-        <h2 className="text-xl font-extrabold text-[#4A453E] tracking-tight">You May Also Like</h2>
-        {relatedProducts.length > 2 ? (
-          <Slider desktopCols={4}>
-            {relatedProducts.map(p => <ProductCard key={p.id} product={p} />)}
-          </Slider>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-4">
-            {relatedProducts.map(p => <ProductCard key={p.id} product={p} />)}
-          </div>
-        )}
-      </section>
+      {relatedProducts.length > 0 && (
+        <section className="space-y-3 pt-3.5 sm:pt-10 border-t border-[#E8E2D6]">
+          <h2 className="text-xl font-extrabold text-[#4A453E] tracking-tight">You May Also Like</h2>
+          {relatedProducts.length > 2 ? (
+            <Slider desktopCols={4}>
+              {relatedProducts.map(p => <ProductCard key={p.id} product={p} />)}
+            </Slider>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-4">
+              {relatedProducts.map(p => <ProductCard key={p.id} product={p} />)}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Sticky mobile add to cart */}
       <StickyAddToCart
