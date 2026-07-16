@@ -80,7 +80,7 @@ export default function ComingSoonPage() {
       <div className="max-w-lg w-full space-y-3 md:space-y-8 relative z-10">
         {/* Brand Logo */}
         <div className="flex flex-col items-center justify-center space-y-3">
-          <img src="/kliamoLogo.png" alt="Kliamo Fashion" className="h-16 w-auto object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]" />
+          <img src="/kliamologoNew.png" alt="Kliamo Fashion" className="h-16 w-auto object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]" />
           <div className="flex items-center gap-1 bg-[#F9A37E]/15 border border-[#F9A37E]/30 rounded-full px-3 py-1 text-[9px] font-black text-[#E8855A] tracking-widest uppercase">
             <Sparkles className="w-3 h-3 animate-spin" style={{ animationDuration: '4s' }} /> Something Big is Brewing
           </div>

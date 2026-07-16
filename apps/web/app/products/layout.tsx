@@ -27,7 +27,7 @@ export default function ProductsLayout({ children }: { children: React.ReactNode
     "publisher": {
       "@type": "Organization",
       "name": "Kliamo Fashion",
-      "logo": `${baseUrl}/kliamoLogo.png`
+      "logo": `${baseUrl}/kliamologoNew.png`
     }
   };
 

@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     description: "Order custom printed apparel with zero minimums. Heavyweight cotton blanks and brilliant direct-to-garment prints.",
     images: [
       {
-        url: "/kliamoLogo.png",
+        url: "/kliamologoNew.png",
         width: 800,
         height: 600,
         alt: "Kliamo Fashion Premium Custom Apparel"
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Kliamo Fashion | Premium Storefront",
     description: "Order custom printed apparel with zero minimums. Heavyweight cotton blanks and brilliant direct-to-garment prints.",
-    images: ["/kliamoLogo.png"],
+    images: ["/kliamologoNew.png"],
     creator: "@kliamofashion"
   },
   icons: {
@@ -88,7 +88,7 @@ export default function RootLayout({
                   "@id": `${baseUrl}/#organization`,
                   "name": "Kliamo Fashion",
                   "url": baseUrl,
-                  "logo": `${baseUrl}/kliamoLogo.png`,
+                  "logo": `${baseUrl}/kliamologoNew.png`,
                   "email": "support@kliamofashion.com",
                   "sameAs": [
                     "https://twitter.com/kliamofashion",
