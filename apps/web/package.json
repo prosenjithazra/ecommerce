@@ -19,7 +19,8 @@
     "lucide-react": "^0.468.0",
     "canvas-confetti": "^1.9.3",
     "clsx": "^2.1.1",
-    "tailwind-merge": "^2.5.5"
+    "tailwind-merge": "^2.5.5",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
