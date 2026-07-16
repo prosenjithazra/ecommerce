@@ -82,7 +82,7 @@ export function AdminSidebar() {
       {/* Brand */}
       <div className="px-5 py-6 border-b border-zinc-800 flex items-center justify-between flex-shrink-0">
         <Link href="/admin" className="flex items-center gap-2.5">
-          <img src="/logoMainNew.png" alt="Kaiva Fashion Logo" className="h-9 w-auto object-contain" />
+          <img src="/kliamologoNew.png" alt="Kliamo Fashion Logo" className="h-9 w-auto object-contain" />
         </Link>
         <button
           onClick={() => setMobileOpen(false)}
@@ -124,7 +124,7 @@ export function AdminSidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <span className="font-extrabold text-white text-xs block leading-tight truncate">{currentUser?.name || "Administrator"}</span>
-            <span className="text-zinc-500 text-[10px] block leading-tight truncate">{currentUser?.email || "admin@kaivafashion.com"}</span>
+            <span className="text-zinc-500 text-[10px] block leading-tight truncate">{currentUser?.email || "admin@kliamofashion.com"}</span>
           </div>
           <button
             onClick={() => { logout(); router.push("/"); }}

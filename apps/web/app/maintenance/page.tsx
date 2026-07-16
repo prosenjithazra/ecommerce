@@ -13,7 +13,7 @@ export default function MaintenancePage() {
       <div className="max-w-lg w-full space-y-4 sm:space-y-6 relative z-10">
         {/* Brand Logo */}
         <div className="flex flex-col items-center justify-center space-y-2">
-          <img src="/logoMainNew.png" alt="Kaiva Fashion" className="h-12 sm:h-16 w-auto object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]" />
+          <img src="/kliamologoNew.png" alt="Kliamo Fashion" className="h-12 sm:h-16 w-auto object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]" />
         </div>
 
         {/* Animated Maintenance Gears */}
@@ -53,7 +53,7 @@ export default function MaintenancePage() {
             <Heart className="w-3.5 h-3.5 text-[#F9A37E] mt-0.5 flex-shrink-0" />
             <div>
               <p className="text-[12px] sm:text-[14px] font-black text-[#4A453E] uppercase tracking-wide">Customer Support</p>
-              <p className="text-[10px] text-[#7A736A] leading-tight mt-0.5">Have an urgent question? Email support@kaivafashion.com anytime.</p>
+              <p className="text-[10px] text-[#7A736A] leading-tight mt-0.5">Have an urgent question? Email support@kliamofashion.com anytime.</p>
             </div>
           </div>
         </div>

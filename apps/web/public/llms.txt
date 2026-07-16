@@ -1,0 +1,21 @@
+# Kliamo Fashion
+
+Kliamo Fashion is a premium print-on-demand custom clothing storefront. The platform allows users to design, customize, and purchase high-quality apparel like T-Shirts, Polos, and Hoodies.
+
+## Key Features
+
+- **Custom Apparel Designer**: Real-time interactive 3D/canvas custom designer for custom printing.
+- **Order Syncing**: Dynamic logistics tracking integrated with Qikink open API.
+- **Admin Portal**: Integrated dashboard for banner management, product additions, users lists, and order processing.
+
+## Tech Stack
+
+- **Frontend**: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS, Framer Motion, Lucide icons.
+- **Backend**: NestJS, TypeORM, PostgreSQL database, Cloudinary image upload, Razorpay payment gateway.
+
+## Core API Endpoints
+
+- `GET /api/qik/token`: Fetches access token for sandbox payment integrations.
+- `POST /api/qik/create-order`: Submits transactions to sandbox gateway.
+- `GET /api/qik/payment-status?orderId={id}`: Checks status.
+- `POST /api/qik/webhook`: Verifies signature and synchronizes local order databases.

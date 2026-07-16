@@ -168,7 +168,7 @@ export const CustomGarmentPreview: React.FC<CustomGarmentPreviewProps> = ({
     return (
       <div className={`${className} bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg overflow-hidden flex-shrink-0`}>
         <img
-          src={defaultImage || '/logoMainNew.png'}
+          src={defaultImage || '/kliamologoNew.png'}
           alt="Product thumbnail"
           className="w-full h-full object-cover"
         />

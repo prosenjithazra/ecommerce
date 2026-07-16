@@ -327,13 +327,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsResponseTime, setSettingsResponseTime] = useState<number | null>(null);
   const [companySettings, setCompanySettings] = useState({
-    email: 'support@kaivafashion.com',
+    email: 'support@kliamofashion.com',
     phone: '+1 555-0199',
     address: '123 Creative St, New York, NY 10001',
     hours: 'Mon - Fri, 9am - 6pm EST',
-    twitterUrl: 'https://twitter.com/kaiva',
-    instagramUrl: 'https://instagram.com/kaiva',
-    facebookUrl: 'https://facebook.com/kaiva',
+    twitterUrl: 'https://twitter.com/kliamo',
+    instagramUrl: 'https://instagram.com/kliamo',
+    facebookUrl: 'https://facebook.com/kliamo',
     customTshirtPrice: 599,
     customPoloPrice: 799,
     customShirtPrice: 999,
@@ -467,7 +467,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 category: it.category,
                 customDesign: it.customDesign
               })) : [
-                { productId: 'standard', name: 'Order Item', price: o.total, quantity: o.items || 1, image: '/logoMainNew.png', size: 'M', color: 'White' }
+                { productId: 'standard', name: 'Order Item', price: o.total, quantity: o.items || 1, image: '/kliamologoNew.png', size: 'M', color: 'White' }
               ],
               itemsJson: o.itemsJson,
               email: o.email
@@ -684,7 +684,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.error("Error saving order to database:", err);
     });
 
-    // Dispatch order sync to Qikink Print-on-Demand partner API
+    // Dispatch order sync to Qikink partner API
     fetch('/api/qikink/order', {
       method: 'POST',
       headers: {

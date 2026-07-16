@@ -315,7 +315,7 @@ export default function CustomizerPage() {
         }
       };
 
-      const thumbnailImage = frontDesign.imageSrc || '/logoMainNew.png';
+      const thumbnailImage = frontDesign.imageSrc || '/kliamologoNew.png';
 
       addToCart({
         productId: `custom-${garmentType}`,

@@ -201,11 +201,11 @@ export default function ContactPage() {
                 Thank You
               </h2>
               <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed max-w-md mx-auto whitespace-pre-line">
-                Thank you for choosing Kaiva Fashion. Your trust and support
+                Thank you for choosing Kliamo Fashion. Your trust and support
                 inspire us to create stylish, comfortable, and high-quality
                 fashion for every occasion. We&apos;re grateful to be a part of your
                 journey and look forward to serving you with collections you&apos;ll
-                love. Welcome to the Kaiva Fashion family!
+                love. Welcome to the Kliamo Fashion family!
               </p>
             </div>
             <button

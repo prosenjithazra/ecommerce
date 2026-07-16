@@ -92,13 +92,13 @@ export const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ childre
                 style={{ animationDuration: '1.2s' }} 
               />
               <img 
-                src="/logoMainNew.png" 
-                alt="Kaiva Fashion Logo" 
+                src="/kliamologoNew.png" 
+                alt="Kliamo Fashion Logo" 
                 className="w-24 h-24 object-contain animate-logo-pulse" 
               />
             </div>
             <h2 className="text-xs font-black tracking-[0.3em] text-[#4A453E]/80 uppercase animate-pulse">
-              KAIVA FASHION
+              KLIAMO FASHION
             </h2>
           </div>
         </div>

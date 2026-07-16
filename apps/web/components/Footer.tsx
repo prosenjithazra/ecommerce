@@ -117,7 +117,7 @@ export const Footer: React.FC = () => {
           {/* Brand */}
           <div className="col-span-2 space-y-4">
             <Link href="/" className="inline-block">
-              <img src="/logoMainNew.png" alt="Kaiva Fashion Logo" className="h-20 w-auto object-contain " />
+              <img src="/kliamologoNew.png" alt="Kliamo Fashion Logo" className="h-20 w-auto object-contain " />
             </Link>
             <p className="text-sm text-[#A89B8A] leading-relaxed max-w-xs">
               Premium custom-printed apparel and accessories, made on demand and delivered fast.
@@ -178,7 +178,7 @@ export const Footer: React.FC = () => {
         {/* Bottom bar */}
         <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4 pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
           <span className="text-sm text-[#d9d9d9] text-center sm:text-left">
-            © {currentYear} <Link href="/" className="hover:text-[#F9A37E] transition-colors">Kaiva Fashion</Link>. All rights reserved.
+            © {currentYear} <Link href="/" className="hover:text-[#F9A37E] transition-colors">Kliamo Fashion</Link>. All rights reserved.
           </span>
           <div className="flex gap-2 justify-center">
             {[

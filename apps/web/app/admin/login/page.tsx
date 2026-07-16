@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-[#F7F4F0] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans antialiased">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link href="/" className="inline-block mb-1">
-          <img src="/logoMainNew.png" alt="Kaiva Fashion Logo" className="h-12 w-auto mx-auto object-contain" />
+          <img src="/kliamologoNew.png" alt="Kliamo Fashion Logo" className="h-12 w-auto mx-auto object-contain" />
         </Link>
         <span className="block text-[10px] font-black tracking-[0.25em] text-[#7A736A] uppercase mb-4">
           Admin Portal
@@ -94,7 +94,7 @@ export default function AdminLoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@kaivafashion.com"
+                placeholder="admin@kliamofashion.com"
                 disabled={submitting}
                 className="mt-1.5 w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl py-3 px-4 text-xs font-medium outline-none focus:border-[#F9A37E] text-[#4A453E] transition-colors disabled:opacity-50"
               />

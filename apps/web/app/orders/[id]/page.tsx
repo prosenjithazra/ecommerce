@@ -68,7 +68,7 @@ export default function OrderDetailPage() {
             category: it.category,
             customDesign: it.customDesign
           })) : [
-            { productId: 'standard', name: 'Order Item', price: o.total, quantity: o.items || 1, image: '/logoMainNew.png', size: 'M', color: 'White' }
+            { productId: 'standard', name: 'Order Item', price: o.total, quantity: o.items || 1, image: '/kliamologoNew.png', size: 'M', color: 'White' }
           ],
           itemsJson: o.itemsJson,
           email: o.email

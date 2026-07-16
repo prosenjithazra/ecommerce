@@ -1,0 +1,10 @@
+/* TEAM */
+Chef: Kliamo Fashion Dev Team
+Contact: tech@kliamofashion.com
+Website: https://kliamofashion.com
+
+/* SITE */
+Last update: 2026-07-16
+Standards: HTML5, CSS3, ESNext
+Components: Next.js 16, TypeScript, Tailwind CSS, NestJS, TypeORM, PostgreSQL
+Software: Turborepo, Next.js, Node.js

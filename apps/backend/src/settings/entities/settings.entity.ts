@@ -5,7 +5,7 @@ export class SettingsEntity {
   @PrimaryColumn()
   id: string;
 
-  @Column({ nullable: false, default: 'support@kaivafashion.com' })
+  @Column({ nullable: false, default: 'support@kliamofashion.com' })
   email: string;
 
   @Column({ nullable: false, default: '+1 555-0199' })
@@ -17,13 +17,13 @@ export class SettingsEntity {
   @Column({ nullable: false, default: 'Mon - Fri, 9am - 6pm EST' })
   hours: string;
 
-  @Column({ nullable: false, default: 'https://twitter.com/kaiva' })
+  @Column({ nullable: false, default: 'https://twitter.com/kliamo' })
   twitterUrl: string;
 
-  @Column({ nullable: false, default: 'https://instagram.com/kaiva' })
+  @Column({ nullable: false, default: 'https://instagram.com/kliamo' })
   instagramUrl: string;
 
-  @Column({ nullable: false, default: 'https://facebook.com/kaiva' })
+  @Column({ nullable: false, default: 'https://facebook.com/kliamo' })
   facebookUrl: string;
 
   @Column({ type: 'int', nullable: false, default: 599 })

@@ -14,7 +14,7 @@ export default function TermsPage() {
 
         <section className="space-y-3">
           <h2 className="text-base font-extrabold text-zinc-900 dark:text-white">1. User Agreement</h2>
-          <p>By accessing Kaiva Fashion and utilizing our design tools or placing purchase orders, you agree to comply with our platform terms. You verify that you are at least 18 years old or are using the storefront under guardian supervision.</p>
+          <p>By accessing Kliamo Fashion and utilizing our design tools or placing purchase orders, you agree to comply with our platform terms. You verify that you are at least 18 years old or are using the storefront under guardian supervision.</p>
         </section>
 
         <section className="space-y-3">

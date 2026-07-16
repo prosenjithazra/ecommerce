@@ -5,7 +5,7 @@ const sections: PolicySection[] = [
   {
     id: "sh1",
     heading: "Processing Time",
-    content: "All print-on-demand orders require a production period of 2–4 business days for printing, quality checking, and packaging before dispatch. This processing time is separate from the shipping transit time. Orders placed on weekends or public holidays begin processing the next working day.",
+    content: "All orders require a production period of 2–4 business days for printing, quality checking, and packaging before dispatch. This processing time is separate from the shipping transit time. Orders placed on weekends or public holidays begin processing the next working day.",
     lastUpdated: "2026-07-01",
   },
   {

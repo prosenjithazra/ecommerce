@@ -78,7 +78,7 @@ export const Header: React.FC = () => {
         <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 h-[auto] flex items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center flex-shrink-0">
-            <img src="/logoMainNew.png" alt="Kaiva Fashion Logo" className="h-10 md:h-14 w-auto object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.15)]" />
+            <img src="/kliamologoNew.png" alt="Kliamo Fashion Logo" className="h-10 md:h-14 w-auto object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.15)]" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -192,7 +192,7 @@ export const Header: React.FC = () => {
             </button>
 
             <p className="text-xs font-bold tracking-widest uppercase text-[#A8C69F] mb-3">
-              Search Kaiva Fashion
+              Search Kliamo Fashion
             </p>
             <form onSubmit={handleSearchSubmit} className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A8C69F]" />
@@ -255,7 +255,7 @@ export const Header: React.FC = () => {
           <div className="relative w-72 bg-white h-full flex flex-col shadow-2xl animate-slide-from-left">
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#E8E2D6]">
               <div className="flex items-center">
-                <img src="/logoMainNew.png" alt="Kaiva Fashion Logo" className="h-9 w-auto object-contain" />
+                <img src="/kliamologoNew.png" alt="Kliamo Fashion Logo" className="h-9 w-auto object-contain" />
               </div>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}

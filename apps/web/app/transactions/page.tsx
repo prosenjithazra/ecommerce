@@ -26,7 +26,7 @@ export default function TransactionsPage() {
         <h1 className="text-3xl font-extrabold text-zinc-909 dark:text-white tracking-tight flex items-center gap-2">
           <FileText className="w-7 h-7 text-indigo-500" /> Transaction Ledger
         </h1>
-        <p className="text-xs text-zinc-400">Ledger of all print-on-demand invoice transactions and refund statuses.</p>
+        <p className="text-xs text-zinc-400">Ledger of all invoice transactions and refund statuses.</p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-zinc-50 dark:bg-zinc-900/60 p-4 border border-zinc-150 dark:border-zinc-800 rounded-lg">

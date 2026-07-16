@@ -1,0 +1,18 @@
+# AI Crawler Rules for Kliamo Fashion
+# Target Crawlers: ChatGPT-User, Claude-Web, GPTBot, ClaudeBot, PerplexityBot, Gemini, Bingbot, Google-Extended
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /api
+Disallow: /private
+Disallow: /cart
+Disallow: /checkout
+Disallow: /profile
+
+# Canonical description
+Description: Kliamo Fashion is a premium custom storefront offering heavyweight cotton apparel with zero minimum order quantities.
+Info: https://kliamofashion.com/about
+Sitemap: https://kliamofashion.com/sitemap.xml
+LLM-Data: https://kliamofashion.com/llms.txt

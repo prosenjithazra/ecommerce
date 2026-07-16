@@ -62,7 +62,7 @@ export default function OrdersPage() {
               category: it.category,
               customDesign: it.customDesign
             })) : [
-              { productId: 'standard', name: 'Order Item', price: o.total, quantity: o.items || 1, image: '/logoMainNew.png', size: 'M', color: 'White' }
+              { productId: 'standard', name: 'Order Item', price: o.total, quantity: o.items || 1, image: '/kliamologoNew.png', size: 'M', color: 'White' }
             ],
             itemsJson: o.itemsJson,
             email: o.email
@@ -122,7 +122,7 @@ export default function OrdersPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A453E] tracking-tight">Order History</h1>
-          <p className="text-xs text-[#A89B8A] mt-1">View and track all your print-on-demand orders.</p>
+          <p className="text-xs text-[#A89B8A] mt-1">View and track all your orders.</p>
         </div>
         {responseTime !== null && (
           <span className="text-[10px] font-extrabold text-zinc-400 bg-zinc-100 border border-zinc-200/60 rounded-full px-2.5 py-1 tracking-wider uppercase flex items-center gap-1 animate-fade-in">

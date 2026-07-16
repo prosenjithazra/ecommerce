@@ -114,7 +114,7 @@ export default function AdminSettingsPage() {
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="support@kaivafashion.com"
+                  placeholder="support@kliamofashion.com"
                   className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
                 />
               </div>
@@ -182,7 +182,7 @@ export default function AdminSettingsPage() {
                     type="url"
                     value={formData.twitterUrl}
                     onChange={(e) => setFormData({ ...formData, twitterUrl: e.target.value })}
-                    placeholder="https://x.com/kaiva"
+                    placeholder="https://x.com/kliamo"
                     className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
                   />
                 </div>
@@ -196,7 +196,7 @@ export default function AdminSettingsPage() {
                     type="url"
                     value={formData.instagramUrl}
                     onChange={(e) => setFormData({ ...formData, instagramUrl: e.target.value })}
-                    placeholder="https://instagram.com/kaiva"
+                    placeholder="https://instagram.com/kliamo"
                     className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
                   />
                 </div>
@@ -210,7 +210,7 @@ export default function AdminSettingsPage() {
                     type="url"
                     value={formData.facebookUrl}
                     onChange={(e) => setFormData({ ...formData, facebookUrl: e.target.value })}
-                    placeholder="https://facebook.com/kaiva"
+                    placeholder="https://facebook.com/kliamo"
                     className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
                   />
                 </div>

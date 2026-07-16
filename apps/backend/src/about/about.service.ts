@@ -29,14 +29,14 @@ export class AboutService implements OnModuleInit {
       about.badge = 'Our Story';
       about.title = 'We empower creators to bring designs to life.';
       about.story1 =
-        'Founded with a passion for quality and design flexibility, Kaiva Fashion is a premium print-on-demand storefront. We reject low-grade sublimation and thin materials, offering only heavyweight cotton, durable stitching, and brilliant color direct-to-garment prints.';
+        'Founded with a passion for quality and design flexibility, Kliamo Fashion is a premium storefront. We reject low-grade sublimation and thin materials, offering only heavyweight cotton, durable stitching, and brilliant color direct-to-garment prints.';
       about.story2 =
         'Whether you are a solo artist looking to drop a new merchandise line, a corporate manager ordering uniform shirts, or simply designing a gift for a loved one, we print and deliver with absolute care.';
       about.image =
         'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80';
       about.missionTitle = 'Our Mission';
       about.missionDesc =
-        'To provide the most intuitive, beautiful, and accessible print-on-demand customization experience online. We enable zero-minimum orders so that creative printing has no entry barriers.';
+        'To provide the most intuitive, beautiful, and accessible customization experience online. We enable zero-minimum orders so that creative printing has no entry barriers.';
       about.visionTitle = 'Our Vision';
       about.visionDesc =
         'To become the leading globally sustainable customization ecosystem, utilizing strictly organic materials, biodegradable water-based inks, and automated carbon-neutral fulfillment logistics.';
@@ -44,7 +44,7 @@ export class AboutService implements OnModuleInit {
         {
           year: '2023',
           title: 'Company Scaffolding',
-          desc: 'Kaiva Fashion was conceptualized with a single high-tech DTG printer in a small Brooklyn garage.',
+          desc: 'Kliamo Fashion was conceptualized with a single high-tech DTG printer in a small Brooklyn garage.',
         },
         {
           year: '2024',

@@ -8,23 +8,23 @@ import { useApp } from "../../../components/AppContext";
 export default function AdminTermsPage() {
   const { showToast } = useApp();
 
-  const [terms, setTerms] = useState(`Welcome to Kaiva Fashion — a print-on-demand storefront specializing in custom-printed merchandise.
+  const [terms, setTerms] = useState(`Welcome to Kliamo Fashion — a storefront specializing in custom-printed merchandise.
 
 By accessing our POD studio editor, placing bulk print orders, or customizing templates, you agree to comply with the following:
 
 1. INTELLECTUAL PROPERTY
-All designs submitted for printing must be original works owned by you, or properly licensed for commercial print use. Kaiva Fashion does not accept responsibility for copyright violations caused by customer-submitted designs.
+All designs submitted for printing must be original works owned by you, or properly licensed for commercial print use. Kliamo Fashion does not accept responsibility for copyright violations caused by customer-submitted designs.
 
 2. ORDER FULFILMENT
-Orders are fulfilled via our integration with the Qikink Print-on-Demand API. Once an order is confirmed and payment is received, the design file is dispatched for printing. Cancellations are only accepted before the order reaches the "Processing & Print" stage.
+Orders are fulfilled via our integration with the Qikink API. Once an order is confirmed and payment is received, the design file is dispatched for printing. Cancellations are only accepted before the order reaches the "Processing & Print" stage.
 
 3. RETURNS & REFUNDS
 Defective or misprinted products are eligible for a full reprint or refund within 7 days of delivery. Size exchange requests are evaluated case-by-case.
 
 4. ACCOUNTS
-User accounts are personal and non-transferable. Kaiva Fashion reserves the right to suspend accounts that violate these terms.`);
+User accounts are personal and non-transferable. Kliamo Fashion reserves the right to suspend accounts that violate these terms.`);
 
-  const [privacy, setPrivacy] = useState(`At Kaiva Fashion, we are committed to protecting your personal data.
+  const [privacy, setPrivacy] = useState(`At Kliamo Fashion, we are committed to protecting your personal data.
 
 1. DATA WE COLLECT
 We collect design assets, customer delivery coordinates, and payment metadata exclusively to process and fulfill customized merchandise orders.

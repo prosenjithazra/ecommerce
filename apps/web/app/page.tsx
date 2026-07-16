@@ -172,7 +172,7 @@ function HeroBanner() {
           <div className="flex items-center justify-center order-2">
             <div className="w-64 h-64 sm:w-[380px] sm:h-[380px] lg:w-[450px] lg:h-[450px] rounded-full bg-zinc-200/60 animate-pulse flex items-center justify-center">
               <img
-                src="/logoMainNew.png"
+                src="/kliamologoNew.png"
                 alt="Loading Logo"
                 className="w-28 sm:w-44 h-auto object-contain opacity-35 animate-pulse"
               />

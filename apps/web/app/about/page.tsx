@@ -9,15 +9,15 @@ import { getApiUrl } from '../../components/ApiConfig';
 const FALLBACK_ABOUT = {
   badge: "Our Story",
   title: "We empower creators to bring designs to life.",
-  story1: "Founded with a passion for quality and design flexibility, Kaiva Fashion is a premium print-on-demand storefront. We reject low-grade sublimation and thin materials, offering only heavyweight cotton, durable stitching, and brilliant color direct-to-garment prints.",
+  story1: "Founded with a passion for quality and design flexibility, Kliamo Fashion is a premium storefront. We reject low-grade sublimation and thin materials, offering only heavyweight cotton, durable stitching, and brilliant color direct-to-garment prints.",
   story2: "Whether you are a solo artist looking to drop a new merchandise line, a corporate manager ordering uniform shirts, or simply designing a gift for a loved one, we print and deliver with absolute care.",
   image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80",
   missionTitle: "Our Mission",
-  missionDesc: "To provide the most intuitive, beautiful, and accessible print-on-demand customization experience online. We enable zero-minimum orders so that creative printing has no entry barriers.",
+  missionDesc: "To provide the most intuitive, beautiful, and accessible customization experience online. We enable zero-minimum orders so that creative printing has no entry barriers.",
   visionTitle: "Our Vision",
   visionDesc: "To become the leading globally sustainable customization ecosystem, utilizing strictly organic materials, biodegradable water-based inks, and automated carbon-neutral fulfillment logistics.",
   milestones: [
-    { year: "2023", title: "Company Scaffolding", desc: "Kaiva Fashion was conceptualized with a single high-tech DTG printer in a small Brooklyn garage." },
+    { year: "2023", title: "Company Scaffolding", desc: "Kliamo Fashion was conceptualized with a single high-tech DTG printer in a small Brooklyn garage." },
     { year: "2024", title: "Interactive Canvas Designer Launch", desc: "Built our bespoke real-time HTML canvas designer interface, facilitating drag-and-drop customization online." },
     { year: "2025", title: "Eco-Fulfillment Integration", desc: "Switched all base blanks to certified organic cotton and recycled fleece fabrics." },
     { year: "2026", title: "Nationwide Scaling", desc: "Opened three new fulfillment centers, lowering delivery turnarounds to less than 4 days." }
