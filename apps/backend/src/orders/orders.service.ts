@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import { OrderEntity } from './entities/order.entity';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class OrdersService implements OnModuleInit {
@@ -11,6 +12,7 @@ export class OrdersService implements OnModuleInit {
     @InjectRepository(OrderEntity)
     private readonly orderRepository: Repository<OrderEntity>,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
   ) {}
 
   async onModuleInit() {
@@ -121,7 +123,14 @@ export class OrdersService implements OnModuleInit {
     order.paymentStatus = data.paymentStatus || 'Pending';
     order.createdAt = now;
     order.updatedAt = now;
-    return this.orderRepository.save(order);
+    const savedOrder = await this.orderRepository.save(order);
+
+    // Send order confirmation email via Nodemailer asynchronously
+    this.emailService.sendOrderConfirmationEmail(savedOrder).catch((err) => {
+      console.error('Error sending order confirmation email asynchronously:', err);
+    });
+
+    return savedOrder;
   }
 
   async update(id: string, data: Partial<OrderEntity>): Promise<OrderEntity> {

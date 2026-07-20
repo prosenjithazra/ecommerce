@@ -1,164 +1,378 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { GoogleAuthButton } from '../../../components/GoogleAuthButton';
 import { useApp } from '../../../components/AppContext';
+import { signUpSchema, SignUpFormData } from '../../../lib/validations/auth';
+import { getApiUrl } from '../../../components/ApiConfig';
 
 export default function SignUpPage() {
-  const { registerUser, loginUser } = useApp();
+  const { registerUser, showToast } = useApp();
   const router = useRouter();
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!fullName || !email || !password || !acceptTerms) return;
-    if (password !== confirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
-    const success = await registerUser(fullName, email, password, phone);
-    if (success) {
-      router.push('/');
+  // OTP step state
+  const [step, setStep] = useState<'form' | 'otp'>('form');
+  const [pendingData, setPendingData] = useState<SignUpFormData | null>(null);
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otpError, setOtpError] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      acceptTerms: false,
+    },
+  });
+
+  // Resend countdown
+  useEffect(() => {
+    if (resendCountdown <= 0) return;
+    const t = setTimeout(() => setResendCountdown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCountdown]);
+
+  // Step 1: validate form → send OTP
+  const onSubmit = async (data: SignUpFormData) => {
+    setSendingOtp(true);
+    try {
+      const res = await fetch(getApiUrl('/user/send-signup-otp'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email.trim().toLowerCase() }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || 'Failed to send OTP');
+      setPendingData(data);
+      setStep('otp');
+      setResendCountdown(60);
+      showToast('OTP Sent', `A 6-digit code was sent to ${data.email}`, 'success');
+    } catch (err: any) {
+      showToast('Error', err.message || 'Failed to send OTP.', 'error');
+    } finally {
+      setSendingOtp(false);
     }
   };
 
-  const inputClass = "mt-1.5 w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg py-3 px-4 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E] placeholder-[#A89B8A]";
+  // OTP input handlers
+  const handleOtpChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+    const next = [...otp];
+    next[index] = value.slice(-1);
+    setOtp(next);
+    setOtpError('');
+    if (value && index < 5) otpRefs.current[index + 1]?.focus();
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) otpRefs.current[index - 1]?.focus();
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent) => {
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pasted.length === 6) { setOtp(pasted.split('')); otpRefs.current[5]?.focus(); }
+  };
+
+  // Step 2: verify OTP → register
+  const handleVerifyAndRegister = async () => {
+    const code = otp.join('');
+    if (code.length !== 6) { setOtpError('Please enter the complete 6-digit code.'); return; }
+    if (!pendingData) return;
+
+    setOtpLoading(true);
+    setOtpError('');
+    try {
+      // Verify OTP
+      const res = await fetch(getApiUrl('/user/verify-signup-otp'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: pendingData.email.trim().toLowerCase(), otp: code }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || 'Invalid OTP');
+
+      // Register the account
+      const success = await registerUser(pendingData.fullName, pendingData.email, pendingData.password, pendingData.phone);
+      if (success) router.push('/');
+    } catch (err: any) {
+      setOtpError(err.message || 'Invalid OTP. Please try again.');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (!pendingData || resendCountdown > 0) return;
+    setOtp(['', '', '', '', '', '']);
+    setOtpError('');
+    try {
+      await fetch(getApiUrl('/user/send-signup-otp'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: pendingData.email.trim().toLowerCase() }),
+      });
+      setResendCountdown(60);
+      showToast('OTP Resent', 'A new code has been sent to your email.', 'success');
+    } catch {
+      showToast('Error', 'Failed to resend OTP.', 'error');
+    }
+  };
+
+  const getInputClass = (hasError?: boolean) =>
+    `mt-1.5 w-full bg-[#FDFAF6] border ${hasError ? 'border-red-500' : 'border-[#E8E2D6]'} rounded-lg py-3 px-4 text-sm outline-none focus:border-[#F9A37E] text-[#4A453E] placeholder-[#A89B8A]`;
 
   return (
     <div className="min-h-screen bg-[#FDFAF6] flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-block font-extrabold text-3xl tracking-tight text-[#4A453E] mb-3">
-          PRINT<span className="text-[#F9A37E]">HUB</span>
+        <Link href="/" className="inline-block mb-3">
+          <img src="/kliamologoNew.png" alt="Kliamo Fashion Logo" className="h-12 w-auto mx-auto object-contain" />
         </Link>
         <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">
           Create your creator account
         </h2>
-        <p className="mt-1.5 text-xs text-[#A89B8A] hidden sm:block">
+        <p className="mt-1.5 text-sm text-[#A89B8A] hidden sm:block">
           Join to browse and order premium printed apparel.
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white border border-[#E8E2D6] shadow-xl rounded-lg sm:rounded-lg py-5 sm:py-8 px-4 sm:px-10">
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="name" className="block text-xs font-bold text-[#4A453E]">
-                Full Name
-              </label>
-              <input
-                id="name" type="text" required value={fullName}
-                onChange={(e) => setFullName(e.target.value)} placeholder="Jane Doe"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-xs font-bold text-[#4A453E]">
-                Email address
-              </label>
-              <input
-                id="email" type="email" required value={email}
-                onChange={(e) => setEmail(e.target.value)} placeholder="jane.doe@example.com"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-xs font-bold text-[#4A453E]">
-                Phone Number (optional)
-              </label>
-              <input
-                id="phone" type="tel" value={phone}
-                onChange={(e) => setPhone(e.target.value)} placeholder="+1 555-0100"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-xs font-bold text-[#4A453E]">
-                Password
-              </label>
-              <input
-                id="password" type="password" required value={password}
-                onChange={(e) => setPassword(e.target.value)} placeholder="Minimum 8 characters"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="confirm-password" className="block text-xs font-bold text-[#4A453E]">
-                Confirm Password
-              </label>
-              <input
-                id="confirm-password" type="password" required value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm password"
-                className={inputClass}
-              />
-            </div>
-
-            <div className="flex items-start pt-2">
-              <label className="flex gap-2.5 cursor-pointer select-none">
+          {step === 'form' && (
+            <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+              <div>
+                <label htmlFor="fullName" className="block text-sm font-bold text-[#4A453E]">
+                  Full Name
+                </label>
                 <input
-                  type="checkbox" required checked={acceptTerms}
-                  onChange={(e) => setAcceptTerms(e.target.checked)}
-                  className="w-4 h-4 rounded border-[#E8E2D6] accent-[#F9A37E]"
+                  id="fullName"
+                  type="text"
+                  {...register("fullName")}
+                  placeholder="Jane Doe"
+                  className={getInputClass(!!errors.fullName)}
                 />
-                <span className="text-[10px] text-[#7A736A] font-medium leading-[15px]">
-                  I accept the{' '}
-                  <Link href="/terms" className="font-bold hover:underline text-[#F9A37E]">Terms of Service</Link>
-                  {' '}and{' '}
-                  <Link href="/privacy" className="font-bold hover:underline text-[#F9A37E]">Privacy Policy</Link>.
-                </span>
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95 mt-2"
-            >
-              Register Account
-            </button>
-          </form>
-
-          {/* Social login partition */}
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[#E8E2D6]" />
+                {errors.fullName && (
+                  <p className="mt-1.5 flex items-start gap-1.5 text-xs text-red-500 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    {errors.fullName.message}
+                  </p>
+                )}
               </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="px-3 bg-white text-[#A89B8A]">Or sign up with</span>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-bold text-[#4A453E]">
+                  Email address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  {...register("email")}
+                  placeholder="jane.doe@example.com"
+                  className={getInputClass(!!errors.email)}
+                />
+                {errors.email && (
+                  <p className="mt-1.5 flex items-start gap-1.5 text-xs text-red-500 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="phone" className="block text-sm font-bold text-[#4A453E]">
+                  Phone Number
+                </label>
+                <input
+                  id="phone"
+                  type="tel"
+                  {...register("phone")}
+                  placeholder="+91 9876543210"
+                  className={getInputClass(!!errors.phone)}
+                />
+                {errors.phone && (
+                  <p className="mt-1.5 flex items-start gap-1.5 text-xs text-red-500 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    {errors.phone.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-bold text-[#4A453E]">
+                  Password
+                </label>
+                <div className="relative mt-1.5">
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    {...register("password")}
+                    placeholder="Minimum 8 characters"
+                    className={`w-full bg-[#FDFAF6] border ${errors.password ? 'border-red-500' : 'border-[#E8E2D6]'} rounded-lg py-3 px-4 pr-10 text-sm outline-none focus:border-[#F9A37E] text-[#4A453E] placeholder-[#A89B8A]`}
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A89B8A] hover:text-[#4A453E] transition-colors">
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="mt-1.5 flex items-start gap-1.5 text-xs text-red-500 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-bold text-[#4A453E]">
+                  Confirm Password
+                </label>
+                <div className="relative mt-1.5">
+                  <input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    {...register("confirmPassword")}
+                    placeholder="Confirm password"
+                    className={`w-full bg-[#FDFAF6] border ${errors.confirmPassword ? 'border-red-500' : 'border-[#E8E2D6]'} rounded-lg py-3 px-4 pr-10 text-sm outline-none focus:border-[#F9A37E] text-[#4A453E] placeholder-[#A89B8A]`}
+                  />
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A89B8A] hover:text-[#4A453E] transition-colors">
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {errors.confirmPassword && (
+                  <p className="mt-1.5 flex items-start gap-1.5 text-xs text-red-500 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-col pt-2">
+                <label className="flex gap-2.5 cursor-pointer select-none items-start">
+                  <input
+                    type="checkbox"
+                    {...register("acceptTerms")}
+                    className="w-4 h-4 rounded border-[#E8E2D6] accent-[#F9A37E]"
+                  />
+                  <span className="text-[10px] text-[#7A736A] font-medium leading-[15px]">
+                    I accept the{' '}
+                    <Link href="/terms" className="font-bold hover:underline text-[#F9A37E]">Terms of Service</Link>
+                    {' '}and{' '}
+                    <Link href="/privacy" className="font-bold hover:underline text-[#F9A37E]">Privacy Policy</Link>.
+                  </span>
+                </label>
+                {errors.acceptTerms && (
+                  <p className="mt-1.5 flex items-start gap-1.5 text-xs text-red-500 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    {errors.acceptTerms.message}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting || sendingOtp}
+                className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-sm py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95 disabled:opacity-70 mt-2"
+              >
+                {sendingOtp ? 'Sending OTP...' : isSubmitting ? 'Registering...' : 'Register Account'}
+              </button>
+            </form>
+          )}
+
+          {step === 'otp' && (
+            <div className="space-y-5">
+              <div className="text-center">
+                <p className="text-sm font-bold text-[#4A453E]">Verify your email</p>
+                <p className="text-xs text-[#A89B8A] mt-1 leading-snug">
+                  We sent a 6-digit code to<br />
+                  <strong className="text-[#4A453E]">{pendingData?.email}</strong>
+                </p>
+              </div>
+
+              <div className="flex gap-2 justify-center" onPaste={handleOtpPaste}>
+                {otp.map((digit, i) => (
+                  <input
+                    key={i}
+                    ref={el => { otpRefs.current[i] = el; }}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={e => handleOtpChange(i, e.target.value)}
+                    onKeyDown={e => handleOtpKeyDown(i, e)}
+                    className={`w-10 h-10 sm:w-12 sm:h-12 text-center text-lg font-bold border-2 rounded-lg outline-none transition-all
+                      ${digit ? 'border-[#F9A37E] bg-[#FFF4EE]' : 'border-[#E8E2D6] bg-[#FDFAF6]'}
+                      focus:border-[#F9A37E] focus:bg-[#FFF4EE] text-[#4A453E]`}
+                  />
+                ))}
+              </div>
+
+              {otpError && (
+                <p className="flex items-start gap-1.5 text-xs text-red-500 font-medium justify-center">
+                  <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                  {otpError}
+                </p>
+              )}
+
+              <button
+                onClick={handleVerifyAndRegister}
+                disabled={otpLoading || otp.join('').length !== 6}
+                className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95 disabled:opacity-70"
+              >
+                {otpLoading ? 'Verifying...' : 'Verify & Create Account'}
+              </button>
+
+              <div className="flex flex-col items-center gap-2 text-xs">
+                {resendCountdown > 0 ? (
+                  <span className="text-[#7A736A]">Resend code in <span className="font-bold text-[#4A453E]">0:{resendCountdown < 10 ? `0${resendCountdown}` : resendCountdown}</span></span>
+                ) : (
+                  <button type="button" onClick={handleResendOtp} className="font-bold text-[#F9A37E] hover:text-[#E8855A]">
+                    Resend OTP Code
+                  </button>
+                )}
+                <button type="button" onClick={() => { setStep('form'); setOtp(['','','','','','']); setOtpError(''); }}
+                  className="text-[#A89B8A] hover:text-[#4A453E] transition-colors">
+                  ← Change details
+                </button>
               </div>
             </div>
+          )}
 
-            <button
-              onClick={() => {
-                loginUser("google.creator@gmail.com");
-                router.push('/');
-              }}
-              className="mt-4 w-full border border-[#E8E2D6] hover:bg-[#FDFAF6] text-[#4A453E] font-extrabold text-xs py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
-            >
-              <svg className="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12.24 10.285V13.4h6.887c-.648 2.41-2.519 4.13-5.136 4.13A5.79 5.79 0 0 1 8.2 11.75a5.79 5.79 0 0 1 5.79-5.786c1.5 0 2.87.57 3.93 1.5l2.44-2.44A9.15 9.15 0 0 0 13.99 2.5a9.25 9.25 0 0 0-9.25 9.25 9.25 9.25 0 0 0 9.25 9.25c5.11 0 9.19-3.67 9.19-9.25 0-.585-.05-1.155-.15-1.715z" />
-              </svg>
-              Google Account
-            </button>
-          </div>
+          {step === 'form' && (
+            <div className="mt-6">
+              <div className="relative mb-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-[#E8E2D6]" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-3 bg-white text-[#A89B8A]">Or sign up with</span>
+                </div>
+              </div>
 
-          {/* Bottom Switcher buttons */}
+              <GoogleAuthButton text="signup_with" />
+            </div>
+          )}
+
           <div className="mt-6 pt-5 border-t border-[#E8E2D6] space-y-3">
             <span className="text-[10px] font-bold text-[#A89B8A] uppercase tracking-wider text-center block">
               Already have an account?
             </span>
             <Link
               href="/login"
-              className="w-full bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-3 px-4 rounded-lg transition-all shadow-md shadow-[#A8C69F]/20 flex items-center justify-center text-center animate-fade-in-up"
+              className="w-full bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-sm py-3 px-4 rounded-lg transition-all shadow-md shadow-[#A8C69F]/20 flex items-center justify-center text-center animate-fade-in-up"
             >
               Sign In
             </Link>

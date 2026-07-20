@@ -158,8 +158,9 @@ interface AppContextType {
   returnOrder: (id: string, reason: string) => Promise<boolean>;
   markNotificationsAsRead: () => void;
   logout: () => void;
-  loginUser: (email: string, password?: string) => Promise<boolean>;
+  loginUser: (email: string, password?: string) => Promise<{ success: boolean; error?: string }>;
   registerUser: (name: string, email: string, password: string, phone?: string) => Promise<boolean>;
+  googleAuthUser: (email?: string, name?: string, avatar?: string, phone?: string, credential?: string) => Promise<boolean>;
   updateUserProfile: (name: string, avatar?: string, phone?: string) => Promise<boolean>;
   updateUserPreferences: (preferences: any) => Promise<boolean>;
   companySettings: {
@@ -238,86 +239,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<Product[]>([]);
-  const [addresses, setAddresses] = useState<Address[]>([
-    {
-      id: "a1",
-      fullName: "Jane Doe",
-      street: "123 Creative Street, Suite 100",
-      city: "New York",
-      state: "NY",
-      zip: "10001",
-      country: "United States",
-      phone: "+1 555-0199",
-      isDefault: true
-    }
-  ]);
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: "ORD-9872",
-      date: "2026-07-08",
-      status: "Delivered",
-      items: [
-        {
-          productId: "p1",
-          name: "Premium Soft Cotton Tee",
-          price: 29.99,
-          quantity: 2,
-          image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80",
-          size: "L",
-          color: "Black"
-        }
-      ],
-      total: 59.98,
-      address: {
-        id: "a1",
-        fullName: "Jane Doe",
-        street: "123 Creative Street, Suite 100",
-        city: "New York",
-        state: "NY",
-        zip: "10001",
-        country: "United States",
-        phone: "+1 555-0199",
-        isDefault: true
-      },
-      paymentMethod: "Card",
-      trackingNumber: "TRK-98724109",
-      trackingTimeline: [
-        { status: "Order Placed", date: "2026-07-08 10:00 AM", desc: "Your order has been logged and confirmed.", done: true },
-        { status: "Processing & Print", date: "2026-07-08 02:00 PM", desc: "The items have been printed and prepared.", done: true },
-        { status: "Shipped", date: "2026-07-09 09:00 AM", desc: "Package picked up by DHL Express.", done: true },
-        { status: "Delivered", date: "2026-07-10 11:30 AM", desc: "Delivered and signed at receptionist desk.", done: true }
-      ]
-    }
-  ]);
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    {
-      id: "TXN-847294",
-      date: "2026-07-08",
-      amount: 59.98,
-      status: "Success",
-      type: "Payment",
-      orderId: "ORD-9872",
-      invoiceUrl: "#"
-    }
-  ]);
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: "n1",
-      title: "New Styles Added!",
-      message: "Check out the new catalog selections now available.",
-      type: "promo",
-      date: "2 hours ago",
-      read: false
-    },
-    {
-      id: "n2",
-      title: "Order #ORD-9872 Delivered",
-      message: "Your premium cotton tee has been delivered successfully.",
-      type: "shipping",
-      date: "5 hours ago",
-      read: true
-    }
-  ]);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const isDarkMode = false; // dark mode removed
@@ -764,7 +689,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     router.push("/");
   };
 
-  const loginUser = async (email: string, password?: string): Promise<boolean> => {
+  const loginUser = async (email: string, password?: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const res = await fetch(getApiUrl("/user/login"), {
         method: "POST",
@@ -773,8 +698,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       const data = await res.json();
       if (!res.ok) {
-        showToast("Login Failed", data.message || "Invalid credentials", "error");
-        return false;
+        const errorMsg = data.message || "Invalid email or password. Please try again.";
+        return { success: false, error: errorMsg };
       }
       localStorage.setItem("token", data.token);
       setCurrentUser({
@@ -783,13 +708,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         email: data.user.email,
         role: data.user.role,
         avatar: data.user.avatar,
-        phone: "+1 555-0199"
+        phone: data.user.phone || ''
       });
       showToast("Welcome Back!", `Logged in successfully as ${data.user.email}`, "success");
-      return true;
+      return { success: true };
     } catch (err) {
-      showToast("Connection Error", "Could not connect to the authentication server.", "error");
-      return false;
+      return { success: false, error: "Could not connect to the server. Please check your connection." };
     }
   };
 
@@ -805,7 +729,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         showToast("Registration Failed", data.message || "Could not register account", "error");
         return false;
       }
-      return loginUser(email, password);
+      const loginResult = await loginUser(email, password);
+      return loginResult.success;
+    } catch (err) {
+      showToast("Connection Error", "Could not connect to the authentication server.", "error");
+      return false;
+    }
+  };
+
+  const googleAuthUser = async (
+    email?: string,
+    name?: string,
+    avatar?: string,
+    phone?: string,
+    credential?: string
+  ): Promise<boolean> => {
+    try {
+      const res = await fetch(getApiUrl("/user/google-auth"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name, avatar, phone, credential }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast("Google Authentication Failed", data.message || "Could not authenticate with Google", "error");
+        return false;
+      }
+      localStorage.setItem("token", data.token);
+      setCurrentUser({
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role,
+        avatar: data.user.avatar,
+        phone: data.user.phone || ''
+      });
+      showToast("Welcome to KLIAMO!", `Signed in with Google as ${data.user.email}`, "success");
+      return true;
     } catch (err) {
       showToast("Connection Error", "Could not connect to the authentication server.", "error");
       return false;
@@ -931,6 +891,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       logout,
       loginUser,
       registerUser,
+      googleAuthUser,
       updateUserProfile,
       updateUserPreferences,
       companySettings,

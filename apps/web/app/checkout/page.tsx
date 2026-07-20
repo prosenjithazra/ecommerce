@@ -8,7 +8,7 @@ import { CustomGarmentPreview } from '../../components/CustomGarmentPreview';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, addresses, addAddress, currentUser, profileLoading } = useApp();
+  const { cart, addresses, addAddress, currentUser, profileLoading, showToast } = useApp();
 
   React.useEffect(() => {
     if (profileLoading) return;
@@ -73,7 +73,7 @@ export default function CheckoutPage() {
 
   const handleProceedToPayment = () => {
     if (!selectedAddressId) {
-      alert("Please select a shipping address.");
+      showToast("Select Address", "Please select a shipping address.", "error");
       return;
     }
     router.push(`/payment?addressId=${selectedAddressId}&shipping=${shippingMethod}&notes=${encodeURIComponent(orderNotes)}`);
@@ -112,7 +112,7 @@ export default function CheckoutPage() {
                 </div>
                 <input type="text" placeholder="Street address, Suite, Apartment" required value={newAddr.street}
                   onChange={(e) => setNewAddr({ ...newAddr, street: e.target.value })} className={inputClass} />
-                <div className="grid grid-cols-3 gap-2">
+                <div className="flex flex-col sm:grid grid-cols-3 gap-2">
                   <input type="text" placeholder="City" required value={newAddr.city}
                     onChange={(e) => setNewAddr({ ...newAddr, city: e.target.value })} className={inputClass} />
                   <input type="text" placeholder="State" required value={newAddr.state}
@@ -135,7 +135,7 @@ export default function CheckoutPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {addresses.map(addr => (
                   <div key={addr.id} onClick={() => setSelectedAddressId(addr.id)}
-                    className={`cursor-pointer border-2 rounded-lg p-4 transition-all ${
+                    className={`cursor-pointer border-2 rounded-lg p-2 md:p-4 transition-all ${
                       selectedAddressId === addr.id
                         ? 'border-[#F9A37E] bg-[#FBD5C1]/10'
                         : 'border-[#E8E2D6] hover:border-[#A89B8A]'
@@ -168,14 +168,14 @@ export default function CheckoutPage() {
                 { id: 'express', label: 'Express Air Shipping', sub: '2–3 business days', price: '₹14.99' }
               ].map(opt => (
                 <label key={opt.id}
-                  className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all ${
+                  className={`flex items-center justify-between p-2 md:p-4 border rounded-lg cursor-pointer transition-all ${
                     shippingMethod === opt.id
                       ? 'border-[#F9A37E] bg-[#FBD5C1]/10'
                       : 'border-[#E8E2D6] hover:border-[#A89B8A]'
                   }`}
                   onClick={() => setShippingMethod(opt.id as 'standard' | 'express')}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 md:gap-3">
                     <input type="radio" checked={shippingMethod === opt.id} readOnly className="accent-[#F9A37E]" />
                     <div className="text-xs">
                       <span className="font-extrabold text-[#4A453E] block">{opt.label}</span>

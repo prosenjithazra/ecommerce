@@ -45,7 +45,7 @@ export default function CartPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-12 md:pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-6 pb-12 md:pb-16">
       <Breadcrumb items={[{ name: "Shopping Cart" }]} />
       <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A453E] tracking-tight">Shopping Cart</h1>
 

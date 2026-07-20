@@ -26,4 +26,11 @@ export class UserEntity {
   createdAt: Date;
   @Column()
   updatedAt: Date;
+  @Column({ nullable: true })
+  otpCode?: string;
+  @Column({ nullable: true })
+  otpExpiry?: Date;
+  @Column({ nullable: true, default: 0 })
+  otpAttempts?: number;
 }
+

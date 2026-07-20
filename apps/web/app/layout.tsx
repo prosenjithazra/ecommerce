@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Elms_Sans, Kaushan_Script } from "next/font/google";
 import "./globals.css";
 import { AppProvider } from "../components/AppContext";
 import { LayoutWrapper } from "../components/LayoutWrapper";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
+const elmsSans = Elms_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-elms-sans",
+  display: "swap",
 });
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
+
+const kaushanScript = Kaushan_Script({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-kaushan-script",
+  display: "swap",
 });
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kliamofashion.com';
@@ -73,6 +78,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,300..800;1,300..800&family=Kaushan+Script&display=swap" rel="stylesheet" />
         <link rel="preconnect" href="https://images.unsplash.com" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <link rel="preconnect" href="https://res.cloudinary.com" />
@@ -121,7 +129,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+      <body className={`${elmsSans.variable} ${kaushanScript.variable} ${elmsSans.className} h-full antialiased`}>
         <AppProvider>
           <LayoutWrapper>
             {children}

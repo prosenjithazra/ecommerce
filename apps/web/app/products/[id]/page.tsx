@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ShoppingBag, Heart, ShieldCheck, Truck, RefreshCw, Minus, Plus } from 'lucide-react';
+import { ShoppingBag, Heart, ShieldCheck, Truck, RefreshCw, Minus, Plus, X, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { useApp, Product } from '../../../components/AppContext';
 import { ProductGallery, ReviewCard } from '../../../components/InfoCards';
 import { ProductCard } from '../../../components/ProductCard';
@@ -25,6 +25,7 @@ export default function ProductDetailPage() {
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'desc' | 'print' | 'ship'>('desc');
+  const [isSizeChartOpen, setIsSizeChartOpen] = useState(false);
 
   // Load product details
   useEffect(() => {
@@ -177,7 +178,11 @@ export default function ProductDetailPage() {
                 <span className="text-xs font-bold text-[#4A453E]">
                   Size: <span className="text-[#F9A37E] uppercase">{selectedSize}</span>
                 </span>
-                <button className="text-xs font-bold text-[#A89B8A] hover:text-[#F9A37E] transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setIsSizeChartOpen(true)}
+                  className="text-xs font-bold text-[#A89B8A] hover:text-[#F9A37E] transition-colors cursor-pointer"
+                >
                   Size Chart
                 </button>
               </div>
@@ -225,14 +230,14 @@ export default function ProductDetailPage() {
           <div className="grid grid-cols-2 gap-3 pt-2">
             <button
               onClick={handleAddToCart}
-              className="flex items-center justify-center gap-2 bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-2 px-4 sm:py-3.5 sm:px-6 rounded-lg transition-all shadow-lg shadow-[#A8C69F]/25 active:scale-95"
+              className="flex items-center justify-center gap-2 bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-[14px] py-2 px-4 sm:py-3.5 sm:px-6 rounded-lg transition-all shadow-lg shadow-[#A8C69F]/25 active:scale-95"
             >
               <ShoppingBag className="w-4 h-4" />
               Add to Cart
             </button>
             <button
               onClick={handleBuyNow}
-              className="bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-2 px-4 sm:py-3.5 sm:px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95"
+              className="bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-[14px] py-2 px-4 sm:py-3.5 sm:px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95"
             >
               Buy It Now
             </button>
@@ -324,6 +329,12 @@ export default function ProductDetailPage() {
         </section>
       )}
 
+      {/* Size Chart Popup Modal */}
+      <SizeChartModal
+        isOpen={isSizeChartOpen}
+        onClose={() => setIsSizeChartOpen(false)}
+      />
+
       {/* Sticky mobile add to cart */}
       <StickyAddToCart
         name={product.name}
@@ -337,3 +348,203 @@ export default function ProductDetailPage() {
     </div>
   );
 }
+
+interface SizeChartModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+function SizeChartModal({ isOpen, onClose }: SizeChartModalProps) {
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  // Reset zoom & pan when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setScale(1);
+      setPosition({ x: 0, y: 0 });
+      setIsDragging(false);
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const handleZoomIn = () => setScale(prev => Math.min(prev + 0.5, 4));
+  const handleZoomOut = () => {
+    setScale(prev => {
+      const nextScale = Math.max(prev - 0.5, 1);
+      if (nextScale === 1) setPosition({ x: 0, y: 0 });
+      return nextScale;
+    });
+  };
+
+  const handleResetZoom = () => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    if (e.deltaY < 0) {
+      setScale(prev => Math.min(prev + 0.25, 4));
+    } else {
+      setScale(prev => {
+        const nextScale = Math.max(prev - 0.25, 1);
+        if (nextScale === 1) setPosition({ x: 0, y: 0 });
+        return nextScale;
+      });
+    }
+  };
+
+  const handleDoubleClick = () => {
+    if (scale > 1) {
+      handleResetZoom();
+    } else {
+      setScale(2);
+    }
+  };
+
+  // Mouse drag handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (scale <= 1) return;
+    e.preventDefault();
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || scale <= 1) return;
+    setPosition({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y,
+    });
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+
+  // Touch drag handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (scale <= 1 || e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    if (!touch) return;
+    setIsDragging(true);
+    setDragStart({ x: touch.clientX - position.x, y: touch.clientY - position.y });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || scale <= 1 || e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    if (!touch) return;
+    setPosition({
+      x: touch.clientX - dragStart.x,
+      y: touch.clientY - dragStart.y,
+    });
+  };
+
+  const handleTouchEnd = () => setIsDragging(false);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm transition-all"
+      onClick={onClose}
+    >
+      <div
+        className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-4 sm:p-6 overflow-hidden border border-[#E8E2D6] space-y-4 max-h-[90vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div className="flex items-center justify-between border-b border-[#E8E2D6] pb-3 flex-shrink-0">
+          <div>
+            <h3 className="text-base sm:text-lg font-extrabold text-[#4A453E] tracking-tight">
+              Garment Size Chart
+            </h3>
+            <p className="text-[10px] sm:text-xs text-[#A89B8A]">
+              Drag to move • Scroll or use controls to zoom • Double click to toggle zoom
+            </p>
+          </div>
+
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Zoom Controls */}
+            <div className="flex items-center gap-1 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg p-1">
+              <button
+                type="button"
+                onClick={handleZoomOut}
+                disabled={scale <= 1}
+                className="p-1.5 rounded text-[#7A736A] hover:text-[#4A453E] hover:bg-[#E8E2D6]/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Zoom Out"
+              >
+                <ZoomOut className="w-4 h-4" />
+              </button>
+
+              <span className="text-[11px] font-extrabold text-[#4A453E] px-1.5 min-w-[36px] text-center">
+                {Math.round(scale * 100)}%
+              </span>
+
+              <button
+                type="button"
+                onClick={handleZoomIn}
+                disabled={scale >= 4}
+                className="p-1.5 rounded text-[#7A736A] hover:text-[#4A453E] hover:bg-[#E8E2D6]/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Zoom In"
+              >
+                <ZoomIn className="w-4 h-4" />
+              </button>
+
+              {scale > 1 && (
+                <button
+                  type="button"
+                  onClick={handleResetZoom}
+                  className="p-1.5 rounded text-[#F9A37E] hover:bg-[#F9A37E]/10 transition-colors"
+                  title="Reset Zoom"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-[#A89B8A] hover:text-[#4A453E] hover:bg-[#FDFAF6] transition-colors"
+              title="Close Size Chart"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Image Container with Zoom & Drag */}
+        <div
+          className="flex-1 flex items-center justify-center bg-[#FDFAF6] rounded-xl p-2 sm:p-4 overflow-hidden relative min-h-0 select-none touch-none"
+          onWheel={handleWheel}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onDoubleClick={handleDoubleClick}
+          style={{
+            cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
+          }}
+        >
+          <img
+            src="/sizecart.webp"
+            alt="Garment Size Chart"
+            draggable={false}
+            className="w-full h-auto object-contain max-h-[70vh] rounded-lg shadow-sm transition-transform duration-75 ease-out pointer-events-none"
+            style={{
+              transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+              transformOrigin: 'center center',
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+

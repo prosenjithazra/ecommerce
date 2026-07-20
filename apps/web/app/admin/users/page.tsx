@@ -19,6 +19,7 @@ interface User {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   role: string;
   status: string;
   createdAt: string;
@@ -61,7 +62,7 @@ export default function AdminUsersPage() {
 
   const filtered = users.filter((u) => {
     const s = search.toLowerCase();
-    const matchSearch = u.name.toLowerCase().includes(s) || u.email.toLowerCase().includes(s);
+    const matchSearch = u.name.toLowerCase().includes(s) || u.email.toLowerCase().includes(s) || (u.phone && u.phone.toLowerCase().includes(s));
     const matchFilter = filter === "All" || u.status === filter;
     return matchSearch && matchFilter;
   });
@@ -107,7 +108,7 @@ export default function AdminUsersPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
             <input
               type="text"
-              placeholder="Search by name or email..."
+              placeholder="Search by name, email, or phone..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#F9A37E] transition-colors text-zinc-700 placeholder:text-zinc-400"
@@ -139,7 +140,7 @@ export default function AdminUsersPage() {
               <table className="w-full text-left text-xs">
                 <thead className="bg-zinc-50 border-b border-zinc-200">
                   <tr>
-                    {["#", "User", "Email", "Role", "Joined Date", "Status", "Actions"].map((h) => (
+                    {["#", "User", "Email", "Phone", "Role", "Joined Date", "Status", "Actions"].map((h) => (
                       <th key={h} className="py-3.5 px-4 font-extrabold text-zinc-500 text-[10px] uppercase tracking-wide whitespace-nowrap first:pl-5">
                         {h}
                       </th>
@@ -160,6 +161,9 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="py-4 px-4">
                         <span className="text-zinc-600 font-medium">{u.email}</span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="text-zinc-700 font-bold font-mono text-[11px]">{u.phone || "—"}</span>
                       </td>
                       <td className="py-4 px-4">
                         <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 border border-zinc-200 uppercase tracking-wide">{u.role || 'user'}</span>

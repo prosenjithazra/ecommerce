@@ -25,10 +25,10 @@ export default {
         },
       },
       fontFamily: {
-        heading: ['Quintessential', 'Georgia', 'serif'],
-        body:    ['Elm Sans', 'system-ui', 'sans-serif'],
-        sans:    ['Elm Sans', 'system-ui', 'sans-serif'],
-        serif:   ['Quintessential', 'Georgia', 'serif'],
+        heading: ['var(--font-kaushan-script)', 'Kaushan Script', 'cursive'],
+        body:    ['var(--font-elms-sans)', 'Elms Sans', 'sans-serif'],
+        sans:    ['var(--font-elms-sans)', 'Elms Sans', 'sans-serif'],
+        serif:   ['var(--font-kaushan-script)', 'Kaushan Script', 'cursive'],
       },
       keyframes: {
         'fade-in-up': {

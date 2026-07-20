@@ -16,6 +16,13 @@ export default function ProductsPage() {
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [inStockOnly, setInStockOnly] = useState(false);
+
+  // Draft filter state for smooth typing and batch updates on Submit
+  const [draftSearch, setDraftSearch] = useState("");
+  const [draftColors, setDraftColors] = useState<string[]>([]);
+  const [draftSizes, setDraftSizes] = useState<string[]>([]);
+  const [draftInStockOnly, setDraftInStockOnly] = useState(false);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
@@ -41,11 +48,25 @@ export default function ProductsPage() {
   const filterSizes = ["S", "M", "L", "XL", "XXL"];
 
   const handleColorToggle = (color: string) =>
-    setSelectedColors(prev => prev.includes(color) ? prev.filter(c => c !== color) : [...prev, color]);
+    setDraftColors(prev => prev.includes(color) ? prev.filter(c => c !== color) : [...prev, color]);
   const handleSizeToggle = (size: string) =>
-    setSelectedSizes(prev => prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]);
+    setDraftSizes(prev => prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]);
   
+  const handleApplyFilters = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setSearch(draftSearch);
+    setSelectedColors(draftColors);
+    setSelectedSizes(draftSizes);
+    setInStockOnly(draftInStockOnly);
+    setIsFilterDrawerOpen(false);
+  };
+
   const handleReset = () => {
+    setDraftSearch(""); 
+    setDraftColors([]); 
+    setDraftSizes([]); 
+    setDraftInStockOnly(false);
+
     setSearch(""); 
     setSelectedColors([]); 
     setSelectedSizes([]); 
@@ -87,71 +108,24 @@ export default function ProductsPage() {
   const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
   const paginatedProducts = sortedProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
 
-  const FilterContent = () => (
-    <>
-      {/* Search */}
-      <div className="relative">
-        <Search className="w-4 h-4 text-[#A89B8A] absolute left-3 top-1/2 -translate-y-1/2" />
-        <input
-          type="text" placeholder="Search product..."
-          value={search} onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg py-2.5 pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E]"
-        />
-      </div>
-
-      {/* Availability */}
-      <div className="space-y-2">
-        <h4 className="text-xs font-bold text-[#4A453E]">Availability</h4>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox" checked={inStockOnly}
-            onChange={(e) => setInStockOnly(e.target.checked)}
-            className="w-4 h-4 rounded border-[#E8E2D6] accent-[#F9A37E]"
-          />
-          <span className="text-xs text-[#7A736A] font-medium">In stock only</span>
-        </label>
-      </div>
-
-      {/* Colors */}
-      <div className="space-y-2">
-        <h4 className="text-xs font-bold text-[#4A453E]">Colors</h4>
-        <div className="flex flex-wrap gap-1.5">
-          {filterColors.map(color => {
-            const isSelected = selectedColors.includes(color);
-            return (
-              <button key={color} onClick={() => handleColorToggle(color)}
-                className={`text-[10px] font-bold py-1 px-2.5 rounded-lg border transition-colors ${
-                  isSelected ? 'bg-[#4A453E] text-white border-[#4A453E]' : 'text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
-                }`}
-              >{color}</button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Sizes */}
-      <div className="space-y-2">
-        <h4 className="text-xs font-bold text-[#4A453E]">Sizes</h4>
-        <div className="flex flex-wrap gap-1.5">
-          {filterSizes.map(size => {
-            const isSelected = selectedSizes.includes(size);
-            return (
-              <button key={size} onClick={() => handleSizeToggle(size)}
-                className={`min-w-8 h-8 px-2 rounded-lg text-[10px] font-extrabold border transition-all ${
-                  isSelected ? 'bg-[#F9A37E] text-white border-[#F9A37E]' : 'text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
-                }`}
-              >{size}</button>
-            );
-          })}
-        </div>
-      </div>
-    </>
-  );
+  const filterFormProps = {
+    draftSearch,
+    setDraftSearch,
+    draftInStockOnly,
+    setDraftInStockOnly,
+    draftColors,
+    filterColors,
+    handleColorToggle,
+    draftSizes,
+    filterSizes,
+    handleSizeToggle,
+    handleApplyFilters,
+  };
 
   // Full-width empty state when the product catalog is completely empty
   if (!loading && products.length === 0) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-12 md:pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-6 pb-12 md:pb-16">
         <Breadcrumb items={[{ name: "Products" }]} />
         <div className="w-full">
           <EmptyState
@@ -167,7 +141,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-12 md:pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-6 pb-12 md:pb-16">
       <Breadcrumb items={[{ name: "Products" }]} />
 
       <div>
@@ -187,7 +161,7 @@ export default function ProductsPage() {
               <RotateCcw className="w-3 h-3" /> Reset
             </button>
           </div>
-          <FilterContent />
+          <FilterForm {...filterFormProps} />
         </div>
 
         {/* Product Grid */}
@@ -257,9 +231,119 @@ export default function ProductsPage() {
               <RotateCcw className="w-3.5 h-3.5" /> Reset Filters
             </button>
           </div>
-          <FilterContent />
+          <FilterForm {...filterFormProps} />
         </div>
       </Drawer>
     </div>
   );
 }
+
+interface FilterFormProps {
+  draftSearch: string;
+  setDraftSearch: (val: string) => void;
+  draftInStockOnly: boolean;
+  setDraftInStockOnly: (val: boolean) => void;
+  draftColors: string[];
+  filterColors: string[];
+  handleColorToggle: (color: string) => void;
+  draftSizes: string[];
+  filterSizes: string[];
+  handleSizeToggle: (size: string) => void;
+  handleApplyFilters: (e?: React.FormEvent) => void;
+}
+
+function FilterForm({
+  draftSearch,
+  setDraftSearch,
+  draftInStockOnly,
+  setDraftInStockOnly,
+  draftColors,
+  filterColors,
+  handleColorToggle,
+  draftSizes,
+  filterSizes,
+  handleSizeToggle,
+  handleApplyFilters,
+}: FilterFormProps) {
+  return (
+    <form onSubmit={handleApplyFilters} className="space-y-4">
+      {/* Search */}
+      <div className="relative">
+        <Search className="w-4 h-4 text-[#A89B8A] absolute left-3 top-1/2 -translate-y-1/2" />
+        <input
+          type="text"
+          placeholder="Search product..."
+          value={draftSearch}
+          onChange={(e) => setDraftSearch(e.target.value)}
+          className="w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg py-2.5 pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E]"
+        />
+      </div>
+
+      {/* Availability */}
+      <div className="space-y-2">
+        <h4 className="text-xs font-bold text-[#4A453E]">Availability</h4>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={draftInStockOnly}
+            onChange={(e) => setDraftInStockOnly(e.target.checked)}
+            className="w-4 h-4 rounded border-[#E8E2D6] accent-[#F9A37E]"
+          />
+          <span className="text-xs text-[#7A736A] font-medium">In stock only</span>
+        </label>
+      </div>
+
+      {/* Colors */}
+      <div className="space-y-2">
+        <h4 className="text-xs font-bold text-[#4A453E]">Colors</h4>
+        <div className="flex flex-wrap gap-1.5">
+          {filterColors.map(color => {
+            const isSelected = draftColors.includes(color);
+            return (
+              <button
+                type="button"
+                key={color}
+                onClick={() => handleColorToggle(color)}
+                className={`text-[10px] font-bold py-1 px-2.5 rounded-lg border transition-colors ${
+                  isSelected ? 'bg-[#4A453E] text-white border-[#4A453E]' : 'text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
+                }`}
+              >{color}</button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Sizes */}
+      <div className="space-y-2">
+        <h4 className="text-xs font-bold text-[#4A453E]">Sizes</h4>
+        <div className="flex flex-wrap gap-1.5">
+          {filterSizes.map(size => {
+            const isSelected = draftSizes.includes(size);
+            return (
+              <button
+                type="button"
+                key={size}
+                onClick={() => handleSizeToggle(size)}
+                className={`min-w-8 h-8 px-2 rounded-lg text-[10px] font-extrabold border transition-all ${
+                  isSelected ? 'bg-[#F9A37E] text-white border-[#F9A37E]' : 'text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
+                }`}
+              >{size}</button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Submit Filter Button */}
+      <div className="pt-2">
+        <button
+          type="submit"
+          className="w-full bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2.5 px-4 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20 flex items-center justify-center gap-2 active:scale-[0.98]"
+        >
+          <SlidersHorizontal className="w-3.5 h-3.5" /> Apply Filters
+        </button>
+      </div>
+    </form>
+  );
+}
+
+

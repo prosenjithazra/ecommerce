@@ -363,20 +363,27 @@ export default function AdminOrdersPage() {
                                 <span>Custom Print Specifications</span>
                               </div>
                               
-                              {/* Side-by-side composite previews */}
+                              {/* Side-by-side composite previews with print markers */}
                               <div className="flex justify-center">
                                 <CustomGarmentPreview
                                   customDesign={item.customDesign}
                                   defaultImage={item.image}
                                   view="both"
                                   className="w-20 h-20"
+                                  showMarkers={true}
                                 />
                               </div>
 
                               {/* Specs summary */}
                               <div className="text-[9px] text-zinc-500 space-y-1 border-t border-zinc-150 pt-2 font-medium">
-                                <p>Garment style: <span className="font-bold capitalize text-zinc-700">{designMeta.productType}</span></p>
+                                <p>Garment style: <span className="font-bold capitalize text-zinc-700">{designMeta.productType === 'polo' ? 'Polo T-Shirt' : 'T-Shirt'}</span></p>
                                 <p>Color: <span className="font-bold text-zinc-700">{designMeta.color}</span> ({designMeta.colorHex})</p>
+                                {designMeta.front?.imageUrl && (
+                                  <p>Front Placement: <span className="font-mono font-bold text-zinc-700">X: {designMeta.front.imageX}% | Y: {designMeta.front.imageY}% | Scale: {designMeta.front.imageScale}% | Rot: {designMeta.front.imageRotation}°</span></p>
+                                )}
+                                {designMeta.back?.imageUrl && (
+                                  <p>Back Placement: <span className="font-mono font-bold text-zinc-700">X: {designMeta.back.imageX}% | Y: {designMeta.back.imageY}% | Scale: {designMeta.back.imageScale}% | Rot: {designMeta.back.imageRotation}°</span></p>
+                                )}
                               </div>
 
                               {/* Standalone original graphics download panel */}

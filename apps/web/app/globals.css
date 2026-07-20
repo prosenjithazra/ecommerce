@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Arizonia&family=Faculty+Glyphic&family=Quintessential&display=swap');
-@import url('https://cdn.jsdelivr.net/npm/@fontsource/elm-sans@5/index.css');
+@import url('https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,300..800;1,300..800&family=Kaushan+Script&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -19,23 +18,29 @@
   * {
     border-color: #E8E2D6;
     box-sizing: border-box;
+    font-family: var(--font-elms-sans), 'Elms Sans', sans-serif !important;
   }
 
   html {
     scroll-behavior: smooth;
-    font-size: 18px;
+    font-size: 16px;
   }
 
   body {
     background-color: #FDFAF6;
     color: #4A453E;
-    font-family: 'Elm Sans', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Quintessential', Georgia, serif;
-    color: #4A453E;
+  h1, h2, footer h3, footer h5 {
+    font-family: var(--font-kaushan-script), 'Kaushan Script', cursive !important;
+  }
+
+  /* Ensure all font sizes below 12px render at 12px across the entire project */
+  [class*="text-[1px]"], [class*="text-[2px]"], [class*="text-[3px]"], [class*="text-[4px]"],
+  [class*="text-[5px]"], [class*="text-[6px]"], [class*="text-[7px]"], [class*="text-[8px]"],
+  [class*="text-[9px]"], [class*="text-[10px]"], [class*="text-[11px]"] {
+    font-size: 12px !important;
   }
 }
 

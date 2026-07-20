@@ -11,6 +11,7 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
+import { GoogleAuthDto } from './dto/google-auth.dto';
 import { AuthGuard } from './auth.guard';
 
 interface RequestWithUser extends Request {
@@ -33,6 +34,11 @@ export class UserController {
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
     return this.userService.login(loginDto);
+  }
+
+  @Post('google-auth')
+  async googleAuth(@Body() googleAuthDto: GoogleAuthDto) {
+    return this.userService.googleAuth(googleAuthDto);
   }
 
   @UseGuards(AuthGuard)
@@ -66,4 +72,31 @@ export class UserController {
   async changePassword(@Request() req: RequestWithUser, @Body() body: any) {
     return this.userService.changePassword(req.user.id, body.current, body.new);
   }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() body: { email: string }) {
+    return this.userService.forgotPassword(body.email);
+  }
+
+  @Post('verify-otp')
+  async verifyOtp(@Body() body: { email: string; otp: string }) {
+    return this.userService.verifyOtp(body.email, body.otp);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() body: { email: string; otp: string; newPassword: string }) {
+    return this.userService.resetPassword(body.email, body.otp, body.newPassword);
+  }
+
+  @Post('send-signup-otp')
+  async sendSignupOtp(@Body() body: { email: string }) {
+    return this.userService.sendSignupOtp(body.email);
+  }
+
+  @Post('verify-signup-otp')
+  async verifySignupOtp(@Body() body: { email: string; otp: string }) {
+    return this.userService.verifySignupOtp(body.email, body.otp);
+  }
 }
+
+

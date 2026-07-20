@@ -24,6 +24,7 @@ import { NewsletterEntity } from './newsletter/entities/newsletter.entity';
 import { NewsletterModule } from './newsletter/newsletter.module';
 import { GalleryEntity } from './gallery/entities/gallery.entity';
 import { GalleryModule } from './gallery/gallery.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -92,6 +93,7 @@ import { GalleryModule } from './gallery/gallery.module';
     SettingsModule,
     NewsletterModule,
     GalleryModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp, Address } from '../../components/AppContext';
 import { Breadcrumb } from '../../components/UIComponents';
-import { User, MapPin, ShieldAlert, KeyRound, Sliders, LogOut, LayoutDashboard, Upload, Camera, X, ShoppingBag, Loader2, Calendar, CreditCard, ExternalLink, ChevronDown, ChevronUp, XCircle, Package, Truck, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
+import { User, MapPin, ShieldAlert, KeyRound, Sliders, LogOut, LayoutDashboard, Upload, Camera, X, ShoppingBag, Loader2, Calendar, CreditCard, ExternalLink, ChevronDown, ChevronUp, XCircle, Package, Truck, CheckCircle2, Clock, AlertTriangle, Eye, EyeOff } from 'lucide-react';
 import { AddressCard } from '../../components/InfoCards';
 import { getApiUrl } from '../../components/ApiConfig';
 import { CustomGarmentPreview } from '../../components/CustomGarmentPreview';
@@ -507,8 +507,8 @@ export default function ProfilePage() {
   const [returningOrderId, setReturningOrderId] = useState<string | null>(null);
 
   // Personal Info Form
-  const [name, setName] = useState(currentUser?.name || "Jane Doe");
-  const [email, setEmail] = useState(currentUser?.email || "jane@example.com");
+  const [name, setName] = useState(currentUser?.name || "");
+  const [email, setEmail] = useState(currentUser?.email || "");
   const [phone, setPhone] = useState(currentUser?.phone || "");
   const [avatar, setAvatar] = useState(currentUser?.avatar || "");
 
@@ -555,8 +555,11 @@ export default function ProfilePage() {
     }
   }, [currentUser]);
 
-  // Password Form
+  // Password Form & Eye Toggles
   const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" });
+  const [showCurrentPass, setShowCurrentPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
 
   // Address inline add/edit state
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
@@ -1077,33 +1080,51 @@ export default function ProfilePage() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-zinc-650 mb-1.5">Current Password</label>
-                  <input
-                    type="password"
-                    required
-                    value={passwords.current}
-                    onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showCurrentPass ? "text" : "password"}
+                      required
+                      value={passwords.current}
+                      onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
+                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 pr-10 text-xs outline-none"
+                    />
+                    <button type="button" onClick={() => setShowCurrentPass(!showCurrentPass)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors">
+                      {showCurrentPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-zinc-650 mb-1.5">New Password</label>
-                  <input
-                    type="password"
-                    required
-                    value={passwords.new}
-                    onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showNewPass ? "text" : "password"}
+                      required
+                      value={passwords.new}
+                      onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 pr-10 text-xs outline-none"
+                    />
+                    <button type="button" onClick={() => setShowNewPass(!showNewPass)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors">
+                      {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-zinc-650 mb-1.5">Confirm New Password</label>
-                  <input
-                    type="password"
-                    required
-                    value={passwords.confirm}
-                    onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirmPass ? "text" : "password"}
+                      required
+                      value={passwords.confirm}
+                      onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
+                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 pr-10 text-xs outline-none"
+                    />
+                    <button type="button" onClick={() => setShowConfirmPass(!showConfirmPass)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors">
+                      {showConfirmPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
               </div>
               <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-lg transition-all">

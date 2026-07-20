@@ -218,7 +218,7 @@ export default function AboutPage() {
       </section>
 
       {/* Team */}
-      <section className="space-y-8">
+      {/* <section className="space-y-8">
         <h2 className="text-2xl font-extrabold text-zinc-900 dark:text-white tracking-tight text-center">Meet Our Leadership Team</h2>
         <div className="flex flex-wrap gap-6 md:gap-8 justify-center">
           {data.team.map((t) => (
@@ -233,7 +233,7 @@ export default function AboutPage() {
             </div>
           ))}
         </div>
-      </section>
+      </section> */}
 
       {/* Call to action */}
       <section className="p-6 md:p-12 bg-[#4A453E] text-white rounded-[20px] md:rounded-[32px] text-center space-y-4 md:space-y-6 relative overflow-hidden">

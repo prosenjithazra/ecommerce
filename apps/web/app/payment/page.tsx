@@ -71,7 +71,7 @@ function PaymentPageContent() {
   const handleCodOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!address) {
-      showToast("Checkout Error", "Please verify your shipping details before paying.", "error");
+      showToast("Select Address", "Please select a shipping address.", "error");
       return;
     }
 
@@ -96,7 +96,7 @@ function PaymentPageContent() {
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!address) {
-      showToast("Checkout Error", "Please verify your shipping details before paying.", "error");
+      showToast("Select Address", "Please select a shipping address.", "error");
       return;
     }
 
@@ -337,11 +337,11 @@ function PaymentPageContent() {
             </h3>
 
             {/* Top-level Payment Mode Selector */}
-            <div className="grid grid-cols-2 gap-4 pb-1">
+            <div className="grid grid-cols-2 gap-2 sm:gap-4 pb-1">
               <button
                 type="button"
                 onClick={() => setPaymentMode('online')}
-                className={`flex flex-col items-center justify-center p-5 border-2 rounded-xl gap-2 font-black text-xs transition-all ${
+                className={`flex flex-col items-center justify-center p-2 sm:p-5 border-2 rounded-xl gap-1 font-black text-xs transition-all ${
                   paymentMode === 'online'
                     ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]'
                     : 'border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950/20'
@@ -349,13 +349,13 @@ function PaymentPageContent() {
               >
                 <CreditCard className="w-5 h-5" />
                 <span>Online Payment</span>
-                <span className="text-[9px] font-medium text-zinc-400 mt-0.5">Card, UPI, Net Banking, Wallet</span>
+                <span className="text-[12px] font-medium text-zinc-400 mt-0.5">Card, UPI, Net Banking, Wallet</span>
               </button>
               
               <button
                 type="button"
                 onClick={() => setPaymentMode('cod')}
-                className={`flex flex-col items-center justify-center p-5 border-2 rounded-xl gap-2 font-black text-xs transition-all ${
+                className={`flex flex-col items-center justify-center p-2 sm:p-5 border-2 rounded-xl gap-1 font-black text-xs transition-all ${
                   paymentMode === 'cod'
                     ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]'
                     : 'border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950/20'
@@ -363,7 +363,7 @@ function PaymentPageContent() {
               >
                 <Layers className="w-5 h-5" />
                 <span>Cash on Delivery (COD)</span>
-                <span className="text-[9px] font-medium text-zinc-400 mt-0.5">Pay in cash upon delivery</span>
+                <span className="text-[12px] font-medium text-zinc-400 mt-0.5">Pay in cash upon delivery</span>
               </button>
             </div>
 
@@ -385,7 +385,7 @@ function PaymentPageContent() {
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('card')}
-                    className={`flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg gap-1.5 sm:gap-2 font-bold text-xs transition-all ${paymentMethod === 'card' ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]' : 'border-zinc-150 text-zinc-550'}`}
+                    className={`flex flex-col items-center justify-center p-2 sm:p-4 border rounded-lg gap-1.5 sm:gap-2 font-bold text-xs transition-all ${paymentMethod === 'card' ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]' : 'border-zinc-150 text-zinc-550'}`}
                   >
                     <CreditCard className="w-5 h-5" />
                     <span>Credit / Debit Card</span>
@@ -393,7 +393,7 @@ function PaymentPageContent() {
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('upi')}
-                    className={`flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg gap-1.5 sm:gap-2 font-bold text-xs transition-all ${paymentMethod === 'upi' ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]' : 'border-zinc-150 text-zinc-550'}`}
+                    className={`flex flex-col items-center justify-center p-2 sm:p-4 border rounded-lg gap-1.5 sm:gap-2 font-bold text-xs transition-all ${paymentMethod === 'upi' ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]' : 'border-zinc-150 text-zinc-550'}`}
                   >
                     <PhoneCall className="w-5 h-5" />
                     <span>UPI (GPay / PhonePe)</span>
@@ -401,7 +401,7 @@ function PaymentPageContent() {
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('netbank')}
-                    className={`flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg gap-1.5 sm:gap-2 font-bold text-xs transition-all ${paymentMethod === 'netbank' ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]' : 'border-zinc-150 text-zinc-550'}`}
+                    className={`flex flex-col items-center justify-center p-2 sm:p-4 border rounded-lg gap-1.5 sm:gap-2 font-bold text-xs transition-all ${paymentMethod === 'netbank' ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]' : 'border-zinc-150 text-zinc-550'}`}
                   >
                     <Landmark className="w-5 h-5" />
                     <span>Net Banking</span>
@@ -409,7 +409,7 @@ function PaymentPageContent() {
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('wallet')}
-                    className={`flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg gap-1.5 sm:gap-2 font-bold text-xs transition-all ${paymentMethod === 'wallet' ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]' : 'border-zinc-150 text-zinc-550'}`}
+                    className={`flex flex-col items-center justify-center p-2 sm:p-4 border rounded-lg gap-1.5 sm:gap-2 font-bold text-xs transition-all ${paymentMethod === 'wallet' ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]' : 'border-zinc-150 text-zinc-550'}`}
                   >
                     <Wallet className="w-5 h-5" />
                     <span>Wallets</span>
@@ -428,9 +428,9 @@ function PaymentPageContent() {
 
                 <button
                   type="submit"
-                  className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-4 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 mt-4 sm:mt-6"
+                  className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-sm py-3.5 px-4 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 mt-4 sm:mt-6"
                 >
-                  Pay ₹{total.toFixed(2)} Securely with Razorpay
+                  Pay ₹{total.toFixed(2)}
                 </button>
               </form>
             ) : (
