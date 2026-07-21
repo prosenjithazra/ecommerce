@@ -5,9 +5,9 @@ import {
   NotFoundException,
   OnModuleInit,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UserEntity } from './entitites/user.entity';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { GoogleAuthDto } from './dto/google-auth.dto';
@@ -21,12 +21,11 @@ import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class UserService implements OnModuleInit {
-  // Temporary in-memory store for signup OTPs (email → { otp, expiry })
   private signupOtpStore = new Map<string, { otp: string; expiry: Date }>();
 
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
+    @InjectModel(User.name)
+    private readonly userModel: Model<UserDocument>,
     private readonly configService: ConfigService,
     private readonly cloudinaryService: CloudinaryService,
     private readonly emailService: EmailService,
@@ -45,17 +44,14 @@ export class UserService implements OnModuleInit {
         return;
       }
 
-      let user = await this.userRepository.findOne({
-        where: { id: 'admin-default-uuid-1111' },
-      });
+      let user = await this.userModel.findOne({ id: 'admin-default-uuid-1111' });
 
       const hashedPassword = await bcrypt.hash(adminPassword, 10);
       const now = new Date();
 
       if (!user) {
-        // Prevent duplicate keys if user already exists under different ID
-        const emailExists = await this.userRepository.findOne({
-          where: { email: adminEmail.toLowerCase() },
+        const emailExists = await this.userModel.findOne({
+          email: adminEmail.toLowerCase(),
         });
         if (emailExists) {
           emailExists.role = 'admin';
@@ -66,22 +62,23 @@ export class UserService implements OnModuleInit {
           if (!isPasswordMatch) {
             emailExists.password = hashedPassword;
           }
-          await this.userRepository.save(emailExists);
+          await emailExists.save();
           console.log(`Updated existing user to admin: ${adminEmail}`);
           return;
         }
 
-        user = new UserEntity();
-        user.id = 'admin-default-uuid-1111';
-        user.name = 'Administrator';
-        user.email = adminEmail.toLowerCase();
-        user.password = hashedPassword;
-        user.avatar = '';
-        user.role = 'admin';
-        user.status = 'Active';
-        user.createdAt = now;
-        user.updatedAt = now;
-        await this.userRepository.save(user);
+        user = new this.userModel({
+          id: 'admin-default-uuid-1111',
+          name: 'Administrator',
+          email: adminEmail.toLowerCase(),
+          password: hashedPassword,
+          avatar: '',
+          role: 'admin',
+          status: 'Active',
+          createdAt: now,
+          updatedAt: now,
+        });
+        await user.save();
         console.log(
           `Seeded default admin user from environment: ${adminEmail}`,
         );
@@ -94,7 +91,7 @@ export class UserService implements OnModuleInit {
           user.email = adminEmail.toLowerCase();
           user.password = hashedPassword;
           user.updatedAt = now;
-          await this.userRepository.save(user);
+          await user.save();
           console.log(
             `Updated admin credentials in database from environment: ${adminEmail}`,
           );
@@ -105,16 +102,13 @@ export class UserService implements OnModuleInit {
     }
   }
 
-  async register(dto: CreateUserDto): Promise<Omit<UserEntity, 'password'>> {
+  async register(dto: CreateUserDto): Promise<any> {
     const email = dto?.email ? dto.email.trim().toLowerCase() : '';
     if (!email) {
       throw new ConflictException('Email address is required');
     }
 
-    const existing = await this.userRepository.findOne({
-      where: { email },
-    });
-
+    const existing = await this.userModel.findOne({ email });
     if (existing) {
       throw new ConflictException('Email is already registered');
     }
@@ -122,42 +116,37 @@ export class UserService implements OnModuleInit {
     const hashedPassword = await bcrypt.hash(dto.password || 'password123', 10);
     const now = new Date();
 
-    const user = new UserEntity();
-    user.id = randomUUID();
-    user.name = dto.name || 'User';
-    user.email = email;
-    user.password = hashedPassword;
-    user.avatar = dto.avatar || '';
-    user.phone = dto.phone || '';
-    user.role = dto.role || 'user';
-    user.status = dto.status || 'Active';
-    user.createdAt = now;
-    user.updatedAt = now;
+    const user = new this.userModel({
+      id: randomUUID(),
+      name: dto.name || 'User',
+      email: email,
+      password: hashedPassword,
+      avatar: dto.avatar || '',
+      phone: dto.phone || '',
+      role: dto.role || 'user',
+      status: dto.status || 'Active',
+      createdAt: now,
+      updatedAt: now,
+    });
 
-    await this.userRepository.save(user);
+    await user.save();
 
-    // Send welcome email via Nodemailer asynchronously
     this.emailService.sendWelcomeEmail(user.email, user.name).catch((err) => {
       console.error('Error sending welcome email asynchronously:', err);
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...result } = user;
-    return result;
+    const obj = user.toObject();
+    delete (obj as any).password;
+    return obj;
   }
 
-  async login(
-    dto: LoginDto,
-  ): Promise<{ token: string; user: Omit<UserEntity, 'password'> }> {
+  async login(dto: LoginDto): Promise<{ token: string; user: any }> {
     const email = dto?.email ? dto.email.trim().toLowerCase() : '';
     if (!email) {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const user = await this.userRepository.findOne({
-      where: { email },
-    });
-
+    const user = await this.userModel.findOne({ email });
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
@@ -180,14 +169,12 @@ export class UserService implements OnModuleInit {
       { expiresIn: '7d' },
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...result } = user;
-    return { token, user: result };
+    const obj = user.toObject();
+    delete (obj as any).password;
+    return { token, user: obj };
   }
 
-  async googleAuth(
-    dto: GoogleAuthDto,
-  ): Promise<{ token: string; user: Omit<UserEntity, 'password'> }> {
+  async googleAuth(dto: GoogleAuthDto): Promise<{ token: string; user: any }> {
     let email = dto?.email ? dto.email.trim().toLowerCase() : '';
     let name = dto?.name;
     let avatar = dto?.avatar;
@@ -209,16 +196,13 @@ export class UserService implements OnModuleInit {
       throw new UnauthorizedException('Invalid Google authentication credentials');
     }
 
-    let user = await this.userRepository.findOne({
-      where: { email },
-    });
+    let user = await this.userModel.findOne({ email });
 
     if (user) {
       if (user.status !== 'Active') {
         throw new UnauthorizedException('Account is suspended or inactive');
       }
 
-      // Update avatar or name if provided and missing
       let updated = false;
       if (avatar && !user.avatar) {
         user.avatar = avatar;
@@ -230,28 +214,27 @@ export class UserService implements OnModuleInit {
       }
       if (updated) {
         user.updatedAt = new Date();
-        await this.userRepository.save(user);
+        await user.save();
       }
     } else {
-      // Register new user via Google
       const hashedPassword = await bcrypt.hash(randomUUID(), 10);
       const now = new Date();
 
-      user = new UserEntity();
-      user.id = randomUUID();
-      user.name = name || email.split('@')[0] || 'User';
-      user.email = email;
-      user.password = hashedPassword;
-      user.avatar = avatar || '';
-      user.phone = dto.phone || '';
-      user.role = 'user';
-      user.status = 'Active';
-      user.createdAt = now;
-      user.updatedAt = now;
+      user = new this.userModel({
+        id: randomUUID(),
+        name: name || email.split('@')[0] || 'User',
+        email: email,
+        password: hashedPassword,
+        avatar: avatar || '',
+        phone: dto.phone || '',
+        role: 'user',
+        status: 'Active',
+        createdAt: now,
+        updatedAt: now,
+      });
 
-      await this.userRepository.save(user);
+      await user.save();
 
-      // Send welcome email asynchronously
       this.emailService.sendWelcomeEmail(user.email, user.name).catch((err) => {
         console.error('Error sending welcome email for Google user:', err);
       });
@@ -266,27 +249,24 @@ export class UserService implements OnModuleInit {
       { expiresIn: '7d' },
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...result } = user;
-    return { token, user: result };
+    const obj = user.toObject();
+    delete (obj as any).password;
+    return { token, user: obj };
   }
 
-  async getProfile(userId: string): Promise<Omit<UserEntity, 'password'>> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+  async getProfile(userId: string): Promise<any> {
+    const user = await this.userModel.findOne({ id: userId });
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...result } = user;
-    return result;
+    const obj = user.toObject();
+    delete (obj as any).password;
+    return obj;
   }
 
-  async updateProfile(
-    userId: string,
-    dto: any,
-  ): Promise<Omit<UserEntity, 'password'>> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+  async updateProfile(userId: string, dto: any): Promise<any> {
+    const user = await this.userModel.findOne({ id: userId });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -309,28 +289,31 @@ export class UserService implements OnModuleInit {
     }
 
     user.updatedAt = new Date();
-    await this.userRepository.save(user);
+    await user.save();
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...result } = user;
-    return result;
+    const obj = user.toObject();
+    delete (obj as any).password;
+    return obj;
   }
 
-  async findAll(): Promise<Omit<UserEntity, 'password'>[]> {
-    const users = await this.userRepository.find({
-      order: { createdAt: 'DESC' },
+  async findAll(): Promise<any[]> {
+    const users = await this.userModel.find().sort({ createdAt: -1 });
+    return users.map((u) => {
+      const obj = u.toObject();
+      delete (obj as any).password;
+      return obj;
     });
-    return users.map(({ password, ...result }) => result);
   }
 
-  async toggleStatus(id: string): Promise<Omit<UserEntity, 'password'>> {
-    const user = await this.userRepository.findOne({ where: { id } });
+  async toggleStatus(id: string): Promise<any> {
+    const user = await this.userModel.findOne({ id });
     if (!user) throw new NotFoundException('User not found');
     user.status = user.status === 'Active' ? 'Suspended' : 'Active';
     user.updatedAt = new Date();
-    await this.userRepository.save(user);
-    const { password, ...result } = user;
-    return result;
+    await user.save();
+    const obj = user.toObject();
+    delete (obj as any).password;
+    return obj;
   }
 
   async changePassword(
@@ -338,37 +321,34 @@ export class UserService implements OnModuleInit {
     currentPass: string,
     newPass: string,
   ): Promise<{ success: boolean }> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+    const user = await this.userModel.findOne({ id: userId });
     if (!user) throw new NotFoundException('User not found');
     const isMatch = await bcrypt.compare(currentPass, user.password);
     if (!isMatch)
       throw new UnauthorizedException('Current password does not match');
     user.password = await bcrypt.hash(newPass, 10);
     user.updatedAt = new Date();
-    await this.userRepository.save(user);
+    await user.save();
     return { success: true };
   }
 
   async forgotPassword(email: string): Promise<{ message: string }> {
     const normalizedEmail = email.trim().toLowerCase();
-    const user = await this.userRepository.findOne({ where: { email: normalizedEmail } });
+    const user = await this.userModel.findOne({ email: normalizedEmail });
 
-    // Always return success to avoid email enumeration attacks
     if (!user || user.status !== 'Active') {
       return { message: 'If this email is registered, you will receive an OTP shortly.' };
     }
 
-    // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const expiry = new Date(Date.now() + 10 * 60 * 1000);
 
     user.otpCode = otp;
     user.otpExpiry = expiry;
     user.otpAttempts = 0;
     user.updatedAt = new Date();
-    await this.userRepository.save(user);
+    await user.save();
 
-    // Send OTP email
     this.emailService.sendOtpEmail(user.email, user.name, otp).catch((err) => {
       console.error('Error sending OTP email:', err);
     });
@@ -378,48 +358,44 @@ export class UserService implements OnModuleInit {
 
   async verifyOtp(email: string, otp: string): Promise<{ valid: boolean; message: string }> {
     const normalizedEmail = email.trim().toLowerCase();
-    const user = await this.userRepository.findOne({ where: { email: normalizedEmail } });
+    const user = await this.userModel.findOne({ email: normalizedEmail });
 
     if (!user || !user.otpCode || !user.otpExpiry) {
       throw new UnauthorizedException('No active OTP found. Please request a new one.');
     }
 
-    // Check attempts (max 5)
     if ((user.otpAttempts || 0) >= 5) {
       user.otpCode = undefined;
       user.otpExpiry = undefined;
       user.otpAttempts = 0;
-      await this.userRepository.save(user);
+      await user.save();
       throw new UnauthorizedException('Too many failed attempts. Please request a new OTP.');
     }
 
-    // Check expiry
     if (new Date() > user.otpExpiry) {
       user.otpCode = undefined;
       user.otpExpiry = undefined;
       user.otpAttempts = 0;
-      await this.userRepository.save(user);
+      await user.save();
       throw new UnauthorizedException('OTP has expired. Please request a new one.');
     }
 
-    // Check code
     if (user.otpCode !== otp.trim()) {
       user.otpAttempts = (user.otpAttempts || 0) + 1;
-      await this.userRepository.save(user);
+      await user.save();
       const remaining = 5 - (user.otpAttempts || 0);
       throw new UnauthorizedException(`Invalid OTP. ${remaining} attempt(s) remaining.`);
     }
 
-    // OTP valid — mark as verified (keep code for reset step)
     user.otpAttempts = 0;
-    await this.userRepository.save(user);
+    await user.save();
 
     return { valid: true, message: 'OTP verified successfully.' };
   }
 
   async resetPassword(email: string, otp: string, newPassword: string): Promise<{ success: boolean }> {
     const normalizedEmail = email.trim().toLowerCase();
-    const user = await this.userRepository.findOne({ where: { email: normalizedEmail } });
+    const user = await this.userModel.findOne({ email: normalizedEmail });
 
     if (!user || !user.otpCode || !user.otpExpiry) {
       throw new UnauthorizedException('No active OTP session found. Please start over.');
@@ -428,7 +404,7 @@ export class UserService implements OnModuleInit {
     if (new Date() > user.otpExpiry) {
       user.otpCode = undefined;
       user.otpExpiry = undefined;
-      await this.userRepository.save(user);
+      await user.save();
       throw new UnauthorizedException('OTP has expired. Please request a new one.');
     }
 
@@ -440,13 +416,12 @@ export class UserService implements OnModuleInit {
       throw new UnauthorizedException('Password must be at least 8 characters.');
     }
 
-    // Reset password and clear OTP
     user.password = await bcrypt.hash(newPassword, 10);
     user.otpCode = undefined;
     user.otpExpiry = undefined;
     user.otpAttempts = 0;
     user.updatedAt = new Date();
-    await this.userRepository.save(user);
+    await user.save();
 
     return { success: true };
   }
@@ -454,18 +429,15 @@ export class UserService implements OnModuleInit {
   async sendSignupOtp(email: string): Promise<{ message: string }> {
     const normalizedEmail = email.trim().toLowerCase();
 
-    // Check email not already registered
-    const existing = await this.userRepository.findOne({ where: { email: normalizedEmail } });
+    const existing = await this.userModel.findOne({ email: normalizedEmail });
     if (existing) {
       throw new ConflictException('This email is already registered. Please login instead.');
     }
 
-    // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const expiry = new Date(Date.now() + 10 * 60 * 1000);
     this.signupOtpStore.set(normalizedEmail, { otp, expiry });
 
-    // Send OTP email (find a placeholder name from the email prefix)
     const name = normalizedEmail.split('@')[0] || 'User';
     this.emailService.sendOtpEmail(normalizedEmail, name, otp).catch((err) => {
       console.error('Error sending signup OTP email:', err);
@@ -491,9 +463,7 @@ export class UserService implements OnModuleInit {
       throw new UnauthorizedException('Invalid OTP. Please check and try again.');
     }
 
-    // OTP valid — remove from store
     this.signupOtpStore.delete(normalizedEmail);
     return { valid: true, message: 'OTP verified successfully.' };
   }
 }
-

@@ -33,7 +33,11 @@ interface Product {
   inStock: boolean;
   tag: string;
   sku: string;
+  slug?: string;
 }
+
+const slugify = (name: string) =>
+  name.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
 
 export default function AdminProductsPage() {
   const { showToast } = useApp();
@@ -213,7 +217,15 @@ export default function AdminProductsPage() {
                       />
                     </td>
                     <td className="py-3 px-4">
-                      <span className="font-extrabold text-zinc-900 leading-snug block">{p.name}</span>
+                      <Link
+                        href={`/products/${p.slug || slugify(p.name)}`}
+                        target="_blank"
+                        className="font-extrabold text-zinc-900 leading-snug hover:text-[#F9A37E] transition-colors group-hover:underline block"
+                        title="View on store"
+                      >
+                        {p.name}
+                      </Link>
+                      <span className="text-[9px] text-zinc-400 font-mono">/{p.slug || slugify(p.name)}</span>
                     </td>
                     <td className="py-3 px-4">
                       <code className="text-[10px] font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-md">{p.sku}</code>
@@ -244,7 +256,7 @@ export default function AdminProductsPage() {
                     <td className="py-3 px-5 text-right">
                       <div className="flex gap-1.5 justify-end opacity-60 group-hover:opacity-100 transition-opacity">
                         <Link
-                          href={`/admin/products/edit/${p.id}`}
+                          href={`/admin/products/edit/${p.slug || slugify(p.name)}`}
                           className="p-1.5 border border-zinc-200 hover:border-[#F9A37E]/40 hover:bg-[#F9A37E]/5 hover:text-[#F9A37E] text-zinc-400 rounded-lg transition-all"
                         >
                           <Edit2 className="w-3.5 h-3.5" />

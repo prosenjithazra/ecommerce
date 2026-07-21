@@ -193,7 +193,7 @@ export default function ProductsPage() {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 grid-cols-mobile-single">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array(6).fill(0).map((_, i) => <ProductCard key={i} loading={true} />)}
             </div>
           ) : paginatedProducts.length === 0 ? (
@@ -207,7 +207,7 @@ export default function ProductsPage() {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 grid-cols-mobile-single">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {paginatedProducts.map(prod => <ProductCard key={prod.id} product={prod} />)}
             </div>
           )}

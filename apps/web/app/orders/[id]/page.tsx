@@ -8,6 +8,7 @@ import { Download, Calendar, Truck, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { CustomGarmentPreview } from '../../../components/CustomGarmentPreview';
 import { getApiUrl } from '../../../components/ApiConfig';
+import { printPdfInvoice } from '../../../utils/invoiceGenerator';
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -133,10 +134,10 @@ export default function OrderDetailPage() {
         </div>
         <div className="flex gap-2 sm:gap-3">
           <button
-            onClick={() => alert("Downloading PDF Invoice...")}
-            className="border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-extrabold text-xs py-2.5 px-3 sm:px-4 rounded-lg transition-all flex items-center gap-1.5"
+            onClick={() => printPdfInvoice(order)}
+            className="border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-extrabold text-xs py-2.5 px-3 sm:px-4 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
           >
-            <Download className="w-4 h-4" /> Invoice
+            <Download className="w-4 h-4 text-[#F9A37E]" /> Download Invoice
           </button>
           <Link
             href={`/orders/${order.id}/track`}
@@ -152,28 +153,57 @@ export default function OrderDetailPage() {
         {/* Left 2 Columns: Items & Address */}
         <div className="md:col-span-2 space-y-4 sm:space-y-6">
           {/* Order Items */}
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-4 sm:p-6 space-y-3 sm:space-y-4">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 space-y-4 shadow-xs">
             <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white">Items in this shipment</h3>
-            <div className="divide-y divide-zinc-150 dark:divide-zinc-800">
+            <div className="divide-y divide-zinc-150 dark:divide-zinc-800 space-y-4">
               {order.items.map((item: any, index: number) => {
                 const itemJson = order.itemsJson && Array.isArray(order.itemsJson) ? order.itemsJson[index] : null;
+                const design = itemJson?.customDesign || item.customDesign;
+                let designMeta: any = null;
+                if (design?.baseImage) {
+                  if (typeof design.baseImage === 'string') {
+                    try { designMeta = JSON.parse(design.baseImage); } catch {}
+                  } else {
+                    designMeta = design.baseImage;
+                  }
+                }
+                if (!designMeta && design && typeof design === 'object') {
+                  designMeta = design;
+                }
+
+                const sizeQuantities = designMeta?.sizeQuantities;
+                const sizeSummary = sizeQuantities
+                  ? Object.entries(sizeQuantities)
+                      .filter(([_, q]: any) => Number(q) > 0)
+                      .map(([s, q]: any) => `${s}: ${q}`)
+                      .join(', ')
+                  : null;
+
                 return (
-                  <div key={index} className="flex gap-3 sm:gap-4 py-3 sm:py-4 first:pt-0 last:pb-0">
-                    <CustomGarmentPreview
-                      customDesign={itemJson?.customDesign}
-                      defaultImage={item.image}
-                      view="both"
-                      className="w-14 h-14"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-xs text-zinc-800 dark:text-zinc-200 truncate">{item.name}</h4>
-                      <p className="text-[10px] text-zinc-400 mt-1">
-                        Size: {item.size} | Color: {item.color} | Quantity: {item.quantity}
-                      </p>
+                  <div key={index} className="pt-4 first:pt-0 space-y-3">
+                    <div className="flex gap-3 sm:gap-4 items-start">
+                      <CustomGarmentPreview
+                        customDesign={design}
+                        defaultImage={item.image}
+                        view="both"
+                        className="w-16 h-16 sm:w-20 sm:h-20"
+                        showMarkers={true}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-extrabold text-sm text-zinc-800 dark:text-zinc-200 truncate">{item.name}</h4>
+                        <p className="text-xs text-zinc-500 mt-1">
+                          Size: <span className="font-bold text-zinc-700 dark:text-zinc-300">{item.size}</span> | Color: <span className="font-bold text-zinc-700 dark:text-zinc-300">{item.color}</span> | Quantity: <span className="font-bold text-zinc-700 dark:text-zinc-300">{item.quantity}</span>
+                        </p>
+                        {sizeSummary && (
+                          <p className="text-[11px] text-[#e8855a] font-bold mt-1 bg-[#FDFAF6] px-2 py-0.5 rounded-md inline-block border border-[#F9A37E]/30">
+                            Size Breakdown: {sizeSummary}
+                          </p>
+                        )}
+                      </div>
+                      <span className="font-black text-sm text-zinc-900 dark:text-white">
+                        ₹{(item.price * item.quantity).toFixed(2)}
+                      </span>
                     </div>
-                    <span className="font-extrabold text-xs text-zinc-900 dark:text-white">
-                      ₹{(item.price * item.quantity).toFixed(2)}
-                    </span>
                   </div>
                 );
               })}

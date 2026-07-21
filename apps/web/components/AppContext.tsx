@@ -60,6 +60,7 @@ export interface Product {
   colors: { name: string; hex: string }[];
   sizes: string[];
   inStock: boolean;
+  slug?: string;
 }
 
 export interface Address {
@@ -291,6 +292,47 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setAddresses(user.addresses);
         }
         setProfileLoading(false);
+        // Fetch persisted cart from backend after profile load
+        fetch(getApiUrl('/cart'), { headers: { Authorization: `Bearer ${token}` } })
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (!data) return;
+            const items: CartItem[] = (data.items || []).map((i: any) => ({
+              id: i.productId,
+              productId: i.productId,
+              name: i.name,
+              price: Number(i.price) || 0,
+              quantity: Number(i.quantity) || 1,
+              image: i.image || '',
+              size: i.size || '',
+              color: i.color || '',
+            }));
+            setCart(items);
+          })
+          .catch(() => {});
+        // Fetch persisted wishlist from backend
+        fetch(getApiUrl('/wishlist'), { headers: { Authorization: `Bearer ${token}` } })
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (!data) return;
+            const products: Product[] = (data.items || []).map((i: any) => ({
+              id: i.productId,
+              name: i.name,
+              price: Number(i.price) || 0,
+              originalPrice: Number(i.originalPrice) || 0,
+              image: i.image || '',
+              category: i.category || '',
+              rating: Number(i.rating) || 0,
+              reviewsCount: Number(i.reviewsCount) || 0,
+              inStock: i.inStock ?? true,
+              images: [],
+              description: '',
+              colors: [],
+              sizes: [],
+            }));
+            setWishlist(products);
+          })
+          .catch(() => {});
       })
       .catch(() => {
         localStorage.removeItem("token");
@@ -321,39 +363,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
   }, []);
 
-  // Sync cart and wishlist with localStorage to persist on reload
+  // ─── CART BACKEND HELPERS ───────────────────────────────────────────────────
+  const fetchCartFromBackend = async () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) return;
+    try {
+      const res = await fetch(getApiUrl('/cart'), {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const items: CartItem[] = (data.items || []).map((i: any) => ({
+        id: i.productId,
+        productId: i.productId,
+        name: i.name,
+        price: Number(i.price) || 0,
+        quantity: Number(i.quantity) || 1,
+        image: i.image || '',
+        size: i.size || '',
+        color: i.color || '',
+      }));
+      setCart(items);
+    } catch (err) {
+      console.error('Failed to fetch cart from backend:', err);
+    }
+  };
+
+  // ─── WISHLIST BACKEND HELPERS ─────────────────────────────────────────────
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedCart = localStorage.getItem("cart");
-      if (storedCart) {
-        try {
-          setCart(JSON.parse(storedCart));
-        } catch (e) {
-          console.error("Failed to parse stored cart", e);
-        }
-      }
-      const storedWishlist = localStorage.getItem("wishlist");
+      const storedWishlist = localStorage.getItem('wishlist');
       if (storedWishlist) {
-        try {
-          setWishlist(JSON.parse(storedWishlist));
-        } catch (e) {
-          console.error("Failed to parse stored wishlist", e);
-        }
+        try { setWishlist(JSON.parse(storedWishlist)); } catch {}
       }
     }
   }, []);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem("cart", JSON.stringify(cart));
-    }
-  }, [cart]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem("wishlist", JSON.stringify(wishlist));
-    }
-  }, [wishlist]);
 
   useEffect(() => {
     if (currentUser?.email) {
@@ -416,57 +460,178 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setToasts(prev => prev.filter(t => t.id !== id));
   };
 
-  // Cart operations
-  const addToCart = (item: Omit<CartItem, 'id'>) => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
-    if (!token && !currentUser) {
-      showToast("Login Required", "Please login first to access design customizer and add products.", "error");
-      router.push("/login");
+  // Cart operations — all synced to backend API
+  const addToCart = async (item: Omit<CartItem, 'id'>) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token || !currentUser) {
+      showToast('Login Required', 'Please login first to add products to your cart.', 'error');
+      router.push('/login');
       return;
     }
-    const id = Math.random().toString(36).substring(7);
-    setCart(prev => {
-      // Check if identical item (same product, size, color, and without customization) already in cart
-      if (!item.customDesign) {
-        const existing = prev.find(
-          x => x.productId === item.productId && x.size === item.size && x.color === item.color && !x.customDesign
-        );
-        if (existing) {
-          return prev.map(x => x.id === existing.id ? { ...x, quantity: x.quantity + item.quantity } : x);
-        }
+    try {
+      const res = await fetch(getApiUrl('/cart/add'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          productId: item.productId,
+          name: item.name,
+          image: item.image,
+          price: item.price,
+          quantity: item.quantity || 1,
+          size: item.size,
+          color: item.color,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast('Cart Error', data.message || 'Failed to add item to cart.', 'error');
+        return;
       }
-      return [...prev, { ...item, id }];
-    });
-    showToast("Added to Cart", `${item.name} (${item.size} / ${item.color}) is now in your cart.`, "success");
+      const items: CartItem[] = (data.items || []).map((i: any) => ({
+        id: i.productId,
+        productId: i.productId,
+        name: i.name,
+        price: Number(i.price) || 0,
+        quantity: Number(i.quantity) || 1,
+        image: i.image || '',
+        size: i.size || '',
+        color: i.color || '',
+      }));
+      setCart(items);
+      showToast('Added to Cart', `${item.name} (${item.size} / ${item.color}) added.`, 'success');
+    } catch (err) {
+      showToast('Cart Error', 'Could not connect to cart server.', 'error');
+    }
   };
 
-  const removeFromCart = (id: string) => {
-    setCart(prev => prev.filter(item => item.id !== id));
-    showToast("Removed from Cart", "The item has been deleted from your cart.", "info");
+  const removeFromCart = async (id: string) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) return;
+    // id here is productId (we map id = productId on fetch)
+    try {
+      const res = await fetch(getApiUrl(`/cart/item/${id}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        showToast('Error', data.message || 'Failed to remove item.', 'error');
+        return;
+      }
+      const data = await res.json();
+      const items: CartItem[] = (data.items || []).map((i: any) => ({
+        id: i.productId,
+        productId: i.productId,
+        name: i.name,
+        price: Number(i.price) || 0,
+        quantity: Number(i.quantity) || 1,
+        image: i.image || '',
+        size: i.size || '',
+        color: i.color || '',
+      }));
+      setCart(items);
+      showToast('Removed from Cart', 'The item has been removed from your cart.', 'info');
+    } catch (err) {
+      showToast('Error', 'Could not connect to cart server.', 'error');
+    }
   };
 
-  const updateCartQty = (id: string, qty: number) => {
-    if (qty <= 0) {
-      removeFromCart(id);
+  const updateCartQty = async (id: string, qty: number) => {
+    if (qty <= 0) { removeFromCart(id); return; }
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) return;
+    try {
+      const res = await fetch(getApiUrl(`/cart/item/${id}`), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ quantity: qty }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        showToast('Error', data.message || 'Failed to update quantity.', 'error');
+        return;
+      }
+      const data = await res.json();
+      const items: CartItem[] = (data.items || []).map((i: any) => ({
+        id: i.productId,
+        productId: i.productId,
+        name: i.name,
+        price: Number(i.price) || 0,
+        quantity: Number(i.quantity) || 1,
+        image: i.image || '',
+        size: i.size || '',
+        color: i.color || '',
+      }));
+      setCart(items);
+    } catch (err) {
+      showToast('Error', 'Could not connect to cart server.', 'error');
+    }
+  };
+
+  const clearCart = async () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) { setCart([]); return; }
+    try {
+      await fetch(getApiUrl('/cart/clear'), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCart([]);
+    } catch {
+      setCart([]);
+    }
+  };
+
+  // Wishlist — backend synced
+  const toggleWishlist = async (product: Product) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token || !currentUser) {
+      showToast('Login Required', 'Please login to save items to your wishlist.', 'error');
+      router.push('/login');
       return;
     }
-    setCart(prev => prev.map(item => item.id === id ? { ...item, quantity: qty } : item));
-  };
-
-  const clearCart = () => setCart([]);
-
-  // Wishlist
-  const toggleWishlist = (product: Product) => {
-    setWishlist(prev => {
-      const exists = prev.some(p => p.id === product.id);
-      if (exists) {
-        showToast("Removed from Wishlist", `${product.name} removed.`, "info");
-        return prev.filter(p => p.id !== product.id);
+    try {
+      const res = await fetch(getApiUrl('/wishlist/toggle'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          productId: product.id,
+          name: product.name,
+          price: product.price,
+          originalPrice: product.originalPrice,
+          image: product.image,
+          category: product.category,
+          rating: product.rating,
+          reviewsCount: product.reviewsCount,
+          inStock: product.inStock,
+        }),
+      });
+      if (!res.ok) { showToast('Error', 'Failed to update wishlist.', 'error'); return; }
+      const data = await res.json();
+      const products: Product[] = (data.wishlist?.items || []).map((i: any) => ({
+        id: i.productId,
+        name: i.name,
+        price: Number(i.price) || 0,
+        originalPrice: Number(i.originalPrice) || 0,
+        image: i.image || '',
+        category: i.category || '',
+        rating: Number(i.rating) || 0,
+        reviewsCount: Number(i.reviewsCount) || 0,
+        inStock: i.inStock ?? true,
+        images: [],
+        description: '',
+        colors: [],
+        sizes: [],
+      }));
+      setWishlist(products);
+      if (data.added) {
+        showToast('Added to Wishlist', `${product.name} saved.`, 'success');
       } else {
-        showToast("Added to Wishlist", `${product.name} saved.`, "success");
-        return [...prev, product];
+        showToast('Removed from Wishlist', `${product.name} removed.`, 'info');
       }
-    });
+    } catch {
+      showToast('Error', 'Could not connect to wishlist server.', 'error');
+    }
   };
 
   const isInWishlist = (productId: string) => wishlist.some(p => p.id === productId);
@@ -682,11 +847,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem('token');
+    localStorage.removeItem('wishlist');
     setCurrentUser(null);
     setCart([]);
-    showToast("Logged Out", "You have been logged out of your account.", "info");
-    router.push("/");
+    setWishlist([]); // clear local state — wishlist stays in MongoDB for next login
+    showToast('Logged Out', 'You have been logged out of your account.', 'info');
+    router.push('/');
   };
 
   const loginUser = async (email: string, password?: string): Promise<{ success: boolean; error?: string }> => {
@@ -701,7 +868,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const errorMsg = data.message || "Invalid email or password. Please try again.";
         return { success: false, error: errorMsg };
       }
-      localStorage.setItem("token", data.token);
+      localStorage.setItem('token', data.token);
       setCurrentUser({
         id: data.user.id,
         name: data.user.name,
@@ -710,7 +877,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         avatar: data.user.avatar,
         phone: data.user.phone || ''
       });
-      showToast("Welcome Back!", `Logged in successfully as ${data.user.email}`, "success");
+      // Restore cart from backend after login
+      fetch(getApiUrl('/cart'), { headers: { Authorization: `Bearer ${data.token}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then(cartData => {
+          if (!cartData) return;
+          const items: CartItem[] = (cartData.items || []).map((i: any) => ({
+            id: i.productId,
+            productId: i.productId,
+            name: i.name,
+            price: Number(i.price) || 0,
+            quantity: Number(i.quantity) || 1,
+            image: i.image || '',
+            size: i.size || '',
+            color: i.color || '',
+          }));
+          setCart(items);
+        })
+        .catch(() => {});
+      // Restore wishlist from backend after login
+      fetch(getApiUrl('/wishlist'), { headers: { Authorization: `Bearer ${data.token}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then(wlData => {
+          if (!wlData) return;
+          const products: Product[] = (wlData.items || []).map((i: any) => ({
+            id: i.productId,
+            name: i.name,
+            price: Number(i.price) || 0,
+            originalPrice: Number(i.originalPrice) || 0,
+            image: i.image || '',
+            category: i.category || '',
+            rating: Number(i.rating) || 0,
+            reviewsCount: Number(i.reviewsCount) || 0,
+            inStock: i.inStock ?? true,
+            images: [],
+            description: '',
+            colors: [],
+            sizes: [],
+          }));
+          setWishlist(products);
+        })
+        .catch(() => {});
+      showToast('Welcome Back!', `Logged in successfully as ${data.user.email}`, 'success');
       return { success: true };
     } catch (err) {
       return { success: false, error: "Could not connect to the server. Please check your connection." };

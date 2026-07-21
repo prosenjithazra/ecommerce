@@ -1,12 +1,17 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { CategoryService } from './category.service';
 import { CategoryController } from './category.controller';
-import { CategoryEntity } from './entities/category.entity';
+import { Category, CategorySchema } from './schemas/category.schema';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CategoryEntity]), CloudinaryModule],
+  imports: [
+    MongooseModule.forFeature([
+      { name: Category.name, schema: CategorySchema },
+    ]),
+    CloudinaryModule,
+  ],
   providers: [CategoryService],
   controllers: [CategoryController],
   exports: [CategoryService],

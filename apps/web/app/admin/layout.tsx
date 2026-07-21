@@ -28,7 +28,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
     if (currentUser) {
       setLoading(false);
-      if (currentUser.role !== "admin") {
+      const isAdminRole = currentUser.role === "admin" || currentUser.role === "super_admin";
+      if (!isAdminRole) {
         router.push("/");
       } else if (isLoginPage) {
         router.push("/admin");

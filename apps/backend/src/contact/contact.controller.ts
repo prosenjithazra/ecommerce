@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ContactService } from './contact.service';
-import { ContactEntity } from './entities/contact.entity';
+import { Contact } from './schemas/contact.schema';
 import { AuthGuard } from '../user/auth.guard';
 
 @Controller('contact')
@@ -17,13 +17,13 @@ export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
   @Post()
-  async create(@Body() data: Partial<ContactEntity>): Promise<ContactEntity> {
+  async create(@Body() data: Partial<Contact>): Promise<Contact> {
     return this.contactService.create(data);
   }
 
   @UseGuards(AuthGuard)
   @Get()
-  async findAll(): Promise<ContactEntity[]> {
+  async findAll(): Promise<Contact[]> {
     return this.contactService.findAll();
   }
 
@@ -32,7 +32,7 @@ export class ContactController {
   async updateStatus(
     @Param('id') id: string,
     @Body('status') status: string,
-  ): Promise<ContactEntity> {
+  ): Promise<Contact> {
     return this.contactService.updateStatus(id, status);
   }
 

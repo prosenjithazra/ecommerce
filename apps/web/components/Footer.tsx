@@ -73,19 +73,19 @@ export const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
 
         {/* Newsletter */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-10" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 pb-10" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+          <div className="lg:col-span-3 space-y-2">
             <h4 className="text-white font-extrabold text-xl">Join the Creative Club</h4>
-            <p className="text-sm text-[#A89B8A] max-w-xs">Sign up for updates, exclusive drops, and 10% off your first order.</p>
+            <p className="text-sm text-[#A89B8A] max-w-lg">Join our Creative Club for exclusive updates, inspiring events, creative resources, member-only opportunities, and connect with passionate creators worldwide.</p>
           </div>
-          <div className="lg:col-span-2 flex items-center">
+          <div className="lg:col-span-3 flex items-center">
             {subscribed ? (
               <div className="flex items-center gap-3 text-emerald-400 bg-emerald-900/20 border border-emerald-700/30 rounded-lg px-4 py-3">
                 <Mail className="w-4 h-4 flex-shrink-0" />
                 <span className="text-sm font-bold">You&apos;re on the list! Welcome to the Creative Club. 🎉</span>
               </div>
             ) : (
-              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2.5 w-full max-w-lg">
+              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2.5 w-full">
                 <input
                   type="email"
                   placeholder="Enter your email address"

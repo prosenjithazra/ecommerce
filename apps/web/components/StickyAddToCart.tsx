@@ -17,7 +17,7 @@ export const StickyAddToCart: React.FC<StickyAddToCartProps> = ({
   name, price, image, selectedSize, selectedColor, onAddToCart, inStock
 }) => {
   return (
-    <div className="md:hidden fixed bottom-[66px] left-0 right-0 z-20 bg-white border-t border-[#E8E2D6] px-4 py-3 flex items-center justify-between shadow-lg">
+    <div className="md:hidden fixed bottom-[65px] left-0 right-0 z-20 bg-white border-t border-[#E8E2D6] px-4 py-3 flex items-center justify-between shadow-lg">
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-10 h-10 bg-[#E8E2D6] rounded-lg overflow-hidden flex-shrink-0">
           <img src={image} alt={name} className="w-full h-full object-cover" />

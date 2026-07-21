@@ -218,7 +218,7 @@ export default function CheckoutPage() {
                   <CustomGarmentPreview
                     customDesign={item.customDesign}
                     defaultImage={item.image}
-                    view="front"
+                    view="both"
                     className="w-9 h-9"
                   />
                   <span className="font-bold text-[#4A453E] truncate">

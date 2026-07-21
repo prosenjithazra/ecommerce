@@ -300,46 +300,81 @@ interface SliderProps {
 
 export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = React.useState(false);
+  const [canScrollRight, setCanScrollRight] = React.useState(false);
   const [activeIndex, setActiveIndex] = React.useState(0);
   const childrenArray = React.Children.toArray(children);
 
-  const handleScroll = () => {
+  const updateScrollState = React.useCallback(() => {
     if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current;
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setCanScrollLeft(scrollLeft > 5);
+      setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
       const index = Math.round(scrollLeft / (clientWidth * 0.666));
       setActiveIndex(Math.min(index, childrenArray.length - 1));
     }
+  }, [childrenArray.length]);
+
+  React.useEffect(() => {
+    updateScrollState();
+    window.addEventListener('resize', updateScrollState);
+    return () => window.removeEventListener('resize', updateScrollState);
+  }, [updateScrollState]);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const { clientWidth } = scrollRef.current;
+      const scrollAmount = direction === 'left' ? -clientWidth * 0.75 : clientWidth * 0.75;
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
   };
 
-  const desktopGridClass = desktopCols === 3 ? "md:grid-cols-3" : "lg:grid-cols-4";
-  const gridBreakpoint = desktopCols === 3 ? "md" : "lg";
-
-  const containerClass = gridBreakpoint === 'md'
-    ? `flex md:grid ${desktopGridClass} gap-5 md:gap-5 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory pb-4 no-scrollbar scroll-smooth`
-    : `flex lg:grid ${desktopGridClass} gap-5 lg:gap-5 overflow-x-auto lg:overflow-x-visible snap-x snap-mandatory pb-4 no-scrollbar scroll-smooth`;
-
-  const itemClass = gridBreakpoint === 'md'
-    ? 'w-[66.6%] min-w-[66.6%] sm:w-[45%] sm:min-w-[45%] md:w-auto md:min-w-0 snap-start flex-shrink-0 flex [&>*]:w-full [&>*]:h-full'
-    : 'w-[66.6%] min-w-[66.6%] sm:w-[45%] sm:min-w-[45%] lg:w-auto lg:min-w-0 snap-start flex-shrink-0 flex [&>*]:w-full [&>*]:h-full';
-
-  const controlsVisibilityClass = gridBreakpoint === 'md' ? 'md:hidden' : 'lg:hidden';
+  const itemWidthClass = desktopCols === 3
+    ? 'w-full sm:w-[48%] md:w-[calc(33.333%-14px)] min-w-full sm:min-w-[48%] md:min-w-[calc(33.333%-14px)]'
+    : 'w-full sm:w-[48%] lg:w-[calc(25%-15px)] min-w-full sm:min-w-[48%] lg:min-w-[calc(25%-15px)]';
 
   return (
     <div className="relative group/slider w-full">
+      {/* Left Arrow Button */}
+      {canScrollLeft && (
+        <button
+          type="button"
+          onClick={() => scroll('left')}
+          className="absolute -left-3.5 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-white/95 hover:bg-white text-[#4A453E] shadow-md border border-[#E8E2D6] hover:scale-110 transition-all opacity-0 group-hover/slider:opacity-100 flex items-center justify-center cursor-pointer"
+          aria-label="Previous items"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+      )}
+
+      {/* Right Arrow Button */}
+      {canScrollRight && (
+        <button
+          type="button"
+          onClick={() => scroll('right')}
+          className="absolute -right-3.5 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-white/95 hover:bg-white text-[#4A453E] shadow-md border border-[#E8E2D6] hover:scale-110 transition-all opacity-0 group-hover/slider:opacity-100 flex items-center justify-center cursor-pointer"
+          aria-label="Next items"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      )}
+
+      {/* Scrollable Container */}
       <div
         ref={scrollRef}
-        onScroll={handleScroll}
-        className={containerClass}
+        onScroll={updateScrollState}
+        className="flex gap-5 overflow-x-auto snap-x snap-mandatory pb-4 no-scrollbar scroll-smooth"
       >
         {childrenArray.map((child, idx) => (
-          <div key={idx} className={itemClass}>
+          <div key={idx} className={`${itemWidthClass} snap-start flex-shrink-0 flex [&>*]:w-full [&>*]:h-full`}>
             {child}
           </div>
         ))}
       </div>
 
+      {/* Dot Indicators */}
       {childrenArray.length > 1 && (
-        <div className={`flex justify-center gap-1.5 mt-2 ${controlsVisibilityClass}`}>
+        <div className="flex justify-center gap-1.5 mt-2">
           {Array.from({ length: childrenArray.length }).map((_, idx) => (
             <button
               key={idx}
@@ -347,18 +382,12 @@ export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => 
                 if (scrollRef.current) {
                   const child = scrollRef.current.children[idx] as HTMLElement;
                   if (child) {
-                    child.scrollIntoView({
-                      behavior: 'smooth',
-                      block: 'nearest',
-                      inline: 'start'
-                    });
+                    child.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
                   }
                 }
               }}
               className={`h-1.5 rounded-full transition-all duration-300 ${
-                activeIndex === idx
-                  ? 'bg-[#F9A37E] w-4'
-                  : 'bg-[#E8E2D6] w-1.5'
+                activeIndex === idx ? 'bg-[#F9A37E] w-4' : 'bg-[#E8E2D6] w-1.5'
               }`}
               aria-label={`Go to slide ${idx + 1}`}
             />
@@ -368,3 +397,4 @@ export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => 
     </div>
   );
 };
+

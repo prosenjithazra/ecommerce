@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { BannerEntity } from './entities/banner.entity';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Banner, BannerDocument } from './schemas/banner.schema';
 import { CreateBannerDto } from './dto/create-banner.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { randomUUID } from 'crypto';
@@ -9,70 +9,57 @@ import { randomUUID } from 'crypto';
 @Injectable()
 export class BannerService {
   constructor(
-    @InjectRepository(BannerEntity)
-    private readonly bannerRepository: Repository<BannerEntity>,
+    @InjectModel(Banner.name)
+    private readonly bannerModel: Model<BannerDocument>,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  async findActive(): Promise<BannerEntity[]> {
-    return this.bannerRepository.find({
-      where: { isActive: true },
-      order: { createdAt: 'DESC' },
-    });
+  async findActive(): Promise<Banner[]> {
+    return this.bannerModel
+      .find({ isActive: true })
+      .sort({ createdAt: -1 });
   }
 
-  async findAll(): Promise<BannerEntity[]> {
-    return this.bannerRepository.find({
-      order: { createdAt: 'DESC' },
-    });
+  async findAll(): Promise<Banner[]> {
+    return this.bannerModel.find().sort({ createdAt: -1 });
   }
 
-  async create(dto: CreateBannerDto): Promise<BannerEntity> {
-    const banner = new BannerEntity();
+  async create(dto: CreateBannerDto): Promise<Banner> {
     const now = new Date();
+    const productImg = dto.productImg
+      ? await this.cloudinaryService.uploadImage(dto.productImg)
+      : '';
+    const bgImg = dto.bgImg
+      ? await this.cloudinaryService.uploadImage(dto.bgImg)
+      : '';
 
-    banner.id = randomUUID();
-    banner.badge = dto.badge || '';
-    banner.headline1 = dto.headline1;
-    banner.headline2 = dto.headline2;
-    banner.headline2Color = dto.headline2Color || '#F9A37E';
-    banner.sub = dto.sub || '';
+    const banner = new this.bannerModel({
+      id: randomUUID(),
+      badge: dto.badge || '',
+      headline1: dto.headline1 || '',
+      headline2: dto.headline2 || '',
+      headline2Color: dto.headline2Color || '#F9A37E',
+      sub: dto.sub || '',
+      productImg,
+      bgImg,
+      headline1Color: dto.headline1Color || '',
+      subColor: dto.subColor || '',
+      badgeColor: dto.badgeColor || '',
+      overlayColor: dto.overlayColor || '#000000',
+      bg: dto.bg || '#E8E2D6',
+      accent: dto.accent || '#F9A37E',
+      textDark: dto.textDark ?? true,
+      isActive: dto.isActive ?? true,
+      badges: dto.badges || [],
+      createdAt: now,
+      updatedAt: now,
+    });
 
-    if (dto.productImg) {
-      banner.productImg = await this.cloudinaryService.uploadImage(
-        dto.productImg,
-      );
-    } else {
-      banner.productImg = '';
-    }
-
-    if (dto.bgImg) {
-      banner.bgImg = await this.cloudinaryService.uploadImage(dto.bgImg);
-    } else {
-      banner.bgImg = '';
-    }
-
-    banner.headline1Color = dto.headline1Color || '';
-    banner.subColor = dto.subColor || '';
-    banner.badgeColor = dto.badgeColor || '';
-    banner.overlayColor = dto.overlayColor || '#000000';
-
-    banner.bg = dto.bg || '#E8E2D6';
-    banner.accent = dto.accent || '#F9A37E';
-    banner.textDark = dto.textDark ?? true;
-    banner.isActive = dto.isActive ?? true;
-    banner.badges = dto.badges || null;
-    banner.createdAt = now;
-    banner.updatedAt = now;
-
-    return this.bannerRepository.save(banner);
+    return banner.save();
   }
 
-  async update(
-    id: string,
-    dto: Partial<CreateBannerDto>,
-  ): Promise<BannerEntity> {
-    const banner = await this.bannerRepository.findOne({ where: { id } });
+  async update(id: string, dto: Partial<CreateBannerDto>): Promise<Banner> {
+    const banner = await this.bannerModel.findOne({ id });
     if (!banner) {
       throw new NotFoundException('Banner slide not found');
     }
@@ -85,9 +72,9 @@ export class BannerService {
     if (dto.sub !== undefined) banner.sub = dto.sub;
 
     if (dto.productImg !== undefined) {
-      banner.productImg = await this.cloudinaryService.uploadImage(
-        dto.productImg,
-      );
+      banner.productImg = dto.productImg
+        ? await this.cloudinaryService.uploadImage(dto.productImg)
+        : '';
     }
 
     if (dto.bgImg !== undefined) {
@@ -109,12 +96,12 @@ export class BannerService {
     if (dto.badges !== undefined) banner.badges = dto.badges;
 
     banner.updatedAt = new Date();
-    return this.bannerRepository.save(banner);
+    return banner.save();
   }
 
   async delete(id: string): Promise<{ success: boolean }> {
-    const res = await this.bannerRepository.delete(id);
-    if (res.affected === 0) {
+    const res = await this.bannerModel.deleteOne({ id });
+    if (res.deletedCount === 0) {
       throw new NotFoundException('Banner slide not found');
     }
     return { success: true };
