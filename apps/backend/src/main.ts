@@ -13,8 +13,8 @@ async function bootstrap() {
     }),
   );
   app.enableCors();
-  app.use(json({ limit: '10mb' }));
-  app.use(urlencoded({ limit: '10mb', extended: true }));
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ limit: '50mb', extended: true }));
   const configService = app.get(ConfigService);
   const port = Number(configService.get<string>('PORT') ?? 8000);
 
