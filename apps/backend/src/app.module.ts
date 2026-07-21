@@ -37,6 +37,8 @@ import { CouponsModule } from './coupons/coupons.module';
 
         return {
           uri: mongoUrl,
+          serverSelectionTimeoutMS: 10000,
+          connectTimeoutMS: 10000,
         };
       },
     }),
