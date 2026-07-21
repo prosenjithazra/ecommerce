@@ -4,24 +4,47 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '../../../components/AppContext';
+import { getApiUrl } from '../../../components/ApiConfig';
 
 export default function ForgotPasswordPage() {
   const { showToast } = useApp();
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     if (!email) return;
-    showToast("OTP Sent", `We have sent a verification code to ${email}`, "success");
-    router.push('/verify-otp');
+
+    setLoading(true);
+    try {
+      const res = await fetch(getApiUrl('/user/forgot-password'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to send OTP');
+
+      // Store email to use on verify-otp page
+      sessionStorage.setItem('otp_email', email.trim().toLowerCase());
+      showToast("OTP Sent", `We have sent a verification code to ${email}`, "success");
+      router.push('/verify-otp');
+    } catch (err: any) {
+      setError(err.message || 'Failed to send OTP. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#FDFAF6] flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-block font-extrabold text-3xl tracking-tight text-[#4A453E] mb-3">
-          PRINT<span className="text-[#F9A37E]">HUB</span>
+        <Link href="/" className="inline-block mb-3">
+          <img src="/kliamologoNew.png" alt="Kliamo Fashion Logo" className="h-12 w-auto mx-auto object-contain" />
         </Link>
         <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">
           Reset your password
@@ -40,16 +63,21 @@ export default function ForgotPasswordPage() {
               </label>
               <input
                 id="email" type="email" required value={email}
-                onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
-                className="mt-1.5 w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg py-3 px-4 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E]"
+                onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                placeholder="you@example.com"
+                className={`mt-1.5 w-full bg-[#FDFAF6] border ${error ? 'border-red-400' : 'border-[#E8E2D6]'} rounded-lg py-3 px-4 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E]`}
               />
+              {error && (
+                <p className="mt-1.5 text-xs text-red-500 font-medium">{error}</p>
+              )}
             </div>
 
             <button
               type="submit"
-              className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95"
+              disabled={loading}
+              className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95 disabled:opacity-70"
             >
-              Send OTP Code
+              {loading ? 'Sending OTP...' : 'Send OTP Code'}
             </button>
           </form>
 

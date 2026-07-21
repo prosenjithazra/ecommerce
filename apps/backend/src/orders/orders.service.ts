@@ -1,131 +1,64 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
-import { OrderEntity } from './entities/order.entity';
+import { Order, OrderDocument } from './schemas/order.schema';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class OrdersService implements OnModuleInit {
   constructor(
-    @InjectRepository(OrderEntity)
-    private readonly orderRepository: Repository<OrderEntity>,
+    @InjectModel(Order.name)
+    private readonly orderModel: Model<OrderDocument>,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
   ) {}
 
   async onModuleInit() {
-    // Disable automatic seeding as per user request to manage orders dynamically only
-    // await this.seedOrders();
+    // Seeding optional
   }
 
-  private async seedOrders() {
-    try {
-      const count = await this.orderRepository.count();
-      if (count > 0) return;
-
-      const initial = [
-        {
-          id: 'ORD-9872',
-          customer: 'Jane Doe',
-          email: 'jane.doe@example.com',
-          date: '2026-07-08',
-          items: 2,
-          total: 4598,
-          status: 'Delivered',
-        },
-        {
-          id: 'ORD-4819',
-          customer: 'Alex Mercer',
-          email: 'alex.mercer@gmail.com',
-          date: '2026-07-12',
-          items: 3,
-          total: 8040,
-          status: 'Processing',
-        },
-        {
-          id: 'ORD-2391',
-          customer: 'Sarah Connor',
-          email: 's.connor@cyberdyne.org',
-          date: '2026-07-13',
-          items: 1,
-          total: 2299,
-          status: 'Pending',
-        },
-        {
-          id: 'ORD-1104',
-          customer: 'Mark Wells',
-          email: 'mark.w@example.com',
-          date: '2026-07-11',
-          items: 4,
-          total: 12840,
-          status: 'Shipped',
-        },
-        {
-          id: 'ORD-7761',
-          customer: 'Priya Sharma',
-          email: 'priya.s@gmail.com',
-          date: '2026-07-09',
-          items: 1,
-          total: 1699,
-          status: 'Cancelled',
-        },
-      ];
-
-      const now = new Date();
-      for (const item of initial) {
-        const order = new OrderEntity();
-        order.id = item.id;
-        order.customer = item.customer;
-        order.email = item.email;
-        order.date = item.date;
-        order.items = item.items;
-        order.total = item.total;
-        order.status = item.status;
-        order.createdAt = now;
-        order.updatedAt = now;
-        await this.orderRepository.save(order);
-      }
-      console.log('Seeded initial orders successfully.');
-    } catch (err) {
-      console.error('Error seeding orders:', err);
-    }
-  }
-
-  async findAll(email?: string): Promise<OrderEntity[]> {
+  async findAll(email?: string): Promise<Order[]> {
     if (email) {
-      return this.orderRepository.find({
-        where: { email },
-        order: { createdAt: 'DESC' },
-      });
+      return this.orderModel.find({ email }).sort({ createdAt: -1 });
     }
-    return this.orderRepository.find({ order: { createdAt: 'DESC' } });
+    return this.orderModel.find().sort({ createdAt: -1 });
   }
 
-  async findOne(id: string): Promise<OrderEntity | null> {
-    return this.orderRepository.findOne({ where: { id } });
+  async findOne(id: string): Promise<Order | null> {
+    return this.orderModel.findOne({ id });
   }
 
-  async create(data: Partial<OrderEntity>): Promise<OrderEntity> {
+  async create(data: Partial<Order>): Promise<Order> {
     const now = new Date();
-    const order = new OrderEntity();
-    order.id = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
-    order.customer = data.customer!;
-    order.email = data.email!;
-    order.date = data.date || now.toISOString().split('T')[0];
-    order.items = data.items ?? 1;
-    order.total = Number(data.total) || 0;
-    order.status = data.status || 'Pending';
-    order.itemsJson = data.itemsJson || null;
-    order.paymentMethod = data.paymentMethod || 'Pending';
-    order.paymentId = data.paymentId || null;
-    order.paymentStatus = data.paymentStatus || 'Pending';
-    order.createdAt = now;
-    order.updatedAt = now;
-    return this.orderRepository.save(order);
+    const order = new this.orderModel({
+      id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
+      customer: data.customer!,
+      email: data.email!,
+      date: data.date || now.toISOString().split('T')[0],
+      items: data.items ?? 1,
+      total: Number(data.total) || 0,
+      status: data.status || 'Pending',
+      itemsJson: data.itemsJson || null,
+      paymentMethod: data.paymentMethod || 'Pending',
+      paymentId: data.paymentId || null,
+      paymentStatus: data.paymentStatus || 'Pending',
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    const savedOrder = await order.save();
+
+    this.emailService.sendOrderConfirmationEmail(savedOrder).catch((err) => {
+      console.error('Error sending order confirmation email asynchronously:', err);
+    });
+
+    return savedOrder;
   }
 
-  async update(id: string, data: Partial<OrderEntity>): Promise<OrderEntity> {
-    const order = await this.orderRepository.findOne({ where: { id } });
+  async update(id: string, data: Partial<Order>): Promise<Order> {
+    const order = await this.orderModel.findOne({ id });
     if (!order) throw new Error('Order not found');
 
     if (data.status !== undefined) order.status = data.status;
@@ -136,15 +69,15 @@ export class OrdersService implements OnModuleInit {
     if (data.returnReason !== undefined) order.returnReason = data.returnReason;
     order.updatedAt = new Date();
 
-    return this.orderRepository.save(order);
+    return order.save();
   }
 
   async createRazorpayOrder(amount: number) {
     const keyId = this.configService.get<string>('RAZORPAY_KEY_ID');
     const keySecret = this.configService.get<string>('RAZORPAY_KEY_SECRET');
 
-    // Convert amount to paise (subunit)
-    const amountInPaise = Math.round(amount * 100);
+    const numAmount = Number(amount) || 1;
+    const amountInPaise = Math.round(numAmount * 100);
 
     if (!keyId || !keySecret) {
       console.log('Razorpay keys not configured. Simulating order creation...');
@@ -175,6 +108,7 @@ export class OrdersService implements OnModuleInit {
 
       if (!response.ok) {
         const errorText = await response.text();
+        console.error('Razorpay API error response:', errorText);
         throw new Error(`Razorpay API error: ${errorText}`);
       }
 
@@ -186,7 +120,7 @@ export class OrdersService implements OnModuleInit {
         key: keyId,
         simulated: false,
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating Razorpay order:', error);
       throw error;
     }

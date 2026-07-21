@@ -96,31 +96,38 @@ export default function TrackOrderPage() {
     { status: "Delivered", date: "Estimated 5 days", desc: "Package delivered at doorstep.", done: currentIdx >= 3 }
   ];
 
+  // Derive dynamic tracking ID and courier info
+  const dynamicTrackingId = order.trackingNumber || `TRK-${order.id.replace('ORD-', '')}`;
+  const customerName = order.address?.fullName || order.customer || order.email || "Customer";
+  const addressLine = order.address?.street
+    ? `${order.address.street}, ${order.address.city || ''} ${order.address.state || ''} ${order.address.zip || ''} ${order.address.country || ''}`
+    : `Shipping details logged on order invoice (${order.email || 'Registered Email'})`;
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-8 pb-8 sm:pb-16">
       <Breadcrumb items={[{ name: "My Profile", href: "/profile" }, { name: `Order ${order.id}`, href: `/orders/${order.id}` }, { name: "Track" }]} />
 
       <div className="space-y-1">
-        <span className="text-[10px] font-extrabold text-indigo-500 uppercase tracking-wider flex items-center gap-1">
-          <Truck className="w-3.5 h-3.5" /> Courier: DHL Express
+        <span className="text-[10px] font-extrabold text-[#F9A37E] uppercase tracking-wider flex items-center gap-1">
+          <Truck className="w-3.5 h-3.5" /> Courier: Standard Express Partner
         </span>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
           Track Package
         </h1>
-        <p className="text-xs text-zinc-450">
-          Tracking ID: <span className="font-extrabold text-zinc-800 dark:text-zinc-200 font-mono">{order.trackingNumber || "TRK-2849301"}</span>
+        <p className="text-xs text-zinc-500">
+          Tracking ID: <span className="font-extrabold text-zinc-800 dark:text-zinc-200 font-mono">{dynamicTrackingId}</span>
         </p>
       </div>
 
       {order.status === 'Cancelled' && (
         <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs font-bold">
-          ⚠️ Notice: This order has been Cancelled.
+          ⚠️ Notice: Order {order.id} has been Cancelled.
         </div>
       )}
 
       {order.status === 'Returned' && (
         <div className="p-4 bg-violet-50 border border-violet-200 text-violet-750 rounded-lg text-xs font-bold">
-          ℹ️ Notice: This order has been Returned.
+          ℹ️ Notice: Order {order.id} has been Returned.
         </div>
       )}
 
@@ -131,7 +138,7 @@ export default function TrackOrderPage() {
           {timeline.map((step: any, index: number) => (
             <div key={index} className="relative">
               {/* Timeline circle icon */}
-              <span className={`absolute -left-[32px] sm:-left-[54px] top-0 sm:top-1.5 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-white dark:bg-zinc-900 ${step.done ? 'text-emerald-500' : 'text-zinc-300 dark:border-zinc-800'}`}>
+              <span className={`absolute -left-[30px] sm:-left-[48px] top-0 sm:top-1.5 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-white dark:bg-zinc-900 ${step.done ? 'text-emerald-500' : 'text-zinc-300 dark:border-zinc-800'}`}>
                 {step.done ? (
                   <CheckCircle2 className="w-3.5 h-3.5 sm:w-5 sm:h-5 fill-white dark:fill-zinc-900" />
                 ) : (
@@ -159,11 +166,11 @@ export default function TrackOrderPage() {
 
       {/* Delivery Summary destination */}
       <div className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-150 dark:border-zinc-800 rounded-lg p-3 sm:p-4 sm:p-6 flex gap-3 sm:gap-4 items-start">
-        <MapPin className="w-6 h-6 text-indigo-500 mt-0.5 flex-shrink-0" />
+        <MapPin className="w-6 h-6 text-[#F9A37E] mt-0.5 flex-shrink-0" />
         <div className="text-xs space-y-1">
           <span className="font-extrabold text-zinc-900 dark:text-white block">Delivery Destination</span>
-          <p className="text-zinc-500 dark:text-zinc-400">{order.address?.fullName || "Guest"}</p>
-          <p className="text-zinc-550 dark:text-zinc-400">{order.address?.street}, {order.address?.city}, {order.address?.state} {order.address?.zip}</p>
+          <p className="text-zinc-800 dark:text-zinc-200 font-bold">{customerName}</p>
+          <p className="text-zinc-500 dark:text-zinc-400">{addressLine}</p>
         </div>
       </div>
     </div>

@@ -289,7 +289,7 @@ function HeroBanner() {
 
           {/* Subtitle */}
           <p
-            className="text-sm sm:text-base font-bold leading-relaxed max-w-sm mx-auto lg:mx-0"
+            className="text-sm sm:text-base font-bold leading-relaxed max-w-lg mx-auto lg:mx-0"
             style={{ color: subColor }}
           >
             {slide.sub}
@@ -303,14 +303,14 @@ function HeroBanner() {
               const featureColor = hasBgImg || isDarkTheme ? '#e4e4e7' : '#3f3f46';
               const dividerColor = hasBgImg || isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)';
               return (
-                <div key={idx} className="flex items-center">
+                <div key={idx} className="flex items-center max-w-[100%] sm:max-w-[30%] w-full">
                   {idx > 0 && (
-                    <div className="block h-8 w-px mx-4" style={{ backgroundColor: dividerColor }} />
+                    <div className="hidden sm:block h-8 w-px mx-2 sm:mx-4" style={{ backgroundColor: dividerColor }} />
                   )}
-                  <div className="flex flex-col items-center lg:items-start gap-1.5">
+                  <div className="flex flex-col items-center lg:items-start gap-1.5 w-full">
                     <IconComp className="w-5 h-5" style={{ color: featureColor }} strokeWidth={1.8} />
                     <span
-                      className="text-[9px] font-black tracking-widest uppercase whitespace-pre-line leading-tight text-center lg:text-left"
+                      className="text-[9px] w-full font-black tracking-widest uppercase leading-tight text-center lg:text-left"
                       style={{ color: featureColor }}
                     >
                       {b.label}
@@ -338,7 +338,7 @@ function HeroBanner() {
           <img
             src={slide.productImg}
             alt={slide.headline1}
-            className="w-64 h-64 sm:w-[380px] sm:h-[380px] lg:w-full lg:h-full object-contain drop-shadow-2xl transition-all duration-700 ease-in-out hover:scale-105"
+            className="w-64 h-64 sm:w-[380px] sm:h-[380px] lg:w-full lg:h-full max-h-[550px] object-contain drop-shadow-2xl transition-all duration-700 ease-in-out hover:scale-105"
           />
         </div>
       </div>
@@ -411,43 +411,40 @@ export default function HomePage() {
         setGalleryLoading(false);
       });
 
-    setCategoriesLoading(true);
-    fetch(getApiUrl("/category"))
-      .then(res => {
-        if (res.ok) return res.json();
-        throw new Error("failed");
-      })
-      .then(data => {
-        if (data && data.length > 0) {
-          const mapped = data.map((c: any) => ({
-            name: c.name,
-            image: c.image || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80",
-            count: c.count || 0,
-            href: `/products?category=${encodeURIComponent(c.name)}`,
-          }));
-          setCategories(mapped);
-        }
-      })
-      .catch(() => {})
-      .finally(() => {
-        setCategoriesLoading(false);
-      });
-
     setProductsLoading(true);
+    setCategoriesLoading(true);
     fetch(getApiUrl("/products"))
-      .then(res => {
-        if (res.ok) return res.json();
-        throw new Error("failed");
-      })
-      .then(data => {
-        if (data && data.length > 0) {
-          setProducts(data);
+      .then(res => (res.ok ? res.json() : []))
+      .then(prodData => {
+        if (Array.isArray(prodData) && prodData.length > 0) {
+          setProducts(prodData);
         }
+        // Fetch categories and map real-time item counts dynamically from products
+        return fetch(getApiUrl("/category"))
+          .then(res => (res.ok ? res.json() : []))
+          .then(catData => {
+            if (Array.isArray(catData) && catData.length > 0) {
+              const mapped = catData.map((c: any) => {
+                const realCount = (Array.isArray(prodData) ? prodData : []).filter(
+                  (p: any) => p.category?.toLowerCase() === c.name?.toLowerCase()
+                ).length;
+                return {
+                  name: c.name,
+                  image: c.image || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80",
+                  count: realCount,
+                  href: `/products?category=${encodeURIComponent(c.name)}`,
+                };
+              });
+              setCategories(mapped);
+            }
+          });
       })
       .catch(() => {})
       .finally(() => {
         setProductsLoading(false);
+        setCategoriesLoading(false);
       });
+
 
     return () => clearTimeout(timer);
   }, []);

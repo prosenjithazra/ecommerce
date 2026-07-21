@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { GalleryService } from './gallery.service';
 import { AuthGuard } from '../user/auth.guard';
-import { GalleryEntity } from './entities/gallery.entity';
+import { Gallery } from './schemas/gallery.schema';
 
 @Controller('gallery')
 export class GalleryController {
@@ -29,7 +29,7 @@ export class GalleryController {
 
   @UseGuards(AuthGuard)
   @Post()
-  async create(@Body() data: Partial<GalleryEntity>) {
+  async create(@Body() data: Partial<Gallery>) {
     return this.galleryService.create(data);
   }
 
@@ -37,7 +37,7 @@ export class GalleryController {
   @Put(':id')
   async update(
     @Param('id') id: string,
-    @Body() data: Partial<GalleryEntity>,
+    @Body() data: Partial<Gallery>,
   ) {
     return this.galleryService.update(id, data);
   }

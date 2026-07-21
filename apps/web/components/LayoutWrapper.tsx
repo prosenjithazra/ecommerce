@@ -7,6 +7,7 @@ import { Header } from './Header';
 import { Footer } from './Footer';
 import { MobileBottomNav } from './MobileBottomNav';
 import { ToastContainer } from './Toast';
+import { Zap } from 'lucide-react';
 
 export const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { toasts, dismissToast } = useApp();
@@ -14,6 +15,8 @@ export const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ childre
   const [activeRequests, setActiveRequests] = useState(0);
   const [progressWidth, setProgressWidth] = useState(0);
   const [showPreloader, setShowPreloader] = useState(true);
+  const [lastLatency, setLastLatency] = useState<number | null>(null);
+  const [lastStatus, setLastStatus] = useState<number | null>(200);
 
   // Keep loader visible briefly for initial entry branding
   useEffect(() => {
@@ -23,12 +26,14 @@ export const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => clearTimeout(timer);
   }, []);
 
-  // Monkey-patch window.fetch to capture all API response statuses
+  // Monkey-patch window.fetch to capture API latency & response statuses
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const originalFetch = window.fetch;
     window.fetch = async (...args) => {
+      const startTime = performance.now();
+
       setActiveRequests((prev) => {
         const next = prev + 1;
         if (next === 1) {
@@ -36,8 +41,18 @@ export const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ childre
         }
         return next;
       });
+
       try {
-        return await originalFetch(...args);
+        const response = await originalFetch(...args);
+        const latency = Math.round(performance.now() - startTime);
+        setLastLatency(latency);
+        setLastStatus(response.status);
+        return response;
+      } catch (err) {
+        const latency = Math.round(performance.now() - startTime);
+        setLastLatency(latency);
+        setLastStatus(500);
+        throw err;
       } finally {
         setActiveRequests((prev) => {
           const next = Math.max(0, prev - 1);

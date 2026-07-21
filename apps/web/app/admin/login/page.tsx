@@ -32,7 +32,8 @@ export default function AdminLoginPage() {
             const payloadBase64 = token.split(".")[1];
             if (payloadBase64) {
               const decodedPayload = JSON.parse(window.atob(payloadBase64));
-              if (decodedPayload.role !== "admin") {
+              const isAdminRole = decodedPayload.role === "admin" || decodedPayload.role === "super_admin";
+              if (!isAdminRole) {
                 setError("Access denied. Only administrators can access this portal.");
                 logout();
                 setSubmitting(false);

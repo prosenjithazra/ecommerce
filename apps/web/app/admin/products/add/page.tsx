@@ -3,7 +3,7 @@
 import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Upload, X, ImagePlus, Save, Package } from "lucide-react";
+import { ArrowLeft, Upload, X, ImagePlus, Save, Package, Link2 } from "lucide-react";
 import { AdminTopbar } from "../../AdminSidebar";
 import { useApp } from "../../../../components/AppContext";
 import { getApiUrl } from "../../../../components/ApiConfig";
@@ -19,6 +19,9 @@ const COLORS = [
   { name: "Crimson Red", hex: "#991b1b" },
 ];
 
+const slugify = (name: string) =>
+  name.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+
 export default function AddProductPage() {
   const { showToast } = useApp();
   const router = useRouter();
@@ -26,6 +29,7 @@ export default function AddProductPage() {
 
   const [form, setForm] = useState({
     name: "",
+    slug: "",
     price: "",
     originalPrice: "",
     category: "T-Shirts",
@@ -35,6 +39,7 @@ export default function AddProductPage() {
     selectedColors: [] as string[],
     tag: "",
   });
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [images, setImages] = useState<{ file: File; preview: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -90,6 +95,7 @@ export default function AddProductPage() {
 
     const payload = {
       name: form.name,
+      slug: form.slug || slugify(form.name),
       price: parseFloat(form.price) || 0,
       originalPrice: parseFloat(form.originalPrice) || parseFloat(form.price) || 0,
       category: form.category,
@@ -250,10 +256,46 @@ export default function AddProductPage() {
                     type="text"
                     required
                     value={form.name}
-                    onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                    onChange={(e) => {
+                      const name = e.target.value;
+                      setForm((p) => ({
+                        ...p,
+                        name,
+                        slug: slugManuallyEdited ? p.slug : slugify(name),
+                      }));
+                    }}
                     placeholder="e.g. Vintage Oversized Graphic Tee"
                     className={inputCls}
                   />
+                </div>
+
+                {/* Slug field */}
+                <div>
+                  <label className={labelCls}>
+                    <span className="flex items-center gap-1.5"><Link2 className="w-3 h-3 text-[#F9A37E]" /> URL Slug</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={form.slug}
+                      onChange={(e) => {
+                        setSlugManuallyEdited(true);
+                        setForm((p) => ({ ...p, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-') }));
+                      }}
+                      placeholder="auto-generated-from-name"
+                      className={inputCls + " pr-24"}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => { setSlugManuallyEdited(false); setForm((p) => ({ ...p, slug: slugify(p.name) })); }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-extrabold text-[#F9A37E] hover:underline"
+                    >
+                      Auto-generate
+                    </button>
+                  </div>
+                  <p className="text-[9px] text-zinc-400 mt-1 truncate">
+                    Preview: <span className="text-zinc-600 font-medium">/products/{form.slug || slugify(form.name) || 'your-product-slug'}</span>
+                  </p>
                 </div>
  
                 <div className="grid grid-cols-2 gap-4">

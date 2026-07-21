@@ -6,8 +6,9 @@ import { useRouter } from 'next/navigation';
 import { ShoppingBag, Trash2, Tag, Calendar, ShieldCheck, Minus, Plus } from 'lucide-react';
 import { useApp } from '../../components/AppContext';
 import { Breadcrumb, EmptyState } from '../../components/UIComponents';
-import { CouponCard } from '../../components/InfoCards';
 import { CustomGarmentPreview } from '../../components/CustomGarmentPreview';
+import { getApiUrl } from '../../components/ApiConfig';
+
 
 export default function CartPage() {
   const router = useRouter();
@@ -21,21 +22,70 @@ export default function CartPage() {
     }
   }, [currentUser, profileLoading, router]);
   const [couponCode, setCouponCode] = useState("");
-  const [discountAmount, setDiscountAmount] = useState(0);
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountAmount: number } | null>(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
 
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const tax = subtotal * 0.18;
   const shipping = subtotal > 50 || subtotal === 0 ? 0 : 5.99;
-  const total = subtotal + tax + shipping - discountAmount;
+  const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+  const total = Math.max(0, subtotal + tax + shipping - discountAmount);
+
+  // Automatically re-validate active coupon whenever subtotal / item quantity changes
+  React.useEffect(() => {
+    if (!appliedCoupon?.code) return;
+    if (subtotal === 0) {
+      setAppliedCoupon(null);
+      return;
+    }
+
+    fetch(getApiUrl("/coupons/validate"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: appliedCoupon.code, amount: subtotal }),
+    })
+      .then((res) => {
+        if (res.ok) return res.json();
+        return res.json().then((err) => { throw new Error(err.message || "Coupon no longer valid"); });
+      })
+      .then((data) => {
+        setAppliedCoupon({ code: data.coupon.code, discountAmount: data.discountAmount });
+      })
+      .catch((err) => {
+        setAppliedCoupon(null);
+        showToast("Coupon Invalidated", err.message || "Minimum cart requirement not met", "error");
+      });
+  }, [subtotal, appliedCoupon?.code]);
 
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
-    if (couponCode.toUpperCase() === 'CREATOR10') {
-      setDiscountAmount(subtotal * 0.10);
-      showToast("Coupon Applied", "10% discount applied to your order.", "success");
-    } else {
-      showToast("Invalid Coupon", "This promo code does not exist or has expired.", "error");
-    }
+    if (!couponCode.trim()) return;
+
+    setApplyingCoupon(true);
+    fetch(getApiUrl("/coupons/validate"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: couponCode.trim(), amount: subtotal }),
+    })
+      .then((res) => {
+        if (res.ok) return res.json();
+        return res.json().then((err) => { throw new Error(err.message || "Invalid coupon"); });
+      })
+      .then((data) => {
+        setAppliedCoupon({ code: data.coupon.code, discountAmount: data.discountAmount });
+        showToast("Coupon Applied", data.message || `Saved ₹${data.discountAmount}!`, "success");
+      })
+      .catch((err) => {
+        showToast("Coupon Error", err.message || "Failed to apply coupon", "error");
+      })
+      .finally(() => setApplyingCoupon(false));
+  };
+
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    showToast("Coupon Removed", "Promo code has been removed.", "info");
   };
 
   const getEstimatedDelivery = () => {
@@ -45,7 +95,7 @@ export default function CartPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-12 md:pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-6 pb-12 md:pb-16">
       <Breadcrumb items={[{ name: "Shopping Cart" }]} />
       <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A453E] tracking-tight">Shopping Cart</h1>
 
@@ -106,12 +156,6 @@ export default function CartPage() {
                 </div>
               </div>
             ))}
-
-            {/* Coupons */}
-            <div className="space-y-2 pt-2">
-              <h4 className="text-xs font-bold text-[#4A453E]">Available Offers</h4>
-              <CouponCard code="CREATOR10" discountDesc="Get 10% off your entire order" expiry="Dec 31, 2026" />
-            </div>
           </div>
 
           {/* Order Summary */}
@@ -119,20 +163,44 @@ export default function CartPage() {
             <div className="bg-white border border-[#E8E2D6] rounded-lg p-3 sm:p-5 space-y-5 shadow-sm">
               <h3 className="font-extrabold text-base text-[#4A453E] pb-3 border-b border-[#E8E2D6]">Order Summary</h3>
 
-              {/* Coupon input */}
-              <form onSubmit={handleApplyCoupon} className="flex gap-2">
-                <div className="relative flex-1">
-                  <Tag className="w-3.5 h-3.5 text-[#A89B8A] absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text" placeholder="Coupon code"
-                    value={couponCode} onChange={(e) => setCouponCode(e.target.value)}
-                    className="w-full h-10 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] uppercase text-[#4A453E] font-mono"
-                  />
+              {/* Dynamic Coupon Section */}
+              {appliedCoupon ? (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-emerald-600" />
+                    <div>
+                      <span className="text-xs font-black text-emerald-800 uppercase tracking-wide">{appliedCoupon.code}</span>
+                      <span className="text-[10px] font-bold text-emerald-600 block">Applied (-₹{appliedCoupon.discountAmount.toFixed(2)})</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleRemoveCoupon}
+                    className="text-xs font-bold text-rose-500 hover:text-rose-700 hover:underline"
+                  >
+                    Remove
+                  </button>
                 </div>
-                <button type="submit" className="h-10 bg-[#A8C69F] hover:bg-[#92b089] text-white rounded-lg px-5 text-xs font-extrabold transition-all shadow-md shadow-[#A8C69F]/10 flex-shrink-0 flex items-center justify-center">
-                  Apply
-                </button>
-              </form>
+              ) : (
+                <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Tag className="w-3.5 h-3.5 text-[#A89B8A] absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Coupon code"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      className="w-full h-10 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] uppercase text-[#4A453E] font-mono"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={applyingCoupon}
+                    className="h-10 bg-[#A8C69F] hover:bg-[#92b089] disabled:opacity-60 text-white rounded-lg px-5 text-xs font-extrabold transition-all shadow-md shadow-[#A8C69F]/10 flex-shrink-0 flex items-center justify-center cursor-pointer"
+                  >
+                    {applyingCoupon ? "..." : "Apply"}
+                  </button>
+                </form>
+              )}
 
               {/* Breakdown */}
               <div className="space-y-2.5 text-xs">
@@ -140,7 +208,7 @@ export default function CartPage() {
                   <span className="text-[#7A736A]">Cart Subtotal</span>
                   <span className="font-extrabold text-[#4A453E]">₹{subtotal.toFixed(2)}</span>
                 </div>
-                 <div className="flex justify-between">
+                <div className="flex justify-between">
                   <span className="text-[#7A736A]">Tax / GST (18%)</span>
                   <span className="font-extrabold text-[#4A453E]">₹{tax.toFixed(2)}</span>
                 </div>

@@ -60,6 +60,7 @@ export interface Product {
   colors: { name: string; hex: string }[];
   sizes: string[];
   inStock: boolean;
+  slug?: string;
 }
 
 export interface Address {
@@ -158,8 +159,9 @@ interface AppContextType {
   returnOrder: (id: string, reason: string) => Promise<boolean>;
   markNotificationsAsRead: () => void;
   logout: () => void;
-  loginUser: (email: string, password?: string) => Promise<boolean>;
+  loginUser: (email: string, password?: string) => Promise<{ success: boolean; error?: string }>;
   registerUser: (name: string, email: string, password: string, phone?: string) => Promise<boolean>;
+  googleAuthUser: (email?: string, name?: string, avatar?: string, phone?: string, credential?: string) => Promise<boolean>;
   updateUserProfile: (name: string, avatar?: string, phone?: string) => Promise<boolean>;
   updateUserPreferences: (preferences: any) => Promise<boolean>;
   companySettings: {
@@ -238,86 +240,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<Product[]>([]);
-  const [addresses, setAddresses] = useState<Address[]>([
-    {
-      id: "a1",
-      fullName: "Jane Doe",
-      street: "123 Creative Street, Suite 100",
-      city: "New York",
-      state: "NY",
-      zip: "10001",
-      country: "United States",
-      phone: "+1 555-0199",
-      isDefault: true
-    }
-  ]);
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: "ORD-9872",
-      date: "2026-07-08",
-      status: "Delivered",
-      items: [
-        {
-          productId: "p1",
-          name: "Premium Soft Cotton Tee",
-          price: 29.99,
-          quantity: 2,
-          image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80",
-          size: "L",
-          color: "Black"
-        }
-      ],
-      total: 59.98,
-      address: {
-        id: "a1",
-        fullName: "Jane Doe",
-        street: "123 Creative Street, Suite 100",
-        city: "New York",
-        state: "NY",
-        zip: "10001",
-        country: "United States",
-        phone: "+1 555-0199",
-        isDefault: true
-      },
-      paymentMethod: "Card",
-      trackingNumber: "TRK-98724109",
-      trackingTimeline: [
-        { status: "Order Placed", date: "2026-07-08 10:00 AM", desc: "Your order has been logged and confirmed.", done: true },
-        { status: "Processing & Print", date: "2026-07-08 02:00 PM", desc: "The items have been printed and prepared.", done: true },
-        { status: "Shipped", date: "2026-07-09 09:00 AM", desc: "Package picked up by DHL Express.", done: true },
-        { status: "Delivered", date: "2026-07-10 11:30 AM", desc: "Delivered and signed at receptionist desk.", done: true }
-      ]
-    }
-  ]);
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    {
-      id: "TXN-847294",
-      date: "2026-07-08",
-      amount: 59.98,
-      status: "Success",
-      type: "Payment",
-      orderId: "ORD-9872",
-      invoiceUrl: "#"
-    }
-  ]);
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: "n1",
-      title: "New Styles Added!",
-      message: "Check out the new catalog selections now available.",
-      type: "promo",
-      date: "2 hours ago",
-      read: false
-    },
-    {
-      id: "n2",
-      title: "Order #ORD-9872 Delivered",
-      message: "Your premium cotton tee has been delivered successfully.",
-      type: "shipping",
-      date: "5 hours ago",
-      read: true
-    }
-  ]);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const isDarkMode = false; // dark mode removed
@@ -366,6 +292,47 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setAddresses(user.addresses);
         }
         setProfileLoading(false);
+        // Fetch persisted cart from backend after profile load
+        fetch(getApiUrl('/cart'), { headers: { Authorization: `Bearer ${token}` } })
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (!data) return;
+            const items: CartItem[] = (data.items || []).map((i: any) => ({
+              id: i.productId,
+              productId: i.productId,
+              name: i.name,
+              price: Number(i.price) || 0,
+              quantity: Number(i.quantity) || 1,
+              image: i.image || '',
+              size: i.size || '',
+              color: i.color || '',
+            }));
+            setCart(items);
+          })
+          .catch(() => {});
+        // Fetch persisted wishlist from backend
+        fetch(getApiUrl('/wishlist'), { headers: { Authorization: `Bearer ${token}` } })
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (!data) return;
+            const products: Product[] = (data.items || []).map((i: any) => ({
+              id: i.productId,
+              name: i.name,
+              price: Number(i.price) || 0,
+              originalPrice: Number(i.originalPrice) || 0,
+              image: i.image || '',
+              category: i.category || '',
+              rating: Number(i.rating) || 0,
+              reviewsCount: Number(i.reviewsCount) || 0,
+              inStock: i.inStock ?? true,
+              images: [],
+              description: '',
+              colors: [],
+              sizes: [],
+            }));
+            setWishlist(products);
+          })
+          .catch(() => {});
       })
       .catch(() => {
         localStorage.removeItem("token");
@@ -396,39 +363,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
   }, []);
 
-  // Sync cart and wishlist with localStorage to persist on reload
+  // ─── CART BACKEND HELPERS ───────────────────────────────────────────────────
+  const fetchCartFromBackend = async () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) return;
+    try {
+      const res = await fetch(getApiUrl('/cart'), {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const items: CartItem[] = (data.items || []).map((i: any) => ({
+        id: i.productId,
+        productId: i.productId,
+        name: i.name,
+        price: Number(i.price) || 0,
+        quantity: Number(i.quantity) || 1,
+        image: i.image || '',
+        size: i.size || '',
+        color: i.color || '',
+      }));
+      setCart(items);
+    } catch (err) {
+      console.error('Failed to fetch cart from backend:', err);
+    }
+  };
+
+  // ─── WISHLIST BACKEND HELPERS ─────────────────────────────────────────────
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedCart = localStorage.getItem("cart");
-      if (storedCart) {
-        try {
-          setCart(JSON.parse(storedCart));
-        } catch (e) {
-          console.error("Failed to parse stored cart", e);
-        }
-      }
-      const storedWishlist = localStorage.getItem("wishlist");
+      const storedWishlist = localStorage.getItem('wishlist');
       if (storedWishlist) {
-        try {
-          setWishlist(JSON.parse(storedWishlist));
-        } catch (e) {
-          console.error("Failed to parse stored wishlist", e);
-        }
+        try { setWishlist(JSON.parse(storedWishlist)); } catch {}
       }
     }
   }, []);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem("cart", JSON.stringify(cart));
-    }
-  }, [cart]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem("wishlist", JSON.stringify(wishlist));
-    }
-  }, [wishlist]);
 
   useEffect(() => {
     if (currentUser?.email) {
@@ -491,57 +460,178 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setToasts(prev => prev.filter(t => t.id !== id));
   };
 
-  // Cart operations
-  const addToCart = (item: Omit<CartItem, 'id'>) => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
-    if (!token && !currentUser) {
-      showToast("Login Required", "Please login first to access design customizer and add products.", "error");
-      router.push("/login");
+  // Cart operations — all synced to backend API
+  const addToCart = async (item: Omit<CartItem, 'id'>) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token || !currentUser) {
+      showToast('Login Required', 'Please login first to add products to your cart.', 'error');
+      router.push('/login');
       return;
     }
-    const id = Math.random().toString(36).substring(7);
-    setCart(prev => {
-      // Check if identical item (same product, size, color, and without customization) already in cart
-      if (!item.customDesign) {
-        const existing = prev.find(
-          x => x.productId === item.productId && x.size === item.size && x.color === item.color && !x.customDesign
-        );
-        if (existing) {
-          return prev.map(x => x.id === existing.id ? { ...x, quantity: x.quantity + item.quantity } : x);
-        }
+    try {
+      const res = await fetch(getApiUrl('/cart/add'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          productId: item.productId,
+          name: item.name,
+          image: item.image,
+          price: item.price,
+          quantity: item.quantity || 1,
+          size: item.size,
+          color: item.color,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast('Cart Error', data.message || 'Failed to add item to cart.', 'error');
+        return;
       }
-      return [...prev, { ...item, id }];
-    });
-    showToast("Added to Cart", `${item.name} (${item.size} / ${item.color}) is now in your cart.`, "success");
+      const items: CartItem[] = (data.items || []).map((i: any) => ({
+        id: i.productId,
+        productId: i.productId,
+        name: i.name,
+        price: Number(i.price) || 0,
+        quantity: Number(i.quantity) || 1,
+        image: i.image || '',
+        size: i.size || '',
+        color: i.color || '',
+      }));
+      setCart(items);
+      showToast('Added to Cart', `${item.name} (${item.size} / ${item.color}) added.`, 'success');
+    } catch (err) {
+      showToast('Cart Error', 'Could not connect to cart server.', 'error');
+    }
   };
 
-  const removeFromCart = (id: string) => {
-    setCart(prev => prev.filter(item => item.id !== id));
-    showToast("Removed from Cart", "The item has been deleted from your cart.", "info");
+  const removeFromCart = async (id: string) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) return;
+    // id here is productId (we map id = productId on fetch)
+    try {
+      const res = await fetch(getApiUrl(`/cart/item/${id}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        showToast('Error', data.message || 'Failed to remove item.', 'error');
+        return;
+      }
+      const data = await res.json();
+      const items: CartItem[] = (data.items || []).map((i: any) => ({
+        id: i.productId,
+        productId: i.productId,
+        name: i.name,
+        price: Number(i.price) || 0,
+        quantity: Number(i.quantity) || 1,
+        image: i.image || '',
+        size: i.size || '',
+        color: i.color || '',
+      }));
+      setCart(items);
+      showToast('Removed from Cart', 'The item has been removed from your cart.', 'info');
+    } catch (err) {
+      showToast('Error', 'Could not connect to cart server.', 'error');
+    }
   };
 
-  const updateCartQty = (id: string, qty: number) => {
-    if (qty <= 0) {
-      removeFromCart(id);
+  const updateCartQty = async (id: string, qty: number) => {
+    if (qty <= 0) { removeFromCart(id); return; }
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) return;
+    try {
+      const res = await fetch(getApiUrl(`/cart/item/${id}`), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ quantity: qty }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        showToast('Error', data.message || 'Failed to update quantity.', 'error');
+        return;
+      }
+      const data = await res.json();
+      const items: CartItem[] = (data.items || []).map((i: any) => ({
+        id: i.productId,
+        productId: i.productId,
+        name: i.name,
+        price: Number(i.price) || 0,
+        quantity: Number(i.quantity) || 1,
+        image: i.image || '',
+        size: i.size || '',
+        color: i.color || '',
+      }));
+      setCart(items);
+    } catch (err) {
+      showToast('Error', 'Could not connect to cart server.', 'error');
+    }
+  };
+
+  const clearCart = async () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) { setCart([]); return; }
+    try {
+      await fetch(getApiUrl('/cart/clear'), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCart([]);
+    } catch {
+      setCart([]);
+    }
+  };
+
+  // Wishlist — backend synced
+  const toggleWishlist = async (product: Product) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token || !currentUser) {
+      showToast('Login Required', 'Please login to save items to your wishlist.', 'error');
+      router.push('/login');
       return;
     }
-    setCart(prev => prev.map(item => item.id === id ? { ...item, quantity: qty } : item));
-  };
-
-  const clearCart = () => setCart([]);
-
-  // Wishlist
-  const toggleWishlist = (product: Product) => {
-    setWishlist(prev => {
-      const exists = prev.some(p => p.id === product.id);
-      if (exists) {
-        showToast("Removed from Wishlist", `${product.name} removed.`, "info");
-        return prev.filter(p => p.id !== product.id);
+    try {
+      const res = await fetch(getApiUrl('/wishlist/toggle'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          productId: product.id,
+          name: product.name,
+          price: product.price,
+          originalPrice: product.originalPrice,
+          image: product.image,
+          category: product.category,
+          rating: product.rating,
+          reviewsCount: product.reviewsCount,
+          inStock: product.inStock,
+        }),
+      });
+      if (!res.ok) { showToast('Error', 'Failed to update wishlist.', 'error'); return; }
+      const data = await res.json();
+      const products: Product[] = (data.wishlist?.items || []).map((i: any) => ({
+        id: i.productId,
+        name: i.name,
+        price: Number(i.price) || 0,
+        originalPrice: Number(i.originalPrice) || 0,
+        image: i.image || '',
+        category: i.category || '',
+        rating: Number(i.rating) || 0,
+        reviewsCount: Number(i.reviewsCount) || 0,
+        inStock: i.inStock ?? true,
+        images: [],
+        description: '',
+        colors: [],
+        sizes: [],
+      }));
+      setWishlist(products);
+      if (data.added) {
+        showToast('Added to Wishlist', `${product.name} saved.`, 'success');
       } else {
-        showToast("Added to Wishlist", `${product.name} saved.`, "success");
-        return [...prev, product];
+        showToast('Removed from Wishlist', `${product.name} removed.`, 'info');
       }
-    });
+    } catch {
+      showToast('Error', 'Could not connect to wishlist server.', 'error');
+    }
   };
 
   const isInWishlist = (productId: string) => wishlist.some(p => p.id === productId);
@@ -757,14 +847,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem('token');
+    localStorage.removeItem('wishlist');
     setCurrentUser(null);
     setCart([]);
-    showToast("Logged Out", "You have been logged out of your account.", "info");
-    router.push("/");
+    setWishlist([]); // clear local state — wishlist stays in MongoDB for next login
+    showToast('Logged Out', 'You have been logged out of your account.', 'info');
+    router.push('/');
   };
 
-  const loginUser = async (email: string, password?: string): Promise<boolean> => {
+  const loginUser = async (email: string, password?: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const res = await fetch(getApiUrl("/user/login"), {
         method: "POST",
@@ -773,23 +865,63 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       const data = await res.json();
       if (!res.ok) {
-        showToast("Login Failed", data.message || "Invalid credentials", "error");
-        return false;
+        const errorMsg = data.message || "Invalid email or password. Please try again.";
+        return { success: false, error: errorMsg };
       }
-      localStorage.setItem("token", data.token);
+      localStorage.setItem('token', data.token);
       setCurrentUser({
         id: data.user.id,
         name: data.user.name,
         email: data.user.email,
         role: data.user.role,
         avatar: data.user.avatar,
-        phone: "+1 555-0199"
+        phone: data.user.phone || ''
       });
-      showToast("Welcome Back!", `Logged in successfully as ${data.user.email}`, "success");
-      return true;
+      // Restore cart from backend after login
+      fetch(getApiUrl('/cart'), { headers: { Authorization: `Bearer ${data.token}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then(cartData => {
+          if (!cartData) return;
+          const items: CartItem[] = (cartData.items || []).map((i: any) => ({
+            id: i.productId,
+            productId: i.productId,
+            name: i.name,
+            price: Number(i.price) || 0,
+            quantity: Number(i.quantity) || 1,
+            image: i.image || '',
+            size: i.size || '',
+            color: i.color || '',
+          }));
+          setCart(items);
+        })
+        .catch(() => {});
+      // Restore wishlist from backend after login
+      fetch(getApiUrl('/wishlist'), { headers: { Authorization: `Bearer ${data.token}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then(wlData => {
+          if (!wlData) return;
+          const products: Product[] = (wlData.items || []).map((i: any) => ({
+            id: i.productId,
+            name: i.name,
+            price: Number(i.price) || 0,
+            originalPrice: Number(i.originalPrice) || 0,
+            image: i.image || '',
+            category: i.category || '',
+            rating: Number(i.rating) || 0,
+            reviewsCount: Number(i.reviewsCount) || 0,
+            inStock: i.inStock ?? true,
+            images: [],
+            description: '',
+            colors: [],
+            sizes: [],
+          }));
+          setWishlist(products);
+        })
+        .catch(() => {});
+      showToast('Welcome Back!', `Logged in successfully as ${data.user.email}`, 'success');
+      return { success: true };
     } catch (err) {
-      showToast("Connection Error", "Could not connect to the authentication server.", "error");
-      return false;
+      return { success: false, error: "Could not connect to the server. Please check your connection." };
     }
   };
 
@@ -805,7 +937,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         showToast("Registration Failed", data.message || "Could not register account", "error");
         return false;
       }
-      return loginUser(email, password);
+      const loginResult = await loginUser(email, password);
+      return loginResult.success;
+    } catch (err) {
+      showToast("Connection Error", "Could not connect to the authentication server.", "error");
+      return false;
+    }
+  };
+
+  const googleAuthUser = async (
+    email?: string,
+    name?: string,
+    avatar?: string,
+    phone?: string,
+    credential?: string
+  ): Promise<boolean> => {
+    try {
+      const res = await fetch(getApiUrl("/user/google-auth"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name, avatar, phone, credential }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast("Google Authentication Failed", data.message || "Could not authenticate with Google", "error");
+        return false;
+      }
+      localStorage.setItem("token", data.token);
+      setCurrentUser({
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role,
+        avatar: data.user.avatar,
+        phone: data.user.phone || ''
+      });
+      showToast("Welcome to KLIAMO!", `Signed in with Google as ${data.user.email}`, "success");
+      return true;
     } catch (err) {
       showToast("Connection Error", "Could not connect to the authentication server.", "error");
       return false;
@@ -931,6 +1099,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       logout,
       loginUser,
       registerUser,
+      googleAuthUser,
       updateUserProfile,
       updateUserPreferences,
       companySettings,

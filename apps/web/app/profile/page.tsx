@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp, Address } from '../../components/AppContext';
 import { Breadcrumb } from '../../components/UIComponents';
-import { User, MapPin, ShieldAlert, KeyRound, Sliders, LogOut, LayoutDashboard, Upload, Camera, X, ShoppingBag, Loader2, Calendar, CreditCard, ExternalLink, ChevronDown, ChevronUp, XCircle, Package, Truck, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
+import { User, MapPin, ShieldAlert, KeyRound, Sliders, LogOut, LayoutDashboard, Upload, Camera, X, ShoppingBag, Loader2, Calendar, CreditCard, ExternalLink, ChevronDown, ChevronUp, XCircle, Package, Truck, CheckCircle2, Clock, AlertTriangle, Eye, EyeOff, Tag, Copy, Check } from 'lucide-react';
+
 import { AddressCard } from '../../components/InfoCards';
 import { getApiUrl } from '../../components/ApiConfig';
 import { CustomGarmentPreview } from '../../components/CustomGarmentPreview';
@@ -156,20 +157,27 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
                   const designStr = item.customDesign?.baseImage;
                   let designMeta = null;
                   if (designStr) {
-                    try { designMeta = JSON.parse(designStr); }
-                    catch (e) { /* silently skip */ }
+                    if (typeof designStr === 'string') {
+                      try { designMeta = JSON.parse(designStr); }
+                      catch (e) { designMeta = null; }
+                    } else if (typeof designStr === 'object') {
+                      designMeta = designStr;
+                    }
+                  }
+                  if (!designMeta && item.customDesign && typeof item.customDesign === 'object') {
+                    designMeta = item.customDesign;
                   }
 
                   return (
                     <div key={i} className="border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-900/40">
                       {/* Item Header */}
                       <div className="flex gap-3 p-3.5">
-                        <div className="w-14 h-14 flex-shrink-0 rounded-lg overflow-hidden border border-zinc-150 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
+                        <div className="flex-shrink-0 rounded-lg overflow-hidden border border-zinc-150 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
                           <CustomGarmentPreview
                             customDesign={item.customDesign}
                             defaultImage={item.image}
-                            view="front"
-                            className="w-full h-full"
+                            view="both"
+                            className="w-14 h-14"
                           />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -215,22 +223,13 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
                           <p className="text-[9px] font-extrabold text-[#e8855a] uppercase tracking-wider">🎨 Custom Print Specifications</p>
                           <div className="flex gap-3 items-start">
                             <div className="flex gap-2">
-                              {designMeta.front?.imageUrl && (
-                                <div className="text-center">
-                                  <div className="w-14 h-14 border border-zinc-200 rounded-lg overflow-hidden bg-white">
-                                    <img src={designMeta.front.imageUrl} className="w-full h-full object-contain" alt="Front artwork" />
-                                  </div>
-                                  <p className="text-[8px] font-bold text-zinc-400 mt-1 uppercase">Front</p>
-                                </div>
-                              )}
-                              {designMeta.back?.imageUrl && (
-                                <div className="text-center">
-                                  <div className="w-14 h-14 border border-zinc-200 rounded-lg overflow-hidden bg-white">
-                                    <img src={designMeta.back.imageUrl} className="w-full h-full object-contain" alt="Back artwork" />
-                                  </div>
-                                  <p className="text-[8px] font-bold text-zinc-400 mt-1 uppercase">Back</p>
-                                </div>
-                              )}
+                              <CustomGarmentPreview
+                                customDesign={item.customDesign}
+                                defaultImage={item.image}
+                                view="both"
+                                className="w-14 h-14"
+                                showMarkers={true}
+                              />
                             </div>
                             <div className="flex-1 space-y-1 text-[9px] text-zinc-500 dark:text-zinc-400 font-medium">
                               <p>Style: <span className="font-bold capitalize text-zinc-700 dark:text-zinc-300">{designMeta.productType}</span></p>
@@ -497,8 +496,13 @@ export default function ProfilePage() {
     updateUserProfile,
     updateUserPreferences
   } = useApp();
-  const [activeTab, setActiveTab] = useState<'info' | 'address' | 'orders' | 'password' | 'preferences'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'address' | 'orders' | 'offers' | 'password' | 'preferences'>('info');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // Offers State
+  const [userCoupons, setUserCoupons] = useState<any[]>([]);
+  const [userCouponsLoading, setUserCouponsLoading] = useState(true);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   // Orders State
   const [orders, setOrders] = useState<any[]>([]);
@@ -507,8 +511,8 @@ export default function ProfilePage() {
   const [returningOrderId, setReturningOrderId] = useState<string | null>(null);
 
   // Personal Info Form
-  const [name, setName] = useState(currentUser?.name || "Jane Doe");
-  const [email, setEmail] = useState(currentUser?.email || "jane@example.com");
+  const [name, setName] = useState(currentUser?.name || "");
+  const [email, setEmail] = useState(currentUser?.email || "");
   const [phone, setPhone] = useState(currentUser?.phone || "");
   const [avatar, setAvatar] = useState(currentUser?.avatar || "");
 
@@ -517,6 +521,27 @@ export default function ProfilePage() {
   // Preferences form state
   const [prefOrderEmail, setPrefOrderEmail] = useState(currentUser?.preferences?.orderEmail ?? true);
   const [prefNewsletter, setPrefNewsletter] = useState(currentUser?.preferences?.newsletter ?? false);
+
+  useEffect(() => {
+    if (currentUser?.email) {
+      setUserCouponsLoading(true);
+      fetch(getApiUrl(`/coupons?userEmail=${encodeURIComponent(currentUser.email)}`))
+        .then((res) => (res.ok ? res.json() : []))
+        .then((data) => {
+          if (Array.isArray(data)) setUserCoupons(data);
+          setUserCouponsLoading(false);
+        })
+        .catch(() => setUserCouponsLoading(false));
+    }
+  }, [currentUser]);
+
+  const handleCopyCouponCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    showToast("Code Copied!", `Coupon code "${code}" copied to clipboard.`, "success");
+    setTimeout(() => setCopiedCode(null), 3000);
+  };
+
 
   useEffect(() => {
     const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
@@ -555,8 +580,11 @@ export default function ProfilePage() {
     }
   }, [currentUser]);
 
-  // Password Form
+  // Password Form & Eye Toggles
   const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" });
+  const [showCurrentPass, setShowCurrentPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
 
   // Address inline add/edit state
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
@@ -765,6 +793,12 @@ export default function ProfilePage() {
                 <ShoppingBag className="w-4 h-4" /> My Orders
               </button>
               <button
+                onClick={() => { setActiveTab('offers'); setIsMobileSidebarOpen(false); }}
+                className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-lg text-left transition-all ${activeTab === 'offers' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
+              >
+                <Tag className="w-4 h-4" /> Offers & Coupons
+              </button>
+              <button
                 onClick={() => { setActiveTab('password'); setIsMobileSidebarOpen(false); }}
                 className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-lg text-left transition-all ${activeTab === 'password' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
               >
@@ -777,7 +811,7 @@ export default function ProfilePage() {
                 <Sliders className="w-4 h-4" /> Preferences
               </button>
               
-              {currentUser?.role === 'admin' && (
+              {(currentUser?.role === 'admin' || currentUser?.role === 'super_admin') && (
                 <div className="border-t border-[#E8E2D6] my-1.5 pt-1.5">
                   <Link
                     href="/admin"
@@ -812,6 +846,7 @@ export default function ProfilePage() {
             {activeTab === 'info' && <><User className="w-4.5 h-4.5 text-[#E8855A]" /> Personal Info</>}
             {activeTab === 'address' && <><MapPin className="w-4.5 h-4.5 text-[#E8855A]" /> Address Book</>}
             {activeTab === 'orders' && <><ShoppingBag className="w-4.5 h-4.5 text-[#E8855A]" /> My Orders</>}
+            {activeTab === 'offers' && <><Tag className="w-4.5 h-4.5 text-[#E8855A]" /> Offers & Coupons</>}
             {activeTab === 'password' && <><KeyRound className="w-4.5 h-4.5 text-[#E8855A]" /> Change Password</>}
             {activeTab === 'preferences' && <><Sliders className="w-4.5 h-4.5 text-[#E8855A]" /> Preferences</>}
           </span>
@@ -844,6 +879,12 @@ export default function ProfilePage() {
             <ShoppingBag className="w-4 h-4" /> My Orders
           </button>
           <button
+            onClick={() => setActiveTab('offers')}
+            className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-lg text-left transition-all ${activeTab === 'offers' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
+          >
+            <Tag className="w-4 h-4" /> Offers & Coupons
+          </button>
+          <button
             onClick={() => setActiveTab('password')}
             className={`flex items-center gap-2.5 text-xs font-bold py-2.5 px-4 rounded-lg text-left transition-all ${activeTab === 'password' ? 'bg-[#FBD5C1]/30 text-[#E8855A]' : 'text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'}`}
           >
@@ -855,6 +896,7 @@ export default function ProfilePage() {
           >
             <Sliders className="w-4 h-4" /> Preferences
           </button>
+
           
           {currentUser?.role === 'admin' && (
             <div className="border-t border-[#E8E2D6] my-1.5 pt-1.5">
@@ -1070,6 +1112,96 @@ export default function ProfilePage() {
               )}
             </div>
           )}
+
+          {/* Offers & Coupons Tab */}
+          {activeTab === 'offers' && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-extrabold text-base text-zinc-900 dark:text-white pb-1 border-b border-zinc-150 flex items-center gap-2">
+                  <Tag className="w-4.5 h-4.5 text-[#F9A37E]" /> My Offers & Coupons
+                </h3>
+                <p className="text-xs text-zinc-500 mt-1">Copy coupon code and apply it at checkout to get exclusive discounts!</p>
+              </div>
+
+              {userCouponsLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="h-36 bg-zinc-100 dark:bg-zinc-800 rounded-xl animate-pulse" />
+                  ))}
+                </div>
+              ) : userCoupons.length === 0 ? (
+                <div className="py-12 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-950/10 p-6">
+                  <Tag className="w-10 h-10 text-zinc-300 mx-auto mb-3" />
+                  <h4 className="font-extrabold text-sm text-zinc-800 dark:text-zinc-200">No active offers available</h4>
+                  <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto">Check back later for exclusive store promo codes & discounts!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {userCoupons.map((coupon) => {
+                    const isExpired = coupon.expiresAt && new Date() > new Date(coupon.expiresAt);
+                    const isExclusive = coupon.assignedUserEmail && coupon.assignedUserEmail.toLowerCase() === currentUser?.email?.toLowerCase();
+                    return (
+                      <div
+                        key={coupon.id}
+                        className="relative border-2 border-dashed border-[#F9A37E]/40 hover:border-[#F9A37E] bg-gradient-to-br from-[#FDFAF6] via-white to-[#FBD5C1]/10 dark:from-zinc-900 dark:to-zinc-950 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                      >
+                        {isExclusive && (
+                          <span className="absolute -top-2.5 right-4 bg-gradient-to-r from-[#F9A37E] to-[#E8855A] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm">
+                            ★ Exclusive For You
+                          </span>
+                        )}
+
+                        <div className="space-y-2">
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="font-black text-2xl text-[#4A453E] dark:text-white">
+                              {coupon.discountType === 'percentage' ? `${coupon.discountValue}% OFF` : `₹${coupon.discountValue} OFF`}
+                            </span>
+                            {coupon.maxDiscount > 0 && (
+                              <span className="text-[10px] font-bold text-zinc-400">(Max cap ₹{coupon.maxDiscount})</span>
+                            )}
+                          </div>
+
+                          <p className="text-xs text-zinc-600 dark:text-zinc-400 font-semibold">
+                            {coupon.minOrderAmount > 0 ? `Valid on orders above ₹${coupon.minOrderAmount}` : 'No minimum order required'}
+                          </p>
+
+                          {coupon.expiresAt && (
+                            <p className={`text-[10px] font-bold flex items-center gap-1 ${isExpired ? 'text-red-500' : 'text-zinc-400'}`}>
+                              <Clock className="w-3 h-3" />
+                              {isExpired ? 'Expired on' : 'Expires'}: {new Date(coupon.expiresAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="pt-4 mt-3 border-t border-zinc-200/60 dark:border-zinc-800 flex items-center justify-between gap-3">
+                          <div className="bg-[#4A453E] text-white px-3 py-1.5 rounded-lg font-mono text-xs font-bold tracking-wider select-all uppercase">
+                            {coupon.code}
+                          </div>
+
+                          <button
+                            onClick={() => handleCopyCouponCode(coupon.code)}
+                            disabled={isExpired}
+                            className="bg-[#F9A37E] hover:bg-[#E8855A] disabled:opacity-50 text-white font-extrabold text-xs py-2 px-3.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+                          >
+                            {copiedCode === coupon.code ? (
+                              <>
+                                <Check className="w-3.5 h-3.5 text-white" /> Copied!
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3.5 h-3.5" /> Copy Code
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* 3. Change Password Tab */}
           {activeTab === 'password' && (
             <form onSubmit={handleUpdatePassword} className="space-y-6">
@@ -1077,33 +1209,51 @@ export default function ProfilePage() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-zinc-650 mb-1.5">Current Password</label>
-                  <input
-                    type="password"
-                    required
-                    value={passwords.current}
-                    onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showCurrentPass ? "text" : "password"}
+                      required
+                      value={passwords.current}
+                      onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
+                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 pr-10 text-xs outline-none"
+                    />
+                    <button type="button" onClick={() => setShowCurrentPass(!showCurrentPass)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors">
+                      {showCurrentPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-zinc-650 mb-1.5">New Password</label>
-                  <input
-                    type="password"
-                    required
-                    value={passwords.new}
-                    onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showNewPass ? "text" : "password"}
+                      required
+                      value={passwords.new}
+                      onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 pr-10 text-xs outline-none"
+                    />
+                    <button type="button" onClick={() => setShowNewPass(!showNewPass)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors">
+                      {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-zinc-650 mb-1.5">Confirm New Password</label>
-                  <input
-                    type="password"
-                    required
-                    value={passwords.confirm}
-                    onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirmPass ? "text" : "password"}
+                      required
+                      value={passwords.confirm}
+                      onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
+                      className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 pr-10 text-xs outline-none"
+                    />
+                    <button type="button" onClick={() => setShowConfirmPass(!showConfirmPass)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors">
+                      {showConfirmPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
               </div>
               <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-lg transition-all">

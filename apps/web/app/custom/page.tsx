@@ -1,329 +1,947 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '../../components/AppContext';
 import { Breadcrumb } from '../../components/UIComponents';
-import { Upload, Move, RotateCw, ZoomIn, Plus, Minus, ShoppingBag, Eye, HelpCircle } from 'lucide-react';
+import {
+  Type,
+  Image as ImageIcon,
+  Square,
+  Circle,
+  Triangle,
+  Star,
+  Layers,
+  RotateCcw,
+  RotateCw,
+  Trash2,
+  Move,
+  ShoppingBag,
+  Eye,
+  HelpCircle,
+  Upload,
+  Minus,
+  Plus,
+  Copy,
+  AlignCenter,
+  Bold,
+  Italic,
+  Sparkles,
+  Check,
+  UserCheck,
+  Shield,
+  ZoomIn,
+  ZoomOut,
+  Maximize2
+} from 'lucide-react';
 import { getApiUrl } from '../../components/ApiConfig';
-
-
+import { CustomGarmentPreview } from '../../components/CustomGarmentPreview';
+import * as fabric from 'fabric';
 
 const COLORS = [
-  { name: 'White', hex: '#FFFFFF', border: 'border-zinc-300' },
-  { name: 'Black', hex: '#18181B', border: 'border-transparent' },
-  { name: 'Navy Blue', hex: '#1E3A8A', border: 'border-transparent' },
-  { name: 'Heather Grey', hex: '#94A3B8', border: 'border-transparent' },
-  { name: 'Sage Green', hex: '#A8C69F', border: 'border-transparent' },
-  { name: 'Peach', hex: '#F9A37E', border: 'border-transparent' },
+  { name: 'White', hex: '#FFFFFF' },
+  { name: 'Black', hex: '#18181B' },
+  { name: 'Navy Blue', hex: '#1E3A8A' },
+  { name: 'Heather Grey', hex: '#94A3B8' },
+  { name: 'Sage Green', hex: '#A8C69F' },
+  { name: 'Peach', hex: '#F9A37E' },
+  { name: 'Crimson Red', hex: '#DC2626' },
+  { name: 'Mustard Yellow', hex: '#F59E0B' },
 ];
 
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 
-// ── REALISTIC SHADED GARMENT SVGS ──
+const FONTS = [
+  { name: 'Sans-Serif (Inter)', family: 'var(--font-elms-sans), sans-serif' },
+  { name: 'Athletic Block (Impact)', family: 'Impact, sans-serif' },
+  { name: 'Cursive (Kaushan)', family: 'var(--font-kaushan-script), cursive' },
+  { name: 'Classic Serif (Georgia)', family: 'Georgia, serif' },
+  { name: 'Modern (Montserrat)', family: 'Montserrat, sans-serif' },
+  { name: 'Monospace (Courier)', family: 'monospace' },
+];
 
-const RealisticTShirtSvg = ({ color }: { color: string }) => (
-  <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-xl">
-    <defs>
-      <linearGradient id="tshirtShade" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#ffffff" stopOpacity="0.25" />
-        <stop offset="50%" stopColor="#ffffff" stopOpacity="0.0" />
-        <stop offset="100%" stopColor="#000000" stopOpacity="0.35" />
-      </linearGradient>
-      <filter id="softBlur">
-        <feGaussianBlur stdDeviation="1.8" />
-      </filter>
-    </defs>
-    {/* Soft Drop Shadow */}
-    <ellipse cx="100" cy="190" rx="55" ry="6" fill="#000" opacity="0.18" filter="url(#softBlur)" />
-    
-    {/* Base Fabric Outline */}
-    <path d="M 40,30 C 50,30 65,37 75,37 C 85,37 90,32 100,32 C 110,32 115,37 125,37 C 135,37 150,30 160,30 C 168,30 172,36 172,42 C 172,48 162,70 158,78 C 154,86 142,88 142,88 L 142,185 C 142,192 135,195 128,195 L 72,195 C 65,195 58,192 58,185 L 58,88 C 58,88 46,86 42,78 C 38,70 28,48 28,42 C 28,36 32,30 40,30 Z" style={{ fill: color }} stroke="#18181b" strokeWidth="1.2" strokeLinejoin="round" />
-    
-    {/* Volumetric Shading */}
-    <path d="M 40,30 C 50,30 65,37 75,37 C 85,37 90,32 100,32 C 110,32 115,37 125,37 C 135,37 150,30 160,30 C 168,30 172,36 172,42 C 172,48 162,70 158,78 C 154,86 142,88 142,88 L 142,185 C 142,192 135,195 128,195 L 72,195 C 65,195 58,192 58,185 L 58,88 C 58,88 46,86 42,78 C 38,70 28,48 28,42 C 28,36 32,30 40,30 Z" fill="url(#tshirtShade)" pointerEvents="none" />
-    
-    {/* Seams and folds */}
-    <path d="M 75,37 C 85,37 90,43 100,43 C 110,43 115,37 125,37" fill="none" stroke="#000" strokeWidth="2" opacity="0.35" />
-    <path d="M 75,37 C 85,37 90,43 100,43 C 110,43 115,37 125,37" fill="none" stroke="#fff" strokeWidth="0.8" opacity="0.25" />
-    
-    {/* Armpit wrinkles */}
-    <path d="M 58,95 C 66,99 64,106 61,114" fill="none" stroke="#000" strokeWidth="2" opacity="0.2" filter="url(#softBlur)" />
-    <path d="M 142,95 C 134,99 136,106 139,114" fill="none" stroke="#000" strokeWidth="2" opacity="0.2" filter="url(#softBlur)" />
-    
-    {/* Shoulder highlights */}
-    <path d="M 40,30 C 50,30 65,34 75,34" fill="none" stroke="#fff" strokeWidth="2" opacity="0.2" />
-    <path d="M 160,30 C 150,30 135,34 125,34" fill="none" stroke="#fff" strokeWidth="2" opacity="0.2" />
-    
-    {/* Fabric drape folds */}
-    <path d="M 96,44 Q 82,110 74,180" fill="none" stroke="#000" strokeWidth="2.5" opacity="0.12" filter="url(#softBlur)" />
-    <path d="M 104,44 Q 118,110 126,180" fill="none" stroke="#000" strokeWidth="2.5" opacity="0.12" filter="url(#softBlur)" />
-  </svg>
-);
+// ── PHOTOREALISTIC SHADED GARMENT SVGS WITH EXACT SILHOUETTE CLIPPING ──
 
-const RealisticPoloSvg = ({ color }: { color: string }) => (
-  <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-xl">
-    <defs>
-      <linearGradient id="poloShade" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#ffffff" stopOpacity="0.2" />
-        <stop offset="50%" stopColor="#ffffff" stopOpacity="0.0" />
-        <stop offset="100%" stopColor="#000000" stopOpacity="0.38" />
-      </linearGradient>
-      <filter id="softBlur">
-        <feGaussianBlur stdDeviation="1.8" />
-      </filter>
-    </defs>
-    <ellipse cx="100" cy="190" rx="55" ry="6" fill="#000" opacity="0.18" filter="url(#softBlur)" />
-    
-    {/* Base Polo shape */}
-    <path d="M 40,30 C 50,30 65,37 75,37 C 85,37 90,32 100,32 C 110,32 115,37 125,37 C 135,37 150,30 160,30 C 168,30 172,36 172,42 C 172,48 162,70 158,78 L 142,88 L 142,185 C 142,192 135,195 128,195 L 72,195 C 65,195 58,192 58,185 L 58,88 L 42,78 C 38,70 28,48 28,42 C 28,36 32,30 40,30 Z" style={{ fill: color }} stroke="#18181b" strokeWidth="1.2" strokeLinejoin="round" />
-    <path d="M 40,30 C 50,30 65,37 75,37 C 85,37 90,32 100,32 C 110,32 115,37 125,37 C 135,37 150,30 160,30 C 168,30 172,36 172,42 C 172,48 162,70 158,78 L 142,88 L 142,185 C 142,192 135,195 128,195 L 72,195 C 65,195 58,192 58,185 L 58,88 L 42,78 C 38,70 28,48 28,42 C 28,36 32,30 40,30 Z" fill="url(#poloShade)" pointerEvents="none" />
-    
-    {/* Collar Details with shadows */}
-    <path d="M 75,37 L 90,56 L 100,56 L 110,56 L 125,37" style={{ fill: color }} stroke="#18181b" strokeWidth="1.5" />
-    <path d="M 75,37 Q 100,44 125,37" fill="none" stroke="#000" strokeWidth="2.5" opacity="0.3" />
-    <path d="M 90,56 L 100,78 L 110,56" style={{ fill: color }} stroke="#18181b" strokeWidth="1.2" />
-    <path d="M 100,56 L 100,92" fill="none" stroke="#18181b" strokeWidth="1.5" />
-    
-    {/* Buttons with thread crosses */}
-    <circle cx="100" cy="64" r="2" fill="#E8E2D6" stroke="#222" strokeWidth="0.5" />
-    <circle cx="100" cy="76" r="2" fill="#E8E2D6" stroke="#222" strokeWidth="0.5" />
-    <circle cx="100" cy="88" r="2" fill="#E8E2D6" stroke="#222" strokeWidth="0.5" />
+const RealPhotoGarment = ({
+  garmentType,
+  colorHex,
+  view = 'front',
+  className = 'w-full h-full'
+}: {
+  garmentType: 'tshirt' | 'polo' | string;
+  colorHex: string;
+  view?: 'front' | 'back';
+  className?: string;
+}) => {
+  const isPolo = garmentType === 'polo';
+  const isBack = view === 'back';
+  const isWhite = !colorHex || colorHex.toUpperCase() === '#FFFFFF' || colorHex.toUpperCase() === '#FFF';
 
-    {/* Sleeve ribs */}
-    <path d="M 33,63 C 38,72 40,75 42,78" fill="none" stroke="#000" strokeWidth="2.5" opacity="0.15" />
-    <path d="M 167,63 C 162,72 160,75 158,78" fill="none" stroke="#000" strokeWidth="2.5" opacity="0.15" />
-    
-    {/* Folds */}
-    <path d="M 58,102 Q 70,105 82,102" fill="none" stroke="#000" strokeWidth="2" opacity="0.1" filter="url(#softBlur)" />
-    <path d="M 142,102 Q 130,105 118,102" fill="none" stroke="#000" strokeWidth="2" opacity="0.1" filter="url(#softBlur)" />
-    <path d="M 97,94 Q 85,140 80,185" fill="none" stroke="#000" strokeWidth="3" opacity="0.12" filter="url(#softBlur)" />
-    <path d="M 103,94 Q 115,140 120,185" fill="none" stroke="#000" strokeWidth="3" opacity="0.12" filter="url(#softBlur)" />
-  </svg>
-);
+  const imageSrc = isPolo
+    ? (isBack ? '/polo_back.png' : '/polo_front.png')
+    : (isBack ? '/whiteTshirtBack.png' : '/whiteTshirtFront.png');
 
-const RealisticShirtSvg = ({ color }: { color: string }) => (
-  <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-xl">
-    <defs>
-      <linearGradient id="shirtShade" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#ffffff" stopOpacity="0.25" />
-        <stop offset="50%" stopColor="#ffffff" stopOpacity="0.0" />
-        <stop offset="100%" stopColor="#000000" stopOpacity="0.4" />
-      </linearGradient>
-      <filter id="softBlur">
-        <feGaussianBlur stdDeviation="1.8" />
-      </filter>
-    </defs>
-    <ellipse cx="100" cy="190" rx="55" ry="6" fill="#000" opacity="0.18" filter="url(#softBlur)" />
-    
-    {/* Base Button down Shirt Outline */}
-    <path d="M 45,28 C 52,28 65,34 75,34 C 85,34 90,32 100,32 C 110,32 115,34 125,34 C 135,34 148,28 155,28 C 163,28 168,34 168,40 C 168,48 160,78 156,84 C 152,90 142,90 142,90 L 142,185 C 142,192 135,195 128,195 L 72,195 C 65,195 58,192 58,185 L 58,90 C 58,90 48,90 44,84 C 40,78 32,48 32,40 C 32,34 37,28 45,28 Z" style={{ fill: color }} stroke="#18181b" strokeWidth="1.2" strokeLinejoin="round" />
-    <path d="M 45,28 C 52,28 65,34 75,34 C 85,34 90,32 100,32 C 110,32 115,34 125,34 C 135,34 148,28 155,28 C 163,28 168,34 168,40 C 168,48 160,78 156,84 C 152,90 142,90 142,90 L 142,185 C 142,192 135,195 128,195 L 72,195 C 65,195 58,192 58,185 L 58,90 C 58,90 48,90 44,84 C 40,78 32,48 32,40 C 32,34 37,28 45,28 Z" fill="url(#shirtShade)" pointerEvents="none" />
-    
-    {/* Collar Folds */}
-    <path d="M 75,34 L 88,48 L 100,48" style={{ fill: color }} stroke="#18181b" strokeWidth="1.5" />
-    <path d="M 125,34 L 112,48 L 100,48" style={{ fill: color }} stroke="#18181b" strokeWidth="1.5" />
-    <path d="M 75,34 C 88,38 112,38 125,34" fill="none" stroke="#000" strokeWidth="2.5" opacity="0.3" />
-    
-    {/* Left and Right overlapping panels */}
-    <path d="M 100,48 L 100,195" fill="none" stroke="#18181b" strokeWidth="2" />
-    <path d="M 103,48 L 103,195" fill="none" stroke="#000" strokeWidth="0.8" opacity="0.15" />
-    
-    {/* Buttons */}
-    {[58, 83, 108, 133, 158, 183].map(y => (
-      <circle key={y} cx="100" cy={y} r="2.2" fill="#FFFFFF" stroke="#18181b" strokeWidth="0.6" />
-    ))}
+  const maskId = `garmentMask-${garmentType}-${view}-${(colorHex || 'white').replace('#', '')}`;
 
-    {/* Pocket outline with stitching */}
-    <path d="M 68,75 L 85,75 L 85,98 C 85,98 81,104 76.5,104 C 72,104 68,98 68,98 Z" fill="none" stroke="#18181b" strokeWidth="1.2" />
-    <path d="M 69,76 L 84,76 L 84,97 C 84,97 80,103 76.5,103 C 73,103 69,97 69,97 Z" fill="none" stroke="#000" strokeWidth="1" strokeDasharray="1,1" opacity="0.4" />
-    
-    {/* Fabric Crease Lines */}
-    <path d="M 58,98 C 66,104 68,112 65,124" fill="none" stroke="#000" strokeWidth="2" opacity="0.18" filter="url(#softBlur)" />
-    <path d="M 142,98 C 134,104 132,112 135,124" fill="none" stroke="#000" strokeWidth="2" opacity="0.18" filter="url(#softBlur)" />
-    <path d="M 82,115 Q 75,150 72,185" fill="none" stroke="#000" strokeWidth="2" opacity="0.08" filter="url(#softBlur)" />
-    <path d="M 118,115 Q 125,150 128,185" fill="none" stroke="#000" strokeWidth="2" opacity="0.08" filter="url(#softBlur)" />
-  </svg>
-);
+  return (
+    <div className={`relative ${className} flex items-center justify-center overflow-hidden`}>
+      <svg viewBox="0 0 500 500" className="w-full h-full drop-shadow-xl pointer-events-none" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <mask id={maskId} maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" x="0" y="0" width="500" height="500">
+            <image href={imageSrc} x="0" y="0" width="500" height="500" preserveAspectRatio="xMidYMid meet" />
+          </mask>
+        </defs>
+
+        {/* Base T-shirt photo texture */}
+        <image href={imageSrc} x="0" y="0" width="500" height="500" preserveAspectRatio="xMidYMid meet" />
+
+        {/* Garment-only color fill overlay */}
+        {!isWhite && (
+          <rect
+            x="0"
+            y="0"
+            width="500"
+            height="500"
+            fill={colorHex}
+            mask={`url(#${maskId})`}
+            style={{ mixBlendMode: 'multiply' }}
+          />
+        )}
+      </svg>
+    </div>
+  );
+};
+
+
 
 export default function CustomizerPage() {
   const router = useRouter();
-  const { addToCart, showToast, currentUser, companySettings, settingsLoading, settingsResponseTime } = useApp();
+  const { addToCart, showToast, currentUser, companySettings, settingsLoading } = useApp();
 
-  React.useEffect(() => {
+  // Authentication check - wait until AppContext finishes loading
+  useEffect(() => {
+    if (settingsLoading) return;
     const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
     if (!token && !currentUser) {
       router.push('/login');
     }
-  }, [currentUser, router]);
+  }, [currentUser, settingsLoading, router]);
 
-  // Active configurations
-  const [garmentType, setGarmentType] = useState<'tshirt' | 'polo' | 'shirt'>('tshirt');
-  const [selectedColor, setSelectedColor] = useState<(typeof COLORS)[number]>(COLORS[0]!);
-  const [selectedSize, setSelectedSize] = useState('M');
-  const [quantity, setQuantity] = useState(1);
+  // Garment & Cart State
+  const [garmentType, setGarmentType] = useState<'tshirt' | 'polo'>('tshirt');
+  const [selectedColor, setSelectedColor] = useState(COLORS[0]!);
   const [currentView, setCurrentView] = useState<'front' | 'back'>('front');
-  const [activeTab, setActiveTab] = useState<'style' | 'graphics'>('style');
-
-  // Design artwork layers (separate for Front and Back)
-  const [frontDesign, setFrontDesign] = useState({
-    imageSrc: '',
-    imageX: 50,
-    imageY: 50,
-    imageScale: 40,
-    imageRotation: 0,
-  });
-
-  const [backDesign, setBackDesign] = useState({
-    imageSrc: '',
-    imageX: 50,
-    imageY: 45,
-    imageScale: 50,
-    imageRotation: 0,
-  });
-
+  const [activeLeftTab, setActiveLeftTab] = useState<'text' | 'upload' | 'shapes' | 'roster' | 'layers'>('text');
   const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [studioZoom, setStudioZoom] = useState(1);
 
-  // Dynamic garment base pricing from api metadata
+  // Size Breakdown Matrix (CustomInk style)
+  const [sizeQuantities, setSizeQuantities] = useState<{ [key: string]: number }>({
+    S: 0,
+    M: 1,
+    L: 0,
+    XL: 0,
+    XXL: 0,
+  });
+
+  const totalQuantity = Object.values(sizeQuantities).reduce((sum, q) => sum + Math.max(0, q), 0) || 1;
+
+  // Tiered Volume Discount Logic (1-5 standard, 6-11: 10% off, 12+: 20% off)
+  let discountPercent = 0;
+  if (totalQuantity >= 12) {
+    discountPercent = 20;
+  } else if (totalQuantity >= 6) {
+    discountPercent = 10;
+  }
+
+  // Dynamic garment base pricing
   const PRICES = {
     tshirt: Number(companySettings?.customTshirtPrice || 599),
     polo: Number(companySettings?.customPoloPrice || 799),
-    shirt: Number(companySettings?.customShirtPrice || 999),
   };
 
-  const GARMENT_TYPES = [
-    { id: 'tshirt', name: 'T-Shirt', basePrice: PRICES.tshirt, desc: 'Classic crew neck soft cotton tee' },
-    { id: 'polo', name: 'Polo T-Shirt', basePrice: PRICES.polo, desc: 'Premium ribbed collar sporty polo' },
-    { id: 'shirt', name: 'Casual Shirt', basePrice: PRICES.shirt, desc: 'Button-down casual premium cotton shirt' },
+  const GARMENT_TYPES: Array<{ id: 'tshirt' | 'polo'; name: string; basePrice: number; desc: string }> = [
+    { id: 'tshirt', name: 'Crewneck T-Shirt', basePrice: PRICES.tshirt, desc: 'Classic crew neck soft cotton tee' },
+    { id: 'polo', name: 'Polo Shirt', basePrice: PRICES.polo, desc: 'Premium ribbed collar sporty polo' },
   ];
 
-  // Render skeleton loading state
-  if (settingsLoading) {
-    return (
-      <div className="min-h-screen bg-[#FDFAF6] py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto space-y-6">
-          {/* Breadcrumb Skeleton */}
-          <div className="h-4 w-48 bg-zinc-200 animate-pulse rounded" />
+  // Fabric.js Canvas Refs (Single source of truth via useRef)
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
+  const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
+  const [activeObject, setActiveObject] = useState<fabric.Object | null>(null);
 
-          {/* Main Grid Skeleton */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Left: Design mockup workspace skeleton */}
-            <div className="lg:col-span-7 bg-white border border-[#E8E2D6] rounded-2xl p-6 sm:p-12 shadow-sm relative aspect-square flex items-center justify-center animate-pulse">
-              <div className="w-80 h-80 bg-zinc-150 rounded-full opacity-60" />
-            </div>
+  // Canvas View States (Front & Back JSONs)
+  const frontStateRef = useRef<any>(null);
+  const backStateRef = useRef<any>(null);
 
-            {/* Right: Styles options sidebar skeleton */}
-            <div className="lg:col-span-5 bg-white border border-[#E8E2D6] rounded-2xl p-6 shadow-sm space-y-6 animate-pulse">
-              <div className="h-6 w-3/4 bg-zinc-200 rounded" />
-              <div className="h-4 w-1/2 bg-zinc-200 rounded" />
-              <div className="space-y-3">
-                <div className="h-12 w-full bg-zinc-100 rounded-xl" />
-                <div className="h-12 w-full bg-zinc-100 rounded-xl" />
-                <div className="h-12 w-full bg-zinc-100 rounded-xl" />
-              </div>
-              <div className="h-8 w-1/3 bg-zinc-200 rounded" />
-              <div className="h-12 w-full bg-[#FBD5C1]/40 rounded-xl" />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // History Undo/Redo State
+  const historyRef = useRef<string[]>([]);
+  const historyIdxRef = useRef<number>(-1);
+  const isUndoRedoRef = useRef<boolean>(false);
 
-  // Compute values
-  const activeDesign = currentView === 'front' ? frontDesign : backDesign;
-  const setActiveDesign = currentView === 'front' ? setFrontDesign : setBackDesign;
+  // Text Styling Form Controls
+  const [textInput, setTextInput] = useState('YOUR TEXT');
+  const [selectedFont, setSelectedFont] = useState(FONTS[0]!.family);
+  const [fontSize, setFontSize] = useState(28);
+  const [textColor, setTextColor] = useState('#18181B');
+  const [textBold, setTextBold] = useState(false);
+  const [textItalic, setTextItalic] = useState(false);
+  const [textAlign, setTextAlign] = useState<'left' | 'center' | 'right'>('center');
 
-  const basePrice = PRICES[garmentType];
-  const frontCustomized = !!frontDesign.imageSrc;
-  const backCustomized = !!backDesign.imageSrc;
-  const customizationFee = (frontCustomized ? 150 : 0) + (backCustomized ? 150 : 0);
-  const itemPrice = basePrice + customizationFee;
-  const totalPrice = itemPrice * quantity;
+  // Object Styling Controls
+  const [objectFillColor, setObjectFillColor] = useState('#F9A37E');
+  const [objectStrokeColor, setObjectStrokeColor] = useState('#18181B');
+  const [objectOpacity, setObjectOpacity] = useState(100);
 
-  // File uploading handler
+  // Jersey Personalization Roster State
+  const [jerseyName, setJerseyName] = useState('');
+  const [jerseyNumber, setJerseyNumber] = useState('');
+
+  // Object Layers List for Layer Management Sidebar
+  const [canvasObjects, setCanvasObjects] = useState<fabric.Object[]>([]);
+
+  // Front and Back Side Composite Data URLs for Previews
+  const [frontPreviewUrl, setFrontPreviewUrl] = useState<string>('');
+  const [backPreviewUrl, setBackPreviewUrl] = useState<string>('');
+  const [frontMockupPreviewUrl, setFrontMockupPreviewUrl] = useState<string>('');
+  const [backMockupPreviewUrl, setBackMockupPreviewUrl] = useState<string>('');
+
+  // Raw Uploaded Original Artwork Files
+  const rawFrontArtworkRef = useRef<string>('');
+  const rawBackArtworkRef = useRef<string>('');
+
+  // Synchronous View Ref to prevent cross-contamination during view switching or editing
+  const currentViewRef = useRef<'front' | 'back'>('front');
+  const isSwitchingViewRef = useRef<boolean>(false);
+
+  // Fixed Virtual Canvas Resolution for 100% Position Accuracy Across All Screens (Desktop, Mobile, Tablet)
+  const VIRTUAL_WIDTH = 280;
+  const VIRTUAL_HEIGHT = 320;
+  const [canvasScale, setCanvasScale] = useState<number>(1);
+
+  // ── 1. INITIALIZE FABRIC CANVAS ──
+  useLayoutEffect(() => {
+    if (settingsLoading) return;
+
+    const canvasEl = canvasRef.current;
+    if (!canvasEl) return;
+
+    // Clean up any stale fabric instance on remount/refresh
+    if (fabricCanvasRef.current) {
+      try {
+        fabricCanvasRef.current.dispose();
+      } catch (err) {
+        console.warn("Fabric cleanup warning:", err);
+      }
+      fabricCanvasRef.current = null;
+    }
+
+    const canvas = new fabric.Canvas(canvasEl, {
+      width: VIRTUAL_WIDTH,
+      height: VIRTUAL_HEIGHT,
+      backgroundColor: 'transparent',
+      preserveObjectStacking: true,
+      selection: true,
+    });
+
+    fabricCanvasRef.current = canvas;
+
+    // Restore saved state from ref or sessionStorage if available
+    const savedState = currentViewRef.current === 'front'
+      ? (frontStateRef.current || (typeof window !== 'undefined' ? sessionStorage.getItem('custom_front_state') : null))
+      : (backStateRef.current || (typeof window !== 'undefined' ? sessionStorage.getItem('custom_back_state') : null));
+
+    if (savedState) {
+      const parsed = typeof savedState === 'string' ? JSON.parse(savedState) : savedState;
+      canvas.loadFromJSON(parsed).then(() => {
+        canvas.renderAll();
+        const dataUrl = canvas.toDataURL({ format: 'png', multiplier: 2.5 });
+        if (currentViewRef.current === 'front') {
+          setFrontPreviewUrl(dataUrl);
+        } else {
+          setBackPreviewUrl(dataUrl);
+        }
+      }).catch(() => {
+        canvas.renderAll();
+      });
+    } else {
+      const initialJson = JSON.stringify(canvas.toJSON());
+      historyRef.current = [initialJson];
+      historyIdxRef.current = 0;
+    }
+
+    const updateScale = () => {
+      if (!canvasContainerRef.current) return;
+      const cw = canvasContainerRef.current.clientWidth || VIRTUAL_WIDTH;
+      const ch = canvasContainerRef.current.clientHeight || VIRTUAL_HEIGHT;
+      const scale = Math.min(cw / VIRTUAL_WIDTH, ch / VIRTUAL_HEIGHT);
+      setCanvasScale(scale || 1);
+      canvas.calcOffset();
+    };
+
+    updateScale();
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateScale();
+    });
+    if (canvasContainerRef.current) {
+      resizeObserver.observe(canvasContainerRef.current);
+    }
+    window.addEventListener('resize', updateScale);
+
+    // Canvas Event Listeners
+    const updateState = () => {
+      const fc = fabricCanvasRef.current;
+      if (!fc || isSwitchingViewRef.current) return;
+
+      const active = fc.getActiveObject();
+      setActiveObject(active || null);
+      setCanvasObjects([...fc.getObjects()]);
+
+      if (active && active.type === 'i-text') {
+        const textObj = active as fabric.IText;
+        setTextInput(textObj.text || '');
+        setFontSize(textObj.fontSize || 28);
+        setTextColor((textObj.fill as string) || '#18181B');
+        setTextBold(textObj.fontWeight === 'bold');
+        setTextItalic(textObj.fontStyle === 'italic');
+        setTextAlign((textObj.textAlign as any) || 'center');
+      }
+
+      if (active) {
+        setObjectFillColor((active.fill as string) || '#F9A37E');
+        setObjectStrokeColor((active.stroke as string) || '#18181B');
+        setObjectOpacity(Math.round((active.opacity || 1) * 100));
+      }
+
+      const dataUrl = fc.toDataURL({ format: 'png', multiplier: 2.5 });
+      const currentJson = fc.toJSON();
+
+      if (currentViewRef.current === 'front') {
+        setFrontPreviewUrl(dataUrl);
+        frontStateRef.current = currentJson;
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('custom_front_state', JSON.stringify(currentJson));
+        }
+      } else {
+        setBackPreviewUrl(dataUrl);
+        backStateRef.current = currentJson;
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('custom_back_state', JSON.stringify(currentJson));
+        }
+      }
+
+      if (!isUndoRedoRef.current) {
+        const json = JSON.stringify(currentJson);
+        const history = historyRef.current.slice(0, historyIdxRef.current + 1);
+        history.push(json);
+        historyRef.current = history;
+        historyIdxRef.current = history.length - 1;
+      }
+      isUndoRedoRef.current = false;
+    };
+
+    canvas.on('selection:created', updateState);
+    canvas.on('selection:updated', updateState);
+    canvas.on('selection:cleared', () => setActiveObject(null));
+    canvas.on('object:modified', updateState);
+    canvas.on('object:added', updateState);
+    canvas.on('object:removed', updateState);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateScale);
+      if (fabricCanvasRef.current) {
+        try {
+          fabricCanvasRef.current.dispose();
+        } catch (err) {
+          console.warn("Fabric dispose warning:", err);
+        }
+        fabricCanvasRef.current = null;
+      }
+    };
+  }, [settingsLoading]);
+
+  // ── AUTO-GENERATE REAL VIEW SHIRT MOCKUPS ON DESIGN / COLOR CHANGE ──
+  useEffect(() => {
+    let active = true;
+    const syncRealMockups = async () => {
+      const frontMock = await generateRealViewMockup(garmentType, selectedColor.hex, 'front', frontPreviewUrl);
+      if (active) setFrontMockupPreviewUrl(frontMock);
+
+      const backMock = await generateRealViewMockup(garmentType, selectedColor.hex, 'back', backPreviewUrl);
+      if (active) setBackMockupPreviewUrl(backMock);
+    };
+    syncRealMockups();
+    return () => { active = false; };
+  }, [frontPreviewUrl, backPreviewUrl, garmentType, selectedColor.hex]);
+
+
+  // ── 2. HANDLE VIEW SWITCHING (FRONT / BACK) ──
+  const switchView = async (targetView: 'front' | 'back') => {
+    const fc = fabricCanvasRef.current;
+    if (!fc || targetView === currentViewRef.current) return;
+
+    isSwitchingViewRef.current = true;
+    try {
+      // Save current view JSON
+      const currentJson = fc.toJSON();
+      const currentDataUrl = fc.toDataURL({ format: 'png', multiplier: 2.5 });
+
+      if (currentViewRef.current === 'front') {
+        frontStateRef.current = currentJson;
+        setFrontPreviewUrl(currentDataUrl);
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('custom_front_state', JSON.stringify(currentJson));
+        }
+      } else {
+        backStateRef.current = currentJson;
+        setBackPreviewUrl(currentDataUrl);
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('custom_back_state', JSON.stringify(currentJson));
+        }
+      }
+
+      // Load target view JSON
+      const targetJson = targetView === 'front' 
+        ? (frontStateRef.current || (typeof window !== 'undefined' ? sessionStorage.getItem('custom_front_state') : null))
+        : (backStateRef.current || (typeof window !== 'undefined' ? sessionStorage.getItem('custom_back_state') : null));
+      
+      currentViewRef.current = targetView;
+      setCurrentView(targetView);
+
+      isUndoRedoRef.current = true;
+      fc.clear();
+
+      if (targetJson) {
+        const parsed = typeof targetJson === 'string' ? JSON.parse(targetJson) : targetJson;
+        await fc.loadFromJSON(parsed);
+        fc.renderAll();
+        const dataUrl = fc.toDataURL({ format: 'png', multiplier: 2.5 });
+        if (targetView === 'front') {
+          setFrontPreviewUrl(dataUrl);
+        } else {
+          setBackPreviewUrl(dataUrl);
+        }
+      }
+    } finally {
+      isSwitchingViewRef.current = false;
+    }
+  };
+
+  // ── 3. UNDO / REDO CONTROLS ──
+  const handleUndo = async () => {
+    const fc = fabricCanvasRef.current;
+    if (!fc || historyIdxRef.current <= 0) return;
+    historyIdxRef.current -= 1;
+    isUndoRedoRef.current = true;
+    const json = historyRef.current[historyIdxRef.current];
+    if (json) {
+      await fc.loadFromJSON(JSON.parse(json));
+      fc.renderAll();
+    }
+  };
+
+  const handleRedo = async () => {
+    const fc = fabricCanvasRef.current;
+    if (!fc || historyIdxRef.current >= historyRef.current.length - 1) return;
+    historyIdxRef.current += 1;
+    isUndoRedoRef.current = true;
+    const json = historyRef.current[historyIdxRef.current];
+    if (json) {
+      await fc.loadFromJSON(JSON.parse(json));
+      fc.renderAll();
+    }
+  };
+
+  // ── 4. ADD TEXT TO CANVAS ──
+  const handleAddText = () => {
+    const fc = fabricCanvasRef.current;
+    if (!fc) return;
+
+    const iText = new fabric.IText(textInput || 'YOUR TEXT', {
+      left: VIRTUAL_WIDTH / 2,
+      top: VIRTUAL_HEIGHT / 2,
+      originX: 'center',
+      originY: 'center',
+      fontFamily: selectedFont,
+      fontSize: fontSize,
+      fill: textColor,
+      fontWeight: textBold ? 'bold' : 'normal',
+      fontStyle: textItalic ? 'italic' : 'normal',
+      textAlign: textAlign,
+      cornerColor: '#F9A37E',
+      cornerStyle: 'circle',
+      borderColor: '#F9A37E',
+      cornerSize: 8,
+    });
+
+    fc.add(iText);
+    fc.setActiveObject(iText);
+    fc.renderAll();
+    showToast("Text Added", "Text object added to printable canvas.", "success");
+  };
+
+  // Update text object dynamically on property change
+  const updateActiveText = (key: string, value: any) => {
+    const fc = fabricCanvasRef.current;
+    if (!fc) return;
+    const active = fc.getActiveObject();
+    if (active && active.type === 'i-text') {
+      active.set(key as any, value);
+      fc.renderAll();
+    }
+  };
+
+  // ── 5. UPLOAD IMAGE TO CANVAS ──
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    const fc = fabricCanvasRef.current;
+    if (!file || !fc) return;
 
     const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64 = reader.result as string;
-      setActiveDesign(prev => ({ ...prev, imageSrc: base64 }));
-      showToast("Design Loaded", "Graphic successfully positioned on mockup workspace.", "success");
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      if (!dataUrl) return;
+
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const fabImg = new fabric.FabricImage(img, {
+            originX: 'center',
+            originY: 'center',
+            cornerColor: '#F9A37E',
+            cornerStyle: 'circle',
+            borderColor: '#F9A37E',
+            cornerSize: 8,
+            transparentCorners: false,
+          });
+
+          // Scale down proportionally if image is larger than printable bounds
+          const maxW = fc.getWidth() * 0.8;
+          const maxH = fc.getHeight() * 0.8;
+          if (img.width > maxW || img.height > maxH) {
+            const scale = Math.min(maxW / img.width, maxH / img.height);
+            fabImg.scale(scale);
+          }
+
+          // Center image on canvas
+          const canvasCenterX = fc.getWidth() / 2;
+          const canvasCenterY = fc.getHeight() / 2;
+          fabImg.set({ left: canvasCenterX, top: canvasCenterY });
+
+          fc.add(fabImg);
+          fc.setActiveObject(fabImg);
+          fc.requestRenderAll();
+
+          // Store raw uploaded artwork file
+          if (currentViewRef.current === 'front') {
+            rawFrontArtworkRef.current = dataUrl;
+          } else {
+            rawBackArtworkRef.current = dataUrl;
+          }
+
+          // Update preview snapshot after render
+          setTimeout(() => {
+            const previewUrl = fc.toDataURL({ format: 'png', multiplier: 2.5 });
+            if (currentViewRef.current === 'front') {
+              setFrontPreviewUrl(previewUrl);
+            } else {
+              setBackPreviewUrl(previewUrl);
+            }
+          }, 50);
+
+          showToast('Artwork Uploaded', 'Graphic placed on garment workspace.', 'success');
+        } catch (err) {
+          console.error('Error creating FabricImage:', err);
+          showToast('Upload Error', 'Could not render artwork on canvas.', 'error');
+        }
+      };
+      img.onerror = () => {
+        showToast('Error', 'Invalid image file provided.', 'error');
+      };
+      img.src = dataUrl;
     };
     reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
-  const handleResetDesign = () => {
-    setActiveDesign(prev => ({
-      ...prev,
-      imageSrc: '',
-      imageX: 50,
-      imageY: 50,
-      imageScale: 40,
-      imageRotation: 0,
-    }));
-    showToast("Design Removed", "Positioning coordinates reset.", "info");
+  // ── 6. ADD SHAPES TO CANVAS ──
+  const handleAddShape = (shapeType: 'rect' | 'circle' | 'triangle' | 'star' | 'shield') => {
+    const fc = fabricCanvasRef.current;
+    if (!fc) return;
+
+    let shapeObj: fabric.Object;
+    const commonProps = {
+      left: VIRTUAL_WIDTH / 2,
+      top: VIRTUAL_HEIGHT / 2,
+      originX: 'center' as const,
+      originY: 'center' as const,
+      fill: objectFillColor,
+      stroke: objectStrokeColor,
+      strokeWidth: 2,
+      cornerColor: '#F9A37E',
+      cornerStyle: 'circle' as const,
+      borderColor: '#F9A37E',
+      cornerSize: 8,
+    };
+
+    if (shapeType === 'rect') {
+      shapeObj = new fabric.Rect({ ...commonProps, width: 80, height: 80 });
+    } else if (shapeType === 'circle') {
+      shapeObj = new fabric.Circle({ ...commonProps, radius: 45 });
+    } else if (shapeType === 'triangle') {
+      shapeObj = new fabric.Triangle({ ...commonProps, width: 80, height: 80 });
+    } else if (shapeType === 'star') {
+      shapeObj = new fabric.Rect({ ...commonProps, width: 70, height: 70, rx: 12, ry: 12 });
+    } else {
+      shapeObj = new fabric.Rect({ ...commonProps, width: 85, height: 85, rx: 20, ry: 20 });
+    }
+
+    fc.add(shapeObj);
+    fc.setActiveObject(shapeObj);
+    fc.renderAll();
+    showToast("Shape Added", `${shapeType.toUpperCase()} shape added to canvas.`, "info");
   };
 
-  // Add customized item to cart
+  // ── 7. JERSEY PERSONALIZATION (ROSTER NAME & NUMBER) ──
+  const handleAddJerseyRoster = () => {
+    const fc = fabricCanvasRef.current;
+    if (!fc) return;
+
+    if (jerseyName.trim()) {
+      const nameText = new fabric.IText(jerseyName.toUpperCase(), {
+        left: VIRTUAL_WIDTH / 2,
+        top: VIRTUAL_HEIGHT / 2 - 40,
+        originX: 'center',
+        originY: 'center',
+        fontFamily: 'Impact, sans-serif',
+        fontSize: 32,
+        fill: textColor,
+        fontWeight: 'bold',
+        cornerColor: '#F9A37E',
+        cornerStyle: 'circle',
+        borderColor: '#F9A37E',
+        cornerSize: 8,
+      });
+      fc.add(nameText);
+    }
+
+    if (jerseyNumber.trim()) {
+      const numText = new fabric.IText(jerseyNumber, {
+        left: VIRTUAL_WIDTH / 2,
+        top: VIRTUAL_HEIGHT / 2 + 30,
+        originX: 'center',
+        originY: 'center',
+        fontFamily: 'Impact, sans-serif',
+        fontSize: 64,
+        fill: textColor,
+        fontWeight: 'bold',
+        cornerColor: '#F9A37E',
+        cornerStyle: 'circle',
+        borderColor: '#F9A37E',
+        cornerSize: 8,
+      });
+      fc.add(numText);
+    }
+
+    fc.renderAll();
+    showToast("Roster Added", "Player name and number placed on garment.", "success");
+  };
+
+  // ── 8. LAYER & ALIGNMENT ACTIONS ──
+  const alignActiveObject = (mode: 'centerH' | 'centerV') => {
+    const fc = fabricCanvasRef.current;
+    if (!fc || !activeObject) return;
+    if (mode === 'centerH') {
+      fc.centerObjectH(activeObject);
+    } else {
+      fc.centerObjectV(activeObject);
+    }
+    fc.renderAll();
+  };
+
+  const moveLayer = (direction: 'up' | 'down') => {
+    const fc = fabricCanvasRef.current;
+    if (!fc || !activeObject) return;
+    if (direction === 'up') {
+      fc.bringObjectForward(activeObject);
+    } else {
+      fc.sendObjectBackwards(activeObject);
+    }
+    fc.renderAll();
+  };
+
+  const deleteActiveObject = () => {
+    const fc = fabricCanvasRef.current;
+    if (!fc || !activeObject) return;
+    fc.remove(activeObject);
+    fc.discardActiveObject();
+    fc.renderAll();
+    showToast("Object Removed", "Selected element deleted from canvas.", "info");
+  };
+
+  const duplicateActiveObject = async () => {
+    const fc = fabricCanvasRef.current;
+    if (!fc || !activeObject) return;
+    const cloned = await activeObject.clone();
+    cloned.set({
+      left: (cloned.left || VIRTUAL_WIDTH / 2) + 15,
+      top: (cloned.top || VIRTUAL_HEIGHT / 2) + 15,
+    });
+    fc.add(cloned);
+    fc.setActiveObject(cloned);
+    fc.renderAll();
+    showToast("Object Duplicated", "Copy created on canvas.", "info");
+  };
+
+  const clearCanvas = () => {
+    const fc = fabricCanvasRef.current;
+    if (!fc) return;
+    fc.clear();
+    fc.renderAll();
+    if (currentViewRef.current === 'front') {
+      frontStateRef.current = null;
+      setFrontPreviewUrl('');
+      if (typeof window !== 'undefined') sessionStorage.removeItem('custom_front_state');
+    } else {
+      backStateRef.current = null;
+      setBackPreviewUrl('');
+      if (typeof window !== 'undefined') sessionStorage.removeItem('custom_back_state');
+    }
+    showToast("Canvas Cleared", "All design elements removed.", "info");
+  };
+
+  // Composite Canvas Mockup Generator for Download & Admin Review
+  const generateRealViewMockup = async (
+    garmentType: string,
+    colorHex: string,
+    view: 'front' | 'back',
+    artworkUrl?: string
+  ): Promise<string> => {
+    return new Promise((resolve) => {
+      const isPolo = garmentType === 'polo';
+      const isBack = view === 'back';
+      const isWhite = !colorHex || colorHex.toUpperCase() === '#FFFFFF' || colorHex.toUpperCase() === '#FFF';
+
+      const baseImgSrc = isPolo
+        ? (isBack ? '/polo_back.png' : '/polo_front.png')
+        : (isBack ? '/whiteTshirtBack.png' : '/whiteTshirtFront.png');
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 800;
+      canvas.height = 800;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return resolve('');
+
+      const baseImg = new Image();
+      baseImg.crossOrigin = 'anonymous';
+      baseImg.src = baseImgSrc;
+
+      baseImg.onload = () => {
+        if (!isWhite) {
+          // 1. Draw base image to establish alpha shape of garment
+          ctx.drawImage(baseImg, 0, 0, 800, 800);
+
+          // 2. Fill color strictly inside garment silhouette
+          ctx.globalCompositeOperation = 'source-in';
+          ctx.fillStyle = colorHex;
+          ctx.fillRect(0, 0, 800, 800);
+
+          // 3. Composite garment shading and fabric texture
+          ctx.globalCompositeOperation = 'multiply';
+          ctx.drawImage(baseImg, 0, 0, 800, 800);
+
+          ctx.globalCompositeOperation = 'source-over';
+        } else {
+          ctx.drawImage(baseImg, 0, 0, 800, 800);
+        }
+
+        if (!artworkUrl) {
+          return resolve(canvas.toDataURL('image/png'));
+        }
+
+        const artImg = new Image();
+        artImg.crossOrigin = 'anonymous';
+        artImg.src = artworkUrl;
+        artImg.onload = () => {
+          const printW = 336;
+          const printH = 384;
+          const printX = (800 - printW) / 2;
+          const printY = 200;
+
+          const scale = Math.min(printW / artImg.width, printH / artImg.height);
+          const drawW = artImg.width * scale;
+          const drawH = artImg.height * scale;
+          const drawX = printX + (printW - drawW) / 2;
+          const drawY = printY + (printH - drawH) / 2;
+
+          ctx.drawImage(artImg, drawX, drawY, drawW, drawH);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        artImg.onerror = () => resolve(canvas.toDataURL('image/png'));
+      };
+      baseImg.onerror = () => resolve('');
+    });
+  };
+
+  // ── 9. ADD CUSTOM APPAREL TO CART ──
   const handleAddToCart = async () => {
+    if (totalQuantity <= 0) {
+      showToast("Select Quantity", "Please enter quantity for at least one size.", "info");
+      return;
+    }
+
     setUploading(true);
-    let frontUploadedUrl = '';
-    let backUploadedUrl = '';
-
     try {
-      if (frontDesign.imageSrc) {
-        const res = await fetch(getApiUrl('/cloudinary/upload'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image: frontDesign.imageSrc }),
-        });
-        const data = await res.json();
-        frontUploadedUrl = data.url || frontDesign.imageSrc;
+      const fc = fabricCanvasRef.current;
+      // Save current side before export
+      const currentJson = fc?.toJSON();
+      const currentUrl = fc?.toDataURL({ format: 'png', multiplier: 2.5 });
+
+      let finalFrontUrl = frontPreviewUrl;
+      let finalBackUrl = backPreviewUrl;
+
+      if (currentViewRef.current === 'front') {
+        frontStateRef.current = currentJson;
+        finalFrontUrl = currentUrl || frontPreviewUrl;
+      } else {
+        backStateRef.current = currentJson;
+        finalBackUrl = currentUrl || backPreviewUrl;
       }
 
-      if (backDesign.imageSrc) {
+      // Cloudinary upload for transparent design PNGs
+      let uploadedFrontCloud = '';
+      let uploadedBackCloud = '';
+
+      if (finalFrontUrl) {
         const res = await fetch(getApiUrl('/cloudinary/upload'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image: backDesign.imageSrc }),
+          body: JSON.stringify({ image: finalFrontUrl }),
         });
         const data = await res.json();
-        backUploadedUrl = data.url || backDesign.imageSrc;
+        uploadedFrontCloud = data.url || finalFrontUrl;
       }
+
+      if (finalBackUrl) {
+        const res = await fetch(getApiUrl('/cloudinary/upload'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: finalBackUrl }),
+        });
+        const data = await res.json();
+        uploadedBackCloud = data.url || finalBackUrl;
+      }
+
+      // Generate Real View Shirt Mockup Images
+      const frontMockupData = await generateRealViewMockup(garmentType, selectedColor.hex, 'front', finalFrontUrl);
+      const backMockupData = await generateRealViewMockup(garmentType, selectedColor.hex, 'back', finalBackUrl);
+
+      let uploadedFrontMockup = '';
+      let uploadedBackMockup = '';
+
+      if (frontMockupData) {
+        try {
+          const res = await fetch(getApiUrl('/cloudinary/upload'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: frontMockupData }),
+          });
+          const data = await res.json();
+          uploadedFrontMockup = data.url || frontMockupData;
+        } catch {
+          uploadedFrontMockup = frontMockupData;
+        }
+      }
+
+      if (backMockupData) {
+        try {
+          const res = await fetch(getApiUrl('/cloudinary/upload'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: backMockupData }),
+          });
+          const data = await res.json();
+          uploadedBackMockup = data.url || backMockupData;
+        } catch {
+          uploadedBackMockup = backMockupData;
+        }
+      }
+
+      // Upload raw uploaded original artwork files to Cloudinary if available
+      let uploadedRawFrontCloud = '';
+      let uploadedRawBackCloud = '';
+
+      if (rawFrontArtworkRef.current) {
+        try {
+          const res = await fetch(getApiUrl('/cloudinary/upload'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: rawFrontArtworkRef.current }),
+          });
+          const data = await res.json();
+          uploadedRawFrontCloud = data.url || rawFrontArtworkRef.current;
+        } catch {
+          uploadedRawFrontCloud = rawFrontArtworkRef.current;
+        }
+      }
+
+      if (rawBackArtworkRef.current) {
+        try {
+          const res = await fetch(getApiUrl('/cloudinary/upload'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: rawBackArtworkRef.current }),
+          });
+          const data = await res.json();
+          uploadedRawBackCloud = data.url || rawBackArtworkRef.current;
+        } catch {
+          uploadedRawBackCloud = rawBackArtworkRef.current;
+        }
+      }
+
+      const hasFrontPrint = !!frontStateRef.current?.objects?.length;
+      const hasBackPrint = !!backStateRef.current?.objects?.length;
+
+      const customizationFee = (hasFrontPrint ? 150 : 0) + (hasBackPrint ? 150 : 0);
+      const baseUnitPrice = (PRICES[garmentType] + customizationFee) * (1 - discountPercent / 100);
 
       const customDesignMeta = {
         productType: garmentType,
         color: selectedColor.name,
         colorHex: selectedColor.hex,
+        sizeQuantities: sizeQuantities,
+        discountPercent: discountPercent,
         front: {
-          imageUrl: frontUploadedUrl,
-          imageX: frontDesign.imageX,
-          imageY: frontDesign.imageY,
-          imageScale: frontDesign.imageScale,
-          imageRotation: frontDesign.imageRotation,
+          imageUrl: uploadedFrontCloud || finalFrontUrl,
+          rawArtworkUrl: uploadedRawFrontCloud || rawFrontArtworkRef.current,
         },
         back: {
-          imageUrl: backUploadedUrl,
-          imageX: backDesign.imageX,
-          imageY: backDesign.imageY,
-          imageScale: backDesign.imageScale,
-          imageRotation: backDesign.imageRotation,
-        }
+          imageUrl: uploadedBackCloud || finalBackUrl,
+          rawArtworkUrl: uploadedRawBackCloud || rawBackArtworkRef.current,
+        },
+        frontDesignUrl: uploadedFrontCloud || finalFrontUrl,
+        backDesignUrl: uploadedBackCloud || finalBackUrl,
+        rawFrontArtworkUrl: uploadedRawFrontCloud || rawFrontArtworkRef.current,
+        rawBackArtworkUrl: uploadedRawBackCloud || rawBackArtworkRef.current,
+        frontMockupUrl: uploadedFrontMockup || frontMockupData,
+        backMockupUrl: uploadedBackMockup || backMockupData,
       };
 
-      const thumbnailImage = frontDesign.imageSrc || '/kliamologoNew.png';
+      const selectedSizesSummary = Object.entries(sizeQuantities)
+        .filter(([_, q]) => q > 0)
+        .map(([s, q]) => `${s}: ${q}`)
+        .join(', ');
 
       addToCart({
         productId: `custom-${garmentType}`,
-        name: `Custom ${garmentType.charAt(0).toUpperCase() + garmentType.slice(1)} (${selectedColor.name})`,
-        price: itemPrice,
-        quantity: quantity,
-        image: thumbnailImage,
-        size: selectedSize,
+        name: `Custom ${garmentType === 'polo' ? 'Polo Shirt' : 'T-Shirt'} (${selectedColor.name})`,
+        price: baseUnitPrice,
+        quantity: totalQuantity,
+        image: uploadedFrontMockup || frontMockupData || uploadedFrontCloud || '/kliamologoNew.png',
+        size: selectedSizesSummary || 'M',
         color: selectedColor.name,
         customDesign: {
           textLayers: [],
@@ -334,434 +952,381 @@ export default function CustomizerPage() {
         }
       });
 
+      showToast("Added to Cart", "Custom apparel saved to shopping bag.", "success");
       router.push('/cart');
     } catch (err) {
       console.error(err);
-      showToast("Submission Error", "Error syncing custom design with Cloudinary.", "error");
+      showToast("Submission Error", "Failed to process custom apparel order.", "error");
     } finally {
       setUploading(false);
     }
   };
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-6 pb-12 md:pb-16">
-      <div className="flex justify-between items-center flex-wrap gap-2">
-        <Breadcrumb items={[{ name: "Design Studio" }]} />
-        {settingsResponseTime !== null && (
-          <span className="text-[10px] font-extrabold text-zinc-400 bg-zinc-100 border border-zinc-200/60 rounded-full px-2.5 py-1 tracking-wider uppercase flex items-center gap-1 animate-fade-in">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-            API Latency: {settingsResponseTime}ms
-          </span>
-        )}
+  // Pricing calculations
+  const hasFrontPrint = !!frontPreviewUrl;
+  const hasBackPrint = !!backPreviewUrl;
+  const customizationFee = (hasFrontPrint ? 150 : 0) + (hasBackPrint ? 150 : 0);
+  const rawUnitPrice = PRICES[garmentType] + customizationFee;
+  const unitPrice = rawUnitPrice * (1 - discountPercent / 100);
+  const totalPrice = unitPrice * totalQuantity;
+
+  if (settingsLoading) {
+    return (
+      <div className="min-h-screen bg-[#FDFAF6] flex items-center justify-center p-8">
+        <Sparkles className="w-8 h-8 text-[#F9A37E] animate-spin" />
       </div>
+    );
+  }
+
+  return (
+    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 space-y-4 pb-16">
       
-      <div className="flex flex-col lg:flex-row gap-6 items-stretch">
-        
-        {/* LEFT COLUMN: VISUAL DESIGN CANVAS WORKSPACE */}
-        <div className="flex-1 flex flex-col items-center justify-between border border-[#E8E2D6] bg-white rounded-2xl p-3 md:p-6 relative overflow-hidden min-h-[500px]">
+      {/* ── HEADER BAR (CustomInk Lab Style) ── */}
+      <div className="flex items-center justify-between flex-wrap gap-3 py-3 border-b border-[#E8E2D6] bg-white rounded-2xl px-5 shadow-xs">
+        <div className="flex items-center gap-3">
+          <Breadcrumb items={[{ name: "Design Studio" }]} />
+          <span className="hidden md:inline-block h-4 w-px bg-[#E8E2D6]" />
+          <div className="hidden md:flex items-center gap-2 text-xs text-[#7A736A]">
+            <Shield className="w-3.5 h-3.5 text-[#F9A37E]" />
+            <span className="font-extrabold text-[#4A453E]">{garmentType === 'polo' ? 'Polo Shirt' : 'Crewneck Tee'}</span>
+            <span>• {selectedColor.name}</span>
+          </div>
+        </div>
+
+        {/* Action Controls & Top CTA */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleUndo}
+            disabled={historyIdxRef.current <= 0}
+            className="p-2 border border-[#E8E2D6] rounded-xl hover:bg-[#FDFAF6] text-[#7A736A] disabled:opacity-40 transition-colors"
+            title="Undo"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </button>
+          <button
+            onClick={handleRedo}
+            disabled={historyIdxRef.current >= historyRef.current.length - 1}
+            className="p-2 border border-[#E8E2D6] rounded-xl hover:bg-[#FDFAF6] text-[#7A736A] disabled:opacity-40 transition-colors"
+            title="Redo"
+          >
+            <RotateCw className="w-4 h-4" />
+          </button>
+          <div className="h-4 w-px bg-[#E8E2D6] mx-1" />
+          <button
+            onClick={clearCanvas}
+            className="text-xs font-bold text-red-500 hover:text-red-600 px-3 py-1.5 border border-red-200 rounded-xl hover:bg-red-50 transition-colors flex items-center gap-1"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Clear
+          </button>
+          <button
+            onClick={handleAddToCart}
+            disabled={uploading}
+            className="ml-2 bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs px-5 py-2 rounded-xl transition-all shadow-md flex items-center gap-2"
+          >
+            <ShoppingBag className="w-4 h-4" />
+            Order Now (₹{totalPrice.toFixed(0)})
+          </button>
+        </div>
+      </div>
+
+      {/* ── THREE-COLUMN DESIGN LAB GRID ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+        {/* ── 1. LEFT SIDEBAR: UPLOAD ARTWORK DRAWER ── */}
+        <div className="lg:col-span-4 bg-white border border-[#E8E2D6] rounded-2xl p-4 shadow-sm space-y-4">
           
-          <div className="w-full flex items-center justify-between z-10 flex-col gap-2 sm:flex-row flex-wrap">
-            <div className="flex gap-2 bg-[#FDFAF6] border border-[#E8E2D6] rounded-full p-1 shadow-sm">
+          <div className="flex items-center gap-2 border-b border-[#E8E2D6] pb-3">
+            <Upload className="w-5 h-5 text-[#F9A37E]" />
+            <h3 className="font-extrabold text-sm text-[#4A453E]">Upload Custom Artwork</h3>
+          </div>
+
+          <div className="space-y-4 animate-fade-in duration-150">
+            <label className="border-2 border-dashed border-[#E8E2D6] hover:border-[#F9A37E] rounded-2xl p-6 flex flex-col items-center justify-center gap-2 bg-[#FDFAF6] hover:bg-white cursor-pointer transition-all">
+              <Upload className="w-8 h-8 text-[#F9A37E]" />
+              <p className="text-xs font-bold text-[#4A453E]">Choose Image (PNG / JPG / SVG)</p>
+              <p className="text-[10px] text-[#A89B8A] text-center">High resolution transparent artwork recommended</p>
+              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+            </label>
+
+            {activeObject && (
+              <div className="p-3 border border-[#E8E2D6] rounded-xl bg-[#FDFAF6] space-y-2">
+                <span className="text-[10px] font-black uppercase text-[#F9A37E]">Artwork Position Controls</span>
+                <div className="grid grid-cols-2 gap-2">
+                  <button onClick={() => alignActiveObject('centerH')} className="py-1.5 px-2 bg-white border border-[#E8E2D6] rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 hover:border-[#F9A37E]">
+                    <AlignCenter className="w-3 h-3" /> Center Horiz
+                  </button>
+                  <button onClick={() => alignActiveObject('centerV')} className="py-1.5 px-2 bg-white border border-[#E8E2D6] rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 hover:border-[#F9A37E]">
+                    <Move className="w-3 h-3" /> Center Vert
+                  </button>
+                  <button onClick={duplicateActiveObject} className="py-1.5 px-2 bg-white border border-[#E8E2D6] rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 hover:border-[#F9A37E]">
+                    <Copy className="w-3 h-3" /> Duplicate
+                  </button>
+                  <button onClick={deleteActiveObject} className="py-1.5 px-2 bg-white border border-red-200 text-red-500 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 hover:bg-red-50">
+                    <Trash2 className="w-3 h-3" /> Delete
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+        </div>
+
+        {/* ── 2. CENTER WORKSPACE: REAL APPAREL STUDIO CANVAS ── */}
+        <div className="overflow-hidden lg:col-span-5 flex flex-col items-center justify-between border border-[#E8E2D6] bg-white rounded-2xl p-4 relative min-h-[540px] shadow-sm">
+          
+          {/* Top View Switcher & Zoom Controls */}
+          <div className="w-full flex items-center justify-center sm:justify-between z-10 flex-wrap gap-2">
+            <div className="flex gap-2 bg-[#FDFAF6] border border-[#E8E2D6] rounded-full p-1 shadow-xs">
               <button
-                onClick={() => setCurrentView('front')}
-                className={`text-xs font-extrabold px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${currentView === 'front' ? 'bg-[#F9A37E] text-white' : 'text-[#7A736A] hover:bg-[#E8E2D6]/40'}`}
+                onClick={() => switchView('front')}
+                className={`text-xs font-extrabold px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${currentView === 'front' ? 'bg-[#F9A37E] text-white shadow-xs' : 'text-[#7A736A] hover:bg-[#E8E2D6]/40'}`}
               >
                 <Eye className="w-3.5 h-3.5" />
                 Front View
               </button>
               <button
-                onClick={() => setCurrentView('back')}
-                className={`text-xs font-extrabold px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${currentView === 'back' ? 'bg-[#F9A37E] text-white' : 'text-[#7A736A] hover:bg-[#E8E2D6]/40'}`}
+                onClick={() => switchView('back')}
+                className={`text-xs font-extrabold px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${currentView === 'back' ? 'bg-[#F9A37E] text-white shadow-xs' : 'text-[#7A736A] hover:bg-[#E8E2D6]/40'}`}
               >
                 <Eye className="w-3.5 h-3.5" />
                 Back View
               </button>
             </div>
-            
-            <button
-              onClick={handleResetDesign}
-              className="text-xs font-extrabold text-[#7A736A] hover:text-[#4A453E] px-3 py-1.5 border border-[#E8E2D6] rounded-lg hover:bg-zinc-50 transition-colors"
-            >
-              Remove Design
-            </button>
+
+            <div className="flex items-center gap-1 bg-[#FDFAF6] border border-[#E8E2D6] rounded-full px-2 py-1">
+              <button onClick={() => setStudioZoom(Math.max(0.8, studioZoom - 0.1))} className="p-1 text-[#7A736A] hover:text-[#4A453E]">
+                <ZoomOut className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-[10px] font-black text-[#4A453E] w-8 text-center">{Math.round(studioZoom * 100)}%</span>
+              <button onClick={() => setStudioZoom(Math.min(1.4, studioZoom + 0.1))} className="p-1 text-[#7A736A] hover:text-[#4A453E]">
+                <ZoomIn className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
-          {/* Shaded apparel canvas */}
-          <div className="relative w-full max-w-sm aspect-square my-auto flex items-center justify-center p-1 sm:p-4">
+          {/* Studio Garment Background with Fabric.js Interactive Overlay */}
+          <div 
+            className="relative w-full max-w-md aspect-square my-auto flex items-center justify-center transition-transform duration-200"
+            style={{ transform: `scale(${studioZoom})` }}
+          >
             
-            <div className="w-full h-full">
-              {garmentType === 'tshirt' && <RealisticTShirtSvg color={selectedColor.hex} />}
-              {garmentType === 'polo' && <RealisticPoloSvg color={selectedColor.hex} />}
-              {garmentType === 'shirt' && <RealisticShirtSvg color={selectedColor.hex} />}
+            {/* Real Studio Photo Garment Background */}
+            <div className="w-full h-full absolute inset-0">
+              <RealPhotoGarment garmentType={garmentType} colorHex={selectedColor.hex} view={currentView} />
             </div>
 
-            {/* Bounding box print area */}
-            <div 
-              className="absolute border border-dashed border-[#F9A37E]/40 bg-[#F9A37E]/2 rounded-lg z-10 flex items-center justify-center pointer-events-none"
+            {/* Bounded Printable Area Box */}
+            <div
+              className="absolute border-2 border-dashed border-[#F9A37E] bg-[#F9A37E]/5 rounded-xl z-20 pointer-events-none flex items-center justify-center"
               style={{
-                width: garmentType === 'shirt' ? '30%' : '38%',
-                height: '42%',
-                top: garmentType === 'shirt' ? '32%' : '28%',
-                left: garmentType === 'shirt' ? '38%' : '31%',
+                width: '42%',
+                height: '48%',
+                top: '25%',
+                left: '29%',
               }}
             >
-              <span className="absolute -top-5 text-[8px] font-bold text-[#F9A37E] uppercase tracking-wider">Printable Area</span>
-              
-              {activeDesign.imageSrc && (
-                <div
-                  className="absolute pointer-events-auto"
-                  style={{
-                    left: `${activeDesign.imageX}%`,
-                    top: `${activeDesign.imageY}%`,
-                    transform: `translate(-50%, -50%) scale(${activeDesign.imageScale / 100}) rotate(${activeDesign.imageRotation}deg)`,
-                    width: '100%',
-                    height: '100%',
-                  }}
-                >
-                  <img
-                    src={activeDesign.imageSrc}
-                    alt="Design Graphic Overlay"
-                    className="w-full h-full object-contain pointer-events-none"
-                  />
-                </div>
-              )}
+              <span className="absolute -top-10 sm:-top-6 text-center text-[8px] font-black text-[#e8855a] uppercase tracking-wider bg-white/95 px-2 py-0.5 rounded-full border border-[#F9A37E]/40 shadow-xs">
+                Print Area ({currentView.toUpperCase()})
+              </span>
+
+              {/* Corner Indicators */}
+              <div className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-[#e8855a]" />
+              <div className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-[#e8855a]" />
+              <div className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-[#e8855a]" />
+              <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-[#e8855a]" />
             </div>
+
+            {/* Fabric.js Dynamic Overlay Canvas */}
+            <div
+              ref={canvasContainerRef}
+              className="absolute z-30 flex items-center justify-center overflow-visible pointer-events-none"
+              style={{
+                width: '42%',
+                height: '48%',
+                top: '25%',
+                left: '29%',
+              }}
+            >
+              <div
+                style={{
+                  width: `${VIRTUAL_WIDTH}px`,
+                  height: `${VIRTUAL_HEIGHT}px`,
+                  transform: `scale(${canvasScale})`,
+                  transformOrigin: 'center center',
+                  pointerEvents: 'auto',
+                  position: 'relative',
+                }}
+              >
+                <canvas
+                  ref={canvasRef}
+                  width={VIRTUAL_WIDTH}
+                  height={VIRTUAL_HEIGHT}
+                  style={{ display: 'block' }}
+                />
+              </div>
+            </div>
+
           </div>
 
           <div className="flex items-center gap-1.5 text-[10px] text-[#A89B8A] bg-[#FDFAF6] border border-[#E8E2D6] px-4 py-2 rounded-full w-full max-w-sm justify-center">
             <HelpCircle className="w-3.5 h-3.5 text-[#F9A37E]" />
-            <span>Position your artwork exactly inside the dotted boundary</span>
+            <span>Click & drag your artwork graphics inside the dashed printable box</span>
           </div>
 
         </div>
 
-        {/* RIGHT COLUMN: PREPARATION CONTROLS */}
-        <div className="w-full lg:w-96 flex flex-col gap-5">
+        {/* ── 3. RIGHT SIDEBAR: OPTIONS, SIZES & LIVE PRICING MATRIX ── */}
+        <div className="lg:col-span-3 space-y-4">
           
-          <div className="bg-white border border-[#E8E2D6] rounded-2xl p-3 sm:p-5 shadow-sm space-y-5">
+          {/* Garment Options */}
+          <div className="bg-white border border-[#E8E2D6] rounded-2xl p-4 shadow-sm space-y-4">
+            <h3 className="font-extrabold text-xs text-[#4A453E] border-b border-[#E8E2D6] pb-2">1. Select Style & Color</h3>
             
-            <div className="flex border-b border-[#E8E2D6] pb-3 gap-2">
-              {[
-                { id: 'style', name: 'Garment Options', icon: ShoppingBag },
-                { id: 'graphics', name: 'Graphic Design', icon: Upload },
-              ].map(t => {
-                const Icon = t.icon;
-                return (
+            <div className="space-y-2">
+              <label className="block text-[11px] font-bold text-[#7A736A]">Garment Style</label>
+              <div className="grid grid-cols-2 gap-2">
+                {GARMENT_TYPES.map(g => (
                   <button
-                    key={t.id}
-                    onClick={() => setActiveTab(t.id as any)}
-                    className={`flex-1 flex flex-col items-center py-2 rounded-lg font-extrabold text-[10px] uppercase tracking-wider transition-all border ${activeTab === t.id ? 'border-[#F9A37E] bg-[#FDFAF6] text-[#e8855a]' : 'border-transparent text-[#7A736A] hover:bg-[#FDFAF6]'}`}
+                    key={g.id}
+                    onClick={() => setGarmentType(g.id)}
+                    className={`p-2.5 rounded-xl border text-left transition-all ${garmentType === g.id ? 'border-[#F9A37E] bg-[#FDFAF6] shadow-xs' : 'border-[#E8E2D6] hover:border-zinc-300'}`}
                   >
-                    <Icon className="w-4 h-4 mb-1" />
-                    {t.name}
+                    <p className="font-black text-xs text-[#4A453E]">{g.name}</p>
+                    <p className="text-[10px] text-[#F9A37E] font-bold mt-0.5">₹{g.basePrice}</p>
                   </button>
-                );
-              })}
+                ))}
+              </div>
             </div>
 
-            {/* TAB: STYLE OPTIONS */}
-            {activeTab === 'style' && (
-              <div className="space-y-4 animate-fade-in-up duration-200">
-                
-                <div className="space-y-2">
-                  <label className="block text-xs font-bold text-[#4A453E]">Garment Type</label>
-                  <div className="space-y-2">
-                    {GARMENT_TYPES.map((g) => (
-                      <button
-                        key={g.id}
-                        onClick={() => setGarmentType(g.id as any)}
-                        className={`w-full text-left p-3 border rounded-xl flex items-center justify-between transition-all ${garmentType === g.id ? 'border-[#F9A37E] bg-[#F9A37E]/5' : 'border-[#E8E2D6] hover:border-zinc-300 bg-white'}`}
-                      >
-                        <div>
-                          <p className="font-extrabold text-xs text-[#4A453E]">{g.name}</p>
-                          <p className="text-[10px] text-[#A89B8A] mt-0.5">{g.desc}</p>
-                        </div>
-                        <span className="font-black text-xs text-[#4A453E]">₹{g.basePrice}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-xs font-bold text-[#4A453E]">Garment Color: <span className="text-[#F9A37E]">{selectedColor.name}</span></label>
-                  <div className="flex gap-2 flex-wrap">
-                    {COLORS.map((c) => (
-                      <button
-                        key={c.name}
-                        onClick={() => setSelectedColor(c)}
-                        title={c.name}
-                        className={`w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center ${selectedColor.name === c.name ? 'border-[#F9A37E] scale-110' : 'border-zinc-200'}`}
-                        style={{ backgroundColor: c.hex }}
-                      >
-                        {selectedColor.name === c.name && (
-                          <div className={`w-2 h-2 rounded-full ${c.name === 'White' ? 'bg-[#18181B]' : 'bg-white'}`} />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-xs font-bold text-[#4A453E]">Select Size</label>
-                  <div className="flex gap-2">
-                    {SIZES.map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => setSelectedSize(s)}
-                        className={`w-10 h-10 rounded-lg border font-black text-xs transition-all ${selectedSize === s ? 'border-[#F9A37E] bg-[#F9A37E] text-white shadow-md' : 'border-[#E8E2D6] bg-white text-[#7A736A] hover:border-zinc-300'}`}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-xs font-bold text-[#4A453E]">Quantity</label>
-                  <div className="flex items-center border border-[#E8E2D6] rounded-lg bg-[#FDFAF6] h-10 w-32 overflow-hidden shadow-sm">
-                    <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-10 h-full flex items-center justify-center text-[#7A736A] hover:text-[#4A453E] hover:bg-[#E8E2D6]/40 transition-colors"
-                    >
-                      <Minus className="w-3.5 h-3.5" />
-                    </button>
-                    <span className="flex-1 text-sm font-black text-center text-[#4A453E]">{quantity}</span>
-                    <button
-                      onClick={() => setQuantity(quantity + 1)}
-                      className="w-10 h-full flex items-center justify-center text-[#7A736A] hover:text-[#4A453E] hover:bg-[#E8E2D6]/40 transition-colors"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            )}
-
-            {/* TAB: GRAPHIC WORKSPACE SLIDERS */}
-            {activeTab === 'graphics' && (
-              <div className="space-y-4 animate-fade-in-up duration-200">
-                
-                <div className="space-y-2">
-                  <label className="block text-xs font-bold text-[#4A453E]">Upload Custom Artwork</label>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageUpload}
-                    accept="image/*"
-                    className="hidden"
+            {/* Color Swatches Grid */}
+            <div className="space-y-2">
+              <label className="block text-[11px] font-bold text-[#7A736A]">
+                Garment Color: <span className="text-[#4A453E] font-extrabold">{selectedColor.name}</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {COLORS.map(c => (
+                  <button
+                    key={c.name}
+                    onClick={() => setSelectedColor(c)}
+                    className={`w-7 h-7 rounded-full border-2 transition-transform ${selectedColor.name === c.name ? 'scale-110 border-[#F9A37E] shadow-md ring-2 ring-[#F9A37E]/20' : 'border-zinc-300'}`}
+                    style={{ backgroundColor: c.hex }}
+                    title={c.name}
                   />
-                  
-                  {activeDesign.imageSrc ? (
-                    <div className="p-3 border border-[#E8E2D6] rounded-xl flex items-center gap-3 bg-[#FDFAF6]">
-                      <div className="w-12 h-12 bg-white border border-[#E8E2D6] rounded-lg overflow-hidden flex items-center justify-center">
-                        <img src={activeDesign.imageSrc} alt="Thumbnail preview" className="w-full h-full object-contain" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-[#4A453E] truncate">Custom Artwork Active</p>
-                        <p className="text-[10px] text-[#A89B8A] mt-0.5">Click replace to upload new image</p>
-                      </div>
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="text-[10px] font-bold text-[#F9A37E] hover:underline"
-                      >
-                        Replace
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-full border-2 border-dashed border-[#E8E2D6] hover:border-[#F9A37E] rounded-xl p-6 flex flex-col items-center justify-center gap-2 hover:bg-[#FDFAF6] transition-all"
-                    >
-                      <Upload className="w-6 h-6 text-[#A8C69F]" />
-                      <p className="text-xs font-bold text-[#4A453E]">Select Image (PNG / JPG)</p>
-                      <p className="text-[9px] text-[#A89B8A]">Transparent PNGs work best</p>
-                    </button>
-                  )}
-                </div>
-
-                {activeDesign.imageSrc && (
-                  <div className="space-y-3 pt-3 border-t border-[#E8E2D6]">
-                    
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs font-bold text-[#4A453E]">
-                        <span>Graphic Size (Scale)</span>
-                        <span className="text-[#F9A37E]">{activeDesign.imageScale}%</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="10"
-                        max="100"
-                        value={activeDesign.imageScale}
-                        onChange={(e) => setActiveDesign(prev => ({ ...prev, imageScale: parseInt(e.target.value) }))}
-                        className="w-full h-1.5 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-[#F9A37E]"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs font-bold text-[#4A453E]">
-                        <span>Rotation</span>
-                        <span className="text-[#F9A37E]">{activeDesign.imageRotation}°</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="-180"
-                        max="180"
-                        value={activeDesign.imageRotation}
-                        onChange={(e) => setActiveDesign(prev => ({ ...prev, imageRotation: parseInt(e.target.value) }))}
-                        className="w-full h-1.5 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-[#F9A37E]"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs font-bold text-[#4A453E]">
-                        <span>Horizontal Position</span>
-                        <span className="text-[#F9A37E]">{activeDesign.imageX - 50} px</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="10"
-                        max="90"
-                        value={activeDesign.imageX}
-                        onChange={(e) => setActiveDesign(prev => ({ ...prev, imageX: parseInt(e.target.value) }))}
-                        className="w-full h-1.5 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-[#F9A37E]"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs font-bold text-[#4A453E]">
-                        <span>Vertical Position</span>
-                        <span className="text-[#F9A37E]">{activeDesign.imageY - 50} px</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="10"
-                        max="90"
-                        value={activeDesign.imageY}
-                        onChange={(e) => setActiveDesign(prev => ({ ...prev, imageY: parseInt(e.target.value) }))}
-                        className="w-full h-1.5 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-[#F9A37E]"
-                      />
-                    </div>
-
-                  </div>
-                )}
-
+                ))}
               </div>
+            </div>
+
+            {/* Size Breakdown Quantity Matrix (CustomInk Style) */}
+            <div className="space-y-2 pt-2 border-t border-[#E8E2D6]">
+              <div className="flex justify-between items-center">
+                <label className="block text-[11px] font-bold text-[#7A736A]">Size & Quantity Roster</label>
+                <span className="text-[10px] font-black text-[#F9A37E]">Total: {totalQuantity} pcs</span>
+              </div>
+
+              <div className="grid grid-cols-5 gap-1 text-center">
+                {SIZES.map(s => (
+                  <div key={s} className="border border-[#E8E2D6] rounded-xl p-1 bg-[#FDFAF6]">
+                    <span className="block text-[10px] font-black text-[#4A453E] mb-1">{s}</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={sizeQuantities[s] || 0}
+                      onChange={(e) => {
+                        const val = Math.max(0, parseInt(e.target.value) || 0);
+                        setSizeQuantities(prev => ({ ...prev, [s]: val }));
+                      }}
+                      className="w-full text-center bg-white border border-[#E8E2D6] rounded-lg text-xs font-bold py-1 text-[#4A453E] focus:outline-none focus:border-[#F9A37E]"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Volume Bulk Discount Banner */}
+            {discountPercent > 0 ? (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 text-center">
+                <p className="text-xs font-extrabold text-emerald-700 flex items-center justify-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5" /> Bulk Savings Applied ({discountPercent}% OFF)
+                </p>
+              </div>
+            ) : (
+              <p className="text-[10px] text-[#A89B8A] italic text-center">Order 6+ shirts to unlock 10% volume discount!</p>
             )}
 
           </div>
 
-          {/* ── REALISTIC FINAL COMPOSITE REVIEW SECTION ── */}
-          {(frontDesign.imageSrc || backDesign.imageSrc) && (
-            <div className="bg-white border border-[#E8E2D6] rounded-2xl p-5 shadow-sm space-y-4 animate-fade-in-up duration-300">
-              <div className="flex items-center justify-between border-b border-[#E8E2D6] pb-2">
-                <h3 className="font-extrabold text-xs text-[#4A453E] uppercase tracking-wider flex items-center gap-1.5">
-                  <Eye className="w-4 h-4 text-[#F9A37E]" />
-                  Final Realistic Review
-                </h3>
-                <span className="text-[9px] bg-emerald-50 text-emerald-600 font-extrabold px-2 py-0.5 rounded-full uppercase">Ready</span>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3 justify-center items-center py-2 bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl">
-                {/* Front Side Composite Mini Preview */}
-                <div className="flex flex-col items-center gap-1">
-                  <div className="relative w-28 h-28 flex items-center justify-center overflow-hidden">
-                    <div className="w-full h-full">
-                      {garmentType === 'tshirt' && <RealisticTShirtSvg color={selectedColor.hex} />}
-                      {garmentType === 'polo' && <RealisticPoloSvg color={selectedColor.hex} />}
-                      {garmentType === 'shirt' && <RealisticShirtSvg color={selectedColor.hex} />}
-                    </div>
-                    {frontDesign.imageSrc && (
-                      <div 
-                        className="absolute pointer-events-none"
-                        style={{
-                          width: garmentType === 'shirt' ? '30%' : '38%',
-                          height: '42%',
-                          top: garmentType === 'shirt' ? '32%' : '28%',
-                          left: garmentType === 'shirt' ? '38%' : '31%',
+          {/* Live Side-by-Side Review Cards */}
+          {(frontPreviewUrl || backPreviewUrl) && (
+            <div className="bg-white border border-[#E8E2D6] rounded-2xl p-4 shadow-sm space-y-3">
+              <h4 className="font-extrabold text-xs text-[#4A453E]">2. Real-View Live Shirt Preview</h4>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="border border-[#E8E2D6] rounded-xl p-2 bg-[#FDFAF6] flex flex-col items-center">
+                  <div className="w-24 h-24 relative overflow-hidden flex items-center justify-center bg-white rounded-lg border border-[#E8E2D6]">
+                    {frontMockupPreviewUrl ? (
+                      <img src={frontMockupPreviewUrl} alt="Real View Front" className="w-full h-full object-contain pointer-events-none" />
+                    ) : (
+                      <CustomGarmentPreview
+                        customDesign={{
+                          baseImage: JSON.stringify({
+                            productType: garmentType,
+                            colorHex: selectedColor.hex,
+                            frontDesignUrl: frontPreviewUrl,
+                          })
                         }}
-                      >
-                        <div
-                          className="absolute w-full h-full"
-                          style={{
-                            left: `${frontDesign.imageX}%`,
-                            top: `${frontDesign.imageY}%`,
-                            transform: `translate(-50%, -50%) scale(${frontDesign.imageScale / 100}) rotate(${frontDesign.imageRotation}deg)`,
-                            width: '100%',
-                            height: '100%',
-                          }}
-                        >
-                          <img src={frontDesign.imageSrc} alt="" className="w-full h-full object-contain" />
-                        </div>
-                      </div>
+                        view="front"
+                        className="w-full h-full"
+                      />
                     )}
                   </div>
-                  <span className="text-[9px] font-bold text-[#7A736A] uppercase tracking-wider">Front Preview</span>
+                  <span className="text-[8px] font-black text-[#7A736A] mt-1 uppercase">Front View</span>
                 </div>
-
-                {/* Back Side Composite Mini Preview */}
-                <div className="flex flex-col items-center gap-1">
-                  <div className="relative w-28 h-28 flex items-center justify-center overflow-hidden">
-                    <div className="w-full h-full">
-                      {garmentType === 'tshirt' && <RealisticTShirtSvg color={selectedColor.hex} />}
-                      {garmentType === 'polo' && <RealisticPoloSvg color={selectedColor.hex} />}
-                      {garmentType === 'shirt' && <RealisticShirtSvg color={selectedColor.hex} />}
-                    </div>
-                    {backDesign.imageSrc && (
-                      <div 
-                        className="absolute pointer-events-none"
-                        style={{
-                          width: garmentType === 'shirt' ? '30%' : '38%',
-                          height: '42%',
-                          top: garmentType === 'shirt' ? '32%' : '28%',
-                          left: garmentType === 'shirt' ? '38%' : '31%',
+                <div className="border border-[#E8E2D6] rounded-xl p-2 bg-[#FDFAF6] flex flex-col items-center">
+                  <div className="w-24 h-24 relative overflow-hidden flex items-center justify-center bg-white rounded-lg border border-[#E8E2D6]">
+                    {backMockupPreviewUrl ? (
+                      <img src={backMockupPreviewUrl} alt="Real View Back" className="w-full h-full object-contain pointer-events-none" />
+                    ) : (
+                      <CustomGarmentPreview
+                        customDesign={{
+                          baseImage: JSON.stringify({
+                            productType: garmentType,
+                            colorHex: selectedColor.hex,
+                            backDesignUrl: backPreviewUrl,
+                          })
                         }}
-                      >
-                        <div
-                          className="absolute w-full h-full"
-                          style={{
-                            left: `${backDesign.imageX}%`,
-                            top: `${backDesign.imageY}%`,
-                            transform: `translate(-50%, -50%) scale(${backDesign.imageScale / 100}) rotate(${backDesign.imageRotation}deg)`,
-                            width: '100%',
-                            height: '100%',
-                          }}
-                        >
-                          <img src={backDesign.imageSrc} alt="" className="w-full h-full object-contain" />
-                        </div>
-                      </div>
+                        view="back"
+                        className="w-full h-full"
+                      />
                     )}
                   </div>
-                  <span className="text-[9px] font-bold text-[#7A736A] uppercase tracking-wider">Back Preview</span>
+                  <span className="text-[8px] font-black text-[#7A736A] mt-1 uppercase">Back View</span>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Pricing summary & CTA */}
-          <div className="bg-[#FDFAF6] border border-[#E8E2D6] rounded-2xl p-3 sm:p-5 shadow-sm space-y-4">
-            <h3 className="font-extrabold text-sm text-[#4A453E] border-b border-[#E8E2D6] pb-2">Pricing Details</h3>
-            
-            <div className="space-y-2 text-xs">
+          {/* Pricing & CTA */}
+          <div className="bg-[#FDFAF6] border border-[#E8E2D6] rounded-2xl p-4 shadow-sm space-y-4">
+            <h4 className="font-extrabold text-xs text-[#4A453E] border-b border-[#E8E2D6] pb-1.5">3. All-Inclusive Summary</h4>
+            <div className="space-y-1.5 text-xs">
               <div className="flex justify-between text-[#7A736A]">
-                <span>Base Apparel</span>
-                <span className="font-bold text-[#4A453E]">₹{basePrice.toFixed(2)}</span>
+                <span>Base Garment ({totalQuantity} pcs)</span>
+                <span className="font-bold text-[#4A453E]">₹{(PRICES[garmentType] * totalQuantity).toFixed(2)}</span>
               </div>
-              
               {customizationFee > 0 && (
                 <div className="flex justify-between text-[#7A736A]">
-                  <span>Custom Design Fee</span>
-                  <span className="font-bold text-[#4A453E]">₹{customizationFee.toFixed(2)}</span>
+                  <span>Print Fee ({hasFrontPrint && hasBackPrint ? '2 Sides' : '1 Side'})</span>
+                  <span className="font-bold text-[#4A453E]">₹{(customizationFee * totalQuantity).toFixed(2)}</span>
                 </div>
               )}
-
-              <div className="flex justify-between text-[#7A736A]">
-                <span>Quantity</span>
-                <span className="font-bold text-[#4A453E]">x {quantity}</span>
-              </div>
-
+              {discountPercent > 0 && (
+                <div className="flex justify-between text-emerald-600 font-bold">
+                  <span>Volume Discount ({discountPercent}%)</span>
+                  <span>-₹{((rawUnitPrice * totalQuantity) * (discountPercent / 100)).toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between border-t border-[#E8E2D6] pt-2 text-sm font-black">
-                <span className="text-[#4A453E]">Total</span>
+                <span className="text-[#4A453E]">Total Estimated Price</span>
                 <span className="text-[#F9A37E]">₹{totalPrice.toFixed(2)}</span>
               </div>
             </div>
@@ -772,7 +1337,7 @@ export default function CustomizerPage() {
               className="w-full bg-[#F9A37E] hover:bg-[#E8855A] disabled:opacity-60 text-white font-extrabold text-xs py-3.5 rounded-xl transition-all shadow-lg shadow-[#F9A37E]/25 flex items-center justify-center gap-2"
             >
               {uploading ? (
-                <span>Uploading design...</span>
+                <span>Processing Order...</span>
               ) : (
                 <>
                   <ShoppingBag className="w-4 h-4" />

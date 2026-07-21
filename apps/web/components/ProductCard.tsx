@@ -11,6 +11,9 @@ interface ProductCardProps {
   loading?: boolean;
 }
 
+const slugify = (name: string) =>
+  name.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+
 export const ProductCard: React.FC<ProductCardProps> = ({ product, loading }) => {
   const { toggleWishlist, isInWishlist, addToCart } = useApp();
   const [quickViewOpen, setQuickViewOpen] = useState(false);
@@ -39,6 +42,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, loading }) =>
 
   const isSaved = isInWishlist(product.id);
   const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+  const productSlug = product.slug || slugify(product.name);
 
   const handleQuickAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -72,8 +76,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, loading }) =>
 
           {/* Wishlist button */}
           <button
-            onClick={() => toggleWishlist(product)}
-            className="absolute top-2 right-2 z-10 p-1.5 bg-white/90 hover:bg-white text-[#7A736A] hover:text-rose-400 rounded-full transition-all shadow-sm"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product); }}
+            className="absolute top-2 right-2 z-20 p-1.5 bg-white/90 hover:bg-white text-[#7A736A] hover:text-rose-400 rounded-full transition-all shadow-sm"
             aria-label="Add to wishlist"
           >
             <Heart className={`w-4 h-4 ${isSaved ? 'fill-rose-400 text-rose-400' : ''}`} />
@@ -97,7 +101,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, loading }) =>
             </button>
           </div>
 
-          <Link href={`/products/${product.id}`}>
+          <Link href={`/products/${productSlug}`}>
             <img
               src={product.image}
               alt={product.name}
@@ -112,7 +116,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, loading }) =>
             <p className="text-[9px] uppercase font-bold tracking-wider text-[#A89B8A]">
               {product.category}
             </p>
-            <Link href={`/products/${product.id}`} className="block">
+            <Link href={`/products/${productSlug}`} className="block">
               <h4 className="font-bold text-sm text-[#4A453E] hover:text-[#F9A37E] line-clamp-1 transition-colors">
                 {product.name}
               </h4>
@@ -132,7 +136,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, loading }) =>
               )}
             </div>
             <Link
-              href={`/products/${product.id}`}
+              href={`/products/${productSlug}`}
               className="text-[14px] font-bold text-[#F9A37E] hover:text-[#E8855A] transition-colors"
             >
               Details →
@@ -220,7 +224,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, loading }) =>
                   <ShoppingBag className="w-4 h-4" /> Add to Cart
                 </button>
                 <Link
-                  href={`/products/${product.id}`}
+                  href={`/products/${productSlug}`}
                   onClick={() => setQuickViewOpen(false)}
                   className="bg-[#F9A37E] hover:bg-[#e28e6c] text-white text-xs font-extrabold py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 flex items-center justify-center"
                 >

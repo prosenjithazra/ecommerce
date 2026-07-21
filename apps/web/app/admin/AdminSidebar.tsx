@@ -21,6 +21,7 @@ import {
   Settings,
   Newspaper,
   Instagram,
+  Tag,
 } from "lucide-react";
 import { useApp } from "../../components/AppContext";
 
@@ -30,6 +31,7 @@ const mainMenuItems = [
   { href: "/admin/categories", label: "Categories", icon: Layers, exact: false },
   { href: "/admin/orders", label: "Orders", icon: Sliders, exact: false },
   { href: "/admin/users", label: "Users", icon: Users, exact: false },
+  { href: "/admin/coupons", label: "Coupons & Offers", icon: Tag, exact: false },
   { href: "/admin/banners", label: "Home Banners", icon: Image, exact: false },
   { href: "/admin/about", label: "About Us Page", icon: FileText, exact: false },
   { href: "/admin/contact", label: "Contact Queries", icon: Mail, exact: false },
@@ -37,6 +39,7 @@ const mainMenuItems = [
   { href: "/admin/gallery", label: "Gallery (#Wear)", icon: Instagram, exact: false },
   { href: "/admin/settings", label: "Store Settings", icon: Settings, exact: false },
 ];
+
 
 const policyMenuItems = [
   { href: "/admin/policies/refund", label: "Refund Policy", icon: FileText, exact: false },

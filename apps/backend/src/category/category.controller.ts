@@ -8,27 +8,27 @@ import {
   Param,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
-import { CategoryEntity } from './entities/category.entity';
+import { Category } from './schemas/category.schema';
 
 @Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Get()
-  async findAll(): Promise<CategoryEntity[]> {
+  async findAll(): Promise<Category[]> {
     return this.categoryService.findAll();
   }
 
   @Post()
-  async create(@Body() data: Partial<CategoryEntity>): Promise<CategoryEntity> {
+  async create(@Body() data: Partial<Category>): Promise<Category> {
     return this.categoryService.create(data);
   }
 
   @Put(':id')
   async update(
     @Param('id') id: string,
-    @Body() data: Partial<CategoryEntity>,
-  ): Promise<CategoryEntity> {
+    @Body() data: Partial<Category>,
+  ): Promise<Category> {
     return this.categoryService.update(id, data);
   }
 
