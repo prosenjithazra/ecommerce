@@ -95,7 +95,7 @@ export default function CartPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-6 pb-12 md:pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-6 pb-10 md:pb-16">
       <Breadcrumb items={[{ name: "Shopping Cart" }]} />
       <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A453E] tracking-tight">Shopping Cart</h1>
 
@@ -108,7 +108,7 @@ export default function CartPage() {
           icon={<ShoppingBag className="w-8 h-8 text-[#A8C69F]" />}
         />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6 items-start">
 
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-3">

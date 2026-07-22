@@ -11,6 +11,12 @@ export const ProductGallery: React.FC<{ images: string[]; name: string }> = ({ i
   const [activeImage, setActiveImage] = useState(images[0] || "");
   const [zoomStyle, setZoomStyle] = useState<React.CSSProperties>({});
 
+  React.useEffect(() => {
+    if (images && images.length > 0) {
+      setActiveImage(images[0] || "");
+    }
+  }, [images]);
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - left) / width) * 100;
@@ -25,9 +31,16 @@ export const ProductGallery: React.FC<{ images: string[]; name: string }> = ({ i
           <button
             key={idx}
             onClick={() => setActiveImage(img)}
-            className={`w-14 h-14 rounded-lg overflow-hidden border-2 bg-[#F5F0E8] flex-shrink-0 transition-all ${activeImage === img ? 'border-[#F9A37E] scale-105' : 'border-transparent'}`}
+            className={`relative w-14 h-14 rounded-lg overflow-hidden bg-[#F5F0E8] flex-shrink-0 transition-all focus:outline-none focus-visible:outline-none ${
+              activeImage === img ? 'shadow-sm' : ''
+            }`}
           >
-            <img src={img} alt={`${name} ${idx}`} className="w-full h-full object-cover" />
+            <img src={img} alt={`${name} ${idx}`} width={80} height={80} loading="lazy" className="w-full h-full object-cover" />
+            <div
+              className={`absolute inset-0 rounded-lg border-2 pointer-events-none transition-colors ${
+                activeImage === img ? 'border-[#F9A37E]' : 'border-[#E8E2D6]/40'
+              }`}
+            />
           </button>
         ))}
       </div>
@@ -36,7 +49,7 @@ export const ProductGallery: React.FC<{ images: string[]; name: string }> = ({ i
         onMouseMove={handleMouseMove}
         onMouseLeave={() => setZoomStyle({})}
       >
-        <img src={activeImage} alt={name} style={zoomStyle} className="w-full h-full object-cover transition-transform duration-75" />
+        <img src={activeImage} alt={name} width={600} height={600} style={zoomStyle} className="w-full h-full object-cover transition-transform duration-75" />
         <div className="absolute bottom-4 right-4 bg-black/50 text-white text-[10px] font-bold py-1 px-2.5 rounded-full pointer-events-none">
           Hover to Zoom
         </div>

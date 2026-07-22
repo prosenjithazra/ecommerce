@@ -7,7 +7,7 @@ import { ChevronRight, Home, EyeOff, X, ArrowLeft, ArrowRight, Star, AlertTriang
 /* 1. BREADCRUMB */
 interface BreadcrumbItem { name: string; href?: string; }
 export const Breadcrumb: React.FC<{ items: BreadcrumbItem[] }> = ({ items }) => (
-  <nav className="flex items-center gap-1.5 text-xs text-[#A89B8A] pt-8 sm:pt-10 pb-2 sm:pb-4 overflow-x-auto whitespace-nowrap">
+  <nav className="flex items-center gap-1.5 text-xs text-[#A89B8A] pt-6 sm:pt-8 sm:pt-10 pb-2 sm:pb-4 overflow-x-auto whitespace-nowrap">
     <Link href="/" className="hover:text-[#4A453E] flex items-center gap-1 transition-colors">
       <Home className="w-4.5 h-4.5" />
     </Link>

@@ -51,7 +51,7 @@ function ThankYouPageContent() {
         </div>
         <div className="flex justify-between items-center text-xs">
           <span className="text-zinc-450">Fulfillment Status</span>
-          <span className="font-extrabold text-indigo-500">In Print Queue</span>
+          <span className="font-extrabold text-[#F9A37E]">In Print Queue</span>
         </div>
         <div className="flex justify-between items-center text-xs border-t border-zinc-100 dark:border-zinc-800 pt-3">
           <span className="text-zinc-450">Estimated Dispatch</span>
@@ -75,7 +75,7 @@ function ThankYouPageContent() {
         </button>
         <Link
           href="/orders"
-          className="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1"
+          className="text-xs font-bold text-[#F9A37E] hover:text-[#e8855a] hover:underline flex items-center gap-1"
         >
           Track Shipment <ArrowRight className="w-4 h-4" />
         </Link>

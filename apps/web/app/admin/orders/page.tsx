@@ -376,7 +376,7 @@ export default function AdminOrdersPage() {
                           const isWhite = !colorHex || colorHex.toUpperCase() === '#FFFFFF' || colorHex.toUpperCase() === '#FFF';
 
                           const baseImgSrc = isPolo
-                            ? (isBack ? '/polo_back.png' : '/polo_front.png')
+                            ? (isBack ? '/poloTshirtBack.png' : '/poloTshirtFront.png')
                             : (isBack ? '/whiteTshirtBack.png' : '/whiteTshirtFront.png');
 
                           const canvas = document.createElement('canvas');
@@ -525,7 +525,7 @@ export default function AdminOrdersPage() {
                                   <p className="text-[9px] font-black uppercase text-[#e8855a] tracking-wider mb-2 flex items-center gap-1">
                                     <Eye className="w-3 h-3" /> Real View Product Mockup Downloads
                                   </p>
-                                  <div className={`grid grid-cols-1 ${hasFrontSide && hasBackSide ? 'sm:grid-cols-2' : ''} gap-2`}>
+                                  <div className={`grid grid-cols-1 ${hasFrontSide && hasBackSide ? 'sm:grid-cols-1' : ''} gap-2`}>
                                     {hasFrontSide && (
                                       <div className="p-2.5 border border-zinc-200 rounded-xl bg-white flex flex-col items-center gap-2 shadow-xs">
                                         <span className="text-[9px] font-black text-zinc-600 uppercase">Real View Front Product</span>
@@ -575,7 +575,7 @@ export default function AdminOrdersPage() {
                                   <p className="text-[9px] font-black uppercase text-zinc-500 tracking-wider mb-2">
                                     Original Artwork Files (Print Resolution PNG)
                                   </p>
-                                  <div className={`grid grid-cols-1 ${hasFrontSide && hasBackSide ? 'sm:grid-cols-2' : ''} gap-2`}>
+                                  <div className={`grid grid-cols-1 ${hasFrontSide && hasBackSide ? 'sm:grid-cols-1' : ''} gap-2`}>
                                     {hasFrontSide && (rawFrontArtwork || frontDesignUrl) && (
                                       <div className="p-2 border border-zinc-200 rounded-lg bg-white flex flex-col items-center gap-1.5">
                                         <span className="text-[8px] font-bold text-zinc-400 uppercase">Front Artwork File</span>
@@ -611,6 +611,28 @@ export default function AdminOrdersPage() {
                                     )}
                                   </div>
                                 </div>
+
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    if (hasFrontSide) {
+                                      await handleDownloadMockup('front');
+                                      if (rawFrontArtwork || frontDesignUrl) {
+                                        triggerDownload(rawFrontArtwork || frontDesignUrl, `print_front_artwork_${selectedOrder.id}.png`);
+                                      }
+                                    }
+                                    if (hasBackSide) {
+                                      await handleDownloadMockup('back');
+                                      if (rawBackArtwork || backDesignUrl) {
+                                        triggerDownload(rawBackArtwork || backDesignUrl, `print_back_artwork_${selectedOrder.id}.png`);
+                                      }
+                                    }
+                                  }}
+                                  className="w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[11px] py-2 px-1 rounded-md transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer mt-3"
+                                >
+                                  <Download className="w-3.5 h-3.5" />
+                                  Download All Items (Mockups & Artworks)
+                                </button>
                               </div>
                             </div>
                           )}

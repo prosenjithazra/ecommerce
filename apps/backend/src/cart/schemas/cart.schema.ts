@@ -11,6 +11,7 @@ export class Cart {
   @Prop({
     type: [
       {
+        cartItemId: { type: String, required: true },
         productId: { type: String, required: true },
         name: { type: String, required: true },
         image: { type: String, default: '' },
@@ -18,11 +19,13 @@ export class Cart {
         quantity: { type: Number, default: 1 },
         size: { type: String, default: '' },
         color: { type: String, default: '' },
+        customDesign: { type: Object, default: null },
       },
     ],
     default: [],
   })
   items: {
+    cartItemId: string;
     productId: string;
     name: string;
     image: string;
@@ -30,6 +33,7 @@ export class Cart {
     quantity: number;
     size: string;
     color: string;
+    customDesign?: any;
   }[];
 
   @Prop()

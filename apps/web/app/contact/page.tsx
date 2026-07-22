@@ -115,7 +115,7 @@ export default function ContactPage() {
                         setErrors({ ...errors, name: undefined });
                     }}
                     placeholder="Jane"
-                    className={`w-full bg-zinc-55 dark:bg-zinc-800 border ${errors.name ? "border-red-400 focus:border-red-500" : "border-zinc-200 dark:border-zinc-700 focus:border-indigo-500"} rounded-lg py-3 px-4 text-xs outline-none text-zinc-955 dark:text-zinc-50`}
+                    className={`w-full bg-zinc-55 dark:bg-zinc-800 border ${errors.name ? "border-red-400 focus:border-red-500" : "border-zinc-200 dark:border-zinc-700 focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20"} rounded-lg py-3 px-4 text-xs outline-none text-zinc-955 dark:text-zinc-50`}
                   />
                   {errors.name && (
                     <p className="text-[10px] text-red-500 font-bold mt-1.5">
@@ -136,7 +136,7 @@ export default function ContactPage() {
                         setErrors({ ...errors, email: undefined });
                     }}
                     placeholder="jane@example.com"
-                    className={`w-full bg-zinc-55 dark:bg-zinc-800 border ${errors.email ? "border-red-400 focus:border-red-500" : "border-zinc-200 dark:border-zinc-700 focus:border-indigo-500"} rounded-lg py-3 px-4 text-xs outline-none text-zinc-955 dark:text-zinc-50`}
+                    className={`w-full bg-zinc-55 dark:bg-zinc-800 border ${errors.email ? "border-red-400 focus:border-red-500" : "border-zinc-200 dark:border-zinc-700 focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20"} rounded-lg py-3 px-4 text-xs outline-none text-zinc-955 dark:text-zinc-50`}
                   />
                   {errors.email && (
                     <p className="text-[10px] text-red-500 font-bold mt-1.5">
@@ -157,7 +157,7 @@ export default function ContactPage() {
                     setFormData({ ...formData, subject: e.target.value })
                   }
                   placeholder="Bulk order inquiry"
-                  className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg py-3 px-4 text-xs outline-none focus:border-indigo-500 text-zinc-955 dark:text-zinc-50"
+                  className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg py-3 px-4 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-955 dark:text-zinc-50"
                 />
               </div>
 
@@ -174,7 +174,7 @@ export default function ContactPage() {
                       setErrors({ ...errors, message: undefined });
                   }}
                   placeholder="Write details about your request..."
-                  className={`w-full bg-zinc-55 dark:bg-zinc-800 border ${errors.message ? "border-red-400 focus:border-red-500" : "border-zinc-200 dark:border-zinc-700 focus:border-indigo-500"} rounded-lg py-3 px-4 text-xs outline-none text-zinc-955 dark:text-zinc-50 resize-none`}
+                  className={`w-full bg-zinc-55 dark:bg-zinc-800 border ${errors.message ? "border-red-400 focus:border-red-500" : "border-zinc-200 dark:border-zinc-700 focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20"} rounded-lg py-3 px-4 text-xs outline-none text-zinc-955 dark:text-zinc-50 resize-none`}
                 />
                 {errors.message && (
                   <p className="text-[10px] text-red-500 font-bold mt-1.5">
@@ -228,7 +228,7 @@ export default function ContactPage() {
                 <span className="font-bold text-zinc-850 dark:text-white block text-xs sm:hidden">
                   Headquarters
                 </span>
-                <MapPin className="w-5 h-5 text-indigo-500 flex-shrink-0" />
+                <MapPin className="w-5 h-5 text-[#F9A37E] flex-shrink-0" />
                 <div className="text-xs flex flex-col items-center sm:items-start">
                   <span className="font-bold text-zinc-850 dark:text-white hidden sm:block">
                     Headquarters
@@ -242,7 +242,7 @@ export default function ContactPage() {
                 <span className="font-bold text-zinc-850 dark:text-white block text-xs sm:hidden">
                   Call Us
                 </span>
-                <Phone className="w-5 h-5 text-indigo-500 flex-shrink-0" />
+                <Phone className="w-5 h-5 text-[#F9A37E] flex-shrink-0" />
                 <div className="text-xs flex flex-col items-center sm:items-start">
                   <span className="font-bold text-zinc-850 dark:text-white hidden sm:block">
                     Call Us
@@ -250,7 +250,7 @@ export default function ContactPage() {
                   <span className="text-zinc-500 dark:text-zinc-400 mt-1 block">
                     <a
                       href={`tel:${companySettings.phone.replace(/\s+/g, "")}`}
-                      className="hover:text-indigo-500 transition-colors"
+                      className="hover:text-[#F9A37E] transition-colors"
                     >
                       {companySettings.phone}
                     </a>

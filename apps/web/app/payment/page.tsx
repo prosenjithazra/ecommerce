@@ -370,7 +370,7 @@ function PaymentPageContent() {
 
             {paymentMode === 'online' ? (
               <form onSubmit={handlePay} className="pt-4 border-t border-zinc-100 dark:border-zinc-800/80 space-y-4 animate-fade-in-up duration-200">
-                <div className="flex justify-between items-center pb-2">
+                <div className="flex justify-between items-center gap-1 pb-2">
                   <div>
                     <h4 className="font-extrabold text-sm text-zinc-900 dark:text-white">Razorpay Secure Checkout</h4>
                     <p className="text-[10px] text-zinc-400 mt-0.5">Opens Razorpay — choose Card, UPI, Net Banking or Wallet inside</p>

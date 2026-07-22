@@ -298,7 +298,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           .then(data => {
             if (!data) return;
             const items: CartItem[] = (data.items || []).map((i: any) => ({
-              id: i.productId,
+              id: i.cartItemId || i.productId,
               productId: i.productId,
               name: i.name,
               price: Number(i.price) || 0,
@@ -306,6 +306,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               image: i.image || '',
               size: i.size || '',
               color: i.color || '',
+              customDesign: i.customDesign,
             }));
             setCart(items);
           })
@@ -316,7 +317,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           .then(data => {
             if (!data) return;
             const products: Product[] = (data.items || []).map((i: any) => ({
-              id: i.productId,
+              id: i.cartItemId || i.productId,
               name: i.name,
               price: Number(i.price) || 0,
               originalPrice: Number(i.originalPrice) || 0,
@@ -374,7 +375,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!res.ok) return;
       const data = await res.json();
       const items: CartItem[] = (data.items || []).map((i: any) => ({
-        id: i.productId,
+        id: i.cartItemId || i.productId,
         productId: i.productId,
         name: i.name,
         price: Number(i.price) || 0,
@@ -382,6 +383,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         image: i.image || '',
         size: i.size || '',
         color: i.color || '',
+        customDesign: i.customDesign,
       }));
       setCart(items);
     } catch (err) {
@@ -480,6 +482,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           quantity: item.quantity || 1,
           size: item.size,
           color: item.color,
+          customDesign: item.customDesign,
         }),
       });
       const data = await res.json();
@@ -488,7 +491,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return;
       }
       const items: CartItem[] = (data.items || []).map((i: any) => ({
-        id: i.productId,
+        id: i.cartItemId || i.productId,
         productId: i.productId,
         name: i.name,
         price: Number(i.price) || 0,
@@ -496,6 +499,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         image: i.image || '',
         size: i.size || '',
         color: i.color || '',
+        customDesign: i.customDesign,
       }));
       setCart(items);
       showToast('Added to Cart', `${item.name} (${item.size} / ${item.color}) added.`, 'success');
@@ -507,7 +511,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const removeFromCart = async (id: string) => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     if (!token) return;
-    // id here is productId (we map id = productId on fetch)
+    // id here is cartItemId (unique per cart slot, even for same productId with different designs)
     try {
       const res = await fetch(getApiUrl(`/cart/item/${id}`), {
         method: 'DELETE',
@@ -520,7 +524,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       const data = await res.json();
       const items: CartItem[] = (data.items || []).map((i: any) => ({
-        id: i.productId,
+        id: i.cartItemId || i.productId,
         productId: i.productId,
         name: i.name,
         price: Number(i.price) || 0,
@@ -528,6 +532,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         image: i.image || '',
         size: i.size || '',
         color: i.color || '',
+        customDesign: i.customDesign,
       }));
       setCart(items);
       showToast('Removed from Cart', 'The item has been removed from your cart.', 'info');
@@ -553,7 +558,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       const data = await res.json();
       const items: CartItem[] = (data.items || []).map((i: any) => ({
-        id: i.productId,
+        id: i.cartItemId || i.productId,
         productId: i.productId,
         name: i.name,
         price: Number(i.price) || 0,
@@ -561,6 +566,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         image: i.image || '',
         size: i.size || '',
         color: i.color || '',
+        customDesign: i.customDesign,
       }));
       setCart(items);
     } catch (err) {
@@ -609,7 +615,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!res.ok) { showToast('Error', 'Failed to update wishlist.', 'error'); return; }
       const data = await res.json();
       const products: Product[] = (data.wishlist?.items || []).map((i: any) => ({
-        id: i.productId,
+        id: i.cartItemId || i.productId,
         name: i.name,
         price: Number(i.price) || 0,
         originalPrice: Number(i.originalPrice) || 0,
@@ -883,7 +889,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         .then(cartData => {
           if (!cartData) return;
           const items: CartItem[] = (cartData.items || []).map((i: any) => ({
-            id: i.productId,
+            id: i.cartItemId || i.productId,
             productId: i.productId,
             name: i.name,
             price: Number(i.price) || 0,
@@ -901,7 +907,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         .then(wlData => {
           if (!wlData) return;
           const products: Product[] = (wlData.items || []).map((i: any) => ({
-            id: i.productId,
+            id: i.cartItemId || i.productId,
             name: i.name,
             price: Number(i.price) || 0,
             originalPrice: Number(i.originalPrice) || 0,

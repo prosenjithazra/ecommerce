@@ -80,7 +80,7 @@ export default function TrackOrderPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center space-y-4">
         <h2 className="text-xl font-bold">Order not found</h2>
-        <Link href="/profile" className="text-indigo-650 hover:underline">Back to Profile</Link>
+        <Link href="/profile" className="text-[#F9A37E] hover:text-[#e8855a] font-bold hover:underline">Back to Profile</Link>
       </div>
     );
   }

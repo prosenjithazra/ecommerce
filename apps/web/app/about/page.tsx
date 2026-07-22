@@ -153,13 +153,13 @@ export default function AboutPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5 md:space-y-16 pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5 md:space-y-16 pb-10 sm:pb-16">
       <Breadcrumb items={[{ name: "About Us" }]} />
 
       {/* Header story */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 items-center">
         <div className="space-y-[16px] md:space-y-6">
-          <span className="text-xs uppercase font-extrabold tracking-widest text-indigo-500 bg-indigo-50 dark:bg-indigo-950/30 px-3 py-1 rounded-full">
+          <span className="text-xs uppercase font-extrabold tracking-widest text-[#e8855a] bg-[#FBD5C1]/30 px-3 py-1 rounded-full">
             {data.badge}
           </span>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-zinc-900 dark:text-white tracking-tight leading-tight">
@@ -184,7 +184,7 @@ export default function AboutPage() {
       {/* Mission & Vision */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
         <div className="p-4 md:p-8 bg-zinc-50 dark:bg-zinc-900/40 rounded-[16px] md:rounded-lg border border-zinc-200/50 dark:border-zinc-800 space-y-4">
-          <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-500 rounded-lg flex items-center justify-center">
+          <div className="w-12 h-12 bg-[#FBD5C1]/20 dark:bg-[#FBD5C1]/5 text-[#e8855a] rounded-lg flex items-center justify-center">
             <Rocket className="w-6 h-6" />
           </div>
           <h3 className="font-extrabold text-lg text-zinc-900 dark:text-white">{data.missionTitle}</h3>
@@ -209,7 +209,7 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6">
           {data.milestones.map((m) => (
             <div key={m.year} className="p-3 md:p-6 border border-zinc-150 dark:border-zinc-800 rounded-lg bg-white dark:bg-zinc-900/60 relative">
-              <span className="text-2xl font-black text-indigo-550 dark:text-indigo-400 block mb-2">{m.year}</span>
+              <span className="text-2xl font-black text-[#e8855a] dark:text-[#F9A37E] block mb-2">{m.year}</span>
               <h4 className="font-bold text-sm text-zinc-850 dark:text-white mb-2">{m.title}</h4>
               <p className="text-[11px] text-zinc-450 dark:text-zinc-400 leading-relaxed">{m.desc}</p>
             </div>
@@ -223,7 +223,7 @@ export default function AboutPage() {
         <div className="flex flex-wrap gap-6 md:gap-8 justify-center">
           {data.team.map((t) => (
             <div key={t.name} className="text-center space-y-3 group w-36 sm:w-40 flex-shrink-0">
-              <div className="w-32 h-32 rounded-full overflow-hidden mx-auto shadow-md border-2 border-transparent group-hover:border-indigo-550 transition-all duration-300">
+              <div className="w-32 h-32 rounded-full overflow-hidden mx-auto shadow-md border-2 border-transparent group-hover:border-[#F9A37E] transition-all duration-300">
                 <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
               </div>
               <div>

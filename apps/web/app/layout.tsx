@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
 import { Elms_Sans, Kaushan_Script } from "next/font/google";
 import "./globals.css";
 import { AppProvider } from "../components/AppContext";
 import { LayoutWrapper } from "../components/LayoutWrapper";
+import { getMetadata, baseUrl } from "../components/SeoConfig";
 
 const elmsSans = Elms_Sans({
   subsets: ["latin"],
@@ -18,62 +18,17 @@ const kaushanScript = Kaushan_Script({
   display: "swap",
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kliamofashion.com';
+export const metadata = getMetadata({
+  title: 'Premium Storefront',
+  description: 'Order custom printed hoodies, premium cotton tees, polo shirts, and accessories with zero minimums. Heavyweight blanks, high-fidelity print quality, and instant delivery tracking.',
+  path: '/',
+});
 
-export const metadata: Metadata = {
-  metadataBase: new URL(baseUrl),
-  title: {
-    default: "Kliamo Fashion | Premium Storefront",
-    template: "%s | Kliamo Fashion"
-  },
-  description: "Order custom printed hoodies, premium cotton tees, polo shirts, and accessories with zero minimums. Heavyweight blanks, high-fidelity print quality, and instant delivery tracking.",
-  keywords: ["custom t-shirt printing", "custom hoodies", "clothing storefront", "custom polo shirts", "personalized clothing", "Kliamo Fashion"],
-  alternates: {
-    canonical: "./",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: baseUrl,
-    siteName: "Kliamo Fashion",
-    title: "Kliamo Fashion | Premium Storefront",
-    description: "Order custom printed apparel with zero minimums. Heavyweight cotton blanks and brilliant direct-to-garment prints.",
-    images: [
-      {
-        url: "/kliamoLogo.png",
-        width: 800,
-        height: 600,
-        alt: "Kliamo Fashion Premium Custom Apparel"
-      }
-    ]
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Kliamo Fashion | Premium Storefront",
-    description: "Order custom printed apparel with zero minimums. Heavyweight cotton blanks and brilliant direct-to-garment prints.",
-    images: ["/kliamoLogo.png"],
-    creator: "@kliamofashion"
-  },
-  icons: {
-    icon: "/favicon.ico",
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({

@@ -51,7 +51,7 @@ const RealPhotoGarment = ({
   const isWhite = !colorHex || colorHex.toUpperCase() === '#FFFFFF' || colorHex.toUpperCase() === '#FFF';
 
   const imageSrc = isPolo
-    ? (isBack ? '/polo_back.png' : '/polo_front.png')
+    ? (isBack ? '/poloTshirtBack.png' : '/poloTshirtFront.png')
     : (isBack ? '/whiteTshirtBack.png' : '/whiteTshirtFront.png');
 
   const maskId = `garmentMask-${garmentType}-${view}-${(colorHex || 'white').replace('#', '')}`;
@@ -97,7 +97,7 @@ const SingleViewPreview = ({ type, colorHex, design, side, showMarkers }: { type
     return (
       <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
         <img src={mockupUrl} alt="Real View Shirt" className="w-full h-full object-contain pointer-events-none" />
-        <span className="absolute bottom-1 right-2 text-[7px] font-black uppercase text-zinc-400/80 tracking-widest">{side}</span>
+        <span className="absolute bottom-1 right-4 sm:right-2 text-[7px] font-black uppercase text-zinc-400/80 tracking-widest">{side}</span>
       </div>
     );
   }
@@ -138,7 +138,7 @@ const SingleViewPreview = ({ type, colorHex, design, side, showMarkers }: { type
           />
         </div>
       )}
-      <span className="absolute bottom-1 right-2 text-[7px] font-black uppercase text-zinc-400/80 tracking-widest">{side}</span>
+      <span className="absolute bottom-1 right-4 sm:right-2 text-[7px] font-black uppercase text-zinc-400/80 tracking-widest">{side}</span>
     </div>
   );
 };

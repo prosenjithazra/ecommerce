@@ -32,8 +32,7 @@ import { CouponsModule } from './coupons/coupons.module';
           configService.get<string>('MONGODB_URI') ||
           configService.get<string>('MONGDB_URI') ||
           configService.get<string>('DATABASE_URL');
-
-        console.log('[AppModule] Connecting to MongoDB URL:', mongoUrl?.replace(/:([^@]+)@/, ':****@'));
+          console.log('[AppModule] Connecting to MongoDB URL:', mongoUrl?.replace(/:([^@]+)@/, ':****@'));
 
         return {
           uri: mongoUrl,

@@ -1,20 +1,38 @@
 import { Metadata } from 'next';
+import { getMetadata, getBreadcrumbSchema, baseUrl } from '../../components/SeoConfig';
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kliamofashion.com';
-
-export const metadata: Metadata = {
-  title: "Shop by Category",
-  description: "Explore our curated clothing categories including heavyweight hoodies, classic tees, and sports polo shirts designed for printing customization.",
-  alternates: {
-    canonical: `${baseUrl}/categories`,
-  },
-  openGraph: {
-    title: "Categories | Kliamo Fashion",
-    description: "Explore our clothing categories including heavyweight hoodies, classic tees, and sports polo shirts.",
-    url: `${baseUrl}/categories`,
-  }
-};
+export const metadata: Metadata = getMetadata({
+  title: 'Shop by Category',
+  description: 'Explore our curated clothing categories including heavyweight hoodies, classic tees, and sports polo shirts designed for printing customization.',
+  path: '/categories',
+});
 
 export default function CategoriesLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'Categories', path: '/categories' },
+  ]);
+
+  const collectionSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": `${baseUrl}/categories#collection`,
+    "name": "Kliamo Fashion Categories",
+    "description": "Premium printable blanks categorized for direct-to-garment (DTG) customization.",
+    "url": `${baseUrl}/categories`,
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
+      />
+      {children}
+    </>
+  );
 }
