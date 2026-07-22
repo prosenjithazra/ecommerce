@@ -89,7 +89,7 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
 
           {/* Status Progress Tracker */}
           {!isCancelled && (
-            <div className="px-5 py-5 bg-zinc-50/50 dark:bg-zinc-900/10">
+            <div className="px-3 py-3 sm:px-5 sm:py-5 bg-zinc-50/50 dark:bg-zinc-900/10">
               <p className="text-[10px] font-extrabold text-zinc-450 dark:text-zinc-400 uppercase tracking-wider mb-4">Order Progress</p>
               <div className="flex items-center gap-0">
                 {STATUS_STEPS.map((step, idx) => {
@@ -149,7 +149,7 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
           )}
 
           {/* Items List */}
-          <div className="p-5 space-y-3">
+          <div className="p-3 sm:p-5 space-y-3">
             <p className="text-[10px] font-extrabold text-zinc-450 dark:text-zinc-400 uppercase tracking-wider">Order Items</p>
             {items.length > 0 ? (
               <div className="space-y-3">
@@ -171,13 +171,13 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
                   return (
                     <div key={i} className="border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-900/40">
                       {/* Item Header */}
-                      <div className="flex gap-3 p-3.5">
-                        <div className="flex-shrink-0 rounded-lg overflow-hidden border border-zinc-150 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
+                      <div className="flex flex-col sm:flex-row gap-3 p-3.5">
+                        <div className="flex-shrink-0 w-full sm:w-auto h-auto sm:h-14 rounded-lg overflow-hidden flex justify-center bg-[#f1f1f1] p-2 sm:p-0">
                           <CustomGarmentPreview
                             customDesign={item.customDesign}
                             defaultImage={item.image}
                             view="both"
-                            className="w-14 h-14"
+                            className="w-20 h-20 sm:w-14 sm:h-14"
                           />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -221,13 +221,13 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
                       {designMeta && (
                         <div className="border-t border-dashed border-zinc-200 dark:border-zinc-800 p-3 bg-zinc-50/60 dark:bg-zinc-950/20 space-y-3">
                           <p className="text-[9px] font-extrabold text-[#e8855a] uppercase tracking-wider">🎨 Custom Print Specifications</p>
-                          <div className="flex gap-3 items-start">
-                            <div className="flex gap-2">
+                          <div className="flex flex-col sm:flex-row gap-3 items-start w-full">
+                            <div className="flex gap-2 w-full sm:w-auto justify-center bg-zinc-100 dark:bg-zinc-900 rounded-lg p-2 sm:p-0">
                               <CustomGarmentPreview
                                 customDesign={item.customDesign}
                                 defaultImage={item.image}
                                 view="both"
-                                className="w-14 h-14"
+                                className="w-20 h-20 sm:w-14 sm:h-14"
                                 showMarkers={true}
                               />
                             </div>
@@ -593,6 +593,14 @@ export default function ProfilePage() {
 
   const handleUpdateInfo = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showToast("Error", "Please enter a valid email address.", "error");
+      return;
+    }
+    if (phone && !/^\d{10}$/.test(phone.replace(/[\s()-]+/g, ""))) {
+      showToast("Error", "Please enter a valid 10-digit phone number.", "error");
+      return;
+    }
     await updateUserProfile(name, avatar, phone);
   };
 
@@ -704,7 +712,7 @@ export default function ProfilePage() {
 
   if (isProfileDataLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-8 pb-10 md:pb-16 animate-pulse">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-6 md:space-y-8 pb-10 md:pb-16 animate-pulse">
         {/* Breadcrumb Skeleton */}
         <div className="h-4 w-36 bg-zinc-200 dark:bg-zinc-800 rounded mt-6"></div>
 
@@ -719,7 +727,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Form Skeleton */}
-          <div className="lg:col-span-3 bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-6 sm:p-8 space-y-6">
+          <div className="lg:col-span-3 bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-4 sm:p-6 md:p-8 space-y-6">
             <div className="h-6 bg-zinc-250 dark:bg-zinc-800 rounded w-1/4 pb-3"></div>
             <div className="flex items-center gap-5 border-t border-zinc-100 dark:border-zinc-805 pt-6">
               <div className="w-20 h-20 rounded-full bg-zinc-200 dark:bg-zinc-800"></div>
@@ -750,7 +758,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-8 pb-10 md:pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-6 md:space-y-8 pb-10 md:pb-16">
       <Breadcrumb items={[{ name: "My Profile" }]} />
 
       {/* MOBILE SIDEBAR DRAWER OVERLAY */}
@@ -920,7 +928,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Main Content Area */}
-        <div className="lg:col-span-3 bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-6 sm:p-8">
+        <div className="lg:col-span-3 bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-4 sm:p-6 md:p-8">
           
           {/* 1. Personal Info Tab */}
           {activeTab === 'info' && (
@@ -968,7 +976,7 @@ export default function ProfilePage() {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-indigo-500"
+                    className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-900 dark:text-white"
                   />
                 </div>
                 <div>
@@ -978,7 +986,7 @@ export default function ProfilePage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-indigo-500"
+                    className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-900 dark:text-white"
                   />
                 </div>
               </div>
@@ -1046,7 +1054,7 @@ export default function ProfilePage() {
                     onChange={(e) => setAddrForm({ ...addrForm, street: e.target.value })}
                     className="w-full bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs outline-none"
                   />
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-2">
                     <input
                       type="text"
                       placeholder="City"
@@ -1077,7 +1085,7 @@ export default function ProfilePage() {
                       type="checkbox"
                       checked={addrForm.isDefault}
                       onChange={(e) => setAddrForm({ ...addrForm, isDefault: e.target.checked })}
-                      className="w-4 h-4 rounded border border-zinc-200 accent-indigo-600"
+                      className="w-4 h-4 rounded border border-zinc-200 accent-[#F9A37E]"
                     />
                     <span className="text-xs text-zinc-550 dark:text-zinc-400 font-medium">Set as primary shipping address</span>
                   </label>

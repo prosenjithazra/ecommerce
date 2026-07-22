@@ -7,13 +7,22 @@ import { AddressCard } from '../../components/InfoCards';
 import { MapPin } from 'lucide-react';
 
 export default function AddressesPage() {
-  const { addresses, addAddress, updateAddress, deleteAddress, setDefaultAddress } = useApp();
+  const { addresses, addAddress, updateAddress, deleteAddress, setDefaultAddress, showToast } = useApp();
   const [showForm, setShowForm] = useState(false);
   const [editingAddr, setEditingAddr] = useState<Address | null>(null);
   const [form, setForm] = useState({ fullName: "", street: "", city: "", state: "", zip: "", country: "United States", phone: "", isDefault: false });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!/^\d{10}$/.test(form.phone.replace(/[\s()-]+/g, ""))) {
+      showToast("Validation Error", "Please enter a valid 10-digit phone number.", "error");
+      return;
+    }
+    if (!/^\d{6}$/.test(form.zip.trim())) {
+      showToast("Validation Error", "Please enter a valid 6-digit ZIP/pincode.", "error");
+      return;
+    }
+
     if (editingAddr) {
       updateAddress({ ...form, id: editingAddr.id });
     } else {
@@ -37,7 +46,7 @@ export default function AddressesPage() {
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h1 className="text-3xl font-extrabold text-zinc-909 dark:text-white tracking-tight flex items-center gap-2">
-            <MapPin className="w-7 h-7 text-indigo-500" /> Address Book
+            <MapPin className="w-7 h-7 text-[#F9A37E]" /> Address Book
           </h1>
           <p className="text-xs text-zinc-400">Add, edit, or delete shipping destinations.</p>
         </div>
@@ -67,7 +76,7 @@ export default function AddressesPage() {
                 required
                 value={form.fullName}
                 onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                className="w-full bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-indigo-500"
+                className="w-full bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-800 dark:text-zinc-250"
               />
             </div>
             <div>
@@ -77,7 +86,7 @@ export default function AddressesPage() {
                 required
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className="w-full bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-indigo-500"
+                className="w-full bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-800 dark:text-zinc-250"
               />
             </div>
           </div>
@@ -88,7 +97,7 @@ export default function AddressesPage() {
               required
               value={form.street}
               onChange={(e) => setForm({ ...form, street: e.target.value })}
-              className="w-full bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-indigo-500"
+              className="w-full bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-800 dark:text-zinc-250"
             />
           </div>
           <div className="grid grid-cols-3 gap-2">
@@ -98,7 +107,7 @@ export default function AddressesPage() {
               required
               value={form.city}
               onChange={(e) => setForm({ ...form, city: e.target.value })}
-              className="bg-zinc-55 border rounded-lg py-2 px-3 text-xs"
+              className="bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-800 dark:text-zinc-250"
             />
             <input
               type="text"
@@ -106,7 +115,7 @@ export default function AddressesPage() {
               required
               value={form.state}
               onChange={(e) => setForm({ ...form, state: e.target.value })}
-              className="bg-zinc-55 border rounded-lg py-2 px-3 text-xs"
+              className="bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-800 dark:text-zinc-250"
             />
             <input
               type="text"
@@ -114,7 +123,7 @@ export default function AddressesPage() {
               required
               value={form.zip}
               onChange={(e) => setForm({ ...form, zip: e.target.value })}
-              className="bg-zinc-55 border rounded-lg py-2 px-3 text-xs"
+              className="bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-800 dark:text-zinc-250"
             />
           </div>
           <label className="flex items-center gap-2 cursor-pointer pt-2">
@@ -122,7 +131,7 @@ export default function AddressesPage() {
               type="checkbox"
               checked={form.isDefault}
               onChange={(e) => setForm({ ...form, isDefault: e.target.checked })}
-              className="w-4 h-4 rounded border accent-indigo-600"
+              className="w-4 h-4 rounded border accent-[#F9A37E]"
             />
             <span className="text-xs text-zinc-550 font-medium">Set as primary default shipping address</span>
           </label>

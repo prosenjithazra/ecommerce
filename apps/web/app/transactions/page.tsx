@@ -24,7 +24,7 @@ export default function TransactionsPage() {
 
       <div className="space-y-1">
         <h1 className="text-3xl font-extrabold text-zinc-909 dark:text-white tracking-tight flex items-center gap-2">
-          <FileText className="w-7 h-7 text-indigo-500" /> Transaction Ledger
+          <FileText className="w-7 h-7 text-[#F9A37E]" /> Transaction Ledger
         </h1>
         <p className="text-xs text-zinc-400">Ledger of all invoice transactions and refund statuses.</p>
       </div>
@@ -54,7 +54,7 @@ export default function TransactionsPage() {
             placeholder="Search txn or order ID..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg py-2 pl-9 pr-3 text-xs outline-none focus:border-indigo-500 text-zinc-900 dark:text-white"
+            className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg py-2 pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-900 dark:text-white"
           />
         </div>
       </div>

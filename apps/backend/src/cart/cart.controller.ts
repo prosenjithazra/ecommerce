@@ -39,32 +39,33 @@ export class CartController {
       quantity: body.quantity,
       size: body.size,
       color: body.color,
+      customDesign: body.customDesign,
     });
   }
 
-  /** PUT /cart/item/:productId — update quantity of one item */
+  /** PUT /cart/item/:cartItemId — update quantity of one item */
   @UseGuards(AuthGuard)
-  @Put('item/:productId')
+  @Put('item/:cartItemId')
   async updateItem(
     @Request() req: RequestWithUser,
-    @Param('productId') productId: string,
+    @Param('cartItemId') cartItemId: string,
     @Body() body: any,
   ) {
     return this.cartService.updateItemQuantity(
       req.user.id,
-      productId,
+      cartItemId,
       body.quantity,
     );
   }
 
-  /** DELETE /cart/item/:productId — remove one item from cart */
+  /** DELETE /cart/item/:cartItemId — remove one item from cart */
   @UseGuards(AuthGuard)
-  @Delete('item/:productId')
+  @Delete('item/:cartItemId')
   async removeItem(
     @Request() req: RequestWithUser,
-    @Param('productId') productId: string,
+    @Param('cartItemId') cartItemId: string,
   ) {
-    return this.cartService.removeItem(req.user.id, productId);
+    return this.cartService.removeItem(req.user.id, cartItemId);
   }
 
   /** DELETE /cart/clear — empty the entire cart */

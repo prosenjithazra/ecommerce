@@ -69,11 +69,11 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-[#4A453E] text-[#C4B8A8] pt-12 pb-24 md:pb-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+    <footer className="bg-[#4A453E] text-[#C4B8A8] pt-8 sm:pt-12 pb-24 md:pb-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10">
 
         {/* Newsletter */}
-        <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 pb-10" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 pb-8 sm:pb-10" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
           <div className="lg:col-span-3 space-y-2">
             <h4 className="text-white font-extrabold text-xl">Join the Creative Club</h4>
             <p className="text-sm text-[#A89B8A] max-w-lg">Join our Creative Club for exclusive updates, inspiring events, creative resources, member-only opportunities, and connect with passionate creators worldwide.</p>
@@ -176,7 +176,7 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom bar */}
-        <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4 pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+        <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4 pt-6 sm:pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
           <span className="text-sm text-[#d9d9d9] text-center sm:text-left">
             © {currentYear} <Link href="/" className="hover:text-[#F9A37E] transition-colors">Kliamo Fashion</Link>. All rights reserved.
           </span>

@@ -134,7 +134,7 @@ function HeroBanner() {
   if (loading) {
     return (
       <section className="relative overflow-hidden select-none min-h-[500px] sm:min-h-[580px] lg:min-h-[640px] flex items-center bg-[#F4F4F4]">
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
           {/* Left Column Skeleton */}
           <div className="space-y-6 text-center lg:text-left order-1">
             {/* Badge */}
@@ -248,7 +248,7 @@ function HeroBanner() {
       />
 
       {/* Content wrapper */}
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center relative" style={{ zIndex: 10 }}>
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center relative" style={{ zIndex: 10 }}>
 
         {/* ─── LEFT COLUMN: Text and Actions ─── */}
         <div key={`content-${animKey}`} className="space-y-3 md:space-y-6 animate-slide-in-left text-center lg:text-left order-1 lg:order-1">
@@ -389,6 +389,8 @@ export default function HomePage() {
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
+  const [activeProductIdx, setActiveProductIdx] = useState(0);
+  const mobileProductScrollRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 900);
@@ -450,10 +452,63 @@ export default function HomePage() {
   }, []);
 
   const getFilteredProducts = () => {
+    let list: Product[] = [];
     switch (activeTab) {
-      case 'best': return products.filter(p => p.tag === 'Best Seller');
-      case 'new':  return products.filter(p => p.tag === 'New' || p.tag === 'Eco');
-      default:     return products;
+      case 'best': 
+        list = products.filter(p => p.tag === 'Best Seller');
+        break;
+      case 'new':  
+        list = products.filter(p => p.tag === 'New' || p.tag === 'Eco');
+        break;
+      default:     
+        list = products;
+        break;
+    }
+    return list.slice(0, 8);
+  };
+
+  // Reset mobile active index and scroll position when tab changes
+  React.useEffect(() => {
+    setActiveProductIdx(0);
+    if (mobileProductScrollRef.current) {
+      mobileProductScrollRef.current.scrollTo({ left: 0 });
+    }
+  }, [activeTab]);
+
+  // Mobile product auto-slide every 3.5s with clean cancellation/timer reset on interaction
+  React.useEffect(() => {
+    const filtered = getFilteredProducts();
+    if (filtered.length <= 1) return;
+
+    const interval = setInterval(() => {
+      if (mobileProductScrollRef.current) {
+        const nextIdx = (activeProductIdx + 1) % filtered.length;
+        const container = mobileProductScrollRef.current;
+        const cardWidth = container.clientWidth * 0.7; // matches w-[70%] card size
+        const gap = 16; // gap-4 is 16px
+        
+        container.scrollTo({
+          left: nextIdx * (cardWidth + gap),
+          behavior: 'smooth'
+        });
+        setActiveProductIdx(nextIdx);
+      }
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [activeProductIdx, products, activeTab]);
+
+  const handleMobileScroll = () => {
+    if (mobileProductScrollRef.current) {
+      const container = mobileProductScrollRef.current;
+      const { scrollLeft, clientWidth } = container;
+      const cardWidth = clientWidth * 0.7;
+      const gap = 16;
+      const index = Math.round(scrollLeft / (cardWidth + gap));
+      const filtered = getFilteredProducts();
+      if (index !== activeProductIdx && index >= 0 && index < filtered.length) {
+        setActiveProductIdx(index);
+      }
     }
   };
 
@@ -478,7 +533,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="space-y-6 sm:space-y-16 pb-16">
+    <div className="space-y-8 sm:space-y-16 pb-10 sm:pb-16">
 
       {/* ── HERO SLIDER ── */}
       <HeroBanner />
@@ -509,7 +564,7 @@ export default function HomePage() {
             <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">Shop by Category</h2>
             <p className="text-xs text-[#7A736A] mt-0.5">Premium blanks ready for your design</p>
           </div>
-          <Link href="/products" className="text-xs font-bold text-[#F9A37E] hover:text-[#E8855A] flex items-center gap-1 transition-colors">
+          <Link href="/categories" className="text-xs font-bold text-[#F9A37E] hover:text-[#E8855A] flex items-center gap-1 transition-colors">
             View all <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -560,9 +615,22 @@ export default function HomePage() {
           </div>
         </div>
         {productsLoading || loading ? (
-          <Slider desktopCols={4}>
-            {Array(4).fill(0).map((_, i) => <ProductCard key={i} loading={true} />)}
-          </Slider>
+          <>
+            {/* Desktop grid layout */}
+            <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-6">
+              {Array(4).fill(0).map((_, i) => (
+                <ProductCard key={i} loading={true} />
+              ))}
+            </div>
+            {/* Mobile 1.5 slider layout */}
+            <div className="flex sm:hidden overflow-x-auto snap-x snap-mandatory gap-4 pb-4 no-scrollbar w-full">
+              {Array(4).fill(0).map((_, i) => (
+                <div key={i} className="w-[70%] min-w-[70%] snap-start flex-shrink-0">
+                  <ProductCard loading={true} />
+                </div>
+              ))}
+            </div>
+          </>
         ) : getFilteredProducts().length === 0 ? (
           <div className="w-full py-4">
             <EmptyState
@@ -572,17 +640,58 @@ export default function HomePage() {
             />
           </div>
         ) : (
-          <Slider desktopCols={4}>
-            {getFilteredProducts().map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </Slider>
+          <>
+            {/* Desktop grid layout */}
+            <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-6">
+              {getFilteredProducts().map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+            {/* Mobile 1.5 slider layout */}
+            <div
+              ref={mobileProductScrollRef}
+              onScroll={handleMobileScroll}
+              className="flex sm:hidden overflow-x-auto snap-x snap-mandatory gap-4 pb-4 no-scrollbar w-full"
+            >
+              {getFilteredProducts().map((product) => (
+                <div key={product.id} className="w-[70%] min-w-[70%] snap-start flex-shrink-0">
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
+            {/* Mobile dots indicators */}
+            {getFilteredProducts().length > 1 && (
+              <div className="flex sm:hidden justify-center gap-1.5 mt-2">
+                {getFilteredProducts().map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      if (mobileProductScrollRef.current) {
+                        const container = mobileProductScrollRef.current;
+                        const cardWidth = container.clientWidth * 0.7;
+                        const gap = 16;
+                        container.scrollTo({
+                          left: idx * (cardWidth + gap),
+                          behavior: 'smooth'
+                        });
+                        setActiveProductIdx(idx);
+                      }
+                    }}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      activeProductIdx === idx ? 'bg-[#F9A37E] w-4' : 'bg-[#E8E2D6] w-1.5'
+                    }`}
+                    aria-label={`Go to slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="py-12 sm:py-16" style={{ background: '#F5F0E8' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <section className="py-8 sm:py-16" style={{ background: '#F5F0E8' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-8">
           <div className="text-center">
             <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">How It Works</h2>
             <p className="text-xs text-[#7A736A] mt-1">From studio to your doorstep in 3 simple steps</p>

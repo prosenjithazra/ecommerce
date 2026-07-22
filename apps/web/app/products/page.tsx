@@ -1,21 +1,31 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Breadcrumb, Pagination, Drawer, Select, EmptyState } from '../../components/UIComponents';
+import { Breadcrumb, Pagination, Drawer, Select, EmptyState, LoadingSpinner } from '../../components/UIComponents';
 import { ProductCard } from '../../components/ProductCard';
-import { SlidersHorizontal, Search, RotateCcw } from 'lucide-react';
+import { SlidersHorizontal, Search, RotateCcw, X } from 'lucide-react';
 import { Product } from '../../components/AppContext';
 import { getApiUrl } from '../../components/ApiConfig';
+import { useSearchParams } from 'next/navigation';
 
-export default function ProductsPage() {
+function ProductsCatalog() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category");
+
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(categoryParam);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("popular");
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [inStockOnly, setInStockOnly] = useState(false);
+
+  // Sync with url parameter on navigation
+  useEffect(() => {
+    setSelectedCategory(categoryParam);
+  }, [categoryParam]);
 
   // Draft filter state for smooth typing and batch updates on Submit
   const [draftSearch, setDraftSearch] = useState("");
@@ -72,12 +82,13 @@ export default function ProductsPage() {
     setSelectedSizes([]); 
     setInStockOnly(false); 
     setSort("popular");
+    setSelectedCategory(null);
   };
 
   // Reset page to 1 on search or filter change
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, sort, selectedColors, selectedSizes, inStockOnly]);
+  }, [search, sort, selectedColors, selectedSizes, inStockOnly, selectedCategory]);
 
   // Filter products dynamically
   const filteredProducts = products.filter(p => {
@@ -91,8 +102,10 @@ export default function ProductsPage() {
                        
     const matchSize = selectedSizes.length === 0 || 
                       p.sizes?.some(s => selectedSizes.includes(s));
+
+    const matchCategory = !selectedCategory || p.category?.toLowerCase() === selectedCategory.toLowerCase();
                       
-    return matchSearch && matchStock && matchColor && matchSize;
+    return matchSearch && matchStock && matchColor && matchSize && matchCategory;
   });
 
   // Sort products dynamically
@@ -125,7 +138,7 @@ export default function ProductsPage() {
   // Full-width empty state when the product catalog is completely empty
   if (!loading && products.length === 0) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-6 pb-12 md:pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-6 pb-10 md:pb-16">
         <Breadcrumb items={[{ name: "Products" }]} />
         <div className="w-full">
           <EmptyState
@@ -141,12 +154,26 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-6 pb-12 md:pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-6 pb-10 md:pb-16">
       <Breadcrumb items={[{ name: "Products" }]} />
 
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A453E] tracking-tight">Browse Products</h1>
         <p className="text-xs text-[#A89B8A] mt-1">Filter and pick from our premium print-ready blanks</p>
+        {selectedCategory && (
+          <div className="flex items-center gap-2 mt-3 animate-fade-in">
+            <span className="text-[10px] sm:text-xs font-black bg-[#FBD5C1]/40 text-[#E8855A] px-3 py-1 rounded-full border border-[#F9A37E]/20 flex items-center gap-1.5 shadow-xs">
+              Category: {selectedCategory}
+              <button 
+                onClick={() => setSelectedCategory(null)} 
+                className="hover:text-red-500 transition-colors p-0.5 rounded-full hover:bg-white flex items-center justify-center cursor-pointer"
+                title="Clear Category Filter"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </span>
+          </div>
+        )}
       </div>
 
       <section className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
@@ -235,6 +262,14 @@ export default function ProductsPage() {
         </div>
       </Drawer>
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <React.Suspense fallback={<LoadingSpinner />}>
+      <ProductsCatalog />
+    </React.Suspense>
   );
 }
 

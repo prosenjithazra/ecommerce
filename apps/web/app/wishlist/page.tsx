@@ -10,7 +10,7 @@ export default function WishlistPage() {
   const { wishlist } = useApp();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-6 pb-12 md:pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-6 pb-10 md:pb-16">
       <Breadcrumb items={[{ name: "Wishlist" }]} />
 
       <div>

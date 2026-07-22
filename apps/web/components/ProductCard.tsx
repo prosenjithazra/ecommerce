@@ -105,6 +105,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, loading }) =>
             <img
               src={product.image}
               alt={product.name}
+              width={360}
+              height={360}
+              loading="lazy"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           </Link>
@@ -150,7 +153,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, loading }) =>
         <Modal isOpen={quickViewOpen} onClose={() => setQuickViewOpen(false)}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="aspect-square bg-[#F5F0E8] rounded-lg overflow-hidden">
-              <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+              <img src={product.image} alt={product.name} width={600} height={600} loading="lazy" className="w-full h-full object-cover" />
             </div>
 
             <div className="flex flex-col justify-between">

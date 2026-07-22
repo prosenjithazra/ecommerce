@@ -11,7 +11,7 @@ const sections: PolicySection[] = [
   {
     id: "sh2",
     heading: "Domestic Shipping (India)",
-    content: "Standard shipping within India typically takes 4–7 business days after dispatch. Express shipping (2–3 business days) is available for select pin codes at an additional charge. Free shipping is offered on all orders above ₹999.",
+    content: "Standard shipping within India typically takes 5–7 business days after dispatch. Express shipping (2–5 business days) is available for select pin codes at an additional charge. Free shipping is offered on all orders above ₹999.",
     lastUpdated: "2026-07-01",
   },
   {

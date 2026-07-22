@@ -1,22 +1,18 @@
 import { Metadata } from 'next';
+import { getMetadata, getBreadcrumbSchema, baseUrl } from '../../components/SeoConfig';
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kliamofashion.com';
-
-export const metadata: Metadata = {
-  title: "Shop Premium Blanks Catalog",
-  description: "Browse our extensive catalog of premium cotton t-shirts, hoodies, and accessories. Zero minimums for custom DTG printing.",
-  alternates: {
-    canonical: `${baseUrl}/products`,
-  },
-  openGraph: {
-    title: "Shop Premium Blanks | Kliamo Fashion",
-    description: "Browse our catalog of premium cotton t-shirts, hoodies, and accessories.",
-    url: `${baseUrl}/products`,
-  }
-};
+export const metadata: Metadata = getMetadata({
+  title: 'Shop Premium Blanks Catalog',
+  description: 'Browse our extensive catalog of premium cotton t-shirts, hoodies, and accessories. Zero minimums for custom DTG printing.',
+  path: '/products',
+});
 
 export default function ProductsLayout({ children }: { children: React.ReactNode }) {
-  // Inject CollectionPage Schema (JSON-LD)
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'Products', path: '/products' },
+  ]);
+
   const collectionSchema = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -33,6 +29,10 @@ export default function ProductsLayout({ children }: { children: React.ReactNode
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
