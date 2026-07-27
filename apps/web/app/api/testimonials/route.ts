@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const BACKEND = process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes("localhost")
+  ? process.env.NEXT_PUBLIC_API_URL
+  : 'https://ecommerce-0f9b.onrender.com';
 
 export async function GET() {
   try {
