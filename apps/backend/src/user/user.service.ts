@@ -349,7 +349,7 @@ export class UserService implements OnModuleInit {
     user.updatedAt = new Date();
     await user.save();
 
-    this.emailService.sendOtpEmail(user.email, user.name, otp).catch((err) => {
+    this.emailService.sendOtpEmail(user.email, user.name, otp, 'reset').catch((err) => {
       console.error('Error sending OTP email:', err);
     });
 
@@ -439,7 +439,7 @@ export class UserService implements OnModuleInit {
     this.signupOtpStore.set(normalizedEmail, { otp, expiry });
 
     const name = normalizedEmail.split('@')[0] || 'User';
-    this.emailService.sendOtpEmail(normalizedEmail, name, otp).catch((err) => {
+    this.emailService.sendOtpEmail(normalizedEmail, name, otp, 'signup').catch((err) => {
       console.error('Error sending signup OTP email:', err);
     });
 

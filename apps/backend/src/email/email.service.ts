@@ -17,7 +17,7 @@ export class EmailService {
     const host = this.configService.get<string>('SMTP_HOST') || 'smtp.hostinger.com';
     const port = Number(this.configService.get<number>('SMTP_PORT')) || 465;
     const user = this.configService.get<string>('SMTP_EMAIL') || 'contact@kliamo.com';
-    const pass = this.configService.get<string>('SMTP_PASSWORD') || '';
+    const pass = this.configService.get<string>('SMTP_PASSWORD') || 'Prosenjit2026@';
 
     if (!user || !pass) {
       this.logger.warn('SMTP credentials missing. Email sending disabled.');
@@ -31,6 +31,9 @@ export class EmailService {
       auth: {
         user,
         pass,
+      },
+      tls: {
+        rejectUnauthorized: false,
       },
     });
   }
@@ -76,7 +79,7 @@ export class EmailService {
           
           <!-- Header with Logo -->
           <div style="background-color: #FDFAF6; padding: 32px 24px; text-align: center; border-b: 1px solid #E8E2D6;">
-            <img src="cid:kliamologo@kliamo" alt="KLIAMO Fashion" style="height: 52px; width: auto; max-width: 200px; display: inline-block; border: 0;" />
+            <img src="${attachments.length > 0 ? 'cid:kliamologo@kliamo' : 'https://kliamo.com/kliamologoNew.png'}" alt="KLIAMO Fashion" style="height: 52px; width: auto; max-width: 200px; display: inline-block; border: 0;" />
             <h1 style="color: #4A453E; margin: 16px 0 4px 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Welcome to KLIAMO!</h1>
             <p style="color: #F9A37E; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin: 0;">Style That Defines You</p>
           </div>
@@ -200,7 +203,7 @@ export class EmailService {
           
           <!-- Header Banner with Logo -->
           <div style="background-color: #FDFAF6; padding: 32px 24px; text-align: center; border-bottom: 1px solid #E8E2D6;">
-            <img src="cid:kliamologo@kliamo" alt="KLIAMO Fashion" style="height: 54px; width: auto; max-width: 210px; display: inline-block; border: 0;" />
+            <img src="${attachments.length > 0 ? 'cid:kliamologo@kliamo' : 'https://kliamo.com/kliamologoNew.png'}" alt="KLIAMO Fashion" style="height: 54px; width: auto; max-width: 210px; display: inline-block; border: 0;" />
             <h1 style="color: #4A453E; margin: 16px 0 4px 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Order Confirmation</h1>
             <p style="color: #F9A37E; font-weight: 700; font-size: 14px; margin: 0;">Order #${order.id} &nbsp;·&nbsp; ${orderDateFormatted}</p>
           </div>
@@ -299,42 +302,52 @@ export class EmailService {
     }
   }
 
-  async sendOtpEmail(toEmail: string, userName: string, otp: string): Promise<boolean> {
+  async sendOtpEmail(toEmail: string, userName: string, otp: string, purpose: 'signup' | 'reset' = 'reset'): Promise<boolean> {
     if (!this.transporter) this.initTransporter();
     if (!this.transporter) return false;
 
+    const fromEmail = this.configService.get<string>('SMTP_EMAIL') || 'contact@kliamo.com';
     const logoAttachments = this.getLogoAttachments();
     const logoSrc = logoAttachments.length > 0 ? 'cid:kliamologo@kliamo' : 'https://kliamo.com/kliamologoNew.png';
     const expiryMinutes = 10;
 
+    const isSignup = purpose === 'signup';
+    const titleText = isSignup ? 'Account Verification OTP' : 'Password Reset OTP';
+    const subjectText = isSignup
+      ? `${otp} is your KLIAMO registration verification code`
+      : `${otp} is your KLIAMO password reset code`;
+
+    const bodyText = isSignup
+      ? `Hi <strong style="color: #4A453E;">${userName}</strong>, thank you for registering with KLIAMO. Use the one-time verification code below to complete your account registration. This code expires in <strong>${expiryMinutes} minutes</strong>.`
+      : `Hi <strong style="color: #4A453E;">${userName}</strong>, we received a request to reset your KLIAMO account password. Use the one-time code below to proceed. This code expires in <strong>${expiryMinutes} minutes</strong>.`;
+
     const html = `
-      <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 520px; margin: 0 auto; background-color: #FDFAF6; border: 1px solid #E8E2D6; border-radius: 16px; overflow: hidden;">
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 520px; margin: 0 auto; background-color: #FDFAF6; border: 1px solid #E8E2D6; border-radius: 16px; overflow: hidden;">
         <!-- Header -->
-        <div style="background: linear-gradient(135deg, #c0bbb1 0%, #e6b8a08a 100%); padding: 32px 24px; text-align: center;">
-          <img src="${logoSrc}" alt="KLIAMO" style="height: 48px; width: auto; object-fit: contain;" />
-          <p style="color: rgba(0,0,0,0.9); margin: 8px 0 0; font-size: 13px; letter-spacing: 1px;">STYLE THAT DEFINES YOU</p>
+        <div style="background-color: #FDFAF6; border-bottom: 1px solid #E8E2D6; padding: 32px 24px; text-align: center;">
+          <img src="${logoSrc}" alt="KLIAMO" style="height: 48px; width: auto; max-width: 200px; display: inline-block; border: 0;" />
+          <p style="color: #F9A37E; font-weight: 700; margin: 8px 0 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase;">STYLE THAT DEFINES YOU</p>
         </div>
 
         <!-- Body -->
         <div style="padding: 36px 32px; background-color: #FFFFFF;">
-          <h2 style="color: #4A453E; font-size: 20px; font-weight: 800; margin: 0 0 8px;">Password Reset OTP</h2>
+          <h2 style="color: #4A453E; font-size: 20px; font-weight: 800; margin: 0 0 8px;">${titleText}</h2>
           <p style="color: #7A736A; font-size: 14px; line-height: 1.6; margin: 0 0 28px;">
-            Hi <strong style="color: #4A453E;">${userName}</strong>, we received a request to reset your KLIAMO account password.
-            Use the one-time code below to proceed. This code expires in <strong>${expiryMinutes} minutes</strong>.
+            ${bodyText}
           </p>
 
           <!-- OTP Box -->
-          <div style="background: linear-gradient(135deg, #FDFAF6 0%, #FFF4EE 100%); border: 2px dashed #F9A37E; border-radius: 12px; padding: 28px; text-align: center; margin: 0 0 28px;">
-            <p style="color: #A89B8A; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 12px;">Your Verification Code</p>
+          <div style="background-color: #FDFAF6; border: 2px dashed #F9A37E; border-radius: 12px; padding: 24px; text-align: center; margin: 0 0 28px;">
+            <p style="color: #A89B8A; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 10px;">Your Verification Code</p>
             <span style="display: inline-block; font-size: 36px; font-weight: 900; letter-spacing: 8px; color: #4A453E; font-family: 'Courier New', monospace;">${otp}</span>
-            <p style="color: #A89B8A; font-size: 11px; margin: 14px 0 0;">Valid for ${expiryMinutes} minutes only</p>
+            <p style="color: #A89B8A; font-size: 11px; margin: 12px 0 0;">Valid for ${expiryMinutes} minutes only</p>
           </div>
 
           <!-- Warning -->
           <div style="background-color: #FFF8F0; border-left: 4px solid #F9A37E; border-radius: 0 8px 8px 0; padding: 14px 16px; margin-bottom: 24px;">
             <p style="color: #7A736A; font-size: 12px; line-height: 1.6; margin: 0;">
-              🔒 <strong>Never share this code</strong> with anyone. KLIAMO team will never ask for your OTP.
-              If you didn't request this, please ignore this email — your password will remain unchanged.
+              🔒 <strong>Never share this code</strong> with anyone. The KLIAMO team will never ask for your OTP.
+              ${isSignup ? "If you didn't initiate this registration, please ignore this email." : "If you didn't request this, please ignore this email — your password will remain unchanged."}
             </p>
           </div>
 
@@ -352,13 +365,13 @@ export class EmailService {
 
     try {
       await this.transporter.sendMail({
-        from: `"KLIAMO" <${this.configService.get<string>('SMTP_EMAIL') || 'contact@kliamo.com'}>`,
+        from: `"KLIAMO Fashion" <${fromEmail}>`,
         to: toEmail,
-        subject: `${otp} is your KLIAMO password reset code`,
+        subject: subjectText,
         html,
-        attachments: logoAttachments,
+        ...(logoAttachments.length > 0 ? { attachments: logoAttachments } : {}),
       });
-      this.logger.log(`OTP email sent to ${toEmail}`);
+      this.logger.log(`OTP email sent to ${toEmail} for ${purpose}`);
       return true;
     } catch (error: any) {
       this.logger.error(`Failed to send OTP email to ${toEmail}: ${error?.message || error}`);
@@ -366,4 +379,3 @@ export class EmailService {
     }
   }
 }
-
