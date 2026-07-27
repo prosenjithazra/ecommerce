@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Upload, X, ImagePlus, Save, Package, Loader2, Link2 } from "lucide-react";
+import { ArrowLeft, Upload, X, ImagePlus, Save, Package, Loader2, Link2, Star } from "lucide-react";
 import { AdminTopbar } from "../../../AdminSidebar";
 import { useApp } from "../../../../../components/AppContext";
 import { getApiUrl } from "../../../../../components/ApiConfig";
@@ -45,6 +45,8 @@ export default function EditProductPage() {
     selectedSizes: [] as string[],
     selectedColors: [] as string[],
     tag: "",
+    rating: 5,
+    reviewsCount: 0,
   });
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [existingImages, setExistingImages] = useState<string[]>([]);
@@ -82,6 +84,8 @@ export default function EditProductPage() {
           selectedSizes: product.sizes || [],
           selectedColors: (product.colors || []).map((c: any) => c.name),
           tag: product.tag || "",
+          rating: typeof product.rating === 'number' ? product.rating : 5,
+          reviewsCount: typeof product.reviewsCount === 'number' ? product.reviewsCount : 0,
         });
         setExistingImages(product.images || [product.image].filter(Boolean));
         setLoading(false);
@@ -141,7 +145,9 @@ export default function EditProductPage() {
       sizes: form.selectedSizes,
       colors,
       image: newImages[0]?.preview || existingImages[0] || "",
-      images: [...existingImages, ...newImages.map((img) => img.preview)]
+      images: [...existingImages, ...newImages.map((img) => img.preview)],
+      rating: form.rating,
+      reviewsCount: form.reviewsCount,
     };
 
     const targetId = productId || slug;
@@ -400,6 +406,33 @@ export default function EditProductPage() {
                     <p className="text-[9px] text-zinc-500 mt-1">
                       Mapped color_size keys ensure orders pull automatically from Qikink My Products Library (`search_from_my_products: 1`).
                     </p>
+                  </div>
+                </div>
+
+                {/* Rating & Reviews */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelCls}>Rating (1–5)</label>
+                    <div className="flex gap-1 mt-1">
+                      {[1,2,3,4,5].map(star => (
+                        <button key={star} type="button" onClick={() => setForm(p => ({ ...p, rating: star }))} className="focus:outline-none">
+                          <Star className={`w-6 h-6 transition-colors ${star <= form.rating ? 'text-amber-400 fill-amber-400' : 'text-zinc-200 fill-zinc-200'}`} />
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[9px] text-zinc-400 mt-1">Shown as star rating on product page</p>
+                  </div>
+                  <div>
+                    <label className={labelCls}>Customer Reviews Count</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={form.reviewsCount}
+                      onChange={(e) => setForm(p => ({ ...p, reviewsCount: parseInt(e.target.value) || 0 }))}
+                      placeholder="e.g. 128"
+                      className={inputCls}
+                    />
+                    <p className="text-[9px] text-zinc-400 mt-1">Number of customer reviews shown</p>
                   </div>
                 </div>
 

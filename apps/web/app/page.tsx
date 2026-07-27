@@ -393,6 +393,8 @@ export default function HomePage() {
   const [productsLoading, setProductsLoading] = useState(true);
   const [activeProductIdx, setActiveProductIdx] = useState(0);
   const mobileProductScrollRef = React.useRef<HTMLDivElement>(null);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [testimonialsLoading, setTestimonialsLoading] = useState(true);
 
   React.useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 900);
@@ -408,12 +410,15 @@ export default function HomePage() {
           setGallery(data);
         }
       })
-      .catch(() => {
-        // Fallback quietly
-      })
-      .finally(() => {
-        setGalleryLoading(false);
-      });
+      .catch(() => {})
+      .finally(() => { setGalleryLoading(false); });
+
+    setTestimonialsLoading(true);
+    fetch(getApiUrl('/testimonials'))
+      .then(res => res.ok ? res.json() : [])
+      .then(data => { if (Array.isArray(data) && data.length > 0) setTestimonials(data); })
+      .catch(() => {})
+      .finally(() => setTestimonialsLoading(false));
 
     setProductsLoading(true);
     setCategoriesLoading(true);
@@ -547,11 +552,7 @@ export default function HomePage() {
     { q: "How long does shipping take?",          a: "Production takes 2-3 business days. Domestic shipping takes 3-5 days. Express options are available at checkout." },
   ];
 
-  const reviews = [
-    { name: "Alex Mercer",     rating: 5, date: "2 days ago",   comment: "Print quality exceeded expectations! Vibrant colors and super soft fabric.", verified: true },
-    { name: "Sarah Jenkins",   rating: 5, date: "1 week ago",   comment: "Intuitive designer and incredibly fast delivery. Outstanding service!",       verified: true },
-    { name: "Marcus Thorne",   rating: 4, date: "2 weeks ago",  comment: "Great material, lovely fit. The canvas text editor is really fun to use.",    verified: true },
-  ];
+
 
   return (
     <div className="space-y-8 sm:space-y-16 pb-10 sm:pb-16">
@@ -732,17 +733,35 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── CUSTOMER REVIEWS ── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
         <div className="text-center">
           <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">Loved by Creators</h2>
           <p className="text-xs text-[#7A736A] mt-1">See what our customers have designed.</p>
         </div>
-        <Slider desktopCols={3}>
-          {reviews.map((rev) => (
-            <ReviewCard key={rev.name} name={rev.name} rating={rev.rating} date={rev.date} comment={rev.comment} verified={rev.verified} />
-          ))}
-        </Slider>
+        {testimonialsLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1,2,3].map(i => (
+              <div key={i} className="p-4 border border-[#E8E2D6] rounded-lg bg-white space-y-3 animate-pulse">
+                <div className="h-3 bg-zinc-100 rounded w-1/2" />
+                <div className="h-2 bg-zinc-100 rounded w-1/3" />
+                <div className="h-8 bg-zinc-100 rounded" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <Slider desktopCols={3}>
+            {testimonials.map((rev) => (
+              <ReviewCard
+                key={rev.id}
+                name={rev.name}
+                rating={rev.rating}
+                date={new Date(rev.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                comment={rev.comment}
+                verified={true}
+              />
+            ))}
+          </Slider>
+        )}
       </section>
 
       {/* ── INSTAGRAM GALLERY ── */}

@@ -21,6 +21,7 @@ import {
   Settings,
   Newspaper,
   Tag,
+  Star,
 } from "lucide-react";
 import { InstagramIcon } from "../../components/BrandIcons";
 import { useApp } from "../../components/AppContext";
@@ -37,6 +38,7 @@ const mainMenuItems = [
   { href: "/admin/contact", label: "Contact Queries", icon: Mail, exact: false },
   { href: "/admin/newsletter", label: "Newsletter", icon: Newspaper, exact: false },
   { href: "/admin/gallery", label: "Gallery (#Wear)", icon: InstagramIcon, exact: false },
+  { href: "/admin/testimonials", label: "Testimonials", icon: Star, exact: false },
   { href: "/admin/settings", label: "Store Settings", icon: Settings, exact: false },
 ];
 

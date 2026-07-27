@@ -142,6 +142,7 @@ interface AppContextType {
   searchQuery: string;
   isDarkMode: boolean;
   currentUser: { name: string; email: string; phone?: string; id?: string; role?: string; avatar?: string; preferences?: any } | null;
+  authToken: string | null;
   setSearchQuery: (q: string) => void;
   toggleDarkMode: () => void; // kept for backward compat, no-op
   showToast: (title: string, message: string, type?: 'success' | 'error' | 'info') => void;
@@ -252,6 +253,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const isDarkMode = false; // dark mode removed
   const toggleDarkMode = () => {}; // no-op kept for backward compat
   const [currentUser, setCurrentUser] = useState<{ name: string; email: string; phone?: string; id?: string; role?: string; avatar?: string; preferences?: any } | null>(null);
+  const [authToken, setAuthToken] = useState<string | null>(
+    typeof window !== 'undefined' ? localStorage.getItem('token') : null
+  );
   const [profileLoading, setProfileLoading] = useState(false);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsResponseTime, setSettingsResponseTime] = useState<number | null>(null);
@@ -856,6 +860,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem('token');
     localStorage.removeItem('wishlist');
     setCurrentUser(null);
+    setAuthToken(null);
     setCart([]);
     setWishlist([]); // clear local state — wishlist stays in MongoDB for next login
     showToast('Logged Out', 'You have been logged out of your account.', 'info');
@@ -875,6 +880,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return { success: false, error: errorMsg };
       }
       localStorage.setItem('token', data.token);
+      setAuthToken(data.token);
       setCurrentUser({
         id: data.user.id,
         name: data.user.name,
@@ -970,6 +976,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return false;
       }
       localStorage.setItem("token", data.token);
+      setAuthToken(data.token);
       setCurrentUser({
         id: data.user.id,
         name: data.user.name,
@@ -1084,6 +1091,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       searchQuery,
       isDarkMode,
       currentUser,
+      authToken,
       setSearchQuery,
       toggleDarkMode,
       showToast,

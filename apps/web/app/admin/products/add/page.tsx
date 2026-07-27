@@ -3,7 +3,7 @@
 import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Upload, X, ImagePlus, Save, Package, Link2 } from "lucide-react";
+import { ArrowLeft, Upload, X, ImagePlus, Save, Package, Link2, Star } from "lucide-react";
 import { AdminTopbar } from "../../AdminSidebar";
 import { useApp } from "../../../../components/AppContext";
 import { getApiUrl } from "../../../../components/ApiConfig";
@@ -40,6 +40,8 @@ export default function AddProductPage() {
     selectedSizes: [] as string[],
     selectedColors: [] as string[],
     tag: "",
+    rating: 5,
+    reviewsCount: 0,
   });
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [images, setImages] = useState<{ file: File; preview: string }[]>([]);
@@ -120,6 +122,8 @@ export default function AddProductPage() {
       image: images[0]?.preview || "",
       images: images.map((img) => img.preview),
       sku: form.sku.trim() || "SKU-" + Math.floor(100000 + Math.random() * 900000),
+      rating: form.rating,
+      reviewsCount: form.reviewsCount,
       skuMapping
     };
 
@@ -390,6 +394,33 @@ export default function AddProductPage() {
                     <p className="text-[9px] text-zinc-500 mt-1">
                       Mapped color_size keys ensure orders pull automatically from Qikink My Products Library (`search_from_my_products: 1`).
                     </p>
+                  </div>
+                </div>
+
+                {/* Rating & Reviews */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelCls}>Rating (1–5)</label>
+                    <div className="flex gap-1 mt-1">
+                      {[1,2,3,4,5].map(star => (
+                        <button key={star} type="button" onClick={() => setForm(p => ({ ...p, rating: star }))} className="focus:outline-none">
+                          <Star className={`w-6 h-6 transition-colors ${star <= form.rating ? 'text-amber-400 fill-amber-400' : 'text-zinc-200 fill-zinc-200'}`} />
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[9px] text-zinc-400 mt-1">Shown as star rating on product page</p>
+                  </div>
+                  <div>
+                    <label className={labelCls}>Customer Reviews Count</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={form.reviewsCount}
+                      onChange={(e) => setForm(p => ({ ...p, reviewsCount: parseInt(e.target.value) || 0 }))}
+                      placeholder="e.g. 128"
+                      className={inputCls}
+                    />
+                    <p className="text-[9px] text-zinc-400 mt-1">Number of customer reviews shown</p>
                   </div>
                 </div>
 
