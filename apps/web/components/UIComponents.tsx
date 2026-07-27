@@ -332,9 +332,20 @@ export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => 
   const isMultiItemMobile = childrenArray.length > 1;
   const mobileWidthClass = isMultiItemMobile ? 'w-[78%] min-w-[78%]' : 'w-full min-w-full';
 
-  const itemWidthClass = desktopCols === 3
-    ? `${mobileWidthClass} sm:w-[48%] sm:min-w-[48%] md:w-[calc(33.333%-14px)] md:min-w-[calc(33.333%-14px)]`
-    : `${mobileWidthClass} sm:w-[48%] sm:min-w-[48%] lg:w-[calc(25%-15px)] lg:min-w-[calc(25%-15px)]`;
+  let desktopWidthClass = '';
+  if (childrenArray.length === 1) {
+    desktopWidthClass = 'md:w-full md:min-w-full';
+  } else if (childrenArray.length === 2 && desktopCols >= 2) {
+    desktopWidthClass = 'sm:w-[48%] sm:min-w-[48%] md:w-[calc(50%-10px)] md:min-w-[calc(50%-10px)]';
+  } else if (desktopCols === 3) {
+    desktopWidthClass = 'sm:w-[48%] sm:min-w-[48%] md:w-[calc(33.333%-14px)] md:min-w-[calc(33.333%-14px)]';
+  } else {
+    desktopWidthClass = 'sm:w-[48%] sm:min-w-[48%] lg:w-[calc(25%-15px)] lg:min-w-[calc(25%-15px)]';
+  }
+
+  const itemWidthClass = `${mobileWidthClass} ${desktopWidthClass}`;
+
+  const showDotsOnDesktop = childrenArray.length > desktopCols;
 
   return (
     <div className="relative group/slider w-full">
@@ -353,7 +364,7 @@ export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => 
 
       {/* Dot Indicators */}
       {childrenArray.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-2">
+        <div className={`flex justify-center gap-1.5 mt-2 ${showDotsOnDesktop ? '' : 'md:hidden'}`}>
           {Array.from({ length: childrenArray.length }).map((_, idx) => (
             <button
               key={idx}
