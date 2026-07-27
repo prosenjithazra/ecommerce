@@ -44,6 +44,37 @@ export default function AdminOrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showRawJson, setShowRawJson] = useState(false);
 
+  // Qikink Live API state
+  const [qikinkDetails, setQikinkDetails] = useState<any | null>(null);
+  const [qikinkLoading, setQikinkLoading] = useState(false);
+  const [qikinkError, setQikinkError] = useState<string | null>(null);
+
+  const fetchQikinkDetails = async (orderId: string) => {
+    setQikinkLoading(true);
+    setQikinkError(null);
+    try {
+      const res = await fetch(`/api/qikink/orders?orderId=${encodeURIComponent(orderId)}`);
+      const data = await res.json();
+      if (data.success && data.order) {
+        setQikinkDetails(data.order);
+      } else {
+        setQikinkError(data.error || 'Qikink order sync pending or not found in partners account.');
+      }
+    } catch (err: any) {
+      setQikinkError(err.message || 'Failed to connect to Qikink Print-On-Demand API.');
+    } finally {
+      setQikinkLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedOrder) {
+      setQikinkDetails(null);
+      setQikinkError(null);
+      fetchQikinkDetails(selectedOrder.id);
+    }
+  }, [selectedOrder]);
+
   useEffect(() => {
     fetch(getApiUrl("/orders"))
       .then(res => {
@@ -264,6 +295,73 @@ export default function AdminOrdersPage() {
                     Reason for Return: <span className="font-extrabold text-violet-700">{selectedOrder.returnReason}</span>
                   </div>
                 )}
+              </div>
+
+              {/* Qikink POD Live Sync Status Card */}
+              <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 text-white rounded-xl p-4 space-y-3 shadow-md border border-zinc-700">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-400">
+                      Qikink Print-On-Demand Status
+                    </h4>
+                  </div>
+                  <button
+                    onClick={() => fetchQikinkDetails(selectedOrder.id)}
+                    disabled={qikinkLoading}
+                    className="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-white rounded-md text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                  >
+                    {qikinkLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Tag className="w-3 h-3 text-emerald-400" />}
+                    Refresh Live API
+                  </button>
+                </div>
+
+                {qikinkLoading ? (
+                  <div className="flex items-center gap-2 py-2 text-xs text-zinc-300">
+                    <Loader2 className="w-4 h-4 animate-spin text-[#F9A37E]" />
+                    <span>Connecting to Qikink Print-On-Demand API (https://api.qikink.com)...</span>
+                  </div>
+                ) : qikinkDetails ? (
+                  <div className="space-y-2 text-xs border-t border-zinc-700/80 pt-2.5 font-mono">
+                    <div className="flex justify-between">
+                      <span className="text-zinc-400">Qikink Order ID:</span>
+                      <span className="font-extrabold text-amber-300">{qikinkDetails.order_id}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-400">Order Number:</span>
+                      <span className="font-bold text-zinc-200">{qikinkDetails.number || selectedOrder.id}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-400">POD Status:</span>
+                      <span className="font-black px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase text-[10px]">
+                        {qikinkDetails.status}
+                      </span>
+                    </div>
+                    {qikinkDetails.shipping_type && (
+                      <div className="flex justify-between">
+                        <span className="text-zinc-400">Shipping Type:</span>
+                        <span className="text-zinc-200">{qikinkDetails.shipping_type}</span>
+                      </div>
+                    )}
+                    {qikinkDetails.payment_type && (
+                      <div className="flex justify-between">
+                        <span className="text-zinc-400">Payment Type:</span>
+                        <span className="text-zinc-200">{qikinkDetails.payment_type}</span>
+                      </div>
+                    )}
+                    {qikinkDetails.total_order_value && (
+                      <div className="flex justify-between">
+                        <span className="text-zinc-400">Total Value:</span>
+                        <span className="text-emerald-400 font-bold">₹{qikinkDetails.total_order_value}</span>
+                      </div>
+                    )}
+                  </div>
+                ) : qikinkError ? (
+                  <div className="text-[11px] text-amber-300 bg-amber-950/40 p-2.5 rounded-lg border border-amber-500/30">
+                    <p className="font-bold">Sync Info:</p>
+                    <p className="text-zinc-300 mt-0.5">{qikinkError}</p>
+                  </div>
+                ) : null}
               </div>
 
               {/* Customer Info */}

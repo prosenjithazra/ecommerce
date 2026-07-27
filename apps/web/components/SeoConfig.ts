@@ -9,7 +9,7 @@ export interface SeoOptions {
   title: string;
   description: string;
   path: string;
-  ogType?: 'website' | 'article' | 'product';
+  ogType?: 'website' | 'article';
   ogImage?: string;
   noIndex?: boolean;
   keywords?: string[];

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Mail, Sparkles, Instagram, Facebook, Twitter, Clock } from 'lucide-react';
+import { ArrowRight, Mail, Sparkles, Clock } from 'lucide-react';
+import { FacebookIcon, InstagramIcon, YoutubeIcon } from '../../components/BrandIcons';
 import { useApp } from '../../components/AppContext';
 import { getApiUrl } from '../../components/ApiConfig';
 
@@ -154,14 +155,14 @@ export default function ComingSoonPage() {
         <div className="pt-6 border-t border-[#E8E2D6] flex flex-col items-center gap-4">
           <p className="text-[10px] font-black text-[#A89B8A] uppercase tracking-widest">Stay Connected</p>
           <div className="flex gap-4">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full bg-white border border-[#E8E2D6] text-[#7A736A] hover:text-[#F9A37E] hover:border-[#F9A37E] transition-all shadow-sm">
-              <Instagram className="w-4 h-4" />
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full bg-white border border-[#E8E2D6] text-[#7A736A] hover:text-[#F9A37E] hover:border-[#F9A37E] transition-all shadow-sm" aria-label="Facebook">
+              <FacebookIcon className="w-4 h-4" />
             </a>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full bg-white border border-[#E8E2D6] text-[#7A736A] hover:text-[#F9A37E] hover:border-[#F9A37E] transition-all shadow-sm">
-              <Facebook className="w-4 h-4" />
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full bg-white border border-[#E8E2D6] text-[#7A736A] hover:text-[#F9A37E] hover:border-[#F9A37E] transition-all shadow-sm" aria-label="YouTube">
+              <YoutubeIcon className="w-4 h-4" />
             </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full bg-white border border-[#E8E2D6] text-[#7A736A] hover:text-[#F9A37E] hover:border-[#F9A37E] transition-all shadow-sm">
-              <Twitter className="w-4 h-4" />
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full bg-white border border-[#E8E2D6] text-[#7A736A] hover:text-[#F9A37E] hover:border-[#F9A37E] transition-all shadow-sm" aria-label="Instagram">
+              <InstagramIcon className="w-4 h-4" />
             </a>
           </div>
         </div>

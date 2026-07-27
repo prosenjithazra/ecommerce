@@ -16,8 +16,21 @@ export default function OrderDetailPage() {
   const [cancelOpen, setCancelOpen] = useState(false);
   const [order, setOrder] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [qikinkPodDetails, setQikinkPodDetails] = useState<any | null>(null);
 
   const orderId = (params?.id as string) || "";
+
+  useEffect(() => {
+    if (!orderId) return;
+    fetch(`/api/qikink/orders?orderId=${encodeURIComponent(orderId)}`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.success && data?.order) {
+          setQikinkPodDetails(data.order);
+        }
+      })
+      .catch(() => {});
+  }, [orderId]);
 
   useEffect(() => {
     // 1. First look in context orders
@@ -267,6 +280,23 @@ export default function OrderDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* Live Fulfillment Status Card */}
+          {qikinkPodDetails && (
+            <div className="bg-[#FDFAF6] dark:bg-zinc-850 border border-[#F9A37E]/30 dark:border-zinc-700 rounded-2xl p-4 sm:p-5 shadow-xs space-y-2.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase text-[#e8855a] tracking-wider">Fulfillment Status</span>
+                <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 uppercase">
+                  {qikinkPodDetails.status}
+                </span>
+              </div>
+              <div className="space-y-1 text-zinc-600 dark:text-zinc-300 text-[11px] font-medium">
+                <p>Tracking Reference: <span className="font-extrabold text-zinc-900 dark:text-white font-mono">{qikinkPodDetails.order_id}</span></p>
+                {qikinkPodDetails.shipping_type && <p>Shipping Method: <span className="font-bold">{qikinkPodDetails.shipping_type}</span></p>}
+                {qikinkPodDetails.created_on && <p>Processing Date: <span className="font-bold">{qikinkPodDetails.created_on}</span></p>}
+              </div>
+            </div>
+          )}
 
           {/* Cancellation Option */}
           {isCancellable && (

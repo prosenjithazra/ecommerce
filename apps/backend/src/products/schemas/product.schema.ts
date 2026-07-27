@@ -53,6 +53,12 @@ export class Product {
   @Prop({ default: '' })
   slug: string;
 
+  @Prop({ type: Object, default: {} })
+  skuMapping?: Record<string, string>;
+
+  @Prop({ default: true })
+  isQikinkSynced?: boolean;
+
   @Prop()
   createdAt?: Date;
 

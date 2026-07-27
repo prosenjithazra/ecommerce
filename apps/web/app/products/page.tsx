@@ -40,17 +40,28 @@ function ProductsCatalog() {
 
   useEffect(() => {
     fetch(getApiUrl("/products"))
-      .then(res => {
-        if (res.ok) return res.json();
-        throw new Error("Failed to load products");
-      })
+      .then(res => (res.ok ? res.json() : []))
       .then(data => {
-        setProducts(data);
-        setLoading(false);
+        if (Array.isArray(data) && data.length > 0) {
+          setProducts(data);
+          setLoading(false);
+        } else {
+          return fetch('/api/qikink/products')
+            .then(r => r.json())
+            .then(qData => {
+              setProducts(qData.products || []);
+              setLoading(false);
+            });
+        }
       })
-      .catch(err => {
-        console.error("Error loading products:", err);
-        setLoading(false);
+      .catch(() => {
+        fetch('/api/qikink/products')
+          .then(r => r.json())
+          .then(qData => {
+            setProducts(qData.products || []);
+            setLoading(false);
+          })
+          .catch(() => setLoading(false));
       });
   }, []);
 

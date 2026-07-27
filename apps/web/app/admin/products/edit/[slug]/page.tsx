@@ -35,6 +35,8 @@ export default function EditProductPage() {
   const [form, setForm] = useState({
     name: "",
     slug: "",
+    sku: "",
+    skuMappingStr: "",
     price: "",
     originalPrice: "",
     category: "T-Shirts",
@@ -53,9 +55,16 @@ export default function EditProductPage() {
   useEffect(() => {
     if (!slug) return;
     fetch(getApiUrl(`/products/slug/${slug}`))
-      .then(res => {
-        if (res.ok) return res.json();
-        return fetch(getApiUrl(`/products/${slug}`)).then(r => r.ok ? r.json() : null);
+      .then(async (res) => {
+        if (res.ok) {
+          const text = await res.text();
+          return text && text.trim() ? JSON.parse(text) : null;
+        }
+        return fetch(getApiUrl(`/products/${slug}`)).then(async (r) => {
+          if (!r.ok) return null;
+          const t = await r.text();
+          return t && t.trim() ? JSON.parse(t) : null;
+        });
       })
       .then(product => {
         if (!product) throw new Error("Failed to load product details");
@@ -63,6 +72,8 @@ export default function EditProductPage() {
         setForm({
           name: product.name,
           slug: product.slug || slugify(product.name),
+          sku: product.sku || "",
+          skuMappingStr: product.skuMapping && Object.keys(product.skuMapping).length > 0 ? JSON.stringify(product.skuMapping, null, 2) : "",
           price: String(product.price),
           originalPrice: String(product.originalPrice),
           category: product.category,
@@ -99,6 +110,17 @@ export default function EditProductPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    let skuMapping = {};
+    if (form.skuMappingStr.trim()) {
+      try {
+        skuMapping = JSON.parse(form.skuMappingStr);
+      } catch (e) {
+        showToast("Invalid JSON", "Variant SKU Overrides must be a valid JSON object.", "error");
+        setSubmitting(false);
+        return;
+      }
+    }
+
     setSubmitting(true);
     
     const colors = form.selectedColors
@@ -108,6 +130,8 @@ export default function EditProductPage() {
     const payload = {
       name: form.name,
       slug: form.slug || slugify(form.name),
+      sku: form.sku.trim(),
+      skuMapping,
       price: parseFloat(form.price) || 0,
       originalPrice: parseFloat(form.originalPrice) || parseFloat(form.price) || 0,
       category: form.category,
@@ -128,8 +152,11 @@ export default function EditProductPage() {
       },
       body: JSON.stringify(payload)
     })
-      .then(res => {
-        if (res.ok) return res.json();
+      .then(async (res) => {
+        if (res.ok) {
+          const text = await res.text();
+          return text && text.trim() ? JSON.parse(text) : {};
+        }
         throw new Error("Failed to update product");
       })
       .then(() => {
@@ -292,6 +319,90 @@ export default function EditProductPage() {
                     Preview: <span className="text-zinc-600 font-medium">/products/{form.slug || slugify(form.name) || 'product-slug'}</span>
                   </p>
                 </div>
+
+                {/* Qikink My Products Library Mapping */}
+                <div className="bg-amber-50/70 border border-amber-200/80 rounded-lg p-5 shadow-sm space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-amber-500/10 rounded-lg text-amber-700">
+                      <Link2 className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-extrabold text-sm text-zinc-900">Qikink My Products Library Mapping</h3>
+                        <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase tracking-wide">
+                          Synced
+                        </span>
+                      </div>
+                      <p className="text-[11px] font-medium text-amber-800 leading-relaxed mt-1">
+                        For syncing orders from your store to Qikink, make sure to map the products present in your store with the products in the Qikink My Products Library. This step is crucial for the orders to be pulled correctly from your store.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className={labelCls}>
+                        <span className="flex items-center gap-1.5"><Package className="w-3.5 h-3.5 text-[#F9A37E]" /> Primary Qikink Base SKU <span className="text-red-400">*</span></span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={form.sku}
+                        onChange={(e) => setForm((p) => ({ ...p, sku: e.target.value }))}
+                        placeholder="e.g. MVnHs-Wh-S"
+                        className={inputCls}
+                      />
+                      <p className="text-[9px] text-zinc-500 mt-1">
+                        Must match the SKU registered in your Qikink Seller Dashboard.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className={labelCls}>
+                        <span>Quick Variant SKU Generator</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const base = form.sku.trim() || 'PHT-001';
+                          const colors = form.selectedColors.length > 0 ? form.selectedColors : ['White', 'Black'];
+                          const sizes = form.selectedSizes.length > 0 ? form.selectedSizes : ['S', 'M', 'L', 'XL'];
+                          const map: Record<string, string> = {};
+                          const COLOR_MAP: Record<string, string> = { 'White': 'Wh', 'Black': 'Bk', 'Heather Grey': 'Gy', 'Navy Blue': 'Ny', 'Forest Green': 'Gn', 'Crimson Red': 'Rd' };
+                          colors.forEach(c => {
+                            const cCode = COLOR_MAP[c] || c.slice(0, 2).toUpperCase();
+                            sizes.forEach(s => {
+                              map[`${c}_${s}`] = `${base}-${cCode}-${s}`;
+                            });
+                          });
+                          setForm(p => ({ ...p, skuMappingStr: JSON.stringify(map, null, 2) }));
+                          showToast("SKUs Auto-Generated", "Variant SKUs mapped for Qikink My Products Library.", "info");
+                        }}
+                        className="w-full py-3 px-4 bg-white border border-amber-300 hover:bg-amber-100/50 text-amber-900 font-extrabold text-xs rounded-lg transition-all flex items-center justify-center gap-2 shadow-sm"
+                      >
+                        ⚡ Generate Qikink Variant SKUs
+                      </button>
+                      <p className="text-[9px] text-zinc-500 mt-1">Auto-maps color & size variants to standard Qikink format.</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelCls}>
+                      <span className="flex items-center gap-1.5"><Link2 className="w-3.5 h-3.5 text-[#F9A37E]" /> Variant SKU Mappings (JSON)</span>
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={form.skuMappingStr}
+                      onChange={(e) => setForm((p) => ({ ...p, skuMappingStr: e.target.value }))}
+                      placeholder='{"White_S": "MVnHs-Wh-S", "Black_M": "MVnHs-Bk-M"}'
+                      className={inputCls + " resize-none font-mono text-[10px]"}
+                    />
+                    <p className="text-[9px] text-zinc-500 mt-1">
+                      Mapped color_size keys ensure orders pull automatically from Qikink My Products Library (`search_from_my_products: 1`).
+                    </p>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className={labelCls}>Selling Price (₹) <span className="text-red-400">*</span></label>

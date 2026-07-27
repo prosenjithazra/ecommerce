@@ -20,9 +20,9 @@ import {
   Mail,
   Settings,
   Newspaper,
-  Instagram,
   Tag,
 } from "lucide-react";
+import { InstagramIcon } from "../../components/BrandIcons";
 import { useApp } from "../../components/AppContext";
 
 const mainMenuItems = [
@@ -36,7 +36,7 @@ const mainMenuItems = [
   { href: "/admin/about", label: "About Us Page", icon: FileText, exact: false },
   { href: "/admin/contact", label: "Contact Queries", icon: Mail, exact: false },
   { href: "/admin/newsletter", label: "Newsletter", icon: Newspaper, exact: false },
-  { href: "/admin/gallery", label: "Gallery (#Wear)", icon: Instagram, exact: false },
+  { href: "/admin/gallery", label: "Gallery (#Wear)", icon: InstagramIcon, exact: false },
   { href: "/admin/settings", label: "Store Settings", icon: Settings, exact: false },
 ];
 

@@ -329,36 +329,15 @@ export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => 
     }
   };
 
+  const isMultiItemMobile = childrenArray.length > 1;
+  const mobileWidthClass = isMultiItemMobile ? 'w-[78%] min-w-[78%]' : 'w-full min-w-full';
+
   const itemWidthClass = desktopCols === 3
-    ? 'w-full sm:w-[48%] md:w-[calc(33.333%-14px)] min-w-full sm:min-w-[48%] md:min-w-[calc(33.333%-14px)]'
-    : 'w-full sm:w-[48%] lg:w-[calc(25%-15px)] min-w-full sm:min-w-[48%] lg:min-w-[calc(25%-15px)]';
+    ? `${mobileWidthClass} sm:w-[48%] sm:min-w-[48%] md:w-[calc(33.333%-14px)] md:min-w-[calc(33.333%-14px)]`
+    : `${mobileWidthClass} sm:w-[48%] sm:min-w-[48%] lg:w-[calc(25%-15px)] lg:min-w-[calc(25%-15px)]`;
 
   return (
     <div className="relative group/slider w-full">
-      {/* Left Arrow Button */}
-      {canScrollLeft && (
-        <button
-          type="button"
-          onClick={() => scroll('left')}
-          className="absolute -left-3.5 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-white/95 hover:bg-white text-[#4A453E] shadow-md border border-[#E8E2D6] hover:scale-110 transition-all opacity-0 group-hover/slider:opacity-100 flex items-center justify-center cursor-pointer"
-          aria-label="Previous items"
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-      )}
-
-      {/* Right Arrow Button */}
-      {canScrollRight && (
-        <button
-          type="button"
-          onClick={() => scroll('right')}
-          className="absolute -right-3.5 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-white/95 hover:bg-white text-[#4A453E] shadow-md border border-[#E8E2D6] hover:scale-110 transition-all opacity-0 group-hover/slider:opacity-100 flex items-center justify-center cursor-pointer"
-          aria-label="Next items"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      )}
-
       {/* Scrollable Container */}
       <div
         ref={scrollRef}

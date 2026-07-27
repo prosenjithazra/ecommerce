@@ -23,6 +23,9 @@ export class Settings {
   @Prop({ default: 'https://twitter.com/kliamo' })
   twitterUrl: string;
 
+  @Prop({ default: 'https://youtube.com/@kliamo' })
+  youtubeUrl: string;
+
   @Prop({ default: 'https://instagram.com/kliamo' })
   instagramUrl: string;
 

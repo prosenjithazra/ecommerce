@@ -25,6 +25,7 @@ export class SettingsService implements OnModuleInit {
           address: '123 Creative St, New York, NY 10001',
           hours: 'Mon - Fri, 9am - 6pm EST',
           twitterUrl: 'https://twitter.com/kliamo',
+          youtubeUrl: 'https://youtube.com/@kliamo',
           instagramUrl: 'https://instagram.com/kliamo',
           facebookUrl: 'https://facebook.com/kliamo',
           customTshirtPrice: 599,
@@ -50,6 +51,7 @@ export class SettingsService implements OnModuleInit {
         address: '123 Creative St, New York, NY 10001',
         hours: 'Mon - Fri, 9am - 6pm EST',
         twitterUrl: 'https://twitter.com/kliamo',
+        youtubeUrl: 'https://youtube.com/@kliamo',
         instagramUrl: 'https://instagram.com/kliamo',
         facebookUrl: 'https://facebook.com/kliamo',
         customTshirtPrice: 599,
@@ -71,6 +73,7 @@ export class SettingsService implements OnModuleInit {
     if (data.address !== undefined) settings.address = data.address;
     if (data.hours !== undefined) settings.hours = data.hours;
     if (data.twitterUrl !== undefined) settings.twitterUrl = data.twitterUrl;
+    if (data.youtubeUrl !== undefined) settings.youtubeUrl = data.youtubeUrl;
     if (data.instagramUrl !== undefined)
       settings.instagramUrl = data.instagramUrl;
     if (data.facebookUrl !== undefined) settings.facebookUrl = data.facebookUrl;

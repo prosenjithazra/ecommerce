@@ -44,6 +44,12 @@ export class Order {
   @Prop({ default: null })
   returnReason: string;
 
+  @Prop({ default: null })
+  qikinkOrderId: string;
+
+  @Prop({ default: null })
+  qikinkStatus: string;
+
   @Prop()
   createdAt?: Date;
 

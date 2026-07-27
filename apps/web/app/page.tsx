@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getApiUrl } from '../components/ApiConfig';
 import Link from 'next/link';
-import { ArrowRight, Paintbrush, ShieldCheck, Sparkles, ShoppingBag, Flame, Truck, Layers, Leaf, Palette, Play, SlidersHorizontal } from 'lucide-react';
+import { ArrowRight, Paintbrush, ShieldCheck, Sparkles, ShoppingBag, Flame, Truck, Layers, Leaf, Palette, Play, SlidersHorizontal, Printer, Code2, CheckCircle2, Terminal, Loader2, X } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { CategoryCard } from '../components/CategoryCard';
 import { ReviewCard } from '../components/InfoCards';
@@ -379,6 +379,8 @@ const DEFAULT_GALLERY: GalleryItem[] = [
   { id: "g4", mediaUrl: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=500&auto=format&fit=crop&q=80", link: "https://instagram.com", mediaType: "image", isActive: true },
 ];
 
+/* ─── GALLERY DEFINITION ─── */
+
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<'trending' | 'best' | 'new'>('trending');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -418,30 +420,49 @@ export default function HomePage() {
     fetch(getApiUrl("/products"))
       .then(res => (res.ok ? res.json() : []))
       .then(prodData => {
-        if (Array.isArray(prodData) && prodData.length > 0) {
+        const hasProducts = Array.isArray(prodData) && prodData.length > 0;
+        const loadCategories = (prods: any[]) => {
+          return fetch(getApiUrl("/category"))
+            .then(res => (res.ok ? res.json() : []))
+            .then(catData => {
+              if (Array.isArray(catData) && catData.length > 0) {
+                const mapped = catData.map((c: any) => {
+                  const realCount = prods.filter(
+                    (p: any) => p.category?.toLowerCase() === c.name?.toLowerCase()
+                  ).length;
+                  return {
+                    name: c.name,
+                    image: c.image || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80",
+                    count: realCount,
+                    href: `/products?category=${encodeURIComponent(c.name)}`,
+                  };
+                });
+                setCategories(mapped);
+              }
+            });
+        };
+
+        if (hasProducts) {
           setProducts(prodData);
+          return loadCategories(prodData);
+        } else {
+          return fetch('/api/qikink/products')
+            .then(r => r.json())
+            .then(qData => {
+              const qProds = qData.products || [];
+              setProducts(qProds);
+              return loadCategories(qProds);
+            });
         }
-        // Fetch categories and map real-time item counts dynamically from products
-        return fetch(getApiUrl("/category"))
-          .then(res => (res.ok ? res.json() : []))
-          .then(catData => {
-            if (Array.isArray(catData) && catData.length > 0) {
-              const mapped = catData.map((c: any) => {
-                const realCount = (Array.isArray(prodData) ? prodData : []).filter(
-                  (p: any) => p.category?.toLowerCase() === c.name?.toLowerCase()
-                ).length;
-                return {
-                  name: c.name,
-                  image: c.image || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80",
-                  count: realCount,
-                  href: `/products?category=${encodeURIComponent(c.name)}`,
-                };
-              });
-              setCategories(mapped);
-            }
-          });
       })
-      .catch(() => {})
+      .catch(() => {
+        fetch('/api/qikink/products')
+          .then(r => r.json())
+          .then(qData => {
+            setProducts(qData.products || []);
+          })
+          .catch(() => {});
+      })
       .finally(() => {
         setProductsLoading(false);
         setCategoriesLoading(false);

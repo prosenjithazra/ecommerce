@@ -42,6 +42,11 @@ export class ProductsController {
     return this.productsService.update(id, data);
   }
 
+  @Delete('clear/all')
+  async clearAll(): Promise<{ deletedCount: number }> {
+    return this.productsService.removeAll();
+  }
+
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<void> {
     return this.productsService.remove(id);
