@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useApp, Address } from '../../components/AppContext';
 import { Breadcrumb } from '../../components/UIComponents';
 import { User, MapPin, ShieldAlert, KeyRound, Sliders, LogOut, LayoutDashboard, Upload, Camera, X, ShoppingBag, Loader2, Calendar, CreditCard, ExternalLink, ChevronDown, ChevronUp, XCircle, Package, Truck, CheckCircle2, Clock, AlertTriangle, Eye, EyeOff, Tag, Copy, Check } from 'lucide-react';
-
 import { AddressCard } from '../../components/InfoCards';
+import { validatePhoneNumber, sanitizePhoneInput } from '../../utils/phoneValidation';
 import { getApiUrl } from '../../components/ApiConfig';
 import { CustomGarmentPreview } from '../../components/CustomGarmentPreview';
 
@@ -597,9 +597,12 @@ export default function ProfilePage() {
       showToast("Error", "Please enter a valid email address.", "error");
       return;
     }
-    if (phone && !/^\d{10}$/.test(phone.replace(/[\s()-]+/g, ""))) {
-      showToast("Error", "Please enter a valid 10-digit phone number.", "error");
-      return;
+    if (phone) {
+      const phoneCheck = validatePhoneNumber(phone);
+      if (!phoneCheck.isValid) {
+        showToast("Error", phoneCheck.error || "Please enter a valid 10-digit phone number.", "error");
+        return;
+      }
     }
     await updateUserProfile(name, avatar, phone);
   };
@@ -645,6 +648,11 @@ export default function ProfilePage() {
 
   const handleAddressSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const phoneCheck = validatePhoneNumber(addrForm.phone);
+    if (!phoneCheck.isValid) {
+      showToast("Validation Error", phoneCheck.error || "Please enter a valid 10-digit phone number.", "error");
+      return;
+    }
     if (editingAddress) {
       updateAddress({ ...addrForm, id: editingAddress.id });
     } else {
@@ -993,10 +1001,13 @@ export default function ProfilePage() {
               <div>
                 <label className="block text-xs font-bold text-zinc-650 mb-1.5">Phone Number</label>
                 <input
-                  type="text"
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={10}
+                  placeholder="9876543210"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
+                  onChange={(e) => setPhone(sanitizePhoneInput(e.target.value))}
+                  className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-900 dark:text-white"
                 />
               </div>
               <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-lg transition-all">
@@ -1039,10 +1050,12 @@ export default function ProfilePage() {
                     />
                     <input
                       type="tel"
-                      placeholder="Phone"
+                      inputMode="numeric"
+                      maxLength={10}
+                      placeholder="Phone (10 digits)"
                       required
                       value={addrForm.phone}
-                      onChange={(e) => setAddrForm({ ...addrForm, phone: e.target.value })}
+                      onChange={(e) => setAddrForm({ ...addrForm, phone: sanitizePhoneInput(e.target.value) })}
                       className="w-full bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs outline-none"
                     />
                   </div>

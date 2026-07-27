@@ -198,8 +198,14 @@ export default function SignUpPage() {
                 <input
                   id="phone"
                   type="tel"
-                  {...register("phone")}
-                  placeholder="+91 9876543210"
+                  inputMode="numeric"
+                  maxLength={10}
+                  {...register("phone", {
+                    onChange: (e) => {
+                      e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                    },
+                  })}
+                  placeholder="9876543210"
                   className={getInputClass(!!errors.phone)}
                 />
                 {errors.phone && (
@@ -357,12 +363,12 @@ export default function SignUpPage() {
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-[#E8E2D6]" />
                 </div>
-                <div className="relative flex justify-center text-sm">
+                {/* <div className="relative flex justify-center text-sm">
                   <span className="px-3 bg-white text-[#A89B8A]">Or sign up with</span>
-                </div>
+                </div> */}
               </div>
 
-              <GoogleAuthButton text="signup_with" />
+              {/* <GoogleAuthButton text="signup_with" /> */}
             </div>
           )}
 

@@ -6,6 +6,8 @@ import { Breadcrumb } from '../../components/UIComponents';
 import { AddressCard } from '../../components/InfoCards';
 import { MapPin } from 'lucide-react';
 
+import { validatePhoneNumber, sanitizePhoneInput } from '../../utils/phoneValidation';
+
 export default function AddressesPage() {
   const { addresses, addAddress, updateAddress, deleteAddress, setDefaultAddress, showToast } = useApp();
   const [showForm, setShowForm] = useState(false);
@@ -14,8 +16,9 @@ export default function AddressesPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!/^\d{10}$/.test(form.phone.replace(/[\s()-]+/g, ""))) {
-      showToast("Validation Error", "Please enter a valid 10-digit phone number.", "error");
+    const phoneCheck = validatePhoneNumber(form.phone);
+    if (!phoneCheck.isValid) {
+      showToast("Validation Error", phoneCheck.error || "Please enter a valid 10-digit phone number.", "error");
       return;
     }
     if (!/^\d{6}$/.test(form.zip.trim())) {
@@ -82,10 +85,13 @@ export default function AddressesPage() {
             <div>
               <label className="block text-xs font-bold text-zinc-650 mb-1.5">Phone Number</label>
               <input
-                type="text"
+                type="tel"
+                inputMode="numeric"
+                maxLength={10}
+                placeholder="9876543210"
                 required
                 value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                onChange={(e) => setForm({ ...form, phone: sanitizePhoneInput(e.target.value) })}
                 className="w-full bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-800 dark:text-zinc-250"
               />
             </div>

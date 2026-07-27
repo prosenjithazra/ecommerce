@@ -128,12 +128,12 @@ export default function LoginPage() {
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-[#E8E2D6]" />
               </div>
-              <div className="relative flex justify-center text-xs">
+              {/* <div className="relative flex justify-center text-xs">
                 <span className="px-3 bg-white text-[#A89B8A]">Or continue with</span>
-              </div>
+              </div> */}
             </div>
 
-            <GoogleAuthButton text="continue_with" />
+            {/* <GoogleAuthButton text="continue_with" /> */}
           </div>
 
           {/* Bottom Switcher buttons */}

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useApp } from '../../components/AppContext';
 import { Breadcrumb } from '../../components/UIComponents';
 import { CustomGarmentPreview } from '../../components/CustomGarmentPreview';
+import { validatePhoneNumber, sanitizePhoneInput } from '../../utils/phoneValidation';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -66,6 +67,11 @@ export default function CheckoutPage() {
   const handleAddNewAddress = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAddr.fullName || !newAddr.street || !newAddr.city) return;
+    const phoneCheck = validatePhoneNumber(newAddr.phone);
+    if (!phoneCheck.isValid) {
+      showToast("Validation Error", phoneCheck.error || "Please enter a valid 10-digit phone number.", "error");
+      return;
+    }
     addAddress({ ...newAddr, isDefault: false });
     setShowAddForm(false);
     setNewAddr({ fullName: "", street: "", city: "", state: "", zip: "", country: "United States", phone: "" });
@@ -107,8 +113,8 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input type="text" placeholder="Full Name" required value={newAddr.fullName}
                     onChange={(e) => setNewAddr({ ...newAddr, fullName: e.target.value })} className={inputClass} />
-                  <input type="tel" placeholder="Phone Number" required value={newAddr.phone}
-                    onChange={(e) => setNewAddr({ ...newAddr, phone: e.target.value })} className={inputClass} />
+                  <input type="tel" inputMode="numeric" maxLength={10} placeholder="Phone Number (10 digits)" required value={newAddr.phone}
+                    onChange={(e) => setNewAddr({ ...newAddr, phone: sanitizePhoneInput(e.target.value) })} className={inputClass} />
                 </div>
                 <input type="text" placeholder="Street address, Suite, Apartment" required value={newAddr.street}
                   onChange={(e) => setNewAddr({ ...newAddr, street: e.target.value })} className={inputClass} />
