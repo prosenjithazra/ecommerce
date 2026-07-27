@@ -15,7 +15,8 @@ export class EmailService {
 
   private initTransporter() {
     const host = this.configService.get<string>('SMTP_HOST') || 'smtp.hostinger.com';
-    const port = Number(this.configService.get<number>('SMTP_PORT')) || 465;
+    // Use port 587 (STARTTLS) by default — Render blocks port 465 over IPv6
+    const port = Number(this.configService.get<number>('SMTP_PORT')) || 587;
     const user = this.configService.get<string>('SMTP_EMAIL') || 'contact@kliamo.com';
     const pass = this.configService.get<string>('SMTP_PASSWORD') || 'Prosenjit2026@';
 
@@ -27,15 +28,21 @@ export class EmailService {
     this.transporter = nodemailer.createTransport({
       host,
       port,
+      // port 465 = SSL (secure:true), port 587 = STARTTLS (secure:false)
       secure: port === 465,
       auth: {
         user,
         pass,
       },
+      // Force IPv4 — Render does not support outbound IPv6 SMTP connections
+      family: 4,
       tls: {
         rejectUnauthorized: false,
+        ciphers: 'SSLv3',
       },
-    });
+    } as nodemailer.TransportOptions & { family?: number });
+
+    this.logger.log(`SMTP transporter initialized: ${host}:${port} (IPv4 forced)`);
   }
 
   private getLogoAttachments() {
