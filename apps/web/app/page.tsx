@@ -264,7 +264,18 @@ function HeroBanner() {
     );
   }
 
-  const currentSlide = slides[current] || HERO_SLIDES[0]!;
+  const slide = slides[current] || HERO_SLIDES[0]!;
+  const isDarkTheme = !slide.textDark;
+  const hasBgImg = !!(slide.bgImg && slide.bgImg.length > 10);
+  const headline1Color = slide.headline1Color || (isDarkTheme ? '#FFFFFF' : '#2E2B26');
+  const subColor = slide.subColor || (isDarkTheme ? '#D4D4D8' : '#52525B');
+  const badgeColor = slide.badgeColor || slide.accent || '#E5A93B';
+
+  const overlayHex = slide.overlayColor || '#000000';
+  const overlayR = parseInt(overlayHex.slice(1, 3), 16) || 0;
+  const overlayG = parseInt(overlayHex.slice(3, 5), 16) || 0;
+  const overlayB = parseInt(overlayHex.slice(5, 7), 16) || 0;
+  const overlayRgba = (opacity: number) => `rgba(${overlayR},${overlayG},${overlayB},${opacity})`;
 
   return (
     <section
@@ -275,175 +286,109 @@ function HeroBanner() {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className={`relative overflow-hidden select-none min-h-[500px] sm:min-h-[580px] lg:min-h-[640px] flex items-center bg-[#111] ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      className={`relative overflow-hidden select-none w-full bg-[#111] ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      style={{
+        backgroundColor: hasBgImg ? '#111' : (isDarkTheme ? '#111' : (slide.bg || '#F4F4F4')),
+        transition: 'background-color 0.5s ease',
+      }}
     >
-      {/* Slides Container - Stacked for Smooth Fade Effect */}
-      {slides.map((slide, idx) => {
-        const isActive = idx === current;
-        const slideBadges = slide.badges || (
-          (slide.accent === '#1E40AF' || slide.headline2 === 'TO IMPRESS')
-            ? [
-                { icon: "👕", label: "PREMIUM QUALITY\nFABRIC" },
-                { icon: "🖨️", label: "LONG LASTING\nPRINTS" },
-                { icon: "👥", label: "UNISEX\nCOLLECTION" },
-              ]
-            : (!slide.textDark || slide.headline2 === 'REAL YOU.')
-              ? [
-                  { icon: "🌿", label: "SOFT &\nBREATHABLE" },
-                  { icon: "🎨", label: "VIBRANT\nPRINTS" },
-                  { icon: "🛡️", label: "DURABLE\nQUALITY" },
-                ]
-              : [
-                  { icon: "🌿", label: "100%\nCOTTON" },
-                  { icon: "🎨", label: "HIGH QUALITY\nPRINT" },
-                  { icon: "🛡️", label: "DURABLE &\nLONG LASTING" },
-                  { icon: "🚚", label: "FAST\nDELIVERY" },
-                ]
-        );
-        const sDarkTheme = !slide.textDark;
-        const sHasBgImg = !!(slide.bgImg && slide.bgImg.length > 10);
-        const headline1Color = slide.headline1Color || (sDarkTheme ? '#FFFFFF' : '#2E2B26');
-        const subColor = slide.subColor || (sDarkTheme ? '#D4D4D8' : '#52525B');
-        const badgeColor = slide.badgeColor || slide.accent || '#E5A93B';
+      {/* Background Image */}
+      {hasBgImg && (
+        <img
+          key={`bg-${current}`}
+          src={slide.bgImg}
+          alt="banner background"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-700"
+          style={{ objectPosition: 'center', zIndex: 0 }}
+        />
+      )}
 
-        const overlayHex = slide.overlayColor || '#000000';
-        const overlayR = parseInt(overlayHex.slice(1, 3), 16) || 0;
-        const overlayG = parseInt(overlayHex.slice(3, 5), 16) || 0;
-        const overlayB = parseInt(overlayHex.slice(5, 7), 16) || 0;
-        const overlayRgba = (opacity: number) => `rgba(${overlayR},${overlayG},${overlayB},${opacity})`;
+      {/* Dynamic Overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none transition-all duration-700"
+        style={{
+          zIndex: 2,
+          background: hasBgImg
+            ? `linear-gradient(to right, ${overlayRgba(0.92)} 0%, ${overlayRgba(0.45)} 50%, ${overlayRgba(0.38)} 100%)`
+            : (isDarkTheme
+              ? `radial-gradient(circle at 30% 50%, ${overlayRgba(0.55)} 0%, ${overlayRgba(0.35)} 100%)`
+              : `linear-gradient(135deg, ${overlayRgba(0.07)} 0%, ${overlayRgba(0.01)} 100%)`)
+        }}
+      />
 
-        return (
-          <div
-            key={slide.id || idx}
-            className={`absolute inset-0 w-full h-full flex items-center transition-all duration-1000 ease-in-out ${
-              isActive
-                ? 'opacity-100 pointer-events-auto z-10 scale-100'
-                : 'opacity-0 pointer-events-none z-0 scale-95'
-            }`}
-            style={{
-              backgroundColor: sHasBgImg ? '#111' : (sDarkTheme ? '#111' : (slide.bg || '#F4F4F4')),
-              opacity: isActive && isDragging ? Math.max(0.4, 1 - Math.abs(dragOffset) / 400) : undefined,
-              transform: isActive && isDragging ? `translateX(${dragOffset * 0.25}px)` : undefined,
-            }}
-          >
-            {/* Background Image */}
-            {sHasBgImg && (
-              <img
-                src={slide.bgImg}
-                alt="banner background"
-                className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-                style={{ objectPosition: 'center', zIndex: 0 }}
-              />
-            )}
+      {/* Relative Content Grid - Natural Height Flow with Smooth Slide + Fade */}
+      <div
+        key={`slide-${current}`}
+        className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center relative z-10 animate-slide-fade-in transition-all duration-500 ease-out"
+        style={{
+          opacity: isDragging ? Math.max(0.3, 1 - Math.abs(dragOffset) / 350) : undefined,
+          transform: isDragging ? `translateX(${dragOffset * 0.35}px)` : undefined,
+        }}
+      >
+        {/* Left Column: Text & CTA */}
+        <div className="space-y-4 sm:space-y-6 text-center lg:text-left order-1">
+          {slide.badge && (
+            <span
+              className="inline-block text-[10px] sm:text-xs font-black tracking-[0.2em] uppercase px-4 py-1.5 rounded-[36px]"
+              style={{ backgroundColor: badgeColor, color: '#fff' }}
+            >
+              {slide.badge}
+            </span>
+          )}
 
-            {/* Dynamic Overlay */}
-            <div
-              className="absolute inset-0 pointer-events-none"
+          <div className="space-y-2 md:space-y-3">
+            <h1
+              className="text-3xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tight"
               style={{
-                zIndex: 2,
-                background: sHasBgImg
-                  ? `linear-gradient(to right, ${overlayRgba(0.92)} 0%, ${overlayRgba(0.45)} 50%, ${overlayRgba(0.38)} 100%)`
-                  : (sDarkTheme
-                    ? `radial-gradient(circle at 30% 50%, ${overlayRgba(0.55)} 0%, ${overlayRgba(0.35)} 100%)`
-                    : `linear-gradient(135deg, ${overlayRgba(0.07)} 0%, ${overlayRgba(0.01)} 100%)`)
+                fontFamily: "'Faculty Glyphic', sans-serif",
+                color: headline1Color,
+                textShadow: hasBgImg ? '0 2px 12px rgba(0,0,0,0.45)' : 'none',
               }}
-            />
-
-            {/* Content Grid */}
-            <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center relative z-10">
-              
-              {/* Left Column: Text & CTA */}
-              <div className={`space-y-3 md:space-y-6 text-center lg:text-left order-1 lg:order-1 transition-all duration-700 delay-100 ${isActive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
-                {slide.badge && (
-                  <span
-                    className="inline-block text-[10px] font-black tracking-[0.2em] uppercase px-4 py-1.5 rounded-[36px] mb-1"
-                    style={{ backgroundColor: badgeColor, color: '#fff' }}
-                  >
-                    {slide.badge}
-                  </span>
-                )}
-
-                <div className="space-y-[8px] md:space-y-1">
-                  <h1
-                    className="text-3xl sm:text-[65px] lg:text-[70px] font-black leading-none tracking-tight normal"
-                    style={{
-                      fontFamily: "'Faculty Glyphic', sans-serif",
-                      color: headline1Color,
-                      textShadow: sHasBgImg ? '0 2px 12px rgba(0,0,0,0.45)' : 'none',
-                    }}
-                  >
-                    {slide.headline1}
-                  </h1>
-                  <h2
-                    className="text-3xl sm:text-[65px] lg:text-[70px] font-black leading-none tracking-tight normal"
-                    style={{
-                      fontFamily: "'Faculty Glyphic', sans-serif",
-                      color: slide.headline2Color || '#E5A93B',
-                      textShadow: sHasBgImg ? '0 2px 12px rgba(0,0,0,0.45)' : 'none',
-                    }}
-                  >
-                    {slide.headline2}
-                  </h2>
-                </div>
-
-                <p
-                  className="text-sm sm:text-base font-bold leading-relaxed max-w-lg mx-auto lg:mx-0"
-                  style={{ color: subColor }}
-                >
-                  {slide.sub}
-                </p>
-
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-y-4 pt-1">
-                  {slideBadges.map((b: { icon: string; label: string }, bIdx: number) => {
-                    const labelKey = b.label.replace(/\n/g, ' ').trim().toUpperCase();
-                    const IconComp = FEATURE_ICONS[labelKey] || Leaf;
-                    const featureColor = sHasBgImg || sDarkTheme ? '#e4e4e7' : '#3f3f46';
-                    const dividerColor = sHasBgImg || sDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)';
-                    return (
-                      <div key={bIdx} className="flex items-center max-w-[100%] sm:max-w-[30%] w-full">
-                        {bIdx > 0 && (
-                          <div className="hidden sm:block h-8 w-px mx-2 sm:mx-4" style={{ backgroundColor: dividerColor }} />
-                        )}
-                        <div className="flex flex-col items-center lg:items-start gap-1.5 w-full">
-                          <IconComp className="w-5 h-5" style={{ color: featureColor }} strokeWidth={1.8} />
-                          <span
-                            className="text-[9px] w-full font-black tracking-widest uppercase leading-tight text-center lg:text-left"
-                            style={{ color: featureColor }}
-                          >
-                            {b.label}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="flex justify-center lg:justify-start pt-3">
-                  <Link
-                    href="/products"
-                    className="inline-flex items-center gap-2 font-black text-xs md:text-sm px-6 py-3 md:px-8 md:py-4 text-white rounded-md transition-all hover:scale-105 active:scale-95 shadow-lg"
-                    style={{ backgroundColor: slide.accent || '#E5A93B' }}
-                  >
-                    SHOP NOW &rarr;
-                  </Link>
-                </div>
-              </div>
-
-              {/* Right Column: Product Image */}
-              <div className={`relative flex items-center justify-center order-2 lg:order-2 transition-all duration-700 delay-200 ${isActive ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}`}>
-                <img
-                  src={slide.productImg}
-                  alt={slide.headline1}
-                  className="w-64 h-64 sm:w-[380px] sm:h-[380px] lg:w-full lg:h-full max-h-[550px] object-contain drop-shadow-2xl transition-all duration-700 ease-in-out hover:scale-105"
-                />
-              </div>
-            </div>
+            >
+              {slide.headline1}
+            </h1>
+            <h2
+              className="text-3xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tight"
+              style={{
+                fontFamily: "'Faculty Glyphic', sans-serif",
+                color: slide.headline2Color || '#E5A93B',
+                textShadow: hasBgImg ? '0 2px 12px rgba(0,0,0,0.45)' : 'none',
+              }}
+            >
+              {slide.headline2}
+            </h2>
           </div>
-        );
-      })}
+
+          <p
+            className="text-sm sm:text-base font-bold leading-relaxed max-w-lg mx-auto lg:mx-0"
+            style={{ color: subColor }}
+          >
+            {slide.sub}
+          </p>
+
+          <div className="flex justify-center lg:justify-start pt-3">
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 font-black text-xs md:text-sm px-6 py-3 md:px-8 md:py-4 text-white rounded-md transition-all hover:scale-105 active:scale-95 shadow-lg"
+              style={{ backgroundColor: slide.accent || '#E5A93B' }}
+            >
+              SHOP NOW &rarr;
+            </Link>
+          </div>
+        </div>
+
+        {/* Right Column: Product Image */}
+        <div className="relative flex items-center justify-center order-2">
+          <img
+            src={slide.productImg}
+            alt={slide.headline1}
+            className="w-64 h-64 sm:w-[380px] sm:h-[380px] lg:w-full lg:h-full max-h-[500px] object-contain drop-shadow-2xl transition-all duration-700 ease-in-out hover:scale-105"
+          />
+        </div>
+      </div>
 
       {/* Slider Dots */}
-      <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-2.5 z-30">
+      <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 flex items-center justify-center gap-2.5 z-20">
         {slides.map((_, idx) => (
           <button
             key={idx}
@@ -453,7 +398,7 @@ function HeroBanner() {
               width: idx === current ? '24px' : '7px',
               height: '7px',
               borderRadius: '99px',
-              backgroundColor: idx === current ? (currentSlide.accent || '#E5A93B') : 'rgba(255,255,255,0.35)',
+              backgroundColor: idx === current ? (slide.accent || '#E5A93B') : 'rgba(255,255,255,0.35)',
             }}
           />
         ))}

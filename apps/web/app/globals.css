@@ -183,9 +183,20 @@
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
 }
-.animate-subtle-bounce {
-  animation: subtle-bounce 2.2s ease-in-out infinite;
+@keyframes slide-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateX(35px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
 }
+.animate-slide-fade-in {
+  animation: slide-fade-in 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 
 
 

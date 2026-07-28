@@ -67,7 +67,7 @@ export class EmailService {
   private async sendMailWithFallback(mailOptions: nodemailer.SendMailOptions): Promise<boolean> {
     this.lastErrorDetails = '';
 
-    // 1. Try Resend HTTP API if RESEND_API_KEY is configured
+    // 1. Try Resend HTTP API (HTTPS Port 443 - Never blocked by Render)
     const resendApiKey = (this.configService.get<string>('RESEND_API_KEY') || process.env.RESEND_API_KEY || '').trim();
     if (resendApiKey && resendApiKey !== 're_your_api_key_here') {
       try {
@@ -94,15 +94,49 @@ export class EmailService {
           const resJson = await response.json().catch(() => ({}));
           const msg = resJson.message || response.statusText;
           this.logger.warn(`Resend API failed: ${msg}`);
-          this.lastErrorDetails = `Resend API: ${msg}`;
+          this.lastErrorDetails = `Resend API Error: ${msg}`;
         }
       } catch (err: any) {
         this.logger.warn(`Resend API fetch error: ${err?.message || err}`);
-        this.lastErrorDetails = `Resend API: ${err?.message || err}`;
+        this.lastErrorDetails = `Resend API Fetch Error: ${err?.message || err}`;
       }
     }
 
-    // 2. Fall back to SMTP
+    // 2. Try Brevo HTTP API (HTTPS Port 443)
+    const brevoApiKey = (this.configService.get<string>('BREVO_API_KEY') || process.env.BREVO_API_KEY || '').trim();
+    if (brevoApiKey) {
+      try {
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+          method: 'POST',
+          headers: {
+            'api-key': brevoApiKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            sender: { name: 'KLIAMO Fashion', email: 'contact@kliamo.com' },
+            to: (Array.isArray(mailOptions.to) ? mailOptions.to : [mailOptions.to]).map((e: any) => ({ email: String(e) })),
+            subject: mailOptions.subject,
+            htmlContent: mailOptions.html,
+          }),
+        });
+
+        if (response.ok) {
+          this.logger.log(`Email successfully sent via Brevo API to ${mailOptions.to}`);
+          this.lastErrorDetails = '';
+          return true;
+        } else {
+          const resJson = await response.json().catch(() => ({}));
+          const msg = resJson.message || response.statusText;
+          this.logger.warn(`Brevo API failed: ${msg}`);
+          this.lastErrorDetails = `Brevo API Error: ${msg}`;
+        }
+      } catch (err: any) {
+        this.logger.warn(`Brevo API error: ${err?.message || err}`);
+        this.lastErrorDetails = `Brevo API Error: ${err?.message || err}`;
+      }
+    }
+
+    // 3. Fall back to raw SMTP (Ports 465 & 587)
     const user = this.configService.get<string>('SMTP_EMAIL') || 'contact@kliamo.com';
     const pass = this.configService.get<string>('SMTP_PASSWORD') || 'Prosenjit2026@';
     if (!user || !pass) {
@@ -137,8 +171,7 @@ export class EmailService {
           `Fallback SMTP send also failed on port ${fallbackPort}: ${fMsg}`,
           fallbackError?.stack,
         );
-        const resendWarning = !resendApiKey || resendApiKey === 're_your_api_key_here' ? 'RESEND_API_KEY missing in Render environment variables. ' : '';
-        this.lastErrorDetails = `${resendWarning}Primary port ${primaryPort}: ${pMsg} | Fallback port ${fallbackPort}: ${fMsg}`;
+        this.lastErrorDetails = `Render firewall blocks outbound SMTP ports 465 & 587. Please add RESEND_API_KEY to Render Dashboard -> Environment Variables. (SMTP details: Port ${primaryPort}: ${pMsg} | Port ${fallbackPort}: ${fMsg})`;
         return false;
       }
     }
