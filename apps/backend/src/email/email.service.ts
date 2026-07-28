@@ -68,10 +68,10 @@ export class EmailService {
     this.lastErrorDetails = '';
 
     // 1. Try Resend HTTP API if RESEND_API_KEY is configured
-    const resendApiKey = this.configService.get<string>('RESEND_API_KEY');
-    if (resendApiKey) {
+    const resendApiKey = (this.configService.get<string>('RESEND_API_KEY') || process.env.RESEND_API_KEY || '').trim();
+    if (resendApiKey && resendApiKey !== 're_your_api_key_here') {
       try {
-        const fromEmail = this.configService.get<string>('RESEND_FROM_EMAIL') || 'KLIAMO Fashion <onboarding@resend.dev>';
+        const fromEmail = this.configService.get<string>('RESEND_FROM_EMAIL') || process.env.RESEND_FROM_EMAIL || 'KLIAMO Fashion <onboarding@resend.dev>';
         const response = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
@@ -88,6 +88,7 @@ export class EmailService {
 
         if (response.ok) {
           this.logger.log(`Email successfully sent via Resend API to ${mailOptions.to}`);
+          this.lastErrorDetails = '';
           return true;
         } else {
           const resJson = await response.json().catch(() => ({}));
@@ -136,7 +137,8 @@ export class EmailService {
           `Fallback SMTP send also failed on port ${fallbackPort}: ${fMsg}`,
           fallbackError?.stack,
         );
-        this.lastErrorDetails = `Primary port ${primaryPort}: ${pMsg} | Fallback port ${fallbackPort}: ${fMsg}`;
+        const resendWarning = !resendApiKey || resendApiKey === 're_your_api_key_here' ? 'RESEND_API_KEY missing in Render environment variables. ' : '';
+        this.lastErrorDetails = `${resendWarning}Primary port ${primaryPort}: ${pMsg} | Fallback port ${fallbackPort}: ${fMsg}`;
         return false;
       }
     }
