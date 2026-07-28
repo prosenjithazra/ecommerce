@@ -38,7 +38,6 @@ export class EmailService {
       family: 4,
       tls: {
         rejectUnauthorized: false,
-        ciphers: 'SSLv3',
       },
     } as nodemailer.TransportOptions & { family?: number });
 
@@ -381,7 +380,7 @@ export class EmailService {
       this.logger.log(`OTP email sent to ${toEmail} for ${purpose}`);
       return true;
     } catch (error: any) {
-      this.logger.error(`Failed to send OTP email to ${toEmail}: ${error?.message || error}`);
+      this.logger.error(`Failed to send OTP email to ${toEmail}: ${error?.message || error}`, error?.stack);
       return false;
     }
   }

@@ -3,6 +3,7 @@ import {
   ConflictException,
   UnauthorizedException,
   NotFoundException,
+  InternalServerErrorException,
   OnModuleInit,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -349,7 +350,10 @@ export class UserService implements OnModuleInit {
     user.updatedAt = new Date();
     await user.save();
 
-    await this.emailService.sendOtpEmail(user.email, user.name, otp, 'reset');
+    const sent = await this.emailService.sendOtpEmail(user.email, user.name, otp, 'reset');
+    if (!sent) {
+      throw new InternalServerErrorException('Failed to send OTP email. Please try again later.');
+    }
 
     return { message: 'If this email is registered, you will receive an OTP shortly.' };
   }
@@ -437,7 +441,10 @@ export class UserService implements OnModuleInit {
     this.signupOtpStore.set(normalizedEmail, { otp, expiry });
 
     const name = normalizedEmail.split('@')[0] || 'User';
-    await this.emailService.sendOtpEmail(normalizedEmail, name, otp, 'signup');
+    const sent = await this.emailService.sendOtpEmail(normalizedEmail, name, otp, 'signup');
+    if (!sent) {
+      throw new InternalServerErrorException('Failed to send OTP email. Please check server email configuration.');
+    }
 
     return { message: 'OTP sent to your email. It expires in 10 minutes.' };
   }
