@@ -281,6 +281,18 @@ export class OrdersService implements OnModuleInit {
   }
 
   async create(data: Partial<Order>): Promise<Order> {
+    if (data.paymentMethod === 'COD') {
+      const itemsList = Array.isArray(data.itemsJson) ? data.itemsJson : [];
+      const hasCustom = itemsList.some(item => 
+        item.customDesign || 
+        item.productId?.toLowerCase().includes('custom') || 
+        item.name?.toLowerCase().includes('custom')
+      );
+      if (hasCustom) {
+        throw new Error('Cash on Delivery (COD) is not available for custom/personalized products.');
+      }
+    }
+
     const now = new Date();
     const orderId = data.id || ('ORD-' + Math.floor(1000 + Math.random() * 9000));
     

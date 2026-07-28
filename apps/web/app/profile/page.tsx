@@ -4,12 +4,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp, Address } from '../../components/AppContext';
-import { Breadcrumb } from '../../components/UIComponents';
+import { Breadcrumb, Select } from '../../components/UIComponents';
 import { User, MapPin, ShieldAlert, KeyRound, Sliders, LogOut, LayoutDashboard, Upload, Camera, X, ShoppingBag, Loader2, Calendar, CreditCard, ExternalLink, ChevronDown, ChevronUp, XCircle, Package, Truck, CheckCircle2, Clock, AlertTriangle, Eye, EyeOff, Tag, Copy, Check } from 'lucide-react';
-import { AddressCard } from '../../components/InfoCards';
 import { validatePhoneNumber, sanitizePhoneInput } from '../../utils/phoneValidation';
+import { INDIAN_STATES, sanitizePincodeInput, validateIndianPincode, validateIndianState } from '../../utils/addressValidation';
 import { getApiUrl } from '../../components/ApiConfig';
 import { CustomGarmentPreview } from '../../components/CustomGarmentPreview';
+import { AddressCard } from '../../components/InfoCards';
 
 const STATUS_STYLES: Record<string, string> = {
   Delivered: "bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30",
@@ -589,7 +590,8 @@ export default function ProfilePage() {
   // Address inline add/edit state
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [showAddressForm, setShowAddressForm] = useState(false);
-  const [addrForm, setAddrForm] = useState({ fullName: "", street: "", city: "", state: "", zip: "", country: "United States", phone: "", isDefault: false });
+  const [addrForm, setAddrForm] = useState({ fullName: "", street: "", city: "", state: "", zip: "", country: "India", phone: "", isDefault: false });
+  const [addrErrors, setAddrErrors] = useState<Record<string, string>>({});
 
   const handleUpdateInfo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -648,11 +650,41 @@ export default function ProfilePage() {
 
   const handleAddressSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors: Record<string, string> = {};
+
+    if (!addrForm.fullName.trim()) {
+      newErrors.fullName = "Please enter receiver full name.";
+    }
+
     const phoneCheck = validatePhoneNumber(addrForm.phone);
     if (!phoneCheck.isValid) {
-      showToast("Validation Error", phoneCheck.error || "Please enter a valid 10-digit phone number.", "error");
+      newErrors.phone = phoneCheck.error || "Please enter a valid 10-digit phone number.";
+    }
+
+    if (!addrForm.street.trim()) {
+      newErrors.street = "Please enter street address / suite / flat.";
+    }
+
+    if (!addrForm.city.trim()) {
+      newErrors.city = "Please enter city name.";
+    }
+
+    const stateCheck = validateIndianState(addrForm.state);
+    if (!stateCheck.isValid) {
+      newErrors.state = stateCheck.error || "Please select a valid Indian State / UT.";
+    }
+
+    const pinCheck = validateIndianPincode(addrForm.zip);
+    if (!pinCheck.isValid) {
+      newErrors.zip = pinCheck.error || "Please enter a valid 6-digit Indian PIN Code.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setAddrErrors(newErrors);
       return;
     }
+
+    setAddrErrors({});
     if (editingAddress) {
       updateAddress({ ...addrForm, id: editingAddress.id });
     } else {
@@ -660,7 +692,7 @@ export default function ProfilePage() {
     }
     setShowAddressForm(false);
     setEditingAddress(null);
-    setAddrForm({ fullName: "", street: "", city: "", state: "", zip: "", country: "United States", phone: "", isDefault: false });
+    setAddrForm({ fullName: "", street: "", city: "", state: "", zip: "", country: "India", phone: "", isDefault: false });
   };
 
   const handleEditAddressClick = (addr: Address) => {
@@ -1035,63 +1067,117 @@ export default function ProfilePage() {
               </div>
 
               {showAddressForm ? (
-                <form onSubmit={handleAddressSubmit} className="space-y-4 p-4 border border-zinc-200 dark:border-zinc-850 rounded-lg bg-zinc-50 dark:bg-zinc-950/20">
+                <form onSubmit={handleAddressSubmit} noValidate className="space-y-4 p-4 border border-zinc-200 dark:border-zinc-850 rounded-lg bg-zinc-50 dark:bg-zinc-950/20">
                   <h4 className="font-bold text-xs text-zinc-800 dark:text-zinc-200">
                     {editingAddress ? "Edit Address details" : "Add New Address"}
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      placeholder="Receiver name"
-                      required
-                      value={addrForm.fullName}
-                      onChange={(e) => setAddrForm({ ...addrForm, fullName: e.target.value })}
-                      className="w-full bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs outline-none"
-                    />
-                    <input
-                      type="tel"
-                      inputMode="numeric"
-                      maxLength={10}
-                      placeholder="Phone (10 digits)"
-                      required
-                      value={addrForm.phone}
-                      onChange={(e) => setAddrForm({ ...addrForm, phone: sanitizePhoneInput(e.target.value) })}
-                      className="w-full bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs outline-none"
-                    />
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Receiver name"
+                        value={addrForm.fullName}
+                        onChange={(e) => {
+                          setAddrForm({ ...addrForm, fullName: e.target.value });
+                          if (addrErrors.fullName) setAddrErrors(prev => ({ ...prev, fullName: "" }));
+                        }}
+                        className={`w-full bg-white dark:bg-zinc-800 border rounded-lg py-2 px-3.5 text-xs font-semibold text-[#4A453E] dark:text-zinc-200 placeholder:font-normal outline-none focus:outline-none focus:ring-0 ${
+                          addrErrors.fullName ? 'border-red-500 dark:border-red-500' : 'border-[#E8E2D6] dark:border-zinc-700'
+                        }`}
+                      />
+                      {addrErrors.fullName && (
+                        <p className="text-[10px] text-red-500 dark:text-red-400 font-medium mt-1 ml-0.5">{addrErrors.fullName}</p>
+                      )}
+                    </div>
+                    <div>
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        maxLength={10}
+                        placeholder="Phone (10 digits)"
+                        value={addrForm.phone}
+                        onChange={(e) => {
+                          setAddrForm({ ...addrForm, phone: sanitizePhoneInput(e.target.value) });
+                          if (addrErrors.phone) setAddrErrors(prev => ({ ...prev, phone: "" }));
+                        }}
+                        className={`w-full bg-white dark:bg-zinc-800 border rounded-lg py-2 px-3.5 text-xs font-semibold text-[#4A453E] dark:text-zinc-200 placeholder:font-normal outline-none focus:outline-none focus:ring-0 ${
+                          addrErrors.phone ? 'border-red-500 dark:border-red-500' : 'border-[#E8E2D6] dark:border-zinc-700'
+                        }`}
+                      />
+                      {addrErrors.phone && (
+                        <p className="text-[10px] text-red-500 dark:text-red-400 font-medium mt-1 ml-0.5">{addrErrors.phone}</p>
+                      )}
+                    </div>
                   </div>
-                  <input
-                    type="text"
-                    placeholder="Street, suite, flat"
-                    required
-                    value={addrForm.street}
-                    onChange={(e) => setAddrForm({ ...addrForm, street: e.target.value })}
-                    className="w-full bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs outline-none"
-                  />
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Street, suite, flat"
+                      value={addrForm.street}
+                      onChange={(e) => {
+                        setAddrForm({ ...addrForm, street: e.target.value });
+                        if (addrErrors.street) setAddrErrors(prev => ({ ...prev, street: "" }));
+                      }}
+                      className={`w-full bg-white dark:bg-zinc-800 border rounded-lg py-2 px-3.5 text-xs font-semibold text-[#4A453E] dark:text-zinc-200 placeholder:font-normal outline-none focus:outline-none focus:ring-0 ${
+                        addrErrors.street ? 'border-red-500 dark:border-red-500' : 'border-[#E8E2D6] dark:border-zinc-700'
+                      }`}
+                    />
+                    {addrErrors.street && (
+                      <p className="text-[10px] text-red-500 dark:text-red-400 font-medium mt-1 ml-0.5">{addrErrors.street}</p>
+                    )}
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-2">
-                    <input
-                      type="text"
-                      placeholder="City"
-                      required
-                      value={addrForm.city}
-                      onChange={(e) => setAddrForm({ ...addrForm, city: e.target.value })}
-                      className="bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs"
-                    />
-                    <input
-                      type="text"
-                      placeholder="State"
-                      required
-                      value={addrForm.state}
-                      onChange={(e) => setAddrForm({ ...addrForm, state: e.target.value })}
-                      className="bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Zip"
-                      required
-                      value={addrForm.zip}
-                      onChange={(e) => setAddrForm({ ...addrForm, zip: e.target.value })}
-                      className="bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs"
-                    />
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="City"
+                        value={addrForm.city}
+                        onChange={(e) => {
+                          setAddrForm({ ...addrForm, city: e.target.value });
+                          if (addrErrors.city) setAddrErrors(prev => ({ ...prev, city: "" }));
+                        }}
+                        className={`w-full bg-white dark:bg-zinc-800 border rounded-lg py-2 px-3.5 text-xs font-semibold text-[#4A453E] dark:text-zinc-200 placeholder:font-normal outline-none focus:outline-none focus:ring-0 ${
+                          addrErrors.city ? 'border-red-500 dark:border-red-500' : 'border-[#E8E2D6] dark:border-zinc-700'
+                        }`}
+                      />
+                      {addrErrors.city && (
+                        <p className="text-[10px] text-red-500 dark:text-red-400 font-medium mt-1 ml-0.5">{addrErrors.city}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Select
+                        value={addrForm.state}
+                        onChange={(val) => {
+                          setAddrForm({ ...addrForm, state: val });
+                          if (addrErrors.state) setAddrErrors(prev => ({ ...prev, state: "" }));
+                        }}
+                        options={INDIAN_STATES.map((st) => ({ value: st, label: st }))}
+                        placeholder="Select State / UT"
+                        className="w-full"
+                      />
+                      {addrErrors.state && (
+                        <p className="text-[10px] text-red-500 dark:text-red-400 font-medium mt-1 ml-0.5">{addrErrors.state}</p>
+                      )}
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={6}
+                        placeholder="PIN Code (6 digits)"
+                        value={addrForm.zip}
+                        onChange={(e) => {
+                          setAddrForm({ ...addrForm, zip: sanitizePincodeInput(e.target.value) });
+                          if (addrErrors.zip) setAddrErrors(prev => ({ ...prev, zip: "" }));
+                        }}
+                        className={`w-full bg-white dark:bg-zinc-800 border rounded-lg py-2 px-3.5 text-xs font-semibold text-[#4A453E] dark:text-zinc-200 placeholder:font-normal outline-none focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                          addrErrors.zip ? 'border-red-500 dark:border-red-500' : 'border-[#E8E2D6] dark:border-zinc-700'
+                        }`}
+                      />
+                      {addrErrors.zip && (
+                        <p className="text-[10px] text-red-500 dark:text-red-400 font-medium mt-1 ml-0.5">{addrErrors.zip}</p>
+                      )}
+                    </div>
                   </div>
                   <label className="flex items-center gap-2 cursor-pointer pt-2">
                     <input

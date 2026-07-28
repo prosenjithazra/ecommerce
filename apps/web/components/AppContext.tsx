@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { getApiUrl } from './ApiConfig';
 import { useRouter } from 'next/navigation';
 
@@ -36,6 +36,7 @@ export interface CustomDesign {
 export interface CartItem {
   id: string;
   productId: string;
+  slug?: string;
   name: string;
   price: number;
   quantity: number;
@@ -308,6 +309,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const items: CartItem[] = (data.items || []).map((i: any) => ({
               id: i.cartItemId || i.productId,
               productId: i.productId,
+              slug: i.slug || undefined,
               name: i.name,
               price: Number(i.price) || 0,
               quantity: Number(i.quantity) || 1,
@@ -385,6 +387,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const items: CartItem[] = (data.items || []).map((i: any) => ({
         id: i.cartItemId || i.productId,
         productId: i.productId,
+        slug: i.slug || undefined,
         name: i.name,
         price: Number(i.price) || 0,
         quantity: Number(i.quantity) || 1,
@@ -484,6 +487,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           productId: item.productId,
+          slug: item.slug,
           name: item.name,
           image: item.image,
           price: item.price,
@@ -501,6 +505,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const items: CartItem[] = (data.items || []).map((i: any) => ({
         id: i.cartItemId || i.productId,
         productId: i.productId,
+        slug: i.slug || undefined,
         name: i.name,
         price: Number(i.price) || 0,
         quantity: Number(i.quantity) || 1,
@@ -549,38 +554,56 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const updateCartQty = async (id: string, qty: number) => {
+  // Debounce timer refs for cart quantity updates (one timer per cart item id)
+  const updateQtyTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  const updateCartQty = useCallback(async (id: string, qty: number) => {
     if (qty <= 0) { removeFromCart(id); return; }
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     if (!token) return;
-    try {
-      const res = await fetch(getApiUrl(`/cart/item/${id}`), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ quantity: qty }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        showToast('Error', data.message || 'Failed to update quantity.', 'error');
-        return;
-      }
-      const data = await res.json();
-      const items: CartItem[] = (data.items || []).map((i: any) => ({
-        id: i.cartItemId || i.productId,
-        productId: i.productId,
-        name: i.name,
-        price: Number(i.price) || 0,
-        quantity: Number(i.quantity) || 1,
-        image: i.image || '',
-        size: i.size || '',
-        color: i.color || '',
-        customDesign: i.customDesign,
-      }));
-      setCart(items);
-    } catch (err) {
-      showToast('Error', 'Could not connect to cart server.', 'error');
+
+    // Optimistic local update — instant UI feedback
+    setCart(prev => prev.map(item => item.id === id ? { ...item, quantity: qty } : item));
+
+    // Cancel any pending debounce for this item
+    if (updateQtyTimers.current[id]) {
+      clearTimeout(updateQtyTimers.current[id]);
     }
-  };
+
+    // Debounce the actual API call by 600ms
+    updateQtyTimers.current[id] = setTimeout(async () => {
+      try {
+        const res = await fetch(getApiUrl(`/cart/item/${id}`), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ quantity: qty }),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          showToast('Error', data.message || 'Failed to update quantity.', 'error');
+          return;
+        }
+        const data = await res.json();
+        const items: CartItem[] = (data.items || []).map((i: any) => ({
+          id: i.cartItemId || i.productId,
+          productId: i.productId,
+          name: i.name,
+          price: Number(i.price) || 0,
+          quantity: Number(i.quantity) || 1,
+          image: i.image || '',
+          size: i.size || '',
+          color: i.color || '',
+          customDesign: i.customDesign,
+        }));
+        setCart(items);
+      } catch {
+        showToast('Error', 'Could not connect to cart server.', 'error');
+      } finally {
+        delete updateQtyTimers.current[id];
+      }
+    }, 600);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const clearCart = async () => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -721,8 +744,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       color: c.color
     }));
     const subtotal = cart.reduce((acc, c) => acc + c.price * c.quantity, 0);
-    const tax = subtotal * 0.18;
-    const shipping = subtotal > 50 ? 0 : 5.99;
+    const tax = subtotal * 0.05;
+    const shipping = subtotal > 999 ? 0 : 49;
     const total = subtotal + tax + shipping;
 
     const newOrder: Order = {
@@ -861,6 +884,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem('wishlist');
     setCurrentUser(null);
     setAuthToken(null);
+    setAddresses([]);
     setCart([]);
     setWishlist([]); // clear local state — wishlist stays in MongoDB for next login
     showToast('Logged Out', 'You have been logged out of your account.', 'info');
@@ -889,6 +913,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         avatar: data.user.avatar,
         phone: data.user.phone || ''
       });
+      if (data.user.addresses && Array.isArray(data.user.addresses)) {
+        setAddresses(data.user.addresses);
+      }
+      // Re-fetch user profile from backend to ensure all addresses & profile data are 100% in sync
+      fetch(getApiUrl("/user/profile"), {
+        headers: { Authorization: `Bearer ${data.token}` }
+      })
+        .then(r => r.ok ? r.json() : null)
+        .then(prof => {
+          if (prof && Array.isArray(prof.addresses)) {
+            setAddresses(prof.addresses);
+          }
+        })
+        .catch(() => {});
+
       // Restore cart from backend after login
       fetch(getApiUrl('/cart'), { headers: { Authorization: `Bearer ${data.token}` } })
         .then(r => r.ok ? r.json() : null)
@@ -985,6 +1024,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         avatar: data.user.avatar,
         phone: data.user.phone || ''
       });
+      if (data.user.addresses && Array.isArray(data.user.addresses)) {
+        setAddresses(data.user.addresses);
+      }
+      // Re-fetch user profile from backend to ensure all addresses & profile data are 100% in sync
+      fetch(getApiUrl("/user/profile"), {
+        headers: { Authorization: `Bearer ${data.token}` }
+      })
+        .then(r => r.ok ? r.json() : null)
+        .then(prof => {
+          if (prof && Array.isArray(prof.addresses)) {
+            setAddresses(prof.addresses);
+          }
+        })
+        .catch(() => {});
+
       showToast("Welcome to KLIAMO!", `Signed in with Google as ${data.user.email}`, "success");
       return true;
     } catch (err) {

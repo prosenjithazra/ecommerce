@@ -268,11 +268,11 @@ export default function OrderDetailPage() {
               </div>
               <div className="flex justify-between text-zinc-500 font-medium">
                 <span>Subtotal</span>
-                <span className="font-bold text-zinc-800 dark:text-zinc-250">₹{(order.total / 1.18).toFixed(2)}</span>
+                <span className="font-bold text-zinc-800 dark:text-zinc-250">₹{(order.total / 1.05).toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-zinc-500 font-medium">
-                <span>Tax / GST (18%)</span>
-                <span className="font-bold text-zinc-800 dark:text-zinc-250">₹{(order.total - order.total / 1.18).toFixed(2)}</span>
+                <span>Tax / GST (5%)</span>
+                <span className="font-bold text-zinc-800 dark:text-zinc-250">₹{(order.total - order.total / 1.05).toFixed(2)}</span>
               </div>
               <div className="flex justify-between pt-2 border-t border-zinc-150 dark:border-zinc-800 font-extrabold text-sm text-zinc-900 dark:text-white">
                 <span>Total Amount Paid</span>

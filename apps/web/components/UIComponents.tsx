@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ChevronRight, Home, EyeOff, X, ArrowLeft, ArrowRight, Star, AlertTriangle, ChevronDown, Check, ChevronLeft } from 'lucide-react';
+import { ChevronRight, Home, EyeOff, X, ArrowLeft, ArrowRight, Star, AlertTriangle, ChevronDown, Check, ChevronLeft, Search } from 'lucide-react';
 
 /* 1. BREADCRUMB */
 interface BreadcrumbItem { name: string; href?: string; }
@@ -238,54 +238,103 @@ interface SelectProps {
 
 export const Select: React.FC<SelectProps> = ({ value, onChange, options, placeholder = "Select...", className = "" }) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState("");
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        setSearchQuery("");
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  React.useEffect(() => {
+    if (isOpen && searchInputRef.current) {
+      setTimeout(() => searchInputRef.current?.focus(), 50);
+    }
+  }, [isOpen]);
+
   const selectedOption = options.find(opt => opt.value === value);
+
+  const filteredOptions = options.filter(opt =>
+    opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    opt.value.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className={`relative ${className}`} ref={containerRef}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between border border-[#E8E2D6] bg-white rounded-lg py-2 px-3.5 text-xs font-semibold text-[#4A453E] outline-none shadow-sm focus:border-[#F9A37E] transition-all text-left"
+        onClick={() => {
+          setIsOpen(!isOpen);
+          if (!isOpen) setSearchQuery("");
+        }}
+        className="w-full flex items-center justify-between border border-[#E8E2D6] dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg py-2 px-3.5 text-xs font-semibold text-[#4A453E] dark:text-zinc-200 outline-none focus:outline-none focus:ring-0 focus:border-[#E8E2D6] dark:focus:border-zinc-700 hover:border-[#E8E2D6] dark:hover:border-zinc-700 transition-all text-left"
       >
         <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
         <ChevronDown className={`w-4 h-4 text-[#A89B8A] transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 w-full min-w-[8rem] mt-1.5 bg-white border border-[#E8E2D6] rounded-lg shadow-lg p-1 space-y-0.5 animate-fade-in-up duration-150">
-          {options.map((opt) => {
-            const isSelected = opt.value === value;
-            return (
+        <div className="absolute z-50 w-full min-w-[10rem] mt-1.5 bg-white dark:bg-zinc-900 border border-[#E8E2D6] dark:border-zinc-800 rounded-lg shadow-xl overflow-hidden animate-fade-in-up duration-150">
+          {/* Autocomplete Search Header */}
+          <div className="p-1.5 border-b border-[#E8E2D6]/60 dark:border-zinc-800 bg-[#FDFAF6] dark:bg-zinc-900/90 flex items-center gap-1.5">
+            <Search className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0 ml-1" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-transparent text-xs text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 outline-none focus:outline-none focus:ring-0"
+            />
+            {searchQuery && (
               <button
-                key={opt.value}
                 type="button"
-                onClick={() => {
-                  onChange(opt.value);
-                  setIsOpen(false);
-                }}
-                className={`w-full flex items-center justify-between rounded-lg py-2 px-3 text-xs text-left transition-colors ${
-                  isSelected
-                    ? "bg-[#FBD5C1]/30 text-[#E8855A] font-extrabold"
-                    : "text-[#7A736A] hover:bg-[#FDFAF6] hover:text-[#4A453E] font-medium"
-                }`}
+                onClick={() => setSearchQuery("")}
+                className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-0.5"
               >
-                <span className="truncate">{opt.label}</span>
-                {isSelected && <Check className="w-3.5 h-3.5 text-[#E8855A]" />}
+                <X className="w-3 h-3" />
               </button>
-            );
-          })}
+            )}
+          </div>
+
+          {/* Options List */}
+          <div className="p-1 space-y-0.5 max-h-[180px] overflow-y-auto">
+            {filteredOptions.length > 0 ? (
+              filteredOptions.map((opt) => {
+                const isSelected = opt.value === value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      onChange(opt.value);
+                      setIsOpen(false);
+                      setSearchQuery("");
+                    }}
+                    className={`w-full flex items-center justify-between rounded-lg py-2 px-3 text-xs text-left transition-colors ${
+                      isSelected
+                        ? "bg-[#FBD5C1]/30 text-[#E8855A] font-extrabold"
+                        : "text-[#7A736A] dark:text-zinc-300 hover:bg-[#FDFAF6] dark:hover:bg-zinc-800 hover:text-[#4A453E] dark:hover:text-white font-medium"
+                    }`}
+                  >
+                    <span className="truncate">{opt.label}</span>
+                    {isSelected && <Check className="w-3.5 h-3.5 text-[#E8855A]" />}
+                  </button>
+                );
+              })
+            ) : (
+              <div className="py-3 px-3 text-center text-xs text-zinc-400 dark:text-zinc-500">
+                No matching results
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

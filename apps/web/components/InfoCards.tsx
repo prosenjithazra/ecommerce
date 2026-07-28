@@ -1,58 +1,166 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Copy, MapPin, Truck, Calendar, Download, FileText, CheckCircle2 } from 'lucide-react';
+import { Copy, MapPin, Truck, Calendar, Download, FileText, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Address, Order, Transaction, useApp } from './AppContext';
 import { StatusBadge, Rating, Price } from './UIComponents';
 import { CustomGarmentPreview } from './CustomGarmentPreview';
 
-/* 1. PRODUCT GALLERY */
+/* 1. PRODUCT GALLERY (Draggable Fade-Slide Slider) */
 export const ProductGallery: React.FC<{ images: string[]; name: string }> = ({ images, name }) => {
-  const [activeImage, setActiveImage] = useState(images[0] || "");
-  const [zoomStyle, setZoomStyle] = useState<React.CSSProperties>({});
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [dragStartX, setDragStartX] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+
+  const galleryImages = images && images.length > 0 ? images : ["/placeholder.png"];
+  const total = galleryImages.length;
 
   React.useEffect(() => {
-    if (images && images.length > 0) {
-      setActiveImage(images[0] || "");
-    }
+    setActiveIdx(0);
   }, [images]);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - left) / width) * 100;
-    const y = ((e.clientY - top) / height) * 100;
-    setZoomStyle({ transformOrigin: `${x}% ${y}%`, transform: 'scale(2)' });
+  const handleNext = () => {
+    setActiveIdx((prev) => (prev + 1) % total);
+    setDragOffset(0);
+  };
+
+  const handlePrev = () => {
+    setActiveIdx((prev) => (prev - 1 + total) % total);
+    setDragOffset(0);
+  };
+
+  // Mouse Drag Events
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setDragStartX(e.clientX);
+    setIsDragging(true);
+    setDragOffset(0);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || dragStartX === null) return;
+    const diff = e.clientX - dragStartX;
+    setDragOffset(diff);
+  };
+
+  const handleMouseUp = () => {
+    if (isDragging && Math.abs(dragOffset) > 40) {
+      if (dragOffset < 0) {
+        handleNext();
+      } else {
+        handlePrev();
+      }
+    }
+    setIsDragging(false);
+    setDragStartX(null);
+    setDragOffset(0);
+  };
+
+  // Touch Swipe Events
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (touch && e.touches.length === 1) {
+      setDragStartX(touch.clientX);
+      setIsDragging(true);
+      setDragOffset(0);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (touch && isDragging && dragStartX !== null && e.touches.length === 1) {
+      const diff = touch.clientX - dragStartX;
+      setDragOffset(diff);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (isDragging && Math.abs(dragOffset) > 40) {
+      if (dragOffset < 0) {
+        handleNext();
+      } else {
+        handlePrev();
+      }
+    }
+    setIsDragging(false);
+    setDragStartX(null);
+    setDragOffset(0);
   };
 
   return (
     <div className="flex flex-col md:flex-row gap-3">
-      <div className="flex md:flex-col gap-2 order-2 md:order-1 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0">
-        {images.map((img, idx) => (
-          <button
-            key={idx}
-            onClick={() => setActiveImage(img)}
-            className={`relative w-14 h-14 rounded-lg overflow-hidden bg-[#F5F0E8] flex-shrink-0 transition-all focus:outline-none focus-visible:outline-none ${
-              activeImage === img ? 'shadow-sm' : ''
-            }`}
-          >
-            <img src={img} alt={`${name} ${idx}`} width={80} height={80} loading="lazy" className="w-full h-full object-cover" />
-            <div
-              className={`absolute inset-0 rounded-lg border-2 pointer-events-none transition-colors ${
-                activeImage === img ? 'border-[#F9A37E]' : 'border-[#E8E2D6]/40'
+      {/* Thumbnails list */}
+      {total > 1 && (
+        <div className="flex md:flex-col gap-2 order-2 md:order-1 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0">
+          {galleryImages.map((img, idx) => (
+            <button
+              key={idx}
+              onClick={() => { setActiveIdx(idx); setDragOffset(0); }}
+              className={`relative w-14 h-14 rounded-lg overflow-hidden bg-[#F5F0E8] flex-shrink-0 transition-all focus:outline-none ${
+                activeIdx === idx ? 'shadow-sm' : ''
               }`}
-            />
-          </button>
-        ))}
-      </div>
-      <div
-        className="relative aspect-square w-full bg-[#F5F0E8] rounded-lg overflow-hidden cursor-zoom-in order-1 md:order-2 border border-[#E8E2D6]"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={() => setZoomStyle({})}
-      >
-        <img src={activeImage} alt={name} width={600} height={600} style={zoomStyle} className="w-full h-full object-cover transition-transform duration-75" />
-        <div className="absolute bottom-4 right-4 bg-black/50 text-white text-[10px] font-bold py-1 px-2.5 rounded-full pointer-events-none">
-          Hover to Zoom
+            >
+              <img src={img} alt={`${name} thumbnail ${idx + 1}`} width={80} height={80} loading="lazy" className="w-full h-full object-cover" />
+              <div
+                className={`absolute inset-0 rounded-lg border-2 pointer-events-none transition-colors ${
+                  activeIdx === idx ? 'border-[#F9A37E]' : 'border-[#E8E2D6]/40'
+                }`}
+              />
+            </button>
+          ))}
         </div>
+      )}
+
+      {/* Main Image Slider with Drag / Swipe & Cross-Fade Effect */}
+      <div
+        className="relative aspect-square w-full bg-[#F5F0E8] rounded-lg overflow-hidden order-1 md:order-2 border border-[#E8E2D6] select-none touch-pan-y"
+        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        {galleryImages.map((img, idx) => {
+          const isActive = idx === activeIdx;
+          return (
+            <div
+              key={idx}
+              className={`absolute inset-0 w-full h-full transition-all duration-500 ease-out ${
+                isActive
+                  ? 'opacity-100 scale-100 pointer-events-auto z-10'
+                  : 'opacity-0 scale-95 pointer-events-none z-0'
+              }`}
+              style={
+                isActive && dragOffset !== 0
+                  ? {
+                      transform: `translateX(${dragOffset}px) scale(0.98)`,
+                      opacity: Math.max(0.4, 1 - Math.abs(dragOffset) / 300),
+                      transition: 'none',
+                    }
+                  : undefined
+              }
+            >
+              <img
+                src={img}
+                alt={`${name} slide ${idx + 1}`}
+                width={600}
+                height={600}
+                draggable={false}
+                className="w-full h-full object-cover pointer-events-none select-none"
+              />
+            </div>
+          );
+        })}
+
+        {/* Slide Counter Badge */}
+        {total > 1 && (
+          <div className="absolute bottom-3 right-3 z-20 bg-black/60 backdrop-blur-xs text-white text-[10px] font-extrabold py-1 px-2.5 rounded-full pointer-events-none">
+            {activeIdx + 1} / {total}
+          </div>
+        )}
       </div>
     </div>
   );

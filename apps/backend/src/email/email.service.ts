@@ -355,7 +355,7 @@ export class EmailService {
       `;
     }
 
-    const subtotal = Number(order.total) / 1.18;
+    const subtotal = Number(order.total) / 1.05;
     const taxGst = Number(order.total) - subtotal;
     const orderDateFormatted = order.date || (order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN') : new Date().toLocaleDateString('en-IN'));
 
@@ -409,7 +409,7 @@ export class EmailService {
                   <td style="padding: 4px 0; text-align: right; font-weight: 600;">₹${subtotal.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 4px 0;">Tax / GST (18%)</td>
+                  <td style="padding: 4px 0;">Tax / GST (5%)</td>
                   <td style="padding: 4px 0; text-align: right; font-weight: 600;">₹${taxGst.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</td>
                 </tr>
                 <tr>

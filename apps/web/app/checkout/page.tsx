@@ -2,10 +2,13 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Info } from 'lucide-react';
 import { useApp } from '../../components/AppContext';
-import { Breadcrumb } from '../../components/UIComponents';
+import { Breadcrumb, Select } from '../../components/UIComponents';
 import { CustomGarmentPreview } from '../../components/CustomGarmentPreview';
 import { validatePhoneNumber, sanitizePhoneInput } from '../../utils/phoneValidation';
+import { INDIAN_STATES, sanitizePincodeInput, validateIndianPincode, validateIndianState } from '../../utils/addressValidation';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -26,7 +29,7 @@ export default function CheckoutPage() {
   const [orderNotes, setOrderNotes] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [newAddr, setNewAddr] = useState({
-    fullName: "", street: "", city: "", state: "", zip: "", country: "United States", phone: ""
+    fullName: "", street: "", city: "", state: "", zip: "", country: "India", phone: ""
   });
 
   React.useEffect(() => {
@@ -58,23 +61,44 @@ export default function CheckoutPage() {
   }
 
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const tax = subtotal * 0.18;
-  const shippingFee = shippingMethod === 'express' ? 14.99 : (subtotal > 50 ? 0 : 5.99);
+  const tax = subtotal * 0.05;
+  const shippingFee = shippingMethod === 'express' ? 99 : (subtotal > 999 ? 0 : 49);
   const total = subtotal + tax + shippingFee;
 
-  const inputClass = "w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg py-2.5 px-4 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E] placeholder-[#A89B8A]";
+  const inputClass = "w-full bg-white dark:bg-zinc-800 border border-[#E8E2D6] dark:border-zinc-700 rounded-lg py-2.5 px-4 text-xs outline-none focus:outline-none focus:ring-0 text-[#4A453E] dark:text-zinc-200 placeholder-[#A89B8A]";
 
   const handleAddNewAddress = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newAddr.fullName || !newAddr.street || !newAddr.city) return;
+    if (!newAddr.fullName.trim()) {
+      showToast("Validation Error", "Please enter receiver full name.", "error");
+      return;
+    }
     const phoneCheck = validatePhoneNumber(newAddr.phone);
     if (!phoneCheck.isValid) {
       showToast("Validation Error", phoneCheck.error || "Please enter a valid 10-digit phone number.", "error");
       return;
     }
+    if (!newAddr.street.trim()) {
+      showToast("Validation Error", "Please enter street address / suite / flat.", "error");
+      return;
+    }
+    if (!newAddr.city.trim()) {
+      showToast("Validation Error", "Please enter city name.", "error");
+      return;
+    }
+    const stateCheck = validateIndianState(newAddr.state);
+    if (!stateCheck.isValid) {
+      showToast("Validation Error", stateCheck.error || "Please select a valid Indian State / UT.", "error");
+      return;
+    }
+    const pinCheck = validateIndianPincode(newAddr.zip);
+    if (!pinCheck.isValid) {
+      showToast("Validation Error", pinCheck.error || "Please enter a valid 6-digit Indian PIN Code.", "error");
+      return;
+    }
     addAddress({ ...newAddr, isDefault: false });
     setShowAddForm(false);
-    setNewAddr({ fullName: "", street: "", city: "", state: "", zip: "", country: "United States", phone: "" });
+    setNewAddr({ fullName: "", street: "", city: "", state: "", zip: "", country: "India", phone: "" });
   };
 
   const handleProceedToPayment = () => {
@@ -108,23 +132,23 @@ export default function CheckoutPage() {
             </div>
 
             {showAddForm ? (
-              <form onSubmit={handleAddNewAddress} className="space-y-3 p-4 border border-[#E8E2D6] rounded-lg bg-[#FDFAF6]">
+              <form onSubmit={handleAddNewAddress} noValidate className="space-y-3 p-4 border border-[#E8E2D6] rounded-lg bg-[#FDFAF6]">
                 <h4 className="font-bold text-xs text-[#4A453E]">New Shipping Details</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input type="text" placeholder="Full Name" required value={newAddr.fullName}
+                  <input type="text" placeholder="Full Name" value={newAddr.fullName}
                     onChange={(e) => setNewAddr({ ...newAddr, fullName: e.target.value })} className={inputClass} />
-                  <input type="tel" inputMode="numeric" maxLength={10} placeholder="Phone Number (10 digits)" required value={newAddr.phone}
+                  <input type="tel" inputMode="numeric" maxLength={10} placeholder="Phone Number (10 digits)" value={newAddr.phone}
                     onChange={(e) => setNewAddr({ ...newAddr, phone: sanitizePhoneInput(e.target.value) })} className={inputClass} />
                 </div>
-                <input type="text" placeholder="Street address, Suite, Apartment" required value={newAddr.street}
+                <input type="text" placeholder="Street address, Suite, Apartment" value={newAddr.street}
                   onChange={(e) => setNewAddr({ ...newAddr, street: e.target.value })} className={inputClass} />
                 <div className="flex flex-col sm:grid grid-cols-3 gap-2">
-                  <input type="text" placeholder="City" required value={newAddr.city}
+                  <input type="text" placeholder="City" value={newAddr.city}
                     onChange={(e) => setNewAddr({ ...newAddr, city: e.target.value })} className={inputClass} />
-                  <input type="text" placeholder="State" required value={newAddr.state}
-                    onChange={(e) => setNewAddr({ ...newAddr, state: e.target.value })} className={inputClass} />
-                  <input type="text" placeholder="ZIP" required value={newAddr.zip}
-                    onChange={(e) => setNewAddr({ ...newAddr, zip: e.target.value })} className={inputClass} />
+                  <Select value={newAddr.state} onChange={(val) => setNewAddr({ ...newAddr, state: val })}
+                    options={INDIAN_STATES.map(st => ({ value: st, label: st }))} placeholder="Select State / UT" className="w-full" />
+                  <input type="text" inputMode="numeric" maxLength={6} placeholder="PIN Code (6 digits)" value={newAddr.zip}
+                    onChange={(e) => setNewAddr({ ...newAddr, zip: sanitizePincodeInput(e.target.value) })} className={inputClass} />
                 </div>
                 <div className="flex gap-2 justify-end">
                   <button type="button" onClick={() => setShowAddForm(false)}
@@ -170,8 +194,8 @@ export default function CheckoutPage() {
             <h3 className="font-extrabold text-sm text-[#4A453E]">2. Shipping Method</h3>
             <div className="space-y-2">
               {[
-                { id: 'standard', label: 'Standard Ground Shipping', sub: '4–6 business days', price: subtotal > 50 ? 'FREE' : '₹5.99' },
-                { id: 'express', label: 'Express Air Shipping', sub: '2–3 business days', price: '₹14.99' }
+                { id: 'standard', label: 'Standard Ground Shipping', sub: '5–7 business days', price: subtotal > 999 ? 'FREE' : '₹49' },
+                { id: 'express', label: 'Express Air Shipping', sub: '2–3 business days', price: '₹99' }
               ].map(opt => (
                 <label key={opt.id}
                   className={`flex items-center justify-between p-2 md:p-4 border rounded-lg cursor-pointer transition-all ${
@@ -191,6 +215,12 @@ export default function CheckoutPage() {
                   <span className="font-extrabold text-xs text-[#F9A37E]">{opt.price}</span>
                 </label>
               ))}
+            </div>
+            <div className="mt-3 p-3 bg-[#FDFAF6] dark:bg-zinc-800/40 border border-[#E8E2D6] dark:border-zinc-700/60 rounded-xl flex items-start gap-2.5">
+              <Info className="w-4 h-4 text-[#F9A37E] flex-shrink-0 mt-0.5" />
+              <p className="text-[11px] text-[#7A736A] dark:text-zinc-350 font-semibold leading-relaxed">
+                Standard shipping is <span className="text-[#F9A37E] font-extrabold">FREE</span> for orders of <span className="text-[#4A453E] dark:text-zinc-200 font-extrabold">₹999</span> or more. A standard shipping charge of <span className="text-[#4A453E] dark:text-zinc-200 font-extrabold">₹49</span> is applicable on orders below ₹999.
+              </p>
             </div>
           </div>
 
@@ -218,22 +248,44 @@ export default function CheckoutPage() {
 
           {/* Items */}
           <div className="space-y-3 max-h-48 overflow-y-auto">
-            {cart.map(item => (
-              <div key={item.id} className="flex gap-3 justify-between items-center text-xs">
-                <div className="flex gap-2 items-center min-w-0">
-                  <CustomGarmentPreview
-                    customDesign={item.customDesign}
-                    defaultImage={item.image}
-                    view="both"
-                    className="w-9 h-9"
-                  />
-                  <span className="font-bold text-[#4A453E] truncate">
-                    {item.name} <span className="text-[10px] text-[#A89B8A]">×{item.quantity}</span>
-                  </span>
-                </div>
-                <span className="font-extrabold text-[#4A453E] flex-shrink-0">₹{(item.price * item.quantity).toFixed(2)}</span>
-              </div>
-            ))}
+             {cart.map(item => {
+               const isCustom = item.productId === "custom" || !!item.customDesign;
+               return (
+                 <div key={item.id} className="flex gap-3 justify-between items-center text-xs">
+                   <div className="flex gap-2 items-center min-w-0">
+                     {isCustom ? (
+                       <CustomGarmentPreview
+                         customDesign={item.customDesign}
+                         defaultImage={item.image}
+                         view="both"
+                         className="w-9 h-9 flex-shrink-0"
+                       />
+                     ) : (
+                       <Link href={`/products/${item.slug || item.productId}`} className="cursor-pointer hover:opacity-85 transition-opacity flex-shrink-0">
+                         <CustomGarmentPreview
+                           customDesign={item.customDesign}
+                           defaultImage={item.image}
+                           view="both"
+                           className="w-9 h-9"
+                         />
+                       </Link>
+                     )}
+                     {isCustom ? (
+                       <span className="font-bold text-[#4A453E] truncate block flex-1">
+                         {item.name} <span className="text-[10px] text-[#A89B8A]">×{item.quantity}</span>
+                       </span>
+                     ) : (
+                       <Link href={`/products/${item.slug || item.productId}`} className="hover:text-[#F9A37E] transition-colors truncate flex-1">
+                         <span className="font-bold text-[#4A453E] truncate block">
+                           {item.name} <span className="text-[10px] text-[#A89B8A]">×{item.quantity}</span>
+                         </span>
+                       </Link>
+                     )}
+                   </div>
+                   <span className="font-extrabold text-[#4A453E] flex-shrink-0">₹{(item.price * item.quantity).toFixed(2)}</span>
+                 </div>
+               );
+             })}
           </div>
 
           {/* Totals */}
@@ -243,7 +295,7 @@ export default function CheckoutPage() {
               <span className="font-bold text-[#4A453E]">₹{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#7A736A]">Tax / GST (18%)</span>
+              <span className="text-[#7A736A]">Tax / GST (5%)</span>
               <span className="font-bold text-[#4A453E]">₹{tax.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">

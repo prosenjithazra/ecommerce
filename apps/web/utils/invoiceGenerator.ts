@@ -10,7 +10,7 @@ export function printPdfInvoice(order: any) {
   const items = order.items || [];
   const itemsJson = order.itemsJson || [];
   const totalAmount = Number(order.total || 0);
-  const subtotal = (totalAmount / 1.18).toFixed(2);
+  const subtotal = (totalAmount / 1.05).toFixed(2);
   const taxGst = (totalAmount - Number(subtotal)).toFixed(2);
 
   const itemsHtml = items.map((item: any, idx: number) => {
@@ -214,7 +214,7 @@ export function printPdfInvoice(order: any) {
               <td style="text-align: right; font-weight: 600;">₹${subtotal}</td>
             </tr>
             <tr>
-              <td style="color: #71717A;">GST (18% Included):</td>
+              <td style="color: #71717A;">GST (5% Included):</td>
               <td style="text-align: right; font-weight: 600;">₹${taxGst}</td>
             </tr>
             <tr>

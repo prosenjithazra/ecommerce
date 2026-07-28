@@ -48,6 +48,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, loading }) =>
     e.preventDefault();
     addToCart({
       productId: product.id,
+      slug: product.slug,
       name: product.name,
       price: product.price,
       quantity: 1,
@@ -132,10 +133,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, loading }) =>
           </div>
 
           <div className="flex items-center justify-between mt-3">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <span className="font-extrabold text-sm text-[#4A453E]">₹{product.price}</span>
-              {product.originalPrice > product.price && (
-                <span className="text-xs text-[#A89B8A] line-through">₹{product.originalPrice}</span>
+              {product.originalPrice > 0 && (
+                <span className="text-xs text-[#B0A090] line-through decoration-[#C0A090]">₹{product.originalPrice}</span>
               )}
             </div>
             <Link
@@ -176,7 +177,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, loading }) =>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-extrabold text-[#4A453E]">₹{product.price}</span>
                   {product.originalPrice > product.price && (
-                    <span className="text-sm text-[#A89B8A] line-through">₹{product.originalPrice}</span>
+                    <span className="text-sm text-[#B0A090] line-through decoration-[#C0A090]">₹{product.originalPrice}</span>
+                  )}
+                  {discount > 0 && (
+                    <span className="text-xs font-bold text-rose-400 bg-rose-50 px-1.5 py-0.5 rounded-full">{discount}% off</span>
                   )}
                 </div>
 

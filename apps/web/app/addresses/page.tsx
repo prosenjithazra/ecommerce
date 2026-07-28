@@ -2,17 +2,18 @@
 
 import React, { useState } from 'react';
 import { useApp, Address } from '../../components/AppContext';
-import { Breadcrumb } from '../../components/UIComponents';
+import { Breadcrumb, Select } from '../../components/UIComponents';
 import { AddressCard } from '../../components/InfoCards';
 import { MapPin } from 'lucide-react';
 
 import { validatePhoneNumber, sanitizePhoneInput } from '../../utils/phoneValidation';
+import { INDIAN_STATES, sanitizePincodeInput, validateIndianPincode, validateIndianState } from '../../utils/addressValidation';
 
 export default function AddressesPage() {
   const { addresses, addAddress, updateAddress, deleteAddress, setDefaultAddress, showToast } = useApp();
   const [showForm, setShowForm] = useState(false);
   const [editingAddr, setEditingAddr] = useState<Address | null>(null);
-  const [form, setForm] = useState({ fullName: "", street: "", city: "", state: "", zip: "", country: "United States", phone: "", isDefault: false });
+  const [form, setForm] = useState({ fullName: "", street: "", city: "", state: "", zip: "", country: "India", phone: "", isDefault: false });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,8 +22,14 @@ export default function AddressesPage() {
       showToast("Validation Error", phoneCheck.error || "Please enter a valid 10-digit phone number.", "error");
       return;
     }
-    if (!/^\d{6}$/.test(form.zip.trim())) {
-      showToast("Validation Error", "Please enter a valid 6-digit ZIP/pincode.", "error");
+    const stateCheck = validateIndianState(form.state);
+    if (!stateCheck.isValid) {
+      showToast("Validation Error", stateCheck.error || "Please select a valid Indian State.", "error");
+      return;
+    }
+    const pinCheck = validateIndianPincode(form.zip);
+    if (!pinCheck.isValid) {
+      showToast("Validation Error", pinCheck.error || "Please enter a valid 6-digit Indian PIN Code.", "error");
       return;
     }
 
@@ -33,7 +40,7 @@ export default function AddressesPage() {
     }
     setShowForm(false);
     setEditingAddr(null);
-    setForm({ fullName: "", street: "", city: "", state: "", zip: "", country: "United States", phone: "", isDefault: false });
+    setForm({ fullName: "", street: "", city: "", state: "", zip: "", country: "India", phone: "", isDefault: false });
   };
 
   const handleEdit = (addr: Address) => {
@@ -79,7 +86,7 @@ export default function AddressesPage() {
                 required
                 value={form.fullName}
                 onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                className="w-full bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-800 dark:text-zinc-250"
+                className="w-full bg-white dark:bg-zinc-800 border border-[#E8E2D6] dark:border-zinc-700 rounded-lg py-2 px-3 text-xs outline-none focus:outline-none focus:ring-0 text-zinc-800 dark:text-zinc-250"
               />
             </div>
             <div>
@@ -92,7 +99,7 @@ export default function AddressesPage() {
                 required
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: sanitizePhoneInput(e.target.value) })}
-                className="w-full bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-800 dark:text-zinc-250"
+                className="w-full bg-white dark:bg-zinc-800 border border-[#E8E2D6] dark:border-zinc-700 rounded-lg py-2 px-3 text-xs outline-none focus:outline-none focus:ring-0 text-zinc-800 dark:text-zinc-250"
               />
             </div>
           </div>
@@ -103,7 +110,7 @@ export default function AddressesPage() {
               required
               value={form.street}
               onChange={(e) => setForm({ ...form, street: e.target.value })}
-              className="w-full bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-800 dark:text-zinc-250"
+              className="w-full bg-white dark:bg-zinc-800 border border-[#E8E2D6] dark:border-zinc-700 rounded-lg py-2 px-3 text-xs outline-none focus:outline-none focus:ring-0 text-zinc-800 dark:text-zinc-250"
             />
           </div>
           <div className="grid grid-cols-3 gap-2">
@@ -113,23 +120,24 @@ export default function AddressesPage() {
               required
               value={form.city}
               onChange={(e) => setForm({ ...form, city: e.target.value })}
-              className="bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-800 dark:text-zinc-250"
+              className="bg-white dark:bg-zinc-800 border border-[#E8E2D6] dark:border-zinc-700 rounded-lg py-2 px-3 text-xs outline-none focus:outline-none focus:ring-0 text-zinc-800 dark:text-zinc-250"
             />
-            <input
-              type="text"
-              placeholder="State"
-              required
+            <Select
               value={form.state}
-              onChange={(e) => setForm({ ...form, state: e.target.value })}
-              className="bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-800 dark:text-zinc-250"
+              onChange={(val) => setForm({ ...form, state: val })}
+              options={INDIAN_STATES.map((st) => ({ value: st, label: st }))}
+              placeholder="Select State / UT"
+              className="w-full"
             />
             <input
               type="text"
-              placeholder="ZIP"
+              inputMode="numeric"
+              maxLength={6}
+              placeholder="PIN Code (6 digits)"
               required
               value={form.zip}
-              onChange={(e) => setForm({ ...form, zip: e.target.value })}
-              className="bg-zinc-55 border rounded-lg py-2 px-3 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-800 dark:text-zinc-250"
+              onChange={(e) => setForm({ ...form, zip: sanitizePincodeInput(e.target.value) })}
+              className="bg-white dark:bg-zinc-800 border border-[#E8E2D6] dark:border-zinc-700 rounded-lg py-2 px-3 text-xs outline-none focus:outline-none focus:ring-0 text-zinc-800 dark:text-zinc-250 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
           <label className="flex items-center gap-2 cursor-pointer pt-2">

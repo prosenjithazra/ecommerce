@@ -41,7 +41,19 @@ function PaymentPageContent() {
 
 
 
+  const hasCustomProduct = cart.some(item => 
+    item.customDesign || 
+    item.productId?.toLowerCase().includes('custom') || 
+    item.name?.toLowerCase().includes('custom')
+  );
+
   const [paymentMode, setPaymentMode] = useState<'online' | 'cod'>('online');
+
+  React.useEffect(() => {
+    if (hasCustomProduct && paymentMode === 'cod') {
+      setPaymentMode('online');
+    }
+  }, [hasCustomProduct, paymentMode]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSimulatedModal, setShowSimulatedModal] = useState(false);
   const [simulatedOrderId, setSimulatedOrderId] = useState("");
@@ -89,8 +101,8 @@ function PaymentPageContent() {
   };
 
   const subtotal = cart.reduce((acc, item) => acc + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
-  const tax = subtotal * 0.18;
-  const shippingFee = shippingMethod === 'express' ? 14.99 : (subtotal > 50 ? 0 : 5.99);
+  const tax = subtotal * 0.05;
+  const shippingFee = shippingMethod === 'express' ? 99 : (subtotal > 999 ? 0 : 49);
   const total = subtotal + tax + shippingFee;
 
   const handlePay = async (e: React.FormEvent) => {
@@ -355,16 +367,29 @@ function PaymentPageContent() {
               
               <button
                 type="button"
-                onClick={() => setPaymentMode('cod')}
+                onClick={() => {
+                  if (hasCustomProduct) {
+                    showToast("COD Unavailable", "Cash on Delivery is not available for customized products.", "info");
+                    return;
+                  }
+                  setPaymentMode('cod');
+                }}
+                disabled={hasCustomProduct}
                 className={`flex flex-col items-center justify-center p-2 sm:p-5 border-2 rounded-xl gap-1 font-black text-xs transition-all ${
-                  paymentMode === 'cod'
+                  hasCustomProduct ? 'opacity-40 cursor-not-allowed bg-zinc-55 dark:bg-zinc-900 border-zinc-200 text-zinc-450' : ''
+                } ${
+                  paymentMode === 'cod' && !hasCustomProduct
                     ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]'
                     : 'border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950/20'
                 }`}
               >
                 <Layers className="w-5 h-5" />
                 <span>Cash on Delivery (COD)</span>
-                <span className="text-[12px] font-medium text-zinc-400 mt-0.5">Pay in cash upon delivery</span>
+                {hasCustomProduct ? (
+                  <span className="text-[10px] font-bold text-red-500 mt-1 uppercase">Not available for custom items</span>
+                ) : (
+                  <span className="text-[12px] font-medium text-zinc-400 mt-0.5">Pay in cash upon delivery</span>
+                )}
               </button>
             </div>
 
@@ -446,7 +471,7 @@ function PaymentPageContent() {
                 <span className="font-bold text-zinc-800 dark:text-zinc-200">₹{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Tax / GST (18%)</span>
+                <span className="text-zinc-500">Tax / GST (5%)</span>
                 <span className="font-bold text-zinc-800 dark:text-zinc-200">₹{tax.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">

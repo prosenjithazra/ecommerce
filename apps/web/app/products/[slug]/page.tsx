@@ -68,6 +68,7 @@ export default function ProductDetailPage() {
     if (!product) return;
     addToCart({
       productId: product.id,
+      slug: product.slug,
       name: product.name,
       price: product.price,
       quantity,
@@ -294,10 +295,10 @@ export default function ProductDetailPage() {
         <div className="text-sm text-[#7A736A] leading-relaxed max-w-3xl font-medium">
           {activeTab === 'desc' && <p>{product.description}</p>}
           {activeTab === 'print' && (
-            <p>We use high-fidelity Direct-To-Garment (DTG) digital printing with ecological, water-based inks that penetrate deep into the fibers. Crisp designs that won&apos;t peel, crack, or flake — even after multiple machine washes.</p>
+            <p>We use premium Direct-to-Garment (DTG) printing technology with eco-friendly, water-based inks that bond deeply with the fabric for vibrant, long-lasting results. Every design is printed with exceptional detail and soft-touch comfort, ensuring it won't peel, crack, or flake. Your apparel stays bright, sharp, and comfortable even after repeated machine washes.</p>
           )}
           {activeTab === 'ship' && (
-            <p>Custom apparel is made to order. Production takes 2–3 business days. Standard US shipping is 3–5 business days. Hassle-free returns on print errors or defective blanks within 30 days of receipt.</p>
+            <p>Every product is printed and made to order just for you. Orders are typically processed within 2–3 business days before shipping. Delivery times vary by location but generally take 3–7 business days after dispatch. If you receive a misprinted, damaged, or defective item, please contact us within 30 days of delivery, and we'll gladly arrange a replacement or refund.</p>
           )}
         </div>
       </section>
@@ -446,15 +447,25 @@ function SizeChartModal({ isOpen, onClose }: SizeChartModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm transition-all"
+      className="fixed top-0 !m-0 inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm transition-all"
       onClick={onClose}
     >
       <div
         className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-4 sm:p-6 overflow-hidden border border-[#E8E2D6] space-y-4 max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Close Button — fixed top-right corner */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 p-1.5 rounded-lg text-[#A89B8A] hover:text-[#4A453E] hover:bg-[#FDFAF6] transition-colors"
+          title="Close Size Chart"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-[#E8E2D6] pb-3 flex-shrink-0">
+        <div className="flex items-center justify-between border-b border-[#E8E2D6] pb-3 flex-shrink-0 gap-2">
           <div>
             <h3 className="text-base sm:text-lg font-extrabold text-[#4A453E] tracking-tight">
               Garment Size Chart
@@ -502,16 +513,6 @@ function SizeChartModal({ isOpen, onClose }: SizeChartModalProps) {
                 </button>
               )}
             </div>
-
-            {/* Close Button */}
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 rounded-lg text-[#A89B8A] hover:text-[#4A453E] hover:bg-[#FDFAF6] transition-colors"
-              title="Close Size Chart"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
         </div>
 
@@ -532,7 +533,7 @@ function SizeChartModal({ isOpen, onClose }: SizeChartModalProps) {
           }}
         >
           <img
-            src="/sizecart.webp"
+            src="/newSizeCart.png"
             alt="Garment Size Chart"
             draggable={false}
             className="w-full h-auto object-contain max-h-[70vh] rounded-lg shadow-sm transition-transform duration-75 ease-out pointer-events-none"

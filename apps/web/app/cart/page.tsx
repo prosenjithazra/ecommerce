@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Trash2, Tag, Calendar, ShieldCheck, Minus, Plus } from 'lucide-react';
+import { ShoppingBag, Trash2, Tag, Calendar, ShieldCheck, Minus, Plus, Info } from 'lucide-react';
 import { useApp } from '../../components/AppContext';
 import { Breadcrumb, EmptyState } from '../../components/UIComponents';
 import { CustomGarmentPreview } from '../../components/CustomGarmentPreview';
@@ -26,8 +26,8 @@ export default function CartPage() {
   const [applyingCoupon, setApplyingCoupon] = useState(false);
 
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const tax = subtotal * 0.18;
-  const shipping = subtotal > 50 || subtotal === 0 ? 0 : 5.99;
+  const tax = subtotal * 0.05;
+  const shipping = subtotal > 999 || subtotal === 0 ? 0 : 49;
   const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
   const total = Math.max(0, subtotal + tax + shipping - discountAmount);
 
@@ -112,18 +112,37 @@ export default function CartPage() {
 
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-3">
-            {cart.map((item) => (
-              <div key={item.id} className="p-3 sm:p-4 border border-[#E8E2D6] bg-white rounded-lg flex gap-3 sm:gap-4 hover:shadow-sm transition-shadow">
-                <CustomGarmentPreview
-                  customDesign={item.customDesign}
-                  defaultImage={item.image}
-                  view="both"
-                  className="w-14 h-14 sm:w-16 sm:h-16"
-                />
-                <div className="flex-1 min-w-0 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-extrabold text-xs sm:text-sm text-[#4A453E] truncate">{item.name}</h3>
+            {cart.map((item) => {
+              const isCustom = item.productId === "custom" || !!item.customDesign;
+              return (
+                <div key={item.id} className="p-3 sm:p-4 border border-[#E8E2D6] bg-white rounded-lg flex gap-3 sm:gap-4 hover:shadow-sm transition-shadow">
+                  {isCustom ? (
+                    <CustomGarmentPreview
+                      customDesign={item.customDesign}
+                      defaultImage={item.image}
+                      view="both"
+                      className="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0"
+                    />
+                  ) : (
+                    <Link href={`/products/${item.slug || item.productId}`} className="cursor-pointer hover:opacity-85 transition-opacity flex-shrink-0">
+                      <CustomGarmentPreview
+                        customDesign={item.customDesign}
+                        defaultImage={item.image}
+                        view="both"
+                        className="w-14 h-14 sm:w-16 sm:h-16"
+                      />
+                    </Link>
+                  )}
+                  <div className="flex-1 min-w-0 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-start justify-between gap-2">
+                        {isCustom ? (
+                          <h3 className="font-extrabold text-xs sm:text-sm text-[#4A453E] truncate flex-1">{item.name}</h3>
+                        ) : (
+                        <Link href={`/products/${item.slug || item.productId}`} className="hover:text-[#F9A37E] transition-colors truncate flex-1">
+                            <h3 className="font-extrabold text-xs sm:text-sm text-[#4A453E] truncate">{item.name}</h3>
+                          </Link>
+                        )}
                       <button
                         onClick={() => removeFromCart(item.id)}
                         className="text-[#C4B8A8] hover:text-red-400 transition-colors p-1 flex-shrink-0"
@@ -155,7 +174,8 @@ export default function CartPage() {
                   </div>
                 </div>
               </div>
-            ))}
+            );
+          })}
           </div>
 
           {/* Order Summary */}
@@ -209,7 +229,7 @@ export default function CartPage() {
                   <span className="font-extrabold text-[#4A453E]">₹{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#7A736A]">Tax / GST (18%)</span>
+                  <span className="text-[#7A736A]">Tax / GST (5%)</span>
                   <span className="font-extrabold text-[#4A453E]">₹{tax.toFixed(2)}</span>
                 </div>
                 {discountAmount > 0 && (
@@ -226,6 +246,13 @@ export default function CartPage() {
                   <span className="text-[#4A453E]">Total Amount</span>
                   <span className="text-[#F9A37E]">₹{total.toFixed(2)}</span>
                 </div>
+              </div>
+              
+              <div className="p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl flex items-start gap-2.5">
+                <Info className="w-4 h-4 text-[#F9A37E] flex-shrink-0 mt-0.5" />
+                <p className="text-[11px] text-[#7A736A] font-semibold leading-relaxed">
+                  Standard shipping is <span className="text-[#F9A37E] font-extrabold">FREE</span> for orders of <span className="text-[#4A453E] font-extrabold">₹999</span> or more. A standard shipping charge of <span className="text-[#4A453E] font-extrabold">₹49</span> is applicable on orders below ₹999.
+                </p>
               </div>
 
               {/* Delivery estimate */}

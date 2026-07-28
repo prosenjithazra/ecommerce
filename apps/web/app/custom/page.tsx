@@ -1298,14 +1298,8 @@ export default function CustomizerPage() {
                     <Move className="w-3 h-3" /> Center Vert
                   </button>
                   <button
-                    onClick={duplicateActiveObject}
-                    className="py-1.5 px-2 bg-white border border-[#E8E2D6] rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 hover:border-[#F9A37E]"
-                  >
-                    <Copy className="w-3 h-3" /> Duplicate
-                  </button>
-                  <button
                     onClick={deleteActiveObject}
-                    className="py-1.5 px-2 bg-white border border-red-200 text-red-500 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 hover:bg-red-50"
+                    className="w-full py-1.5 px-2 bg-white col-span-2 border border-red-200 text-red-500 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 hover:bg-red-50"
                   >
                     <Trash2 className="w-3 h-3" /> Delete
                   </button>

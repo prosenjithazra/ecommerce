@@ -197,6 +197,17 @@
   animation: slide-fade-in 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Hide number input spin buttons globally */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+
 
 
 

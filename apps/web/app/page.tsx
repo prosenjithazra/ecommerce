@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getApiUrl } from '../components/ApiConfig';
 import Link from 'next/link';
-import { ArrowRight, Paintbrush, ShieldCheck, Sparkles, ShoppingBag, Flame, Truck, Layers, Leaf, Palette, Play, SlidersHorizontal, Printer, Code2, CheckCircle2, Terminal, Loader2, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, Paintbrush, ShieldCheck, Sparkles, ShoppingBag, Flame, Truck, Layers, Leaf, Palette, Play, SlidersHorizontal, Printer, Code2, CheckCircle2, Terminal, Loader2, X, ChevronLeft, ChevronRight, Shirt, Heart } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { CategoryCard } from '../components/CategoryCard';
 import { ReviewCard } from '../components/InfoCards';
@@ -520,66 +520,47 @@ export default function HomePage() {
     return () => clearTimeout(timer);
   }, []);
 
-  const getFilteredProducts = () => {
-    let list: Product[] = [];
-    switch (activeTab) {
-      case 'best': 
-        list = products.filter(p => p.tag === 'Best Seller');
-        break;
-      case 'new':  
-        list = products.filter(p => p.tag === 'New' || p.tag === 'Eco');
-        break;
-      default:     
-        list = products;
-        break;
-    }
-    return list.slice(0, 8);
-  };
+  const trendingProducts = React.useMemo(() => {
+    return products.slice(0, 8);
+  }, [products]);
 
-  // Reset mobile active index and scroll position when tab changes
-  React.useEffect(() => {
-    setActiveProductIdx(0);
-    if (mobileProductScrollRef.current) {
-      mobileProductScrollRef.current.scrollTo({ left: 0 });
-    }
-  }, [activeTab]);
+  const bestSellerProducts = React.useMemo(() => {
+    const list = products.filter(p => p.tag === 'Best Seller');
+    if (list.length >= 4) return list.slice(0, 8);
+    const remaining = products.filter(p => !list.includes(p));
+    return [...list, ...remaining].slice(0, 8);
+  }, [products]);
 
-  // Mobile product auto-slide every 3.5s with clean cancellation/timer reset on interaction
-  React.useEffect(() => {
-    const filtered = getFilteredProducts();
-    if (filtered.length <= 1) return;
+  const mensProducts = React.useMemo(() => {
+    const list = products.filter(p => {
+      const cat = (p.category || '').toLowerCase();
+      const name = (p.name || '').toLowerCase();
+      return (cat.includes('men') && !cat.includes('women')) || name.includes('men') || name.includes('polo') || name.includes('hoodie');
+    });
+    if (list.length >= 4) return list.slice(0, 8);
+    const remaining = products.filter(p => !list.includes(p));
+    return [...list, ...remaining].slice(0, 8);
+  }, [products]);
 
-    const interval = setInterval(() => {
-      if (mobileProductScrollRef.current) {
-        const nextIdx = (activeProductIdx + 1) % filtered.length;
-        const container = mobileProductScrollRef.current;
-        const cardWidth = container.clientWidth * 0.7; // matches w-[70%] card size
-        const gap = 16; // gap-4 is 16px
-        
-        container.scrollTo({
-          left: nextIdx * (cardWidth + gap),
-          behavior: 'smooth'
-        });
-        setActiveProductIdx(nextIdx);
-      }
-    }, 3500);
+  const womensProducts = React.useMemo(() => {
+    const list = products.filter(p => {
+      const cat = (p.category || '').toLowerCase();
+      const name = (p.name || '').toLowerCase();
+      return cat.includes('women') || name.includes('women') || name.includes('lady') || name.includes('crop') || name.includes('female');
+    });
+    if (list.length >= 4) return list.slice(0, 8);
+    const remaining = products.filter(p => !list.includes(p));
+    return [...list, ...remaining].slice(0, 8);
+  }, [products]);
 
-    return () => clearInterval(interval);
-  }, [activeProductIdx, products, activeTab]);
+  const newArrivalProducts = React.useMemo(() => {
+    const list = products.filter(p => p.tag === 'New' || p.tag === 'Eco' || p.tag === 'Trending');
+    if (list.length >= 4) return list.slice(0, 8);
+    const remaining = products.filter(p => !list.includes(p));
+    return [...list, ...remaining].slice(0, 8);
+  }, [products]);
 
-  const handleMobileScroll = () => {
-    if (mobileProductScrollRef.current) {
-      const container = mobileProductScrollRef.current;
-      const { scrollLeft, clientWidth } = container;
-      const cardWidth = clientWidth * 0.7;
-      const gap = 16;
-      const index = Math.round(scrollLeft / (cardWidth + gap));
-      const filtered = getFilteredProducts();
-      if (index !== activeProductIdx && index >= 0 && index < filtered.length) {
-        setActiveProductIdx(index);
-      }
-    }
-  };
+
 
   const activeGallery = gallery.length > 0 ? gallery.filter(item => item.isActive) : DEFAULT_GALLERY;
 
@@ -598,164 +579,258 @@ export default function HomePage() {
 
 
   return (
-    <div className="space-y-8 sm:space-y-16 pb-10 sm:pb-16">
+    <div className="pb-10 sm:pb-16">
 
       {/* ── HERO SLIDER ── */}
       <HeroBanner />
 
       {/* ── TRUST BAR ── */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            { icon: <ShieldCheck className="w-5 h-5 text-[#A8C69F]" />, label: "Quality Guarantee" },
-            { icon: <Truck className="w-5 h-5 text-[#F9A37E]" />,       label: "48hr Fulfillment" },
-            { icon: <Layers className="w-5 h-5 text-[#A8C69F]" />,      label: "No MOQ" },
-            { icon: <Sparkles className="w-5 h-5 text-[#F9A37E]" />,    label: "Premium Prints" },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center gap-2.5 p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg">
-              <div className="w-8 h-8 bg-[#E8E2D6] rounded-lg flex items-center justify-center flex-shrink-0">
-                {item.icon}
+      <section className="w-full bg-[#FDFAF6] py-8 sm:py-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {[
+              { icon: <ShieldCheck className="w-5 h-5 text-[#A8C69F]" />, label: "Quality Guarantee" },
+              { icon: <Truck className="w-5 h-5 text-[#F9A37E]" />,       label: "48hr Fulfillment" },
+              { icon: <Layers className="w-5 h-5 text-[#A8C69F]" />,      label: "No MOQ" },
+              { icon: <Sparkles className="w-5 h-5 text-[#F9A37E]" />,    label: "Premium Prints" },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-2.5 p-3 rounded-lg">
+                <div className="w-8 h-8 bg-[#E8E2D6] rounded-lg flex items-center justify-center flex-shrink-0">
+                  {item.icon}
+                </div>
+                <span className="text-xs font-bold text-[#4A453E] leading-tight">{item.label}</span>
               </div>
-              <span className="text-xs font-bold text-[#4A453E] leading-tight">{item.label}</span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
       {/* ── FEATURED CATEGORIES ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">Shop by Category</h2>
-            <p className="text-xs text-[#7A736A] mt-0.5">Premium blanks ready for your design</p>
+      <section className="w-full bg-white py-10 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">Shop by Category</h2>
+              <p className="text-xs text-[#7A736A] mt-0.5">Premium blanks ready for your design</p>
+            </div>
+            <Link href="/categories" className="text-xs font-bold text-white bg-[#F9A37E] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+              View all <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-          <Link href="/categories" className="text-xs font-bold text-[#F9A37E] hover:text-[#E8855A] flex items-center gap-1 transition-colors">
-            View all <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          {categoriesLoading || loading ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              {Array(4).fill(0).map((_, i) => <CategoryCard key={i} loading={true} />)}
+            </div>
+          ) : categories.length === 0 ? (
+            <div className="w-full py-4">
+              <EmptyState
+                title="No categories found"
+                description="Our blanks categories collection is currently empty. Please check back later!"
+                icon={<SlidersHorizontal className="w-8 h-8 text-[#F9A37E]" />}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              {categories.map((cat) => (
+                <CategoryCard key={cat.name} name={cat.name} image={cat.image} count={cat.count} href={cat.href} />
+              ))}
+            </div>
+          )}
         </div>
-        {categoriesLoading || loading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {Array(4).fill(0).map((_, i) => <CategoryCard key={i} loading={true} />)}
-          </div>
-        ) : categories.length === 0 ? (
-          <div className="w-full py-4">
-            <EmptyState
-              title="No categories found"
-              description="Our blanks categories collection is currently empty. Please check back later!"
-              icon={<SlidersHorizontal className="w-8 h-8 text-[#F9A37E]" />}
-            />
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {categories.map((cat) => (
-              <CategoryCard key={cat.name} name={cat.name} image={cat.image} count={cat.count} href={cat.href} />
-            ))}
-          </div>
-        )}
       </section>
 
-      {/* ── PRODUCT TABS ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight flex items-center gap-2">
-              <Flame className="w-5 h-5 text-[#F9A37E]" /> Hot off the Press
-            </h2>
-            <p className="text-xs text-[#7A736A] mt-0.5">Curated blanks for your custom look</p>
+      {/* ── 1. TRENDING PRODUCTS (Full Warm Beige Band) ── */}
+      <section className="w-full bg-[#FAF7F2] py-10 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="flex flex-row sm:items-center justify-between gap-1 sm:gap-3">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight flex items-center gap-2">
+                <Flame className="w-5.5 h-5.5 text-[#F9A37E]" /> Hot off the Press
+              </h2>
+              <p className="text-xs text-[#7A736A] mt-0.5">Curated blanks and trending designs for your custom look</p>
+            </div>
+            <Link href="/products" className="text-xs shrink-0 font-bold text-white bg-[#F9A37E] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+              View All <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-          <div className="flex bg-[#E8E2D6] p-1 rounded-lg self-start sm:self-auto">
-            {(['trending', 'best', 'new'] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`text-xs font-bold py-1.5 px-3 rounded-lg transition-all capitalize ${
-                  activeTab === tab
-                    ? 'bg-white text-[#4A453E] shadow-sm'
-                    : 'text-[#7A736A] hover:text-[#4A453E]'
-                }`}
-              >
-                {tab === 'trending' ? 'Trending' : tab === 'best' ? 'Best Sellers' : 'New'}
-              </button>
-            ))}
-          </div>
-        </div>
-        {productsLoading || loading ? (
-          <>
-            {/* Desktop grid layout */}
-            <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-6">
+          {productsLoading || loading ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {Array(4).fill(0).map((_, i) => (
                 <ProductCard key={i} loading={true} />
               ))}
             </div>
-            {/* Mobile 1.5 slider layout */}
-            <div className="flex sm:hidden overflow-x-auto snap-x snap-mandatory gap-4 pb-4 no-scrollbar w-full">
-              {Array(4).fill(0).map((_, i) => (
-                <div key={i} className="w-[70%] min-w-[70%] snap-start flex-shrink-0">
-                  <ProductCard loading={true} />
-                </div>
+          ) : trendingProducts.length === 0 ? (
+            <div className="w-full py-4">
+              <EmptyState
+                title="No featured products found"
+                description="Our custom print blanks catalog is temporarily offline. Please check back shortly!"
+                icon={<ShoppingBag className="w-8 h-8 text-[#A8C69F]" />}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              {trendingProducts.map((product) => (
+                <ProductCard key={`trending-${product.id}`} product={product} />
               ))}
             </div>
-          </>
-        ) : getFilteredProducts().length === 0 ? (
-          <div className="w-full py-4">
-            <EmptyState
-              title="No featured products found"
-              description="Our custom print blanks catalog is temporarily offline. Please check back shortly!"
-              icon={<ShoppingBag className="w-8 h-8 text-[#A8C69F]" />}
-            />
+          )}
+        </div>
+      </section>
+
+      {/* ── 2. BEST SELLERS (Full Rich Sand Band) ── */}
+      <section className="w-full bg-[#F5F0E8] py-10 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="flex flex-row sm:items-center justify-between gap-1 sm:gap-3">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight flex items-center gap-2">
+                <Sparkles className="w-5.5 h-5.5 text-[#F9A37E]" /> Best Sellers
+              </h2>
+              <p className="text-xs text-[#7A736A] mt-0.5">Most popular choices ordered by our custom print community</p>
+            </div>
+            <Link href="/products?tag=best" className="text-xs shrink-0 font-bold text-white bg-[#F9A37E] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+              View All <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-        ) : (
-          <>
-            {/* Desktop grid layout */}
-            <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-6">
-              {getFilteredProducts().map((product) => (
-                <ProductCard key={product.id} product={product} />
+          {productsLoading || loading ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              {Array(4).fill(0).map((_, i) => (
+                <ProductCard key={i} loading={true} />
               ))}
             </div>
-            {/* Mobile 1.5 slider layout */}
-            <div
-              ref={mobileProductScrollRef}
-              onScroll={handleMobileScroll}
-              className="flex sm:hidden overflow-x-auto snap-x snap-mandatory gap-4 pb-4 no-scrollbar w-full"
-            >
-              {getFilteredProducts().map((product) => (
-                <div key={product.id} className="w-[70%] min-w-[70%] snap-start flex-shrink-0">
-                  <ProductCard product={product} />
-                </div>
+          ) : bestSellerProducts.length === 0 ? (
+            <div className="w-full py-4">
+              <EmptyState
+                title="No best sellers found"
+                description="Our custom print catalog is updating. Check back shortly!"
+                icon={<ShoppingBag className="w-8 h-8 text-[#A8C69F]" />}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              {bestSellerProducts.map((product) => (
+                <ProductCard key={`best-${product.id}`} product={product} />
               ))}
             </div>
-            {/* Mobile dots indicators */}
-            {getFilteredProducts().length > 1 && (
-              <div className="flex sm:hidden justify-center gap-1.5 mt-2">
-                {getFilteredProducts().map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      if (mobileProductScrollRef.current) {
-                        const container = mobileProductScrollRef.current;
-                        const cardWidth = container.clientWidth * 0.7;
-                        const gap = 16;
-                        container.scrollTo({
-                          left: idx * (cardWidth + gap),
-                          behavior: 'smooth'
-                        });
-                        setActiveProductIdx(idx);
-                      }
-                    }}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                      activeProductIdx === idx ? 'bg-[#F9A37E] w-4' : 'bg-[#E8E2D6] w-1.5'
-                    }`}
-                    aria-label={`Go to slide ${idx + 1}`}
-                  />
-                ))}
-              </div>
-            )}
-          </>
-        )}
+          )}
+        </div>
+      </section>
+
+      {/* ── 3. MEN'S COLLECTION (Full Cool Slate Band) ── */}
+      <section className="w-full bg-[#F0F4F8] py-10 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="flex flex-row sm:items-center justify-between gap-1 sm:gap-3">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-[#334E68] tracking-tight flex items-center gap-2">
+                <Shirt className="w-5.5 h-5.5 text-[#F9A37E]" /> Men's Collection
+              </h2>
+              <p className="text-xs text-[#627D98] mt-0.5">Tailored tees, polos, hoodies, and streetwear essentials for men</p>
+            </div>
+            <Link href="/products?category=Men" className="text-xs shrink-0 font-bold text-white bg-[#F9A37E] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+              View All <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+          {productsLoading || loading ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              {Array(4).fill(0).map((_, i) => (
+                <ProductCard key={i} loading={true} />
+              ))}
+            </div>
+          ) : mensProducts.length === 0 ? (
+            <div className="w-full py-4">
+              <EmptyState
+                title="No men's products found"
+                description="Men's collection catalog is updating. Check back shortly!"
+                icon={<Shirt className="w-8 h-8 text-[#3B82F6]" />}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              {mensProducts.map((product) => (
+                <ProductCard key={`mens-${product.id}`} product={product} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── 4. WOMEN'S COLLECTION (Full Soft Blush Band) ── */}
+      <section className="w-full bg-[#FAF0F4] py-10 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="flex flex-row sm:items-center justify-between gap-1 sm:gap-3">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-[#702444] tracking-tight flex items-center gap-2">
+                <Heart className="w-5.5 h-5.5 text-[#F9A37E]" /> Women's Collection
+              </h2>
+              <p className="text-xs text-[#9E4A6F] mt-0.5">Stylish cropped tees, relaxed fits, and premium blanks for women</p>
+            </div>
+            <Link href="/products?category=Women" className="text-xs shrink-0 font-bold text-white bg-[#F9A37E] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+              View All <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+          {productsLoading || loading ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              {Array(4).fill(0).map((_, i) => (
+                <ProductCard key={i} loading={true} />
+              ))}
+            </div>
+          ) : womensProducts.length === 0 ? (
+            <div className="w-full py-4">
+              <EmptyState
+                title="No women's products found"
+                description="Women's collection catalog is updating. Check back shortly!"
+                icon={<Heart className="w-8 h-8 text-[#EC4899]" />}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              {womensProducts.map((product) => (
+                <ProductCard key={`womens-${product.id}`} product={product} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── 5. NEW ARRIVALS (Full Fresh Mint Band) ── */}
+      <section className="w-full bg-[#F2F7F2] py-10 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="flex flex-row sm:items-center justify-between gap-1 sm:gap-3">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-[#264D29] tracking-tight flex items-center gap-2">
+                <Paintbrush className="w-5.5 h-5.5 text-[#F9A37E]" /> New Arrivals
+              </h2>
+              <p className="text-xs text-[#446E47] mt-0.5">Fresh drops and newest blank garments ready for customization</p>
+            </div>
+            <Link href="/products?tag=new" className="text-xs shrink-0 font-bold text-white bg-[#F9A37E] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+              View All <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+          {productsLoading || loading ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              {Array(4).fill(0).map((_, i) => (
+                <ProductCard key={i} loading={true} />
+              ))}
+            </div>
+          ) : newArrivalProducts.length === 0 ? (
+            <div className="w-full py-4">
+              <EmptyState
+                title="No new arrivals found"
+                description="Our custom print catalog is updating. Check back shortly!"
+                icon={<ShoppingBag className="w-8 h-8 text-[#10B981]" />}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              {newArrivalProducts.map((product) => (
+                <ProductCard key={`new-${product.id}`} product={product} />
+              ))}
+            </div>
+          )}
+        </div>
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="py-8 sm:py-16" style={{ background: '#F5F0E8' }}>
+      <section className="w-full bg-[#F5F0E8] py-10 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-8">
           <div className="text-center">
             <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">How It Works</h2>
@@ -776,108 +851,115 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-        <div className="text-center">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">Loved by Creators</h2>
-          <p className="text-xs text-[#7A736A] mt-1">See what our customers have designed.</p>
-        </div>
-        {testimonialsLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[1,2,3].map(i => (
-              <div key={i} className="p-4 border border-[#E8E2D6] rounded-lg bg-white space-y-3 animate-pulse">
-                <div className="h-3 bg-zinc-100 rounded w-1/2" />
-                <div className="h-2 bg-zinc-100 rounded w-1/3" />
-                <div className="h-8 bg-zinc-100 rounded" />
-              </div>
-            ))}
+      {/* ── TESTIMONIALS ── */}
+      <section className="w-full bg-[#FDFAF6] py-10 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="text-center">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">Loved by Creators</h2>
+            <p className="text-xs text-[#7A736A] mt-1">See what our customers have designed.</p>
           </div>
-        ) : (
-          <Slider desktopCols={3}>
-            {testimonials.map((rev) => (
-              <ReviewCard
-                key={rev.id}
-                name={rev.name}
-                rating={rev.rating}
-                date={new Date(rev.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                comment={rev.comment}
-                verified={true}
-              />
-            ))}
-          </Slider>
-        )}
+          {testimonialsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[1,2,3].map(i => (
+                <div key={i} className="p-4 rounded-lg bg-white space-y-3 animate-pulse">
+                  <div className="h-3 bg-zinc-100 rounded w-1/2" />
+                  <div className="h-2 bg-zinc-100 rounded w-1/3" />
+                  <div className="h-8 bg-zinc-100 rounded" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Slider desktopCols={3}>
+              {testimonials.map((rev) => (
+                <ReviewCard
+                  key={rev.id}
+                  name={rev.name}
+                  rating={rev.rating}
+                  date={new Date(rev.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  comment={rev.comment}
+                  verified={true}
+                />
+              ))}
+            </Slider>
+          )}
+        </div>
       </section>
 
       {/* ── INSTAGRAM GALLERY ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-        <div className="text-center">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E]">#WearYourCreativity</h2>
-          <p className="text-xs text-[#7A736A] mt-1">Tag us on Instagram to get featured</p>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {activeGallery.map((item, i) => {
-            const isVideo = item.mediaType === "video";
-            const cardMarkup = (
-              <div className="relative aspect-square rounded-lg overflow-hidden group bg-zinc-100 border border-zinc-200">
-                <img
-                  src={item.mediaUrl}
-                  alt={`Gallery ${i + 1}`}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                {isVideo && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
-                    <div className="w-10 h-10 bg-white/95 text-[#4A453E] rounded-full flex items-center justify-center shadow-md transform group-hover:scale-110 transition-transform duration-300">
-                      <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+      <section className="w-full bg-white py-10 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="text-center">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E]">#WearYourCreativity</h2>
+            <p className="text-xs text-[#7A736A] mt-1">Tag us on Instagram to get featured</p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {activeGallery.map((item, i) => {
+              const isVideo = item.mediaType === "video";
+              const cardMarkup = (
+                <div className="relative aspect-square rounded-lg overflow-hidden group bg-zinc-100">
+                  <img
+                    src={item.mediaUrl}
+                    alt={`Gallery ${i + 1}`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  {isVideo && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
+                      <div className="w-10 h-10 bg-white/95 text-[#4A453E] rounded-full flex items-center justify-center shadow-md transform group-hover:scale-110 transition-transform duration-300">
+                        <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            );
-
-            if (item.link) {
-              return (
-                <a
-                  key={item.id}
-                  href={item.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block cursor-pointer"
-                >
-                  {cardMarkup}
-                </a>
+                  )}
+                </div>
               );
-            }
 
-            return (
-              <div key={item.id}>
-                {cardMarkup}
-              </div>
-            );
-          })}
+              if (item.link) {
+                return (
+                  <a
+                    key={item.id}
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block cursor-pointer"
+                  >
+                    {cardMarkup}
+                  </a>
+                );
+              }
+
+              return (
+                <div key={item.id}>
+                  {cardMarkup}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
       {/* ── FAQ ── */}
-      <section className="max-w-2xl mx-auto px-4 space-y-4">
-        <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] text-center">Frequently Asked Questions</h2>
-        <div className="rounded-lg bg-white border border-[#E8E2D6] overflow-hidden divide-y divide-[#E8E2D6]">
-          {faqs.map((faq, idx) => (
-            <div key={idx} className="p-4 sm:p-5">
-              <button
-                onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                className="w-full flex items-center justify-between text-left font-bold text-sm text-[#4A453E]"
-              >
-                <span>{faq.q}</span>
-                <span className="text-[#F9A37E] ml-3 text-base leading-none font-black flex-shrink-0">
-                  {openFaq === idx ? "−" : "+"}
-                </span>
-              </button>
-              {openFaq === idx && (
-                <p className="text-xs text-[#7A736A] mt-3 leading-relaxed animate-fade-in-up">
-                  {faq.a}
-                </p>
-              )}
-            </div>
-          ))}
+      <section className="w-full bg-[#FDFAF6] py-10 sm:py-14">
+        <div className="max-w-2xl mx-auto px-4 space-y-4">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] text-center">Frequently Asked Questions</h2>
+          <div className="rounded-lg bg-white overflow-hidden">
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="p-4 sm:p-5">
+                <button
+                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                  className="w-full flex items-center justify-between text-left font-bold text-sm text-[#4A453E]"
+                >
+                  <span>{faq.q}</span>
+                  <span className="text-[#F9A37E] ml-3 text-base leading-none font-black flex-shrink-0">
+                    {openFaq === idx ? "−" : "+"}
+                  </span>
+                </button>
+                {openFaq === idx && (
+                  <p className="text-xs text-[#7A736A] mt-3 leading-relaxed animate-fade-in-up">
+                    {faq.a}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
