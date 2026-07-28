@@ -9,6 +9,7 @@ import * as dns from 'dns';
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private transporter: nodemailer.Transporter | null = null;
+  public lastErrorDetails: string = '';
 
   constructor(private readonly configService: ConfigService) {
     this.initTransporter();
@@ -57,30 +58,75 @@ export class EmailService {
   }
 
   private async sendMailWithFallback(mailOptions: nodemailer.SendMailOptions): Promise<boolean> {
+    this.lastErrorDetails = '';
+
+    // 1. Try Resend HTTP API if RESEND_API_KEY is configured
+    const resendApiKey = this.configService.get<string>('RESEND_API_KEY');
+    if (resendApiKey) {
+      try {
+        const fromEmail = this.configService.get<string>('RESEND_FROM_EMAIL') || 'KLIAMO Fashion <onboarding@resend.dev>';
+        const response = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${resendApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: fromEmail,
+            to: Array.isArray(mailOptions.to) ? mailOptions.to : [mailOptions.to],
+            subject: mailOptions.subject,
+            html: mailOptions.html,
+          }),
+        });
+
+        if (response.ok) {
+          this.logger.log(`Email successfully sent via Resend API to ${mailOptions.to}`);
+          return true;
+        } else {
+          const resJson = await response.json().catch(() => ({}));
+          const msg = resJson.message || response.statusText;
+          this.logger.warn(`Resend API failed: ${msg}`);
+          this.lastErrorDetails = `Resend API: ${msg}`;
+        }
+      } catch (err: any) {
+        this.logger.warn(`Resend API fetch error: ${err?.message || err}`);
+        this.lastErrorDetails = `Resend API: ${err?.message || err}`;
+      }
+    }
+
+    // 2. Fall back to SMTP
     if (!this.transporter) this.initTransporter();
-    if (!this.transporter) return false;
+    if (!this.transporter) {
+      if (!this.lastErrorDetails) this.lastErrorDetails = 'SMTP transporter missing credentials';
+      return false;
+    }
 
     const primaryPort = Number(this.configService.get<number>('SMTP_PORT')) || 465;
     const fallbackPort = primaryPort === 465 ? 587 : 465;
 
     try {
       await this.transporter.sendMail(mailOptions);
+      this.lastErrorDetails = '';
       return true;
     } catch (primaryError: any) {
+      const pMsg = primaryError?.message || String(primaryError);
       this.logger.warn(
-        `Primary SMTP send failed on port ${primaryPort} (${primaryError?.message || primaryError}). Retrying on fallback port ${fallbackPort}...`,
+        `Primary SMTP send failed on port ${primaryPort} (${pMsg}). Retrying on fallback port ${fallbackPort}...`,
       );
       try {
         const fallbackTransporter = this.createTransporterForPort(fallbackPort);
         await fallbackTransporter.sendMail(mailOptions);
         this.logger.log(`Fallback SMTP send succeeded on port ${fallbackPort}! Updating active transporter.`);
         this.transporter = fallbackTransporter;
+        this.lastErrorDetails = '';
         return true;
       } catch (fallbackError: any) {
+        const fMsg = fallbackError?.message || String(fallbackError);
         this.logger.error(
-          `Fallback SMTP send also failed on port ${fallbackPort}: ${fallbackError?.message || fallbackError}`,
+          `Fallback SMTP send also failed on port ${fallbackPort}: ${fMsg}`,
           fallbackError?.stack,
         );
+        this.lastErrorDetails = `Primary port ${primaryPort}: ${pMsg} | Fallback port ${fallbackPort}: ${fMsg}`;
         return false;
       }
     }

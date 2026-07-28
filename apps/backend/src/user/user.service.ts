@@ -352,7 +352,8 @@ export class UserService implements OnModuleInit {
 
     const sent = await this.emailService.sendOtpEmail(user.email, user.name, otp, 'reset');
     if (!sent) {
-      throw new InternalServerErrorException('Failed to send OTP email. Please try again later.');
+      const details = this.emailService.lastErrorDetails ? ` (${this.emailService.lastErrorDetails})` : '';
+      throw new InternalServerErrorException(`Failed to send OTP email${details}. Please check email configuration.`);
     }
 
     return { message: 'If this email is registered, you will receive an OTP shortly.' };
@@ -443,7 +444,8 @@ export class UserService implements OnModuleInit {
     const name = normalizedEmail.split('@')[0] || 'User';
     const sent = await this.emailService.sendOtpEmail(normalizedEmail, name, otp, 'signup');
     if (!sent) {
-      throw new InternalServerErrorException('Failed to send OTP email. Please check server email configuration.');
+      const details = this.emailService.lastErrorDetails ? ` (${this.emailService.lastErrorDetails})` : '';
+      throw new InternalServerErrorException(`Failed to send OTP email${details}. Please check email configuration.`);
     }
 
     return { message: 'OTP sent to your email. It expires in 10 minutes.' };
