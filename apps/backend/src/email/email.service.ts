@@ -68,10 +68,16 @@ export class EmailService {
     this.lastErrorDetails = '';
 
     // 1. Try Resend HTTP API (HTTPS Port 443 - Never blocked by Render)
-    const resendApiKey = (this.configService.get<string>('RESEND_API_KEY') || process.env.RESEND_API_KEY || '').trim();
+    const resendApiKey = (this.configService.get<string>('RESEND_API_KEY') || process.env.RESEND_API_KEY || '')
+      .trim()
+      .replace(/^["']|["']$/g, '');
     if (resendApiKey && resendApiKey !== 're_your_api_key_here') {
       try {
-        const fromEmail = this.configService.get<string>('RESEND_FROM_EMAIL') || process.env.RESEND_FROM_EMAIL || 'KLIAMO Fashion <onboarding@resend.dev>';
+        const rawFrom = (this.configService.get<string>('RESEND_FROM_EMAIL') || process.env.RESEND_FROM_EMAIL || 'KLIAMO Fashion <onboarding@resend.dev>')
+          .trim()
+          .replace(/^["']|["']$/g, '');
+        const fromEmail = rawFrom.includes('<') ? rawFrom : `KLIAMO Fashion <${rawFrom}>`;
+
         const response = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
@@ -92,18 +98,23 @@ export class EmailService {
           return true;
         } else {
           const resJson = await response.json().catch(() => ({}));
-          const msg = resJson.message || response.statusText;
-          this.logger.warn(`Resend API failed: ${msg}`);
-          this.lastErrorDetails = `Resend API Error: ${msg}`;
+          const msg = resJson.message || resJson.error?.message || response.statusText || 'Resend HTTP Error';
+          this.logger.warn(`Resend API failed (${response.status}): ${msg}`);
+          this.lastErrorDetails = `Resend API (${response.status}): ${msg}`;
+          return false; // Stop here so error details aren't overwritten by SMTP timeout
         }
       } catch (err: any) {
-        this.logger.warn(`Resend API fetch error: ${err?.message || err}`);
-        this.lastErrorDetails = `Resend API Fetch Error: ${err?.message || err}`;
+        const fetchMsg = err?.message || String(err);
+        this.logger.warn(`Resend API fetch error: ${fetchMsg}`);
+        this.lastErrorDetails = `Resend API Network Error: ${fetchMsg}`;
+        return false;
       }
     }
 
     // 2. Try Brevo HTTP API (HTTPS Port 443)
-    const brevoApiKey = (this.configService.get<string>('BREVO_API_KEY') || process.env.BREVO_API_KEY || '').trim();
+    const brevoApiKey = (this.configService.get<string>('BREVO_API_KEY') || process.env.BREVO_API_KEY || '')
+      .trim()
+      .replace(/^["']|["']$/g, '');
     if (brevoApiKey) {
       try {
         const response = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -129,10 +140,12 @@ export class EmailService {
           const msg = resJson.message || response.statusText;
           this.logger.warn(`Brevo API failed: ${msg}`);
           this.lastErrorDetails = `Brevo API Error: ${msg}`;
+          return false;
         }
       } catch (err: any) {
         this.logger.warn(`Brevo API error: ${err?.message || err}`);
         this.lastErrorDetails = `Brevo API Error: ${err?.message || err}`;
+        return false;
       }
     }
 
