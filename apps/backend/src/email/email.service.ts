@@ -78,7 +78,7 @@ export class EmailService {
           .replace(/^["']|["']$/g, '');
         const fromEmail = rawFrom.includes('<') ? rawFrom : `KLIAMO Fashion <${rawFrom}>`;
 
-        const response = await fetch('https://api.resend.com/emails', {
+        let response = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${resendApiKey}`,
@@ -91,6 +91,26 @@ export class EmailService {
             html: mailOptions.html,
           }),
         });
+
+        // Automatic fallback: If domain is unverified (403), retry with free onboarding@resend.dev
+        if (!response.ok && response.status === 403 && !fromEmail.includes('resend.dev')) {
+          this.logger.warn(
+            `Resend domain in '${fromEmail}' is unverified (403). Retrying automatically with 'onboarding@resend.dev'...`,
+          );
+          response = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${resendApiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: 'KLIAMO Fashion <onboarding@resend.dev>',
+              to: Array.isArray(mailOptions.to) ? mailOptions.to : [mailOptions.to],
+              subject: mailOptions.subject,
+              html: mailOptions.html,
+            }),
+          });
+        }
 
         if (response.ok) {
           this.logger.log(`Email successfully sent via Resend API to ${mailOptions.to}`);
