@@ -15,13 +15,23 @@ export class EmailService {
     this.initTransporter();
   }
 
-  private createTransporterForPort(targetPort: number): nodemailer.Transporter {
-    const host = this.configService.get<string>('SMTP_HOST') || 'smtp.hostinger.com';
+  private async createTransporterForPort(targetPort: number): Promise<nodemailer.Transporter> {
+    const rawHost = this.configService.get<string>('SMTP_HOST') || 'smtp.hostinger.com';
     const user = this.configService.get<string>('SMTP_EMAIL') || 'contact@kliamo.com';
     const pass = this.configService.get<string>('SMTP_PASSWORD') || 'Prosenjit2026@';
 
+    let resolvedHost = rawHost;
+    try {
+      const ips = await dns.promises.resolve4(rawHost);
+      if (ips && ips.length > 0) {
+        resolvedHost = ips[0];
+      }
+    } catch (err) {
+      this.logger.warn(`Could not resolve IPv4 for ${rawHost}: ${err}`);
+    }
+
     return nodemailer.createTransport({
-      host,
+      host: resolvedHost,
       port: targetPort,
       secure: targetPort === 465,
       auth: {
@@ -31,17 +41,14 @@ export class EmailService {
       connectionTimeout: 10000,
       greetingTimeout: 10000,
       socketTimeout: 10000,
-      lookup: (hostname: string, options: any, callback: any) => {
-        dns.lookup(hostname, { family: 4 }, callback);
-      },
       tls: {
         rejectUnauthorized: false,
-        servername: host,
+        servername: rawHost,
       },
     } as any);
   }
 
-  private initTransporter() {
+  private async initTransporter() {
     const user = this.configService.get<string>('SMTP_EMAIL') || 'contact@kliamo.com';
     const pass = this.configService.get<string>('SMTP_PASSWORD') || 'Prosenjit2026@';
 
@@ -53,8 +60,8 @@ export class EmailService {
     const host = this.configService.get<string>('SMTP_HOST') || 'smtp.hostinger.com';
     const port = Number(this.configService.get<number>('SMTP_PORT')) || 465;
 
-    this.transporter = this.createTransporterForPort(port);
-    this.logger.log(`SMTP transporter initialized: ${host}:${port} (IPv4 forced via dns.lookup, 10s timeouts)`);
+    this.transporter = await this.createTransporterForPort(port);
+    this.logger.log(`SMTP transporter initialized: ${host}:${port} (Resolved IPv4 forced)`);
   }
 
   private async sendMailWithFallback(mailOptions: nodemailer.SendMailOptions): Promise<boolean> {
@@ -95,8 +102,9 @@ export class EmailService {
     }
 
     // 2. Fall back to SMTP
-    if (!this.transporter) this.initTransporter();
-    if (!this.transporter) {
+    const user = this.configService.get<string>('SMTP_EMAIL') || 'contact@kliamo.com';
+    const pass = this.configService.get<string>('SMTP_PASSWORD') || 'Prosenjit2026@';
+    if (!user || !pass) {
       if (!this.lastErrorDetails) this.lastErrorDetails = 'SMTP transporter missing credentials';
       return false;
     }
@@ -105,7 +113,9 @@ export class EmailService {
     const fallbackPort = primaryPort === 465 ? 587 : 465;
 
     try {
-      await this.transporter.sendMail(mailOptions);
+      const primaryTransporter = await this.createTransporterForPort(primaryPort);
+      await primaryTransporter.sendMail(mailOptions);
+      this.transporter = primaryTransporter;
       this.lastErrorDetails = '';
       return true;
     } catch (primaryError: any) {
@@ -114,7 +124,7 @@ export class EmailService {
         `Primary SMTP send failed on port ${primaryPort} (${pMsg}). Retrying on fallback port ${fallbackPort}...`,
       );
       try {
-        const fallbackTransporter = this.createTransporterForPort(fallbackPort);
+        const fallbackTransporter = await this.createTransporterForPort(fallbackPort);
         await fallbackTransporter.sendMail(mailOptions);
         this.logger.log(`Fallback SMTP send succeeded on port ${fallbackPort}! Updating active transporter.`);
         this.transporter = fallbackTransporter;
