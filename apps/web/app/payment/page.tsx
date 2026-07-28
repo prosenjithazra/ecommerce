@@ -102,7 +102,7 @@ function PaymentPageContent() {
 
   const subtotal = cart.reduce((acc, item) => acc + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
   const tax = subtotal * 0.05;
-  const shippingFee = shippingMethod === 'express' ? 99 : (subtotal > 999 ? 0 : 49);
+  const shippingFee = 0; // FREE for testing
   const total = subtotal + tax + shippingFee;
 
   const handlePay = async (e: React.FormEvent) => {

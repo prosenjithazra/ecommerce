@@ -27,7 +27,7 @@ export default function CartPage() {
 
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const tax = subtotal * 0.05;
-  const shipping = subtotal > 999 || subtotal === 0 ? 0 : 49;
+  const shipping = 0; // FREE for testing
   const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
   const total = Math.max(0, subtotal + tax + shipping - discountAmount);
 
