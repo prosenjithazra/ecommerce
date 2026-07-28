@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as dns from 'dns';
 
 @Injectable()
 export class EmailService {
@@ -13,10 +14,33 @@ export class EmailService {
     this.initTransporter();
   }
 
-  private initTransporter() {
+  private createTransporterForPort(targetPort: number): nodemailer.Transporter {
     const host = this.configService.get<string>('SMTP_HOST') || 'smtp.hostinger.com';
-    // Use port 587 (STARTTLS) by default — Render blocks port 465 over IPv6
-    const port = Number(this.configService.get<number>('SMTP_PORT')) || 587;
+    const user = this.configService.get<string>('SMTP_EMAIL') || 'contact@kliamo.com';
+    const pass = this.configService.get<string>('SMTP_PASSWORD') || 'Prosenjit2026@';
+
+    return nodemailer.createTransport({
+      host,
+      port: targetPort,
+      secure: targetPort === 465,
+      auth: {
+        user,
+        pass,
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
+      lookup: (hostname: string, options: any, callback: any) => {
+        dns.lookup(hostname, { family: 4 }, callback);
+      },
+      tls: {
+        rejectUnauthorized: false,
+        servername: host,
+      },
+    } as any);
+  }
+
+  private initTransporter() {
     const user = this.configService.get<string>('SMTP_EMAIL') || 'contact@kliamo.com';
     const pass = this.configService.get<string>('SMTP_PASSWORD') || 'Prosenjit2026@';
 
@@ -25,23 +49,41 @@ export class EmailService {
       return;
     }
 
-    this.transporter = nodemailer.createTransport({
-      host,
-      port,
-      // port 465 = SSL (secure:true), port 587 = STARTTLS (secure:false)
-      secure: port === 465,
-      auth: {
-        user,
-        pass,
-      },
-      // Force IPv4 — Render does not support outbound IPv6 SMTP connections
-      family: 4,
-      tls: {
-        rejectUnauthorized: false,
-      },
-    } as nodemailer.TransportOptions & { family?: number });
+    const host = this.configService.get<string>('SMTP_HOST') || 'smtp.hostinger.com';
+    const port = Number(this.configService.get<number>('SMTP_PORT')) || 465;
 
-    this.logger.log(`SMTP transporter initialized: ${host}:${port} (IPv4 forced)`);
+    this.transporter = this.createTransporterForPort(port);
+    this.logger.log(`SMTP transporter initialized: ${host}:${port} (IPv4 forced via dns.lookup, 10s timeouts)`);
+  }
+
+  private async sendMailWithFallback(mailOptions: nodemailer.SendMailOptions): Promise<boolean> {
+    if (!this.transporter) this.initTransporter();
+    if (!this.transporter) return false;
+
+    const primaryPort = Number(this.configService.get<number>('SMTP_PORT')) || 465;
+    const fallbackPort = primaryPort === 465 ? 587 : 465;
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+      return true;
+    } catch (primaryError: any) {
+      this.logger.warn(
+        `Primary SMTP send failed on port ${primaryPort} (${primaryError?.message || primaryError}). Retrying on fallback port ${fallbackPort}...`,
+      );
+      try {
+        const fallbackTransporter = this.createTransporterForPort(fallbackPort);
+        await fallbackTransporter.sendMail(mailOptions);
+        this.logger.log(`Fallback SMTP send succeeded on port ${fallbackPort}! Updating active transporter.`);
+        this.transporter = fallbackTransporter;
+        return true;
+      } catch (fallbackError: any) {
+        this.logger.error(
+          `Fallback SMTP send also failed on port ${fallbackPort}: ${fallbackError?.message || fallbackError}`,
+          fallbackError?.stack,
+        );
+        return false;
+      }
+    }
   }
 
   private getLogoAttachments() {
@@ -119,20 +161,17 @@ export class EmailService {
       </html>
     `;
 
-    try {
-      await this.transporter.sendMail({
-        from: `"KLIAMO Fashion" <${fromEmail}>`,
-        to: toEmail,
-        subject: 'Welcome to KLIAMO Fashion!',
-        html: htmlContent,
-        attachments,
-      });
+    const sent = await this.sendMailWithFallback({
+      from: `"KLIAMO Fashion" <${fromEmail}>`,
+      to: toEmail,
+      subject: 'Welcome to KLIAMO Fashion!',
+      html: htmlContent,
+      attachments,
+    });
+    if (sent) {
       this.logger.log(`Welcome email successfully sent to ${toEmail}`);
-      return true;
-    } catch (error: any) {
-      this.logger.error(`Failed to send welcome email to ${toEmail}: ${error?.message || error}`);
-      return false;
     }
+    return sent;
   }
 
   async sendOrderConfirmationEmail(order: any): Promise<boolean> {
@@ -292,20 +331,17 @@ export class EmailService {
       </html>
     `;
 
-    try {
-      await this.transporter.sendMail({
-        from: `"KLIAMO Fashion Orders" <${fromEmail}>`,
-        to: order.email,
-        subject: `Order Confirmation #${order.id} - KLIAMO Fashion`,
-        html: htmlContent,
-        attachments,
-      });
+    const sent = await this.sendMailWithFallback({
+      from: `"KLIAMO Fashion Orders" <${fromEmail}>`,
+      to: order.email,
+      subject: `Order Confirmation #${order.id} - KLIAMO Fashion`,
+      html: htmlContent,
+      attachments,
+    });
+    if (sent) {
       this.logger.log(`Order confirmation email sent to ${order.email} for order #${order.id}`);
-      return true;
-    } catch (error: any) {
-      this.logger.error(`Failed to send order confirmation email to ${order.email}: ${error?.message || error}`);
-      return false;
     }
+    return sent;
   }
 
   async sendOtpEmail(toEmail: string, userName: string, otp: string, purpose: 'signup' | 'reset' = 'reset'): Promise<boolean> {
@@ -369,19 +405,16 @@ export class EmailService {
       </div>
     `;
 
-    try {
-      await this.transporter.sendMail({
-        from: `"KLIAMO Fashion" <${fromEmail}>`,
-        to: toEmail,
-        subject: subjectText,
-        html,
-        ...(logoAttachments.length > 0 ? { attachments: logoAttachments } : {}),
-      });
+    const sent = await this.sendMailWithFallback({
+      from: `"KLIAMO Fashion" <${fromEmail}>`,
+      to: toEmail,
+      subject: subjectText,
+      html,
+      ...(logoAttachments.length > 0 ? { attachments: logoAttachments } : {}),
+    });
+    if (sent) {
       this.logger.log(`OTP email sent to ${toEmail} for ${purpose}`);
-      return true;
-    } catch (error: any) {
-      this.logger.error(`Failed to send OTP email to ${toEmail}: ${error?.message || error}`, error?.stack);
-      return false;
     }
+    return sent;
   }
 }
