@@ -62,7 +62,7 @@ export default function CheckoutPage() {
 
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const tax = subtotal * 0.05;
-  const shippingFee = 0; // FREE for testing
+  const shippingFee = shippingMethod === 'express' ? 99 : (subtotal > 999 ? 0 : 49);
   const total = subtotal + tax + shippingFee;
 
   const inputClass = "w-full bg-white dark:bg-zinc-800 border border-[#E8E2D6] dark:border-zinc-700 rounded-lg py-2.5 px-4 text-xs outline-none focus:outline-none focus:ring-0 text-[#4A453E] dark:text-zinc-200 placeholder-[#A89B8A]";
@@ -300,7 +300,7 @@ export default function CheckoutPage() {
             </div>
             <div className="flex justify-between">
               <span className="text-[#7A736A]">Shipping</span>
-              {/* <span className="font-bold text-[#A8C69F]">{shippingFee === 0 ? "FREE" : `₹${shippingFee.toFixed(2)}`}</span> */}
+              <span className="font-bold text-[#A8C69F]">{shippingFee === 0 ? "FREE" : `₹${shippingFee.toFixed(2)}`}</span>
             </div>
             <div className="flex justify-between pt-3 border-t border-[#E8E2D6] text-sm font-black">
               <span className="text-[#4A453E]">Estimated Total</span>

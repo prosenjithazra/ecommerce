@@ -5,12 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp, Address } from '../../components/AppContext';
 import { Breadcrumb, Select } from '../../components/UIComponents';
-import { User, MapPin, ShieldAlert, KeyRound, Sliders, LogOut, LayoutDashboard, Upload, Camera, X, ShoppingBag, Loader2, Calendar, CreditCard, ExternalLink, ChevronDown, ChevronUp, XCircle, Package, Truck, CheckCircle2, Clock, AlertTriangle, Eye, EyeOff, Tag, Copy, Check } from 'lucide-react';
+import { User, MapPin, ShieldAlert, KeyRound, Sliders, LogOut, LayoutDashboard, Upload, Camera, X, ShoppingBag, Loader2, Calendar, CreditCard, ExternalLink, ChevronDown, ChevronUp, XCircle, Package, Truck, CheckCircle2, Clock, AlertTriangle, Eye, EyeOff, Tag, Copy, Check, Download } from 'lucide-react';
 import { validatePhoneNumber, sanitizePhoneInput } from '../../utils/phoneValidation';
 import { INDIAN_STATES, sanitizePincodeInput, validateIndianPincode, validateIndianState } from '../../utils/addressValidation';
 import { getApiUrl } from '../../components/ApiConfig';
 import { CustomGarmentPreview } from '../../components/CustomGarmentPreview';
 import { AddressCard } from '../../components/InfoCards';
+import { downloadOrderInvoice } from '../../utils/invoiceGenerator';
 
 const STATUS_STYLES: Record<string, string> = {
   Delivered: "bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30",
@@ -38,6 +39,7 @@ const STATUS_STEPS = [
 
 const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelling, onReturn, returning }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showReturnConfirm, setShowReturnConfirm] = useState(false);
   const [cancelReasonSelection, setCancelReasonSelection] = useState("Changed my mind");
@@ -52,6 +54,18 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
   const canReturn = order.status === 'Delivered';
 
   const currentStepIndex = STATUS_STEPS.findIndex(s => s.key === order.status);
+
+  const handleDownloadInvoice = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setIsDownloading(true);
+    try {
+      await downloadOrderInvoice(order.id, order);
+    } catch (err) {
+      console.error("Error downloading invoice:", err);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-950/20 shadow-sm transition-all hover:shadow-md">
@@ -73,11 +87,21 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
           </p>
         </div>
 
-        <div className="flex items-center gap-4 self-stretch sm:self-auto justify-between sm:justify-end">
+        <div className="flex items-center gap-3 self-stretch sm:self-auto justify-between sm:justify-end">
           <div className="text-right">
             <p className="text-[10px] text-zinc-400 font-bold">{order.items} {order.items === 1 ? 'item' : 'items'}</p>
             <p className="text-sm font-black text-zinc-900 dark:text-white mt-0.5">₹{Number(order.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
           </div>
+          <button
+            type="button"
+            onClick={handleDownloadInvoice}
+            disabled={isDownloading}
+            title="Download PDF Invoice"
+            className="flex items-center gap-1.5 text-xs font-extrabold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 rounded-lg transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+          >
+            {isDownloading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#F9A37E]" /> : <Download className="w-3.5 h-3.5 text-[#F9A37E]" />}
+            <span className="hidden sm:inline">Invoice</span>
+          </button>
           <div className="p-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors">
             {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </div>
@@ -173,7 +197,7 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
                     <div key={i} className="border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-900/40">
                       {/* Item Header */}
                       <div className="flex flex-col sm:flex-row gap-3 p-3.5">
-                        <div className="flex-shrink-0 w-full sm:w-auto h-auto sm:h-14 rounded-lg overflow-hidden flex justify-center bg-[#f1f1f1] p-2 sm:p-0">
+                        <div className="flex-shrink-0 w-full sm:w-auto min-h-20 sm:min-h-16 h-auto sm:h-14 rounded-lg overflow-hidden flex justify-center bg-[#f1f1f1] p-2 sm:p-0">
                           <CustomGarmentPreview
                             customDesign={item.customDesign}
                             defaultImage={item.image}
@@ -303,6 +327,22 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
             </div>
           </div>
 
+          {/* Download Invoice Banner */}
+          <div className="px-5 py-3.5 bg-[#FDFAF6] dark:bg-zinc-900/40 border-t border-[#E8E2D6] dark:border-zinc-800 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 block">Tax Invoice / Receipt</span>
+              <span className="text-[10px] text-zinc-500 block mt-0.5">Download official PDF tax invoice with full product & order breakdown.</span>
+            </div>
+            <button
+              onClick={handleDownloadInvoice}
+              disabled={isDownloading}
+              className="flex items-center gap-1.5 text-xs font-extrabold text-zinc-800 dark:text-zinc-100 hover:text-[#e8855a] border border-zinc-200 dark:border-zinc-700 hover:border-[#F9A37E] bg-white dark:bg-zinc-800 px-4 py-2 rounded-lg transition-all shadow-xs cursor-pointer disabled:opacity-50"
+            >
+              {isDownloading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#F9A37E]" /> : <Download className="w-3.5 h-3.5 text-[#F9A37E]" />}
+              Download PDF Invoice
+            </button>
+          </div>
+
           {/* Display Cancellation Reason if Cancelled */}
           {isCancelled && order.cancelReason && (
             <div className="px-5 py-3 bg-red-50/30 dark:bg-red-950/5 border-t border-red-100/50 text-[10px] font-bold text-red-600">
@@ -380,14 +420,14 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
                         setShowCancelConfirm(false);
                       }}
                       disabled={cancelling}
-                      className="flex items-center gap-1.5 text-xs font-extrabold bg-red-650 hover:bg-red-700 active:scale-95 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-all shadow-md shadow-red-500/10 cursor-pointer"
+                      className="flex items-center gap-1.5 text-xs font-extrabold bg-red-600 hover:bg-red-700 active:scale-95 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-all shadow-sm shadow-red-500/20 cursor-pointer"
                     >
                       {cancelling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
                       {cancelling ? 'Cancelling...' : 'Confirm Cancellation'}
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); setShowCancelConfirm(false); }}
-                      className="text-xs font-bold text-zinc-650 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 bg-white dark:bg-zinc-800/80 hover:bg-zinc-50 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-4 py-2 rounded-lg transition-all active:scale-95 cursor-pointer"
+                      className="text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white bg-white dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-4 py-2 rounded-lg transition-all active:scale-95 cursor-pointer"
                     >
                       Keep Order
                     </button>
@@ -460,14 +500,14 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
                         setShowReturnConfirm(false);
                       }}
                       disabled={returning}
-                      className="flex items-center gap-1.5 text-xs font-extrabold bg-violet-600 hover:bg-violet-750 active:scale-95 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-all shadow-md shadow-violet-650/10 cursor-pointer"
+                      className="flex items-center gap-1.5 text-xs font-extrabold bg-violet-600 hover:bg-violet-700 active:scale-95 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-all shadow-sm shadow-violet-500/20 cursor-pointer"
                     >
                       {returning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                       {returning ? 'Submitting...' : 'Confirm Return'}
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); setShowReturnConfirm(false); }}
-                      className="text-xs font-bold text-zinc-650 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 bg-white dark:bg-zinc-800/80 hover:bg-zinc-50 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-4 py-2 rounded-lg transition-all active:scale-95 cursor-pointer"
+                      className="text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white bg-white dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-4 py-2 rounded-lg transition-all active:scale-95 cursor-pointer"
                     >
                       Keep Product
                     </button>

@@ -745,7 +745,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
     const subtotal = cart.reduce((acc, c) => acc + c.price * c.quantity, 0);
     const tax = subtotal * 0.05;
-    const shipping = 0; // FREE for testing
+    const shipping = subtotal > 999 ? 0 : 49;
     const total = subtotal + tax + shipping;
 
     const newOrder: Order = {

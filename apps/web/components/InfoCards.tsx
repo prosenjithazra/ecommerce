@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Copy, MapPin, Truck, Calendar, Download, FileText, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Copy, MapPin, Truck, Calendar, Download, FileText, CheckCircle2, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Address, Order, Transaction, useApp } from './AppContext';
 import { StatusBadge, Rating, Price } from './UIComponents';
 import { CustomGarmentPreview } from './CustomGarmentPreview';
+import { downloadOrderInvoice } from '../utils/invoiceGenerator';
 
 /* 1. PRODUCT GALLERY (Draggable Fade-Slide Slider) */
 export const ProductGallery: React.FC<{ images: string[]; name: string }> = ({ images, name }) => {
@@ -256,7 +257,21 @@ export const AddressCard: React.FC<AddressCardProps> = ({ address, onEdit, onDel
 
 /* 5. ORDER CARD */
 export const OrderCard: React.FC<{ order: Order; onViewDetails: (id: string) => void }> = ({ order, onViewDetails }) => {
+  const [isDownloading, setIsDownloading] = useState(false);
   const itemsCount = order.items.reduce((acc, it) => acc + it.quantity, 0);
+
+  const handleDownloadInvoice = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsDownloading(true);
+    try {
+      await downloadOrderInvoice(order.id, order);
+    } catch (err) {
+      console.error("Error downloading invoice:", err);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <div className="p-4 border border-[#E8E2D6] rounded-lg bg-white space-y-3">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#E8E2D6]">
@@ -295,9 +310,20 @@ export const OrderCard: React.FC<{ order: Order; onViewDetails: (id: string) => 
           <Truck className="w-3.5 h-3.5 text-[#A8C69F]" />
           <span className="text-[10px]">Tracking: <span className="font-semibold text-[#4A453E]">{order.trackingNumber || "N/A"}</span></span>
         </div>
-        <button onClick={() => onViewDetails(order.id)} className="text-xs font-bold text-[#F9A37E] hover:text-[#E8855A] hover:underline">
-          View Details →
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleDownloadInvoice}
+            disabled={isDownloading}
+            className="flex items-center gap-1 text-xs font-bold text-zinc-700 hover:text-[#E8855A] border border-[#E8E2D6] hover:border-[#F9A37E] px-2.5 py-1 rounded transition-colors disabled:opacity-50"
+            title="Download PDF Invoice"
+          >
+            {isDownloading ? <Loader2 className="w-3 h-3 animate-spin text-[#F9A37E]" /> : <Download className="w-3 h-3 text-[#F9A37E]" />}
+            <span>Invoice</span>
+          </button>
+          <button onClick={() => onViewDetails(order.id)} className="text-xs font-bold text-[#F9A37E] hover:text-[#E8855A] hover:underline">
+            View Details →
+          </button>
+        </div>
       </div>
     </div>
   );

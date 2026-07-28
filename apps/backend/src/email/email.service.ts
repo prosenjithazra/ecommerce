@@ -251,7 +251,7 @@ export class EmailService {
           
           <!-- Header with Logo -->
           <div style="background-color: #FDFAF6; padding: 32px 24px; text-align: center; border-b: 1px solid #E8E2D6;">
-            <img src="${attachments.length > 0 ? 'cid:kliamologo@kliamo' : 'https://kliamo.com/kliamologoNew.png'}" alt="KLIAMO Fashion" style="height: 52px; width: auto; max-width: 200px; display: inline-block; border: 0;" />
+            <img src="https://kliamo.com/kliamologoNew.png" alt="Kliamo Fashion India" style="height: 52px; width: auto; max-width: 200px; display: inline-block; border: 0;" />
             <h1 style="color: #4A453E; margin: 16px 0 4px 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Welcome to KLIAMO!</h1>
             <p style="color: #F9A37E; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin: 0;">Style That Defines You</p>
           </div>
@@ -277,7 +277,7 @@ export class EmailService {
           <div style="background-color: #FDFAF6; padding: 20px 24px; text-align: center; border-top: 1px solid #E8E2D6; font-size: 12px; color: #7A736A;">
             <p style="margin: 0 0 6px 0; font-weight: 600;">Need assistance? We're here to help.</p>
             <p style="margin: 0;">Contact us anytime at <a href="mailto:contact@kliamo.com" style="color: #F9A37E; text-decoration: none; font-weight: bold;">contact@kliamo.com</a></p>
-            <p style="margin: 12px 0 0 0; font-size: 11px; color: #A89B8A;">© ${new Date().getFullYear()} KLIAMO Fashion. All rights reserved.</p>
+            <p style="margin: 12px 0 0 0; font-size: 11px; color: #A89B8A;">© ${new Date().getFullYear()} Kliamo Fashion India. All rights reserved.</p>
           </div>
 
         </div>
@@ -286,9 +286,9 @@ export class EmailService {
     `;
 
     const sent = await this.sendMailWithFallback({
-      from: `"KLIAMO Fashion" <${fromEmail}>`,
+      from: `"Kliamo Fashion India" <${fromEmail}>`,
       to: toEmail,
-      subject: 'Welcome to KLIAMO Fashion!',
+      subject: 'Welcome to Kliamo Fashion India!',
       html: htmlContent,
       attachments,
     });
@@ -372,7 +372,7 @@ export class EmailService {
           
           <!-- Header Banner with Logo -->
           <div style="background-color: #FDFAF6; padding: 32px 24px; text-align: center; border-bottom: 1px solid #E8E2D6;">
-            <img src="${attachments.length > 0 ? 'cid:kliamologo@kliamo' : 'https://kliamo.com/kliamologoNew.png'}" alt="KLIAMO Fashion" style="height: 54px; width: auto; max-width: 210px; display: inline-block; border: 0;" />
+            <img src="https://kliamo.com/kliamologoNew.png" alt="Kliamo Fashion India" style="height: 54px; width: auto; max-width: 210px; display: inline-block; border: 0;" />
             <h1 style="color: #4A453E; margin: 16px 0 4px 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Order Confirmation</h1>
             <p style="color: #F9A37E; font-weight: 700; font-size: 14px; margin: 0;">Order #${order.id} &nbsp;·&nbsp; ${orderDateFormatted}</p>
           </div>
@@ -447,7 +447,7 @@ export class EmailService {
           <div style="background-color: #FDFAF6; padding: 24px; text-align: center; border-top: 1px solid #E8E2D6; font-size: 12px; color: #7A736A;">
             <p style="margin: 0 0 6px 0; font-weight: 700; color: #4A453E;">Questions about your shipment or custom order?</p>
             <p style="margin: 0;">Reply directly to this email or contact customer support at <a href="mailto:contact@kliamo.com" style="color: #F9A37E; text-decoration: none; font-weight: bold;">contact@kliamo.com</a></p>
-            <p style="margin: 14px 0 0 0; font-size: 11px; color: #A89B8A;">© ${new Date().getFullYear()} KLIAMO Fashion. All rights reserved.</p>
+            <p style="margin: 14px 0 0 0; font-size: 11px; color: #A89B8A;">© ${new Date().getFullYear()} Kliamo Fashion India. All rights reserved.</p>
           </div>
 
         </div>
@@ -456,9 +456,9 @@ export class EmailService {
     `;
 
     const sent = await this.sendMailWithFallback({
-      from: `"KLIAMO Fashion Orders" <${fromEmail}>`,
+      from: `"Kliamo Fashion India Orders" <${fromEmail}>`,
       to: order.email,
-      subject: `Order Confirmation #${order.id} - KLIAMO Fashion`,
+      subject: `Order Confirmation #${order.id} - Kliamo Fashion India`,
       html: htmlContent,
       attachments,
     });
@@ -474,7 +474,7 @@ export class EmailService {
 
     const fromEmail = this.configService.get<string>('SMTP_EMAIL') || 'contact@kliamo.com';
     const logoAttachments = this.getLogoAttachments();
-    const logoSrc = logoAttachments.length > 0 ? 'cid:kliamologo@kliamo' : 'https://kliamo.com/kliamologoNew.png';
+    const logoSrc = 'https://kliamo.com/kliamologoNew.png';
     const expiryMinutes = 10;
 
     const isSignup = purpose === 'signup';
@@ -524,13 +524,13 @@ export class EmailService {
 
         <!-- Footer -->
         <div style="background-color: #FDFAF6; border-top: 1px solid #E8E2D6; padding: 16px 24px; text-align: center;">
-          <p style="color: #A89B8A; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} KLIAMO. All rights reserved.</p>
+          <p style="color: #A89B8A; font-size: 11px; margin: 0;">© ${new Date().getFullYear()} Kliamo Fashion India. All rights reserved.</p>
         </div>
       </div>
     `;
 
     const sent = await this.sendMailWithFallback({
-      from: `"KLIAMO Fashion" <${fromEmail}>`,
+      from: `"Kliamo Fashion India" <${fromEmail}>`,
       to: toEmail,
       subject: subjectText,
       html,

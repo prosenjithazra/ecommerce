@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 
-export const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kliamofashion.com';
+export const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kliamo.com';
 export const siteName = 'Kliamo Fashion';
 export const googleVerification = 'google-site-verification-placeholder-1234';
 export const bingVerification = 'bing-site-verification-placeholder-5678';
@@ -61,7 +61,7 @@ export function getMetadata(options: SeoOptions): Metadata {
       description: options.description,
       images: [
         {
-          url: options.ogImage || `${baseUrl}/kliamoLogo.png`,
+          url: options.ogImage || `${baseUrl}/kliamologoNew.png`,
           width: 800,
           height: 600,
           alt: options.title,
@@ -72,7 +72,7 @@ export function getMetadata(options: SeoOptions): Metadata {
       card: 'summary_large_image',
       title,
       description: options.description,
-      images: [options.ogImage || `${baseUrl}/kliamoLogo.png`],
+      images: [options.ogImage || `${baseUrl}/kliamologoNew.png`],
       creator: '@kliamofashion',
     },
     verification: {

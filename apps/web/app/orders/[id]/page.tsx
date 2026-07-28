@@ -8,7 +8,7 @@ import { Download, Calendar, Truck, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { CustomGarmentPreview } from '../../../components/CustomGarmentPreview';
 import { getApiUrl } from '../../../components/ApiConfig';
-import { printPdfInvoice } from '../../../utils/invoiceGenerator';
+import { downloadOrderInvoice } from '../../../utils/invoiceGenerator';
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -147,7 +147,7 @@ export default function OrderDetailPage() {
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <button
-            onClick={() => printPdfInvoice(order)}
+            onClick={() => downloadOrderInvoice(order.id, order)}
             className="w-full sm:w-auto justify-center border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-extrabold text-xs py-2.5 px-4 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
           >
             <Download className="w-4 h-4 text-[#F9A37E]" /> Download Invoice

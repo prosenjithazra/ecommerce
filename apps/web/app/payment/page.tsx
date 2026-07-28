@@ -34,6 +34,14 @@ function PaymentPageContent() {
     }
   }, [currentUser, profileLoading, router]);
 
+  // Guard: if cart is empty (e.g. user navigated back after placing an order), redirect to orders
+  React.useEffect(() => {
+    if (profileLoading) return;
+    if (cart.length === 0) {
+      router.replace('/orders');
+    }
+  }, [cart, profileLoading, router]);
+
   const addressId = searchParams?.get('addressId') || "";
   const shippingMethod = searchParams?.get('shipping') || "standard";
   const address = addresses.find(a => a.id === addressId) || addresses.find(a => a.isDefault) || addresses[0];
@@ -102,7 +110,7 @@ function PaymentPageContent() {
 
   const subtotal = cart.reduce((acc, item) => acc + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
   const tax = subtotal * 0.05;
-  const shippingFee = 0; // FREE for testing
+  const shippingFee = shippingMethod === 'express' ? 99 : (subtotal > 999 ? 0 : 49);
   const total = subtotal + tax + shippingFee;
 
   const handlePay = async (e: React.FormEvent) => {
@@ -243,7 +251,7 @@ function PaymentPageContent() {
 
       {/* Processing Loader Overlay */}
       {isProcessing && (
-        <div className="fixed inset-0 bg-white/70 dark:bg-black/70 backdrop-blur-sm z-50 flex flex-col items-center justify-center gap-3">
+        <div className="fixed !top-0 !m-0 inset-0 bg-white/70 dark:bg-black/70 backdrop-blur-sm z-50 flex flex-col items-center justify-center gap-3">
           <Loader2 className="w-10 h-10 animate-spin text-[#F9A37E]" />
           <p className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-wider">Processing Payment Securely...</p>
           <p className="text-xs text-zinc-400">Verifying signature & synchronizing order with print partner...</p>
@@ -477,7 +485,7 @@ function PaymentPageContent() {
               <div className="flex justify-between">
                 <span className="text-zinc-500">Shipping Fees</span>
                 <span className="font-bold text-zinc-800 dark:text-zinc-200">
-                  {/* {shippingFee === 0 ? "FREE" : `₹${shippingFee.toFixed(2)}`} */}
+                  {shippingFee === 0 ? "FREE" : `₹${shippingFee.toFixed(2)}`}
                 </span>
               </div>
               <div className="flex justify-between pt-3 border-t border-zinc-150 dark:border-zinc-800 text-sm font-black">

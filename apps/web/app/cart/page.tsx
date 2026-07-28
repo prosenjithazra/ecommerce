@@ -27,7 +27,7 @@ export default function CartPage() {
 
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const tax = subtotal * 0.05;
-  const shipping = 0; // FREE for testing
+  const shipping = subtotal > 999 || subtotal === 0 ? 0 : 49;
   const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
   const total = Math.max(0, subtotal + tax + shipping - discountAmount);
 
@@ -124,7 +124,7 @@ export default function CartPage() {
                       className="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0"
                     />
                   ) : (
-                    <Link href={`/products/${item.slug || item.productId}`} className="cursor-pointer hover:opacity-85 transition-opacity flex-shrink-0">
+                    <Link href={`/products/${item.productId}`} className="cursor-pointer hover:opacity-85 transition-opacity flex-shrink-0">
                       <CustomGarmentPreview
                         customDesign={item.customDesign}
                         defaultImage={item.image}
@@ -139,7 +139,7 @@ export default function CartPage() {
                         {isCustom ? (
                           <h3 className="font-extrabold text-xs sm:text-sm text-[#4A453E] truncate flex-1">{item.name}</h3>
                         ) : (
-                        <Link href={`/products/${item.slug || item.productId}`} className="hover:text-[#F9A37E] transition-colors truncate flex-1">
+                          <Link href={`/products/${item.productId}`} className="hover:text-[#F9A37E] transition-colors truncate flex-1">
                             <h3 className="font-extrabold text-xs sm:text-sm text-[#4A453E] truncate">{item.name}</h3>
                           </Link>
                         )}
@@ -240,7 +240,7 @@ export default function CartPage() {
                 )}
                 <div className="flex justify-between">
                   <span className="text-[#7A736A]">Standard Shipping</span>
-                  {/* <span className="font-extrabold text-[#A8C69F]">{shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}</span> */}
+                  <span className="font-extrabold text-[#A8C69F]">{shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}</span>
                 </div>
                 <div className="flex justify-between pt-3 border-t border-[#E8E2D6] text-sm font-black">
                   <span className="text-[#4A453E]">Total Amount</span>
