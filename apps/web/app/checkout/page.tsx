@@ -300,7 +300,7 @@ export default function CheckoutPage() {
             </div>
             <div className="flex justify-between">
               <span className="text-[#7A736A]">Shipping</span>
-              <span className="font-bold text-[#A8C69F]">{shippingFee === 0 ? "FREE" : `₹${shippingFee.toFixed(2)}`}</span>
+              {/* <span className="font-bold text-[#A8C69F]">{shippingFee === 0 ? "FREE" : `₹${shippingFee.toFixed(2)}`}</span> */}
             </div>
             <div className="flex justify-between pt-3 border-t border-[#E8E2D6] text-sm font-black">
               <span className="text-[#4A453E]">Estimated Total</span>

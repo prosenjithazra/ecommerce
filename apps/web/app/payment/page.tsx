@@ -477,7 +477,7 @@ function PaymentPageContent() {
               <div className="flex justify-between">
                 <span className="text-zinc-500">Shipping Fees</span>
                 <span className="font-bold text-zinc-800 dark:text-zinc-200">
-                  {shippingFee === 0 ? "FREE" : `₹${shippingFee.toFixed(2)}`}
+                  {/* {shippingFee === 0 ? "FREE" : `₹${shippingFee.toFixed(2)}`} */}
                 </span>
               </div>
               <div className="flex justify-between pt-3 border-t border-zinc-150 dark:border-zinc-800 text-sm font-black">

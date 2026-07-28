@@ -240,7 +240,7 @@ export default function CartPage() {
                 )}
                 <div className="flex justify-between">
                   <span className="text-[#7A736A]">Standard Shipping</span>
-                  <span className="font-extrabold text-[#A8C69F]">{shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}</span>
+                  {/* <span className="font-extrabold text-[#A8C69F]">{shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}</span> */}
                 </div>
                 <div className="flex justify-between pt-3 border-t border-[#E8E2D6] text-sm font-black">
                   <span className="text-[#4A453E]">Total Amount</span>
