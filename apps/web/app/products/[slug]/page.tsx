@@ -64,9 +64,9 @@ export default function ProductDetailPage() {
 
   const isSaved = product ? isInWishlist(product.id) : false;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
-    addToCart({
+    await addToCart({
       productId: product.id,
       slug: product.slug,
       name: product.name,
@@ -78,9 +78,9 @@ export default function ProductDetailPage() {
     });
   };
 
-  const handleBuyNow = () => {
-    handleAddToCart();
-    router.push('/cart');
+  const handleBuyNow = async () => {
+    await handleAddToCart();
+    router.push('/checkout');
   };
 
   if (loading) {
