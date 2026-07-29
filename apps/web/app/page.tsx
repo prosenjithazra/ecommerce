@@ -241,7 +241,7 @@ function HeroBanner() {
           <img
             src={desktopImg}
             alt={slide.title || "Desktop Storefront Banner"}
-            className="hidden md:block w-full h-auto max-h-[580px] object-cover transition-transform duration-700 group-hover:scale-[1.01]"
+            className="hidden md:block w-full h-auto max-h-[800px] object-cover transition-transform duration-700 group-hover:scale-[1.01]"
           />
         )}
         {/* Mobile Banner Image (Visible on Small screens) */}
