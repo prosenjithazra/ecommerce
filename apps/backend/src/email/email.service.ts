@@ -119,15 +119,13 @@ export class EmailService {
         } else {
           const resJson = await response.json().catch(() => ({}));
           const msg = resJson.message || resJson.error?.message || response.statusText || 'Resend HTTP Error';
-          this.logger.warn(`Resend API failed (${response.status}): ${msg}`);
+          this.logger.warn(`Resend API failed (${response.status}): ${msg}. Falling back to SMTP...`);
           this.lastErrorDetails = `Resend API (${response.status}): ${msg}`;
-          return false; // Stop here so error details aren't overwritten by SMTP timeout
         }
       } catch (err: any) {
         const fetchMsg = err?.message || String(err);
-        this.logger.warn(`Resend API fetch error: ${fetchMsg}`);
+        this.logger.warn(`Resend API fetch error: ${fetchMsg}. Falling back to SMTP...`);
         this.lastErrorDetails = `Resend API Network Error: ${fetchMsg}`;
-        return false;
       }
     }
 
@@ -158,14 +156,12 @@ export class EmailService {
         } else {
           const resJson = await response.json().catch(() => ({}));
           const msg = resJson.message || response.statusText;
-          this.logger.warn(`Brevo API failed: ${msg}`);
+          this.logger.warn(`Brevo API failed: ${msg}. Falling back to SMTP...`);
           this.lastErrorDetails = `Brevo API Error: ${msg}`;
-          return false;
         }
       } catch (err: any) {
-        this.logger.warn(`Brevo API error: ${err?.message || err}`);
+        this.logger.warn(`Brevo API error: ${err?.message || err}. Falling back to SMTP...`);
         this.lastErrorDetails = `Brevo API Error: ${err?.message || err}`;
-        return false;
       }
     }
 
@@ -654,7 +650,7 @@ export class EmailService {
     const sent = await this.sendMailWithFallback({
       from: `"Kliamo Creative Club" <${fromEmail}>`,
       to: toEmail,
-      subject: `Welcome to the KLIAMO Creative Club! 🎉`,
+      subject: `Welcome to the KLIAMO Creative Club!`,
       html: htmlContent,
       ...(logoAttachments.length > 0 ? { attachments: logoAttachments } : {}),
     });
