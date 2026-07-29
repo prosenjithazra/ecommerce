@@ -15,6 +15,10 @@ import { Slider, EmptyState } from '../components/UIComponents';
 /* ─── Hero Slides Data ─── */
 interface Slide {
   id: number | string;
+  title?: string;
+  desktopImage?: string;
+  mobileImage?: string;
+  link?: string;
   badge?: string;
   headline1?: string;
   headline2?: string;
@@ -214,57 +218,77 @@ function HeroBanner() {
 
   if (loading) {
     return (
-      <section className="relative overflow-hidden select-none min-h-[500px] sm:min-h-[580px] lg:min-h-[640px] flex items-center bg-[#F4F4F4]">
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
-          {/* Left Column Skeleton */}
-          <div className="space-y-6 text-center lg:text-left order-1">
-            {/* Badge */}
-            <div className="h-6 w-32 mx-auto lg:mx-0 rounded-[36px] bg-zinc-250 animate-pulse" />
-            
-            {/* Headlines */}
-            <div className="space-y-3">
-              <div className="h-12 sm:h-16 w-3/4 mx-auto lg:mx-0 rounded bg-zinc-250 animate-pulse" />
-              <div className="h-12 sm:h-16 w-1/2 mx-auto lg:mx-0 rounded bg-zinc-250 animate-pulse" />
-            </div>
-
-            {/* Subtitle */}
-            <div className="space-y-2 max-w-sm mx-auto lg:mx-0">
-              <div className="h-4 w-full rounded bg-zinc-250 animate-pulse" />
-              <div className="h-4 w-5/6 rounded bg-zinc-250 animate-pulse" />
-            </div>
-
-            {/* Feature Badges */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-1">
-              {[1, 2, 3].map((n) => (
-                <div key={n} className="flex flex-col items-center lg:items-start gap-2">
-                  <div className="w-6 h-6 rounded-full bg-zinc-250 animate-pulse" />
-                  <div className="h-3 w-16 rounded bg-zinc-250 animate-pulse" />
-                </div>
-              ))}
-            </div>
-
-            {/* Button */}
-            <div className="flex justify-center lg:justify-start pt-3">
-              <div className="h-12 w-40 rounded-md bg-zinc-250 animate-pulse" />
-            </div>
-          </div>
-
-          {/* Right Column Skeleton */}
-          <div className="flex items-center justify-center order-2">
-            <div className="w-64 h-64 sm:w-[380px] sm:h-[380px] lg:w-[450px] lg:h-[450px] rounded-full bg-zinc-200/60 animate-pulse flex items-center justify-center">
-              <img
-                src="/kliamologoNew.png"
-                alt="Loading Logo"
-                className="w-28 sm:w-44 h-auto object-contain opacity-35 animate-pulse"
-              />
-            </div>
-          </div>
+      <section className="relative overflow-hidden select-none min-h-[220px] sm:min-h-[380px] lg:min-h-[480px] flex items-center bg-[#F4F4F4] animate-pulse">
+        <div className="w-full h-full flex items-center justify-center py-16">
+          <img src="/kliamologoNew.png" alt="Loading Banner" className="w-32 sm:w-44 h-auto opacity-40 animate-pulse" />
         </div>
       </section>
     );
   }
 
   const slide = slides[current] || HERO_SLIDES[0]!;
+  const desktopImg = slide.desktopImage || slide.bgImg || "";
+  const mobileImg = slide.mobileImage || slide.productImg || desktopImg;
+  const targetLink = slide.link || "/products";
+
+  const isImageBanner = !!(slide.desktopImage || slide.mobileImage || (!slide.headline1 && (desktopImg || mobileImg)));
+
+  if (isImageBanner) {
+    const bannerContent = (
+      <div className="relative w-full overflow-hidden group">
+        {/* Desktop Banner Image (Visible on Medium+ screens) */}
+        {desktopImg && (
+          <img
+            src={desktopImg}
+            alt={slide.title || "Desktop Storefront Banner"}
+            className="hidden md:block w-full h-auto max-h-[580px] object-cover transition-transform duration-700 group-hover:scale-[1.01]"
+          />
+        )}
+        {/* Mobile Banner Image (Visible on Small screens) */}
+        {mobileImg && (
+          <img
+            src={mobileImg}
+            alt={slide.title || "Mobile Storefront Banner"}
+            className="block md:hidden w-full h-auto object-cover"
+          />
+        )}
+      </div>
+    );
+
+    return (
+      <section
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className={`w-full relative overflow-hidden bg-zinc-100 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      >
+        {targetLink ? (
+          <Link href={targetLink} className="block w-full cursor-pointer">
+            {bannerContent}
+          </Link>
+        ) : (
+          bannerContent
+        )}
+
+        {slides.length > 1 && (
+          <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2 z-20 pointer-events-auto">
+            {slides.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => goTo(idx)}
+                className={`transition-all duration-300 rounded-full cursor-pointer ${idx === current ? 'w-6 h-2 bg-[#F9A37E]' : 'w-2 h-2 bg-white/70 shadow-xs'}`}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    );
+  }
+
   const isDarkTheme = !slide.textDark;
   const hasBgImg = !!(slide.bgImg && slide.bgImg.length > 10);
   const headline1Color = slide.headline1Color || (isDarkTheme ? '#FFFFFF' : '#2E2B26');
@@ -316,7 +340,7 @@ function HeroBanner() {
         }}
       />
 
-      {/* Relative Content Grid - Natural Height Flow with Smooth Slide + Fade */}
+      {/* Relative Content Grid */}
       <div
         key={`slide-${current}`}
         className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center relative z-10 animate-slide-fade-in transition-all duration-500 ease-out"
@@ -368,7 +392,7 @@ function HeroBanner() {
 
           <div className="flex justify-center lg:justify-start pt-3">
             <Link
-              href="/products"
+              href={targetLink}
               className="inline-flex items-center gap-2 font-black text-xs md:text-sm px-6 py-3 md:px-8 md:py-4 text-white rounded-md transition-all hover:scale-105 active:scale-95 shadow-lg"
               style={{ backgroundColor: slide.accent || '#E5A93B' }}
             >
@@ -379,11 +403,13 @@ function HeroBanner() {
 
         {/* Right Column: Product Image */}
         <div className="relative flex items-center justify-center order-2">
-          <img
-            src={slide.productImg}
-            alt={slide.headline1}
-            className="w-64 h-64 sm:w-[380px] sm:h-[380px] lg:w-full lg:h-full max-h-[500px] object-contain drop-shadow-2xl transition-all duration-700 ease-in-out hover:scale-105"
-          />
+          {slide.productImg && (
+            <img
+              src={slide.productImg}
+              alt={slide.headline1 || "Product"}
+              className="w-64 h-64 sm:w-[380px] sm:h-[380px] lg:w-full lg:h-full max-h-[500px] object-contain drop-shadow-2xl transition-all duration-700 ease-in-out hover:scale-105"
+            />
+          )}
         </div>
       </div>
 
@@ -585,20 +611,23 @@ export default function HomePage() {
       <HeroBanner />
 
       {/* ── TRUST BAR ── */}
-      <section className="w-full bg-[#FDFAF6] py-8 sm:py-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <section className="w-full bg-[#FDFAF6] py-6 sm:py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-6">
             {[
               { icon: <ShieldCheck className="w-5 h-5 text-[#A8C69F]" />, label: "Quality Guarantee" },
               { icon: <Truck className="w-5 h-5 text-[#F9A37E]" />,       label: "48hr Fulfillment" },
               { icon: <Layers className="w-5 h-5 text-[#A8C69F]" />,      label: "No MOQ" },
               { icon: <Sparkles className="w-5 h-5 text-[#F9A37E]" />,    label: "Premium Prints" },
             ].map((item) => (
-              <div key={item.label} className="flex items-center gap-2.5 p-3 rounded-lg">
-                <div className="w-8 h-8 bg-[#E8E2D6] rounded-lg flex items-center justify-center flex-shrink-0">
+              <div
+                key={item.label}
+                className="flex items-center gap-2 md:gap-3 p-2 sm:p-4 md:p-5 rounded-xl sm:rounded-2xl bg-white border border-zinc-100 shadow-md sm:shadow-lg shadow-zinc-200/50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+              >
+                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl flex items-center justify-center flex-shrink-0 shadow-xs">
                   {item.icon}
                 </div>
-                <span className="text-xs font-bold text-[#4A453E] leading-tight">{item.label}</span>
+                <span className="text-xs md:text-sm font-extrabold text-[#4A453E] leading-tight">{item.label}</span>
               </div>
             ))}
           </div>

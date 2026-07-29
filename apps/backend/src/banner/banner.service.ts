@@ -26,6 +26,12 @@ export class BannerService {
 
   async create(dto: CreateBannerDto): Promise<Banner> {
     const now = new Date();
+    const desktopImage = dto.desktopImage
+      ? await this.cloudinaryService.uploadImage(dto.desktopImage)
+      : '';
+    const mobileImage = dto.mobileImage
+      ? await this.cloudinaryService.uploadImage(dto.mobileImage)
+      : '';
     const productImg = dto.productImg
       ? await this.cloudinaryService.uploadImage(dto.productImg)
       : '';
@@ -35,6 +41,10 @@ export class BannerService {
 
     const banner = new this.bannerModel({
       id: randomUUID(),
+      title: dto.title || '',
+      desktopImage,
+      mobileImage,
+      link: dto.link || '',
       badge: dto.badge || '',
       headline1: dto.headline1 || '',
       headline2: dto.headline2 || '',
@@ -62,6 +72,21 @@ export class BannerService {
     const banner = await this.bannerModel.findOne({ id });
     if (!banner) {
       throw new NotFoundException('Banner slide not found');
+    }
+
+    if (dto.title !== undefined) banner.title = dto.title;
+    if (dto.link !== undefined) banner.link = dto.link;
+
+    if (dto.desktopImage !== undefined) {
+      banner.desktopImage = dto.desktopImage
+        ? await this.cloudinaryService.uploadImage(dto.desktopImage)
+        : '';
+    }
+
+    if (dto.mobileImage !== undefined) {
+      banner.mobileImage = dto.mobileImage
+        ? await this.cloudinaryService.uploadImage(dto.mobileImage)
+        : '';
     }
 
     if (dto.badge !== undefined) banner.badge = dto.badge;

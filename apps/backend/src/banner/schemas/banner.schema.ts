@@ -9,6 +9,18 @@ export class Banner {
   id: string;
 
   @Prop({ default: '' })
+  title: string;
+
+  @Prop({ default: '' })
+  desktopImage: string;
+
+  @Prop({ default: '' })
+  mobileImage: string;
+
+  @Prop({ default: '' })
+  link: string;
+
+  @Prop({ default: '' })
   badge: string;
 
   @Prop({ default: '' })
