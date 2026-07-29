@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Contact, ContactDocument } from './schemas/contact.schema';
+import { EmailService } from '../email/email.service';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -9,6 +10,7 @@ export class ContactService {
   constructor(
     @InjectModel(Contact.name)
     private readonly contactModel: Model<ContactDocument>,
+    private readonly emailService: EmailService,
   ) {}
 
   async create(data: Partial<Contact>): Promise<Contact> {
@@ -21,7 +23,16 @@ export class ContactService {
       status: 'Pending',
       createdAt: new Date(),
     });
-    return contact.save();
+    const saved = await contact.save();
+    this.emailService
+      .sendContactNotificationEmail({
+        name: saved.name,
+        email: saved.email,
+        subject: saved.subject,
+        message: saved.message,
+      })
+      .catch((err) => console.error('Failed to send contact notification email:', err));
+    return saved;
   }
 
   async findAll(): Promise<Contact[]> {

@@ -26,6 +26,7 @@ export default function AddProductPage() {
   const { showToast } = useApp();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [categoriesList, setCategoriesList] = useState<{ id: string; name: string }[]>([]);
 
   const [form, setForm] = useState({
     name: "",
@@ -35,6 +36,7 @@ export default function AddProductPage() {
     price: "",
     originalPrice: "",
     category: "T-Shirts",
+    categoryId: "",
     description: "",
     inStock: true,
     selectedSizes: [] as string[],
@@ -46,6 +48,22 @@ export default function AddProductPage() {
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [images, setImages] = useState<{ file: File; preview: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  React.useEffect(() => {
+    fetch(getApiUrl("/category"))
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCategoriesList(data.map((c: any) => ({ id: c.id, name: c.name })));
+          setForm(prev => ({
+            ...prev,
+            category: prev.category || data[0].name,
+            categoryId: prev.categoryId || data[0].id
+          }));
+        }
+      })
+      .catch(err => console.error("Error fetching categories:", err));
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -114,6 +132,7 @@ export default function AddProductPage() {
       price: parseFloat(form.price) || 0,
       originalPrice: parseFloat(form.originalPrice) || parseFloat(form.price) || 0,
       category: form.category,
+      categoryId: form.categoryId,
       description: form.description,
       inStock: form.inStock,
       tag: form.tag,
@@ -456,13 +475,25 @@ export default function AddProductPage() {
                   <label className={labelCls}>Category <span className="text-red-400">*</span></label>
                   <div className="relative">
                     <select
-                      value={form.category}
-                      onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
+                      value={form.categoryId || form.category}
+                      onChange={(e) => {
+                        const selectedId = e.target.value;
+                        const catObj = categoriesList.find((c) => c.id === selectedId || c.name === selectedId);
+                        setForm((p) => ({
+                          ...p,
+                          categoryId: catObj?.id || selectedId,
+                          category: catObj?.name || selectedId,
+                        }));
+                      }}
                       className="w-full bg-white border border-zinc-200 rounded-lg py-3 pl-4 pr-10 text-xs font-semibold text-zinc-800 outline-none focus:border-[#F9A37E] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer"
                     >
-                      {CATEGORIES.map((c) => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
+                      {categoriesList.length > 0 ? (
+                        categoriesList.map((c) => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))
+                      ) : (
+                        <option value="">No categories created yet. Add a category in Admin first.</option>
+                      )}
                     </select>
                   </div>
                 </div>

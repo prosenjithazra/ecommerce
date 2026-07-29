@@ -34,9 +34,10 @@ export default function CategoriesPage() {
         setProducts(prodData || []);
         const mapped = (catData || []).map((c: any) => ({
           name: c.name,
+          slug: c.slug || c.name.toLowerCase().replace(/\s+/g, '-'),
           image: c.image || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80",
           count: c.count || 0,
-          href: `/products?category=${encodeURIComponent(c.name)}`
+          href: `/categories/${c.slug || encodeURIComponent(c.name.toLowerCase().replace(/\s+/g, '-'))}`
         }));
         setCategories(mapped);
         setLoading(false);

@@ -23,6 +23,9 @@ export class Category {
   @Prop({ default: 'Active' })
   status: string;
 
+  @Prop({ default: '' })
+  description?: string;
+
   @Prop()
   createdAt?: Date;
 

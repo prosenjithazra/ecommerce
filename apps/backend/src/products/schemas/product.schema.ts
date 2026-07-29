@@ -33,6 +33,9 @@ export class Product {
   category: string;
 
   @Prop({ default: '' })
+  categoryId?: string;
+
+  @Prop({ default: '' })
   tag: string;
 
   @Prop({ default: '' })

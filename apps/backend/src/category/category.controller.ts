@@ -19,6 +19,16 @@ export class CategoryController {
     return this.categoryService.findAll();
   }
 
+  @Get('slug/:slug')
+  async findBySlug(@Param('slug') slug: string): Promise<Category | null> {
+    return this.categoryService.findBySlug(slug);
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string): Promise<Category | null> {
+    return this.categoryService.findOne(id);
+  }
+
   @Post()
   async create(@Body() data: Partial<Category>): Promise<Category> {
     return this.categoryService.create(data);

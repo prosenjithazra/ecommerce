@@ -541,4 +541,127 @@ export class EmailService {
     }
     return sent;
   }
+
+  async sendContactNotificationEmail(data: { name: string; email: string; subject?: string; message: string }): Promise<boolean> {
+    if (!this.transporter) this.initTransporter();
+
+    const fromEmail = this.configService.get<string>('SMTP_EMAIL') || 'contact@kliamo.com';
+    const storeEmail = this.configService.get<string>('SUPPORT_EMAIL') || fromEmail;
+    const logoAttachments = this.getLogoAttachments();
+
+    // 1. Send notification to store admin / support team
+    const adminHtml = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #FDFAF6; border: 1px solid #E8E2D6; border-radius: 16px; overflow: hidden;">
+        <div style="background-color: #FDFAF6; border-bottom: 1px solid #E8E2D6; padding: 24px; text-align: center;">
+          <img src="https://kliamo.com/kliamologoNew.png" alt="KLIAMO" style="height: 48px; width: auto; max-width: 200px; display: inline-block;" />
+          <h2 style="color: #4A453E; margin: 12px 0 0 0; font-size: 20px; font-weight: 800;">New Contact Form Message</h2>
+        </div>
+        <div style="padding: 28px; background-color: #FFFFFF; color: #4A453E; line-height: 1.6; font-size: 14px;">
+          <p><strong>Customer Name:</strong> ${data.name}</p>
+          <p><strong>Customer Email:</strong> <a href="mailto:${data.email}" style="color: #F9A37E;">${data.email}</a></p>
+          <p><strong>Subject:</strong> ${data.subject || 'General Inquiry'}</p>
+          <div style="margin-top: 16px; padding: 16px; background-color: #FDFAF6; border-left: 4px solid #F9A37E; border-radius: 4px;">
+            <p style="margin: 0; font-weight: 600; color: #4A453E;">Message Content:</p>
+            <p style="margin: 8px 0 0 0; color: #5C554C; whitespace: pre-line;">${data.message}</p>
+          </div>
+        </div>
+        <div style="background-color: #FDFAF6; border-top: 1px solid #E8E2D6; padding: 16px; text-align: center; font-size: 11px; color: #A89B8A;">
+          © ${new Date().getFullYear()} Kliamo Fashion India. All rights reserved.
+        </div>
+      </div>
+    `;
+
+    await this.sendMailWithFallback({
+      from: `"Kliamo Contact Form" <${fromEmail}>`,
+      to: storeEmail,
+      subject: `[Contact Form] ${data.subject || 'New Message'} from ${data.name}`,
+      html: adminHtml,
+      ...(logoAttachments.length > 0 ? { attachments: logoAttachments } : {}),
+    });
+
+    // 2. Send confirmation auto-responder email to the customer
+    const customerHtml = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #FDFAF6; border: 1px solid #E8E2D6; border-radius: 16px; overflow: hidden;">
+        <div style="background-color: #FDFAF6; border-bottom: 1px solid #E8E2D6; padding: 32px 24px; text-align: center;">
+          <img src="https://kliamo.com/kliamologoNew.png" alt="KLIAMO" style="height: 48px; width: auto; max-width: 200px; display: inline-block;" />
+          <h1 style="color: #4A453E; margin: 16px 0 4px 0; font-size: 22px; font-weight: 800;">Thank You for Reaching Out!</h1>
+          <p style="color: #F9A37E; font-weight: 700; font-size: 12px; uppercase; letter-spacing: 1px; margin: 0;">We Have Received Your Message</p>
+        </div>
+        <div style="padding: 32px 28px; background-color: #FFFFFF; color: #4A453E; line-height: 1.6; font-size: 15px;">
+          <p>Hi <strong>${data.name}</strong>,</p>
+          <p>Thank you for contacting <strong>KLIAMO Fashion India</strong>. We have received your query regarding <strong>"${data.subject || 'General Inquiry'}"</strong>.</p>
+          <p>Our support team is reviewing your message and will get back to you within <strong>24 business hours</strong>.</p>
+          <div style="margin: 24px 0; padding: 18px 20px; background-color: #FDFAF6; border: 1px solid #E8E2D6; border-radius: 12px;">
+            <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 800; color: #F9A37E; text-transform: uppercase; letter-spacing: 1px;">Summary of Your Message</p>
+            <p style="margin: 0; font-size: 13px; color: #5C554C; font-style: italic;">"${data.message}"</p>
+          </div>
+          <p style="margin-bottom: 0;">Best regards,<br/><strong>KLIAMO Support Team</strong></p>
+        </div>
+        <div style="background-color: #FDFAF6; border-top: 1px solid #E8E2D6; padding: 20px 24px; text-align: center; font-size: 12px; color: #7A736A;">
+          <p style="margin: 0;">Contact us directly at <a href="mailto:contact@kliamo.com" style="color: #F9A37E; font-weight: bold; text-decoration: none;">contact@kliamo.com</a></p>
+          <p style="margin: 8px 0 0 0; font-size: 11px; color: #A89B8A;">© ${new Date().getFullYear()} Kliamo Fashion India. All rights reserved.</p>
+        </div>
+      </div>
+    `;
+
+    const sent = await this.sendMailWithFallback({
+      from: `"Kliamo Fashion India" <${fromEmail}>`,
+      to: data.email,
+      subject: `We received your message - Kliamo Fashion India`,
+      html: customerHtml,
+      ...(logoAttachments.length > 0 ? { attachments: logoAttachments } : {}),
+    });
+
+    if (sent) {
+      this.logger.log(`Contact confirmation email sent to ${data.email}`);
+    }
+    return sent;
+  }
+
+  async sendNewsletterWelcomeEmail(toEmail: string): Promise<boolean> {
+    if (!this.transporter) this.initTransporter();
+
+    const fromEmail = this.configService.get<string>('SMTP_EMAIL') || 'contact@kliamo.com';
+    const logoAttachments = this.getLogoAttachments();
+
+    const htmlContent = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #FDFAF6; border: 1px solid #E8E2D6; border-radius: 16px; overflow: hidden;">
+        <div style="background-color: #FDFAF6; border-bottom: 1px solid #E8E2D6; padding: 32px 24px; text-align: center;">
+          <img src="https://kliamo.com/kliamologoNew.png" alt="KLIAMO" style="height: 52px; width: auto; max-width: 200px; display: inline-block;" />
+          <h1 style="color: #4A453E; margin: 16px 0 4px 0; font-size: 24px; font-weight: 800;">Welcome to the Creative Club! 🎉</h1>
+          <p style="color: #F9A37E; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin: 0;">Exclusive Drops & Special Discounts</p>
+        </div>
+        <div style="padding: 32px 28px; background-color: #FFFFFF; color: #4A453E; line-height: 1.6; font-size: 15px;">
+          <p style="margin-top: 0;">Hello Creator,</p>
+          <p>Thank you for subscribing to the <strong>KLIAMO Creative Club</strong>! You are now part of our inner circle.</p>
+          <p>Here is what you can look forward to:</p>
+          <ul style="padding-left: 20px; margin-bottom: 24px; color: #5C554C;">
+            <li style="margin-bottom: 8px;"><strong>Early Access</strong> to new collection launches & seasonal drops</li>
+            <li style="margin-bottom: 8px;"><strong>Member-Only Discounts</strong> & promo codes</li>
+            <li style="margin-bottom: 8px;"><strong>Design Inspiration</strong> & custom print fashion guides</li>
+          </ul>
+          <div style="text-align: center; margin: 32px 0 24px 0;">
+            <a href="https://kliamo.com/products" style="background-color: #F9A37E; color: #FFFFFF; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 800; font-size: 14px; display: inline-block; box-shadow: 0 4px 12px rgba(249, 163, 126, 0.35);">Shop Latest Trends</a>
+          </div>
+        </div>
+        <div style="background-color: #FDFAF6; border-top: 1px solid #E8E2D6; padding: 20px 24px; text-align: center; font-size: 12px; color: #7A736A;">
+          <p style="margin: 0;">You received this because you subscribed to updates on Kliamo.com</p>
+          <p style="margin: 8px 0 0 0; font-size: 11px; color: #A89B8A;">© ${new Date().getFullYear()} Kliamo Fashion India. All rights reserved.</p>
+        </div>
+      </div>
+    `;
+
+    const sent = await this.sendMailWithFallback({
+      from: `"Kliamo Creative Club" <${fromEmail}>`,
+      to: toEmail,
+      subject: `Welcome to the KLIAMO Creative Club! 🎉`,
+      html: htmlContent,
+      ...(logoAttachments.length > 0 ? { attachments: logoAttachments } : {}),
+    });
+
+    if (sent) {
+      this.logger.log(`Newsletter welcome email sent to ${toEmail}`);
+    }
+    return sent;
+  }
 }

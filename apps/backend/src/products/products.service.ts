@@ -88,6 +88,17 @@ export class ProductsService implements OnModuleInit {
     return null;
   }
 
+  async findByCategory(categoryOrId: string): Promise<Product[]> {
+    const slugifiedQuery = slugify(categoryOrId);
+    const all = await this.productModel.find().sort({ createdAt: -1 });
+    return all.filter((p) => {
+      if (p.categoryId && p.categoryId === categoryOrId) return true;
+      if (p.category && p.category.toLowerCase() === categoryOrId.toLowerCase()) return true;
+      if (p.category && slugify(p.category) === slugifiedQuery) return true;
+      return false;
+    });
+  }
+
   async create(data: Partial<Product>): Promise<Product> {
     const now = new Date();
     const name = data.name || 'Custom Product';
@@ -107,6 +118,7 @@ export class ProductsService implements OnModuleInit {
       image: data.image || '',
       images: data.images || [],
       category: data.category || 'T-Shirts',
+      categoryId: data.categoryId || '',
       tag: data.tag || '',
       description: data.description || '',
       colors: data.colors || [],
@@ -142,6 +154,7 @@ export class ProductsService implements OnModuleInit {
     if (data.image !== undefined) prod.image = data.image;
     if (data.images !== undefined) prod.images = data.images;
     if (data.category !== undefined) prod.category = data.category;
+    if (data.categoryId !== undefined) prod.categoryId = data.categoryId;
     if (data.tag !== undefined) prod.tag = data.tag;
     if (data.description !== undefined) prod.description = data.description;
     if (data.colors !== undefined) prod.colors = data.colors;

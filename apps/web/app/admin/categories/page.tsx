@@ -15,7 +15,7 @@ const INITIAL_CATEGORIES = [
   { id: "c5", name: "Mugs", count: 3, slug: "mugs", image: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=300&auto=format&fit=crop&q=80", status: "Inactive" },
 ];
 
-type Category = { id: string; name: string; count: number; slug: string; image: string; status: string };
+type Category = { id: string; name: string; count: number; slug: string; image: string; status: string; description?: string };
 
 function CategoryForm({ initial, onSave, onCancel }: {
   initial?: Partial<Category>;
@@ -25,6 +25,7 @@ function CategoryForm({ initial, onSave, onCancel }: {
   const fileRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(initial?.name || "");
   const [slug, setSlug] = useState(initial?.slug || "");
+  const [description, setDescription] = useState(initial?.description || "");
   const [count, setCount] = useState(String(initial?.count ?? ""));
   const [status, setStatus] = useState(initial?.status || "Active");
   const [preview, setPreview] = useState(initial?.image || "");
@@ -85,6 +86,16 @@ function CategoryForm({ initial, onSave, onCancel }: {
               <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="activewear" className="flex-1 py-2.5 px-3 text-xs text-zinc-800 outline-none bg-transparent" />
             </div>
           </div>
+          <div>
+            <label className="block text-[9px] font-black uppercase text-zinc-500 tracking-widest mb-1.5">Description</label>
+            <textarea
+              rows={2}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Brief summary of this category..."
+              className={inputCls + " resize-none"}
+            />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-[9px] font-black uppercase text-zinc-500 tracking-widest mb-1.5">Product Count</label>
@@ -114,6 +125,7 @@ function CategoryForm({ initial, onSave, onCancel }: {
             onSave({
               name: name.trim(),
               slug: slug || name.toLowerCase().replace(/\s+/g, "-"),
+              description: description.trim(),
               count: parseInt(count) || 0,
               image: preview || "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=300&auto=format&fit=crop&q=80",
               status,
