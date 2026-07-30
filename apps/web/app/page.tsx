@@ -546,44 +546,44 @@ export default function HomePage() {
     return () => clearTimeout(timer);
   }, []);
 
+  const hasHomeSection = (p: any, secName: string) => {
+    if (!p.homeSection) return false;
+    const secLower = secName.trim().toLowerCase();
+    if (Array.isArray(p.homeSection)) {
+      return p.homeSection.some((s: string) => String(s).trim().toLowerCase() === secLower);
+    }
+    if (typeof p.homeSection === 'string') {
+      return p.homeSection.split(',').map((s: string) => s.trim().toLowerCase()).includes(secLower);
+    }
+    return false;
+  };
+
   const trendingProducts = React.useMemo(() => {
-    return products.slice(0, 8);
+    return products.filter(p => hasHomeSection(p, 'Featured')).slice(0, 8);
   }, [products]);
 
   const bestSellerProducts = React.useMemo(() => {
-    const list = products.filter(p => p.tag === 'Best Seller');
-    if (list.length >= 4) return list.slice(0, 8);
-    const remaining = products.filter(p => !list.includes(p));
-    return [...list, ...remaining].slice(0, 8);
+    return products.filter(p => hasHomeSection(p, 'Best Seller') || (p.tag || '').toLowerCase() === 'best seller').slice(0, 8);
   }, [products]);
 
   const mensProducts = React.useMemo(() => {
-    const list = products.filter(p => {
-      const cat = (p.category || '').toLowerCase();
-      const name = (p.name || '').toLowerCase();
-      return (cat.includes('men') && !cat.includes('women')) || name.includes('men') || name.includes('polo') || name.includes('hoodie');
-    });
-    if (list.length >= 4) return list.slice(0, 8);
-    const remaining = products.filter(p => !list.includes(p));
-    return [...list, ...remaining].slice(0, 8);
+    return products.filter(p => {
+      const g = (p.targetGender || 'Both').trim().toLowerCase();
+      if (g === 'women') return false;
+      return g === 'men' || g === 'both';
+    }).slice(0, 8);
   }, [products]);
 
   const womensProducts = React.useMemo(() => {
-    const list = products.filter(p => {
-      const cat = (p.category || '').toLowerCase();
-      const name = (p.name || '').toLowerCase();
-      return cat.includes('women') || name.includes('women') || name.includes('lady') || name.includes('crop') || name.includes('female');
-    });
-    if (list.length >= 4) return list.slice(0, 8);
-    const remaining = products.filter(p => !list.includes(p));
-    return [...list, ...remaining].slice(0, 8);
+    return products.filter(p => {
+      const g = (p.targetGender || 'Both').trim().toLowerCase();
+      if (g === 'men') return false;
+      return g === 'women' || g === 'both';
+    }).slice(0, 8);
   }, [products]);
 
   const newArrivalProducts = React.useMemo(() => {
-    const list = products.filter(p => p.tag === 'New' || p.tag === 'Eco' || p.tag === 'Trending');
-    if (list.length >= 4) return list.slice(0, 8);
-    const remaining = products.filter(p => !list.includes(p));
-    return [...list, ...remaining].slice(0, 8);
+    return products.filter(p => hasHomeSection(p, 'New Arrival') || (p.tag || '').toLowerCase() === 'new' || (p.tag || '').toLowerCase() === 'new arrival').slice(0, 8);
   }, [products]);
 
 

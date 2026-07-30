@@ -64,6 +64,8 @@ export interface Product {
   slug?: string;
   sku?: string;
   skuMapping?: Record<string, string>;
+  homeSection?: string[];
+  targetGender?: 'Men' | 'Women' | 'Both' | string;
 }
 
 export interface Address {

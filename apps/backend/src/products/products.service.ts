@@ -99,6 +99,63 @@ export class ProductsService implements OnModuleInit {
     });
   }
 
+  async filterProducts(filters: {
+    homeSection?: string;
+    targetGender?: string;
+    category?: string;
+    categoryId?: string;
+  }): Promise<Product[]> {
+    const all = await this.productModel.find().sort({ createdAt: -1 });
+    return all.filter((p) => {
+      if (filters.categoryId && p.categoryId !== filters.categoryId) return false;
+      if (filters.category) {
+        const catQuery = filters.category.trim().toLowerCase();
+        const slugifiedQuery = slugify(filters.category);
+        const matchCat =
+          (p.category && p.category.toLowerCase() === catQuery) ||
+          (p.category && slugify(p.category) === slugifiedQuery) ||
+          (p.categoryId && p.categoryId === filters.category);
+        if (!matchCat) return false;
+      }
+
+      if (filters.homeSection) {
+        const secQuery = filters.homeSection.trim().toLowerCase();
+        const rawSections = p.homeSection as any;
+        const sections: string[] = Array.isArray(rawSections)
+          ? rawSections.map((s) => String(s).trim())
+          : typeof rawSections === 'string' && rawSections.trim()
+            ? [rawSections.trim()]
+            : [];
+        const matchesSection =
+          sections.some((s) => s.toLowerCase() === secQuery) ||
+          (p.tag && p.tag.trim().toLowerCase() === secQuery);
+        if (!matchesSection) return false;
+      }
+
+      if (filters.targetGender) {
+        const genQuery = filters.targetGender.trim().toLowerCase();
+        const g = (p.targetGender || 'Both').trim().toLowerCase();
+        if (genQuery === 'men') {
+          if (g !== 'men' && g !== 'both') return false;
+        } else if (genQuery === 'women') {
+          if (g !== 'women' && g !== 'both') return false;
+        } else if (genQuery !== 'both') {
+          if (g !== genQuery) return false;
+        }
+      }
+
+      return true;
+    });
+  }
+
+  async findByHomeSection(section: string): Promise<Product[]> {
+    return this.filterProducts({ homeSection: section });
+  }
+
+  async findByTargetGender(gender: string): Promise<Product[]> {
+    return this.filterProducts({ targetGender: gender });
+  }
+
   async create(data: Partial<Product>): Promise<Product> {
     const now = new Date();
     const name = data.name || 'Custom Product';
@@ -106,6 +163,13 @@ export class ProductsService implements OnModuleInit {
     let slug = baseSlug;
     const existing = await this.productModel.findOne({ slug });
     if (existing) slug = `${baseSlug}-${Date.now().toString(36)}`;
+
+    const rawHomeSection = data.homeSection as any;
+    const homeSection: string[] = Array.isArray(rawHomeSection)
+      ? rawHomeSection.map((s: any) => String(s).trim()).filter(Boolean)
+      : typeof rawHomeSection === 'string' && rawHomeSection.trim()
+        ? [rawHomeSection.trim()]
+        : [];
 
     const prod = new this.productModel({
       id: randomUUID(),
@@ -127,6 +191,8 @@ export class ProductsService implements OnModuleInit {
       sku: data.sku || 'SKU-' + Date.now(),
       skuMapping: data.skuMapping || {},
       isQikinkSynced: data.isQikinkSynced ?? true,
+      homeSection,
+      targetGender: data.targetGender || 'Both',
       createdAt: now,
       updatedAt: now,
     });
@@ -163,6 +229,17 @@ export class ProductsService implements OnModuleInit {
     if (data.sku !== undefined) prod.sku = data.sku;
     if (data.skuMapping !== undefined) prod.skuMapping = data.skuMapping;
     if (data.isQikinkSynced !== undefined) prod.isQikinkSynced = data.isQikinkSynced;
+    if (data.homeSection !== undefined) {
+      const rawHomeSection = data.homeSection as any;
+      prod.homeSection = Array.isArray(rawHomeSection)
+        ? rawHomeSection.map((s: any) => String(s).trim()).filter(Boolean)
+        : typeof rawHomeSection === 'string' && rawHomeSection.trim()
+          ? [rawHomeSection.trim()]
+          : [];
+    }
+    if (data.targetGender !== undefined) {
+      prod.targetGender = data.targetGender || 'Both';
+    }
     prod.updatedAt = new Date();
 
     return prod.save();

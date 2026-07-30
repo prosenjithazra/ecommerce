@@ -62,6 +62,12 @@ export class Product {
   @Prop({ default: true })
   isQikinkSynced?: boolean;
 
+  @Prop({ type: [String], default: [] })
+  homeSection?: string[];
+
+  @Prop({ default: 'Both' })
+  targetGender?: string;
+
   @Prop()
   createdAt?: Date;
 

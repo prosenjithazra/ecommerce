@@ -19,7 +19,12 @@ export class ProductsController {
   async findAll(
     @Query('category') category?: string,
     @Query('categoryId') categoryId?: string,
+    @Query('homeSection') homeSection?: string,
+    @Query('targetGender') targetGender?: string,
   ): Promise<Product[]> {
+    if (homeSection || targetGender) {
+      return this.productsService.filterProducts({ homeSection, targetGender, category, categoryId });
+    }
     if (categoryId) {
       return this.productsService.findByCategory(categoryId);
     }

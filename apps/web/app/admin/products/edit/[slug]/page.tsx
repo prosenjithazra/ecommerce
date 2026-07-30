@@ -45,6 +45,8 @@ export default function EditProductPage() {
     tag: "",
     rating: 5,
     reviewsCount: 0,
+    homeSection: [] as string[],
+    targetGender: "Both" as "Men" | "Women" | "Both",
   });
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [existingImages, setExistingImages] = useState<string[]>([]);
@@ -96,6 +98,8 @@ export default function EditProductPage() {
           tag: product.tag || "",
           rating: typeof product.rating === 'number' ? product.rating : 5,
           reviewsCount: typeof product.reviewsCount === 'number' ? product.reviewsCount : 0,
+          homeSection: Array.isArray(product.homeSection) ? product.homeSection : (product.homeSection ? [product.homeSection] : []),
+          targetGender: (product.targetGender as any) || "Both",
         });
         setExistingImages(product.images || [product.image].filter(Boolean));
         setLoading(false);
@@ -159,6 +163,8 @@ export default function EditProductPage() {
       images: [...existingImages, ...newImages.map((img) => img.preview)],
       rating: form.rating,
       reviewsCount: form.reviewsCount,
+      homeSection: form.homeSection,
+      targetGender: form.targetGender,
     };
 
     const targetId = productId || slug;
@@ -318,6 +324,66 @@ export default function EditProductPage() {
                       <option value="Eco">Eco Friendly</option>
                     </select>
                   </div>
+                </div>
+
+                {/* Homepage Section(s) */}
+                <div>
+                  <label className={labelCls}>Homepage Section(s)</label>
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {["Best Seller", "New Arrival", "Featured", "None"].map((sec) => {
+                      const isNone = sec === "None";
+                      const isSelected = isNone
+                        ? form.homeSection.length === 0 || form.homeSection.includes("None")
+                        : form.homeSection.includes(sec);
+
+                      return (
+                        <button
+                          key={sec}
+                          type="button"
+                          onClick={() => {
+                            setForm((prev) => {
+                              if (isNone) return { ...prev, homeSection: [] };
+                              const current = prev.homeSection.filter((s) => s !== "None");
+                              const next = current.includes(sec)
+                                ? current.filter((s) => s !== sec)
+                                : [...current, sec];
+                              return { ...prev, homeSection: next };
+                            });
+                          }}
+                          className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${
+                            isSelected
+                              ? "bg-[#df794d] text-white border-[#df794d] shadow-sm"
+                              : "bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300"
+                          }`}
+                        >
+                          {sec}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[9px] text-zinc-400 mt-1">Assign product to specific sections on the homepage</p>
+                </div>
+
+                {/* Target Gender */}
+                <div>
+                  <label className={labelCls}>Target Gender</label>
+                  <div className="grid grid-cols-3 gap-2 mt-1">
+                    {(["Men", "Women", "Both"] as const).map((g) => (
+                      <button
+                        key={g}
+                        type="button"
+                        onClick={() => setForm((p) => ({ ...p, targetGender: g }))}
+                        className={`py-2 px-3 text-xs font-bold rounded-lg border transition-all ${
+                          form.targetGender === g
+                            ? "bg-[#4A453E] text-white border-[#4A453E] shadow-sm"
+                            : "bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300"
+                        }`}
+                      >
+                        {g}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[9px] text-zinc-400 mt-1">Controls rendering in Men's or Women's homepage collections</p>
                 </div>
               </div>
             </div>

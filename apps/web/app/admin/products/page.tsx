@@ -34,6 +34,8 @@ interface Product {
   tag: string;
   sku: string;
   slug?: string;
+  homeSection?: string[];
+  targetGender?: string;
 }
 
 const slugify = (name: string) =>
@@ -280,7 +282,19 @@ export default function AdminProductsPage() {
                       >
                         {p.name}
                       </Link>
-                      <span className="text-[9px] text-zinc-400 font-mono">/{p.slug || slugify(p.name)}</span>
+                      <div className="flex flex-wrap items-center gap-1 mt-1">
+                        <span className="text-[9px] text-zinc-400 font-mono">/{p.slug || slugify(p.name)}</span>
+                        {p.targetGender && (
+                          <span className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600 border border-zinc-200">
+                            {p.targetGender}
+                          </span>
+                        )}
+                        {Array.isArray(p.homeSection) && p.homeSection.length > 0 && p.homeSection.map(sec => (
+                          <span key={sec} className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-[#df794d]/10 text-[#df794d] border border-[#df794d]/20">
+                            {sec}
+                          </span>
+                        ))}
+                      </div>
                     </td>
                     <td className="py-3 px-4">
                       <code className="text-[10px] font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-md">{p.sku}</code>

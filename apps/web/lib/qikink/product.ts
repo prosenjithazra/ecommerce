@@ -27,6 +27,8 @@ export interface QikinkProductItem {
   qikink_shipping?: number;
   search_from_my_products?: number;
   print_type_id?: number;
+  homeSection?: string[];
+  targetGender?: string;
 }
 
 const COLOR_CODES: Record<string, string> = COLOR_SKU_CODE_MAP;
@@ -56,6 +58,13 @@ export function normalizeQikinkProduct(item: any): QikinkProductItem {
     });
   });
 
+  const rawHomeSection = item.homeSection;
+  const homeSection = Array.isArray(rawHomeSection)
+    ? rawHomeSection.map((s) => String(s).trim()).filter(Boolean)
+    : typeof rawHomeSection === 'string' && rawHomeSection.trim()
+      ? [rawHomeSection.trim()]
+      : [];
+
   return {
     id: String(item.id || item._id || item.slug),
     name: item.name || 'Untitled Product',
@@ -77,6 +86,8 @@ export function normalizeQikinkProduct(item: any): QikinkProductItem {
     qikink_shipping: 1,
     search_from_my_products: 1,
     print_type_id: 1,
+    homeSection,
+    targetGender: item.targetGender || 'Both',
   };
 }
 

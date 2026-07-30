@@ -7,6 +7,8 @@ export async function GET(request: Request) {
     const query = searchParams.get('query') || searchParams.get('search') || searchParams.get('q');
     const category = searchParams.get('category') || searchParams.get('cat');
     const sku = searchParams.get('sku');
+    const homeSection = searchParams.get('homeSection') || searchParams.get('section');
+    const targetGender = searchParams.get('targetGender') || searchParams.get('gender');
 
     let products = await fetchAllProducts();
 
@@ -26,6 +28,31 @@ export async function GET(request: Request) {
           p.sku.toLowerCase() === sku.toLowerCase() ||
           Object.values(p.skuMapping || {}).some((s) => s.toLowerCase() === sku.toLowerCase())
       );
+    }
+
+    if (homeSection) {
+      const secQuery = homeSection.trim().toLowerCase();
+      products = products.filter((p) => {
+        const sections = Array.isArray(p.homeSection)
+          ? p.homeSection
+          : typeof p.homeSection === 'string'
+            ? [p.homeSection]
+            : [];
+        return (
+          sections.some((s) => s.trim().toLowerCase() === secQuery) ||
+          (p.tag || '').trim().toLowerCase() === secQuery
+        );
+      });
+    }
+
+    if (targetGender) {
+      const genQuery = targetGender.trim().toLowerCase();
+      products = products.filter((p) => {
+        const g = (p.targetGender || 'Both').trim().toLowerCase();
+        if (genQuery === 'men') return g === 'men' || g === 'both';
+        if (genQuery === 'women') return g === 'women' || g === 'both';
+        return g === genQuery;
+      });
     }
 
     return NextResponse.json({
