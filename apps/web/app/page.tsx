@@ -647,7 +647,7 @@ export default function HomePage() {
             </Link>
           </div>
           {categoriesLoading || loading ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-3 md:gap-4">
               {Array(4).fill(0).map((_, i) => <CategoryCard key={i} loading={true} />)}
             </div>
           ) : categories.length === 0 ? (
@@ -659,7 +659,7 @@ export default function HomePage() {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-3 md:gap-4">
               {categories.map((cat) => (
                 <CategoryCard key={cat.name} name={cat.name} image={cat.image} count={cat.count} href={cat.href} />
               ))}
