@@ -220,11 +220,40 @@ export default function EditProductPage() {
                 {existingImages.length > 0 && (
                   <div>
                     <p className="text-[9px] font-bold uppercase text-zinc-400 tracking-widest mb-2">Current Images</p>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2.5">
                       {existingImages.map((src, idx) => (
-                        <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-zinc-200">
+                        <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-zinc-200 group shadow-sm">
                           <img src={src} alt="" className="w-full h-full object-cover" />
-                          {idx === 0 && <span className="absolute top-1 left-1 text-[8px] font-extrabold bg-[#df794d] text-white px-1.5 py-0.5 rounded-md uppercase">Primary</span>}
+                          {idx === 0 ? (
+                            <span className="absolute top-1.5 left-1.5 text-[8px] font-extrabold bg-[#df794d] text-white px-2 py-0.5 rounded-md uppercase shadow-sm">Primary</span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setExistingImages((prev) => {
+                                  const copy = [...prev];
+                                  const target = copy.splice(idx, 1)[0];
+                                  if (target) copy.unshift(target);
+                                  return copy;
+                                });
+                                showToast("Primary Updated", "Image set as primary product image.", "info");
+                              }}
+                              className="absolute top-1.5 left-1.5 text-[8px] font-extrabold bg-zinc-800/80 hover:bg-[#df794d] text-white px-1.5 py-0.5 rounded-md uppercase opacity-80 hover:opacity-100 transition-all"
+                            >
+                              Make Primary
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setExistingImages((prev) => prev.filter((_, i) => i !== idx));
+                              showToast("Image Deleted", "Image removed from product catalog.", "info");
+                            }}
+                            className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-110 cursor-pointer z-10"
+                            title="Delete Image"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -244,12 +273,20 @@ export default function EditProductPage() {
                 {newImages.length > 0 && (
                   <div>
                     <p className="text-[9px] font-bold uppercase text-zinc-400 tracking-widest mb-2">New Uploads</p>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2.5">
                       {newImages.map((img, idx) => (
-                        <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-zinc-200 group">
+                        <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-zinc-200 group shadow-sm">
                           <img src={img.preview} alt="" className="w-full h-full object-cover" />
-                          <button type="button" onClick={() => setNewImages((p) => p.filter((_, i) => i !== idx))} className="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <X className="w-3 h-3 text-white" />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setNewImages((p) => p.filter((_, i) => i !== idx));
+                              showToast("Upload Removed", "Image upload cancelled.", "info");
+                            }}
+                            className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-110 cursor-pointer z-10"
+                            title="Delete Image"
+                          >
+                            <X className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       ))}

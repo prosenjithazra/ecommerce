@@ -683,7 +683,7 @@ export default function HomePage() {
             </Link>
           </div>
           {productsLoading || loading ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {Array(4).fill(0).map((_, i) => (
                 <ProductCard key={i} loading={true} />
               ))}
@@ -697,7 +697,7 @@ export default function HomePage() {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {trendingProducts.map((product) => (
                 <ProductCard key={`trending-${product.id}`} product={product} />
               ))}
@@ -721,7 +721,7 @@ export default function HomePage() {
             </Link>
           </div>
           {productsLoading || loading ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {Array(4).fill(0).map((_, i) => (
                 <ProductCard key={i} loading={true} />
               ))}
@@ -735,7 +735,7 @@ export default function HomePage() {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {bestSellerProducts.map((product) => (
                 <ProductCard key={`best-${product.id}`} product={product} />
               ))}
@@ -759,7 +759,7 @@ export default function HomePage() {
             </Link>
           </div>
           {productsLoading || loading ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {Array(4).fill(0).map((_, i) => (
                 <ProductCard key={i} loading={true} />
               ))}
@@ -773,7 +773,7 @@ export default function HomePage() {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {mensProducts.map((product) => (
                 <ProductCard key={`mens-${product.id}`} product={product} />
               ))}
@@ -797,7 +797,7 @@ export default function HomePage() {
             </Link>
           </div>
           {productsLoading || loading ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {Array(4).fill(0).map((_, i) => (
                 <ProductCard key={i} loading={true} />
               ))}
@@ -811,7 +811,7 @@ export default function HomePage() {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {womensProducts.map((product) => (
                 <ProductCard key={`womens-${product.id}`} product={product} />
               ))}
@@ -835,7 +835,7 @@ export default function HomePage() {
             </Link>
           </div>
           {productsLoading || loading ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {Array(4).fill(0).map((_, i) => (
                 <ProductCard key={i} loading={true} />
               ))}
@@ -849,7 +849,7 @@ export default function HomePage() {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {newArrivalProducts.map((product) => (
                 <ProductCard key={`new-${product.id}`} product={product} />
               ))}
