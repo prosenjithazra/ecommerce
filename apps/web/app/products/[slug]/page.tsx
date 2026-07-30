@@ -10,6 +10,8 @@ import { Breadcrumb, Price, Rating, Slider, SkeletonLoader, EmptyState } from '.
 import { StickyAddToCart } from '../../../components/StickyAddToCart';
 import { getApiUrl } from '../../../components/ApiConfig';
 
+import { getProductSchema, getBreadcrumbSchema, getFaqSchema } from '../../../components/SeoConfig';
+
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -107,6 +109,26 @@ export default function ProductDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-5 pb-12 sm:pb-24">
+      {/* Schema.org JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            getProductSchema(product),
+            getBreadcrumbSchema([
+              { name: "Home", path: "/" },
+              { name: "Products", path: "/products" },
+              { name: product.name, path: `/products/${product.slug || product.id}` }
+            ]),
+            getFaqSchema([
+              { heading: `Is ${product.name} eligible for return?`, content: "Yes, defective items or print errors are eligible for a free replacement within 7 days." },
+              { heading: "What is the delivery turnaround?", content: "Orders are printed on demand within 2-3 business days and delivered in 3-5 days." },
+              { heading: "What printing technique is used?", content: "We use high-fidelity Direct-to-Garment (DTG) and DTF eco-friendly printing for crisp, vibrant artwork." }
+            ])
+          ])
+        }}
+      />
+
       <Breadcrumb items={[{ name: "Products", href: "/products" }, { name: product.name }]} />
 
       {/* ── Product Main Grid ── */}
