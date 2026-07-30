@@ -151,11 +151,31 @@ export default function AddProductPage() {
       body: JSON.stringify(payload)
     })
       .then(async (res) => {
+        const text = await res.text();
+        let body: any = {};
+        try {
+          body = text ? JSON.parse(text) : {};
+        } catch {}
+
         if (res.ok) {
-          const text = await res.text();
-          return text && text.trim() ? JSON.parse(text) : {};
+          return body;
         }
-        throw new Error("Failed to add product");
+
+        // Fallback to local Qikink API route if primary endpoint returns error
+        return fetch('/api/qikink/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+          .then(async (r) => {
+            const rText = await r.text();
+            let rBody: any = {};
+            try { rBody = rText ? JSON.parse(rText) : {}; } catch {}
+            if (r.ok && rBody.success !== false) {
+              return rBody;
+            }
+            throw new Error(rBody.error || body.message || body.error || `Server responded with status ${res.status}`);
+          });
       })
       .then(() => {
         showToast("Product Created", `${form.name} has been added to the catalog.`, "success");

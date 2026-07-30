@@ -164,6 +164,16 @@ export class ProductsService implements OnModuleInit {
     const existing = await this.productModel.findOne({ slug });
     if (existing) slug = `${baseSlug}-${Date.now().toString(36)}`;
 
+    let userSku = (data.sku || '').trim();
+    if (!userSku) {
+      userSku = 'SKU-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(Math.random() * 1000);
+    } else {
+      const existingSku = await this.productModel.findOne({ sku: userSku });
+      if (existingSku) {
+        userSku = `${userSku}-${Math.floor(100 + Math.random() * 900)}`;
+      }
+    }
+
     const rawHomeSection = data.homeSection as any;
     const homeSection: string[] = Array.isArray(rawHomeSection)
       ? rawHomeSection.map((s: any) => String(s).trim()).filter(Boolean)
@@ -172,7 +182,7 @@ export class ProductsService implements OnModuleInit {
         : [];
 
     const prod = new this.productModel({
-      id: randomUUID(),
+      id: data.id || randomUUID(),
       name,
       slug,
       price: Number(data.price) || 0,
@@ -188,7 +198,7 @@ export class ProductsService implements OnModuleInit {
       colors: data.colors || [],
       sizes: data.sizes || [],
       inStock: data.inStock ?? true,
-      sku: data.sku || 'SKU-' + Date.now(),
+      sku: userSku,
       skuMapping: data.skuMapping || {},
       isQikinkSynced: data.isQikinkSynced ?? true,
       homeSection,

@@ -176,11 +176,16 @@ export default function EditProductPage() {
       body: JSON.stringify(payload)
     })
       .then(async (res) => {
+        const text = await res.text();
+        let body: any = {};
+        try {
+          body = text ? JSON.parse(text) : {};
+        } catch {}
+
         if (res.ok) {
-          const text = await res.text();
-          return text && text.trim() ? JSON.parse(text) : {};
+          return body;
         }
-        throw new Error("Failed to update product");
+        throw new Error(body.message || body.error || `Failed to update product (HTTP ${res.status})`);
       })
       .then(() => {
         showToast("Product Updated", `${form.name} has been updated.`, "success");
