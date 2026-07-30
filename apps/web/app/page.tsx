@@ -696,6 +696,12 @@ export default function HomePage() {
                 icon={<ShoppingBag className="w-8 h-8 text-[#7e9677]" />}
               />
             </div>
+          ) : trendingProducts.length > 1 ? (
+            <Slider desktopCols={4}>
+              {trendingProducts.map((product) => (
+                <ProductCard key={`trending-${product.id}`} product={product} />
+              ))}
+            </Slider>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {trendingProducts.map((product) => (
@@ -734,6 +740,12 @@ export default function HomePage() {
                 icon={<ShoppingBag className="w-8 h-8 text-[#7e9677]" />}
               />
             </div>
+          ) : bestSellerProducts.length > 1 ? (
+            <Slider desktopCols={4}>
+              {bestSellerProducts.map((product) => (
+                <ProductCard key={`best-${product.id}`} product={product} />
+              ))}
+            </Slider>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {bestSellerProducts.map((product) => (
@@ -772,6 +784,12 @@ export default function HomePage() {
                 icon={<Shirt className="w-8 h-8 text-[#3B82F6]" />}
               />
             </div>
+          ) : mensProducts.length > 1 ? (
+            <Slider desktopCols={4}>
+              {mensProducts.map((product) => (
+                <ProductCard key={`mens-${product.id}`} product={product} />
+              ))}
+            </Slider>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {mensProducts.map((product) => (
@@ -810,6 +828,12 @@ export default function HomePage() {
                 icon={<Heart className="w-8 h-8 text-[#EC4899]" />}
               />
             </div>
+          ) : womensProducts.length > 1 ? (
+            <Slider desktopCols={4}>
+              {womensProducts.map((product) => (
+                <ProductCard key={`womens-${product.id}`} product={product} />
+              ))}
+            </Slider>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {womensProducts.map((product) => (
@@ -848,6 +872,12 @@ export default function HomePage() {
                 icon={<ShoppingBag className="w-8 h-8 text-[#10B981]" />}
               />
             </div>
+          ) : newArrivalProducts.length > 1 ? (
+            <Slider desktopCols={4}>
+              {newArrivalProducts.map((product) => (
+                <ProductCard key={`new-${product.id}`} product={product} />
+              ))}
+            </Slider>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {newArrivalProducts.map((product) => (

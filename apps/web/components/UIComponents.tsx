@@ -352,6 +352,11 @@ export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => 
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
   const [canScrollRight, setCanScrollRight] = React.useState(false);
   const [activeIndex, setActiveIndex] = React.useState(0);
+  const [isMouseDown, setIsMouseDown] = React.useState(false);
+  const [startX, setStartX] = React.useState(0);
+  const [scrollLeftState, setScrollLeftState] = React.useState(0);
+  const [hasDragged, setHasDragged] = React.useState(false);
+
   const childrenArray = React.Children.toArray(children);
 
   const updateScrollState = React.useCallback(() => {
@@ -378,6 +383,39 @@ export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => 
     }
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsMouseDown(true);
+    setHasDragged(false);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeftState(scrollRef.current.scrollLeft);
+  };
+
+  const handleMouseLeave = () => {
+    setIsMouseDown(false);
+  };
+
+  const handleMouseUp = () => {
+    setIsMouseDown(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isMouseDown || !scrollRef.current) return;
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    if (Math.abs(x - startX) > 4) {
+      setHasDragged(true);
+    }
+    scrollRef.current.scrollLeft = scrollLeftState - walk;
+  };
+
+  const handleClickCapture = (e: React.MouseEvent) => {
+    if (hasDragged) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
   const isMultiItemMobile = childrenArray.length > 1;
   const mobileWidthClass = isMultiItemMobile ? 'w-[78%] min-w-[78%]' : 'w-full min-w-full';
 
@@ -393,19 +431,75 @@ export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => 
   }
 
   const itemWidthClass = `${mobileWidthClass} ${desktopWidthClass}`;
-
   const showDotsOnDesktop = childrenArray.length > desktopCols;
+
+  // Dynamic CSS Mask for smooth edge fade on scroll
+  const maskStyle = React.useMemo(() => {
+    if (canScrollLeft && canScrollRight) {
+      return {
+        WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%)',
+        maskImage: 'linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%)',
+      };
+    }
+    if (canScrollLeft) {
+      return {
+        WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 4%, black 100%)',
+        maskImage: 'linear-gradient(to right, transparent 0%, black 4%, black 100%)',
+      };
+    }
+    if (canScrollRight) {
+      return {
+        WebkitMaskImage: 'linear-gradient(to right, black 0%, black 96%, transparent 100%)',
+        maskImage: 'linear-gradient(to right, black 0%, black 96%, transparent 100%)',
+      };
+    }
+    return {};
+  }, [canScrollLeft, canScrollRight]);
 
   return (
     <div className="relative group/slider w-full">
-      {/* Scrollable Container */}
+      {/* Navigation Arrows on Desktop */}
+      {childrenArray.length > 1 && (
+        <>
+          {canScrollLeft && (
+            <button
+              type="button"
+              onClick={() => scroll('left')}
+              className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white hover:bg-[#df794d] text-zinc-800 hover:text-white rounded-full shadow-lg items-center justify-center border border-zinc-200 transition-all z-20 cursor-pointer hover:scale-110"
+              aria-label="Previous products"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+          )}
+          {canScrollRight && (
+            <button
+              type="button"
+              onClick={() => scroll('right')}
+              className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white hover:bg-[#df794d] text-zinc-800 hover:text-white rounded-full shadow-lg items-center justify-center border border-zinc-200 transition-all z-20 cursor-pointer hover:scale-110"
+              aria-label="Next products"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          )}
+        </>
+      )}
+
+      {/* Scrollable & Draggable Container with Smooth Edge Fade */}
       <div
         ref={scrollRef}
+        style={maskStyle}
         onScroll={updateScrollState}
-        className="flex gap-5 overflow-x-auto snap-x snap-mandatory pb-4 no-scrollbar scroll-smooth"
+        onMouseDown={handleMouseDown}
+        onMouseLeave={handleMouseLeave}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+        onClickCapture={handleClickCapture}
+        className={`flex gap-5 overflow-x-auto snap-x snap-mandatory pb-4 no-scrollbar select-none cursor-grab active:cursor-grabbing transition-all duration-300 ${
+          isMouseDown ? '' : 'scroll-smooth'
+        }`}
       >
         {childrenArray.map((child, idx) => (
-          <div key={idx} className={`${itemWidthClass} snap-start flex-shrink-0 flex [&>*]:w-full [&>*]:h-full`}>
+          <div key={idx} className={`${itemWidthClass} snap-start flex-shrink-0 flex [&>*]:w-full [&>*]:h-full transition-all duration-500 ease-out`}>
             {child}
           </div>
         ))}
