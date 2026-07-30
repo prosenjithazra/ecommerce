@@ -1,32 +1,71 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Breadcrumb } from '../../components/UIComponents';
+import { RefreshCw, FileText } from 'lucide-react';
+
+interface PolicySection {
+  id: string;
+  heading: string;
+  content: string;
+  lastUpdated?: string;
+}
 
 export default function TermsPage() {
+  const [sections, setSections] = useState<PolicySection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [title, setTitle] = useState("Terms & Conditions");
+
+  useEffect(() => {
+    fetch('/api/policies/terms')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) {
+          if (data.title) setTitle(data.title);
+          if (Array.isArray(data.sections) && data.sections.length > 0) {
+            setSections(data.sections);
+          }
+        }
+      })
+      .catch((err) => console.error('[TermsPage] Failed to fetch policy:', err))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-8 pb-10 sm:pb-16">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-12 sm:pb-20">
       <Breadcrumb items={[{ name: "Terms & Conditions" }]} />
 
-      <article className="prose prose-zinc dark:prose-invert space-y-4 sm:space-y-6 text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed">
-        <h1 className="text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">Terms & Conditions</h1>
-        <p className="text-[10px] text-zinc-400">Last updated: July 10, 2026</p>
+      <div className="bg-white border border-[#E8E2D6] rounded-2xl p-6 sm:p-10 shadow-sm space-y-6">
+        <div className="border-b border-zinc-100 pb-5">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A453E] tracking-tight">{title}</h1>
+          <p className="text-xs text-[#7A736A] mt-1">Platform terms of service, custom artwork ownership, and order policies</p>
+        </div>
 
-        <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-zinc-900 dark:text-white">1. User Agreement</h2>
-          <p>By accessing Kliamo Fashion and utilizing our design tools or placing purchase orders, you agree to comply with our platform terms. You verify that you are at least 18 years old or are using the storefront under guardian supervision.</p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-zinc-900 dark:text-white">2. Graphic Content Guidelines</h2>
-          <p>You verify that you hold legal copyright permissions for all images, logos, and custom graphics you upload onto our canvas designer. We reserve the right to cancel orders containing copyrighted material, hate speech, explicit violence, or illegal trademark infringements.</p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-zinc-900 dark:text-white">3. Custom Order Fulfillment</h2>
-          <p>Because items are printed on demand based on your sizing and design layout, orders cannot be changed or cancelled once they enter the &ldquo;Processing &amp; Print&rdquo; stage. Sizing details are provided inside each product page; please check them before confirming transactions.</p>
-        </section>
-      </article>
+        {loading ? (
+          <div className="py-12 text-center flex flex-col items-center justify-center gap-3">
+            <RefreshCw className="w-6 h-6 animate-spin text-purple-600" />
+            <p className="text-xs text-zinc-500 font-bold">Loading Terms & Conditions...</p>
+          </div>
+        ) : sections.length === 0 ? (
+          <div className="py-8 text-center text-xs text-zinc-400">No terms published yet.</div>
+        ) : (
+          <div className="space-y-8">
+            {sections.map((sec, idx) => (
+              <section key={sec.id || idx} className="space-y-2">
+                <h2 className="text-base sm:text-lg font-extrabold text-[#4A453E] flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-purple-50 text-purple-600 text-xs flex items-center justify-center font-black">
+                    {idx + 1}
+                  </span>
+                  {sec.heading}
+                </h2>
+                <p className="text-xs sm:text-sm text-zinc-650 leading-relaxed pl-8 whitespace-pre-line">
+                  {sec.content}
+                </p>
+              </section>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

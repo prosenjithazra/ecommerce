@@ -1,32 +1,71 @@
 "use client";
 
-import React from 'react';
-import { Breadcrumb } from '../../components/UIComponents';
+import React, { useEffect, useState } from 'react';
+import { Breadcrumb, LoadingSpinner } from '../../components/UIComponents';
+import { ShieldAlert, RefreshCw } from 'lucide-react';
+
+interface PolicySection {
+  id: string;
+  heading: string;
+  content: string;
+  lastUpdated?: string;
+}
 
 export default function RefundPage() {
+  const [sections, setSections] = useState<PolicySection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [title, setTitle] = useState("Refund & Returns Policy");
+
+  useEffect(() => {
+    fetch('/api/policies/refund')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) {
+          if (data.title) setTitle(data.title);
+          if (Array.isArray(data.sections) && data.sections.length > 0) {
+            setSections(data.sections);
+          }
+        }
+      })
+      .catch((err) => console.error('[RefundPage] Failed to fetch policy:', err))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-8 pb-10 sm:pb-16">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-12 sm:pb-20">
       <Breadcrumb items={[{ name: "Refund Policy" }]} />
 
-      <article className="prose prose-zinc dark:prose-invert space-y-4 sm:space-y-6 text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed">
-        <h1 className="text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">Refund & Returns Policy</h1>
-        <p className="text-[10px] text-zinc-400">Last updated: July 10, 2026</p>
+      <div className="bg-white border border-[#E8E2D6] rounded-2xl p-6 sm:p-10 shadow-sm space-y-6">
+        <div className="border-b border-zinc-100 pb-5">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A453E] tracking-tight">{title}</h1>
+          <p className="text-xs text-[#7A736A] mt-1">Our commitments for order cancellations, replacements, and refunds</p>
+        </div>
 
-        <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-zinc-900 dark:text-white">1. Custom On-Demand Products</h2>
-          <p>Because every item is custom printed on demand based on your specifications, we do not accept returns or offer refunds for user errors, including choosing incorrect sizes, design positioning, or color combinations.</p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-zinc-900 dark:text-white">2. Damaged Blanks or Print Errors</h2>
-          <p>If you receive an item with printing defects (e.g. alignment issues, faded printing, incorrect colors) or structural damage (torn seams, stains on blank garment), we will send a free replacement immediately. Please email us support ticket details including photos within 14 days of delivery.</p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-zinc-900 dark:text-white">3. Refund Processing</h2>
-          <p>Approved refunds are processed instantly and returned to your original payment method (Card, Razorpay, UPI wallet) within 5-7 business days depending on bank clearance durations.</p>
-        </section>
-      </article>
+        {loading ? (
+          <div className="py-12 text-center flex flex-col items-center justify-center gap-3">
+            <RefreshCw className="w-6 h-6 animate-spin text-[#df794d]" />
+            <p className="text-xs text-zinc-500 font-bold">Loading Refund Policy...</p>
+          </div>
+        ) : sections.length === 0 ? (
+          <div className="py-8 text-center text-xs text-zinc-400">No policy sections published yet.</div>
+        ) : (
+          <div className="space-y-8">
+            {sections.map((sec, idx) => (
+              <section key={sec.id || idx} className="space-y-2">
+                <h2 className="text-base sm:text-lg font-extrabold text-[#4A453E] flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-[#df794d]/10 text-[#df794d] text-xs flex items-center justify-center font-black">
+                    {idx + 1}
+                  </span>
+                  {sec.heading}
+                </h2>
+                <p className="text-xs sm:text-sm text-zinc-650 leading-relaxed pl-8 whitespace-pre-line">
+                  {sec.content}
+                </p>
+              </section>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,35 +1,71 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Breadcrumb } from '../../components/UIComponents';
+import { RefreshCw, Truck } from 'lucide-react';
+
+interface PolicySection {
+  id: string;
+  heading: string;
+  content: string;
+  lastUpdated?: string;
+}
 
 export default function ShippingPage() {
+  const [sections, setSections] = useState<PolicySection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [title, setTitle] = useState("Shipping Policy");
+
+  useEffect(() => {
+    fetch('/api/policies/shipping')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) {
+          if (data.title) setTitle(data.title);
+          if (Array.isArray(data.sections) && data.sections.length > 0) {
+            setSections(data.sections);
+          }
+        }
+      })
+      .catch((err) => console.error('[ShippingPage] Failed to fetch policy:', err))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-8 pb-10 sm:pb-16">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-12 sm:pb-20">
       <Breadcrumb items={[{ name: "Shipping Policy" }]} />
 
-      <article className="prose prose-zinc dark:prose-invert space-y-4 sm:space-y-6 text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed">
-        <h1 className="text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">Shipping Policy</h1>
-        <p className="text-[10px] text-zinc-400">Last updated: July 10, 2026</p>
+      <div className="bg-white border border-[#E8E2D6] rounded-2xl p-6 sm:p-10 shadow-sm space-y-6">
+        <div className="border-b border-zinc-100 pb-5">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A453E] tracking-tight">{title}</h1>
+          <p className="text-xs text-[#7A736A] mt-1">Fulfillment timelines, courier partners, and tracking procedures</p>
+        </div>
 
-        <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-zinc-900 dark:text-white">1. Production & Fulfillment Times</h2>
-          <p>Unlike standard commerce stores, all custom items are printed on demand. Production time ranges between 2-3 business days. High-volume periods (holiday peaks) may extend printing durations by 1-2 days.</p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-zinc-900 dark:text-white">2. Shipping Durations & Charges</h2>
-          <ul className="list-disc pl-5 space-y-2">
-            <li><strong>Standard Ground Shipping</strong>: Free for orders above ₹50 (otherwise ₹5.99). Takes 4-6 business days to arrive.</li>
-            <li><strong>Express Air Shipping</strong>: ₹14.99 flat. Takes 2-3 business days.</li>
-          </ul>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-zinc-905 dark:text-white">3. Package Tracking</h2>
-          <p>Once your custom order has been printed and packaged, we will send an email confirmation containing your DHL tracking number and timeline. You can check order statuses at any time under your profile dashboard.</p>
-        </section>
-      </article>
+        {loading ? (
+          <div className="py-12 text-center flex flex-col items-center justify-center gap-3">
+            <RefreshCw className="w-6 h-6 animate-spin text-[#3B82F6]" />
+            <p className="text-xs text-zinc-500 font-bold">Loading Shipping Policy...</p>
+          </div>
+        ) : sections.length === 0 ? (
+          <div className="py-8 text-center text-xs text-zinc-400">No shipping policy published yet.</div>
+        ) : (
+          <div className="space-y-8">
+            {sections.map((sec, idx) => (
+              <section key={sec.id || idx} className="space-y-2">
+                <h2 className="text-base sm:text-lg font-extrabold text-[#4A453E] flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-blue-50 text-blue-600 text-xs flex items-center justify-center font-black">
+                    {idx + 1}
+                  </span>
+                  {sec.heading}
+                </h2>
+                <p className="text-xs sm:text-sm text-zinc-650 leading-relaxed pl-8 whitespace-pre-line">
+                  {sec.content}
+                </p>
+              </section>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

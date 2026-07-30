@@ -19,6 +19,7 @@ import { CartModule } from './cart/cart.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { TestimonialsModule } from './testimonials/testimonials.module';
+import { PoliciesModule } from './policies/policies.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { TestimonialsModule } from './testimonials/testimonials.module';
     WishlistModule,
     CouponsModule,
     TestimonialsModule,
+    PoliciesModule,
   ],
 
   controllers: [AppController],
