@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+import { getApiUrl } from '../../../../components/ApiConfig';
 
 const DEFAULT_SECTIONS: Record<string, { title: string; subtitle: string; sections: any[] }> = {
   refund: {
@@ -54,18 +53,16 @@ const DEFAULT_SECTIONS: Record<string, { title: string; subtitle: string; sectio
 export async function GET(req: Request, { params }: { params: Promise<{ type: string }> }) {
   const { type } = await params;
   const normType = (type || '').toLowerCase().trim();
+  const backendEndpoint = getApiUrl(`/policies/${normType}`);
 
   try {
-    const res = await fetch(`${BACKEND_URL}/policies/${normType}`, {
-      cache: 'no-store',
-    });
-
+    const res = await fetch(backendEndpoint, { cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
       return NextResponse.json(data);
     }
   } catch (error) {
-    console.error(`[API Policy GET] Error fetching policy '${normType}' from backend:`, error);
+    console.error(`[API Policy GET] Error fetching policy '${normType}' from ${backendEndpoint}:`, error);
   }
 
   const fallback = DEFAULT_SECTIONS[normType] || { title: `${type} Policy`, subtitle: 'Policy details', sections: [] };
@@ -75,10 +72,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ type: st
 export async function PUT(req: Request, { params }: { params: Promise<{ type: string }> }) {
   const { type } = await params;
   const normType = (type || '').toLowerCase().trim();
+  const backendEndpoint = getApiUrl(`/policies/${normType}`);
 
   try {
     const body = await req.json();
-    const res = await fetch(`${BACKEND_URL}/policies/${normType}`, {
+    const res = await fetch(backendEndpoint, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -89,10 +87,26 @@ export async function PUT(req: Request, { params }: { params: Promise<{ type: st
       return NextResponse.json(data);
     }
 
+    // Try POST if PUT returns non-ok
+    const postRes = await fetch(backendEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    if (postRes.ok) {
+      const data = await postRes.json();
+      return NextResponse.json(data);
+    }
+
     const errText = await res.text();
     return NextResponse.json({ error: errText || 'Failed to update policy' }, { status: res.status });
   } catch (error: any) {
     console.error(`[API Policy PUT] Error updating policy '${normType}':`, error);
     return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
   }
+}
+
+export async function POST(req: Request, { params }: { params: Promise<{ type: string }> }) {
+  return PUT(req, { params });
 }

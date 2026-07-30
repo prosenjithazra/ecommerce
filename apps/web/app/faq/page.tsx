@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Breadcrumb } from '../../components/UIComponents';
-import { HelpCircle, ChevronDown, Sparkles, Paintbrush, Truck, Search, HelpCircle as HelpIcon, ArrowRight, RefreshCw } from 'lucide-react';
+import { HelpCircle, ChevronDown, Search, HelpCircle as HelpIcon, ArrowRight, RefreshCw } from 'lucide-react';
+import { getApiUrl } from '../../components/ApiConfig';
 
 interface PolicySection {
   id: string;
@@ -20,18 +21,31 @@ export default function FaqPage() {
   const [title, setTitle] = useState("Help Center / FAQ");
 
   useEffect(() => {
-    fetch('/api/policies/faq')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data) {
-          if (data.title) setTitle(data.title);
-          if (Array.isArray(data.sections) && data.sections.length > 0) {
-            setSections(data.sections);
+    let isMounted = true;
+    const fetchPolicy = async () => {
+      try {
+        let res = await fetch(getApiUrl('/policies/faq')).catch(() => null);
+        if (!res || !res.ok) {
+          res = await fetch('/api/policies/faq').catch(() => null);
+        }
+        if (res && res.ok) {
+          const data = await res.json();
+          if (isMounted && data) {
+            if (data.title) setTitle(data.title);
+            if (Array.isArray(data.sections) && data.sections.length > 0) {
+              setSections(data.sections);
+            }
           }
         }
-      })
-      .catch((err) => console.error('[FaqPage] Failed to fetch FAQ:', err))
-      .finally(() => setLoading(false));
+      } catch (err) {
+        console.error('[FaqPage] Failed to fetch FAQ:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchPolicy();
+    return () => { isMounted = false; };
   }, []);
 
   const handleToggle = (id: string) => {

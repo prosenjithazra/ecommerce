@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { Breadcrumb } from '../../components/UIComponents';
-import { RefreshCw, Truck } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
+import { getApiUrl } from '../../components/ApiConfig';
 
 interface PolicySection {
   id: string;
@@ -17,18 +18,31 @@ export default function ShippingPage() {
   const [title, setTitle] = useState("Shipping Policy");
 
   useEffect(() => {
-    fetch('/api/policies/shipping')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data) {
-          if (data.title) setTitle(data.title);
-          if (Array.isArray(data.sections) && data.sections.length > 0) {
-            setSections(data.sections);
+    let isMounted = true;
+    const fetchPolicy = async () => {
+      try {
+        let res = await fetch(getApiUrl('/policies/shipping')).catch(() => null);
+        if (!res || !res.ok) {
+          res = await fetch('/api/policies/shipping').catch(() => null);
+        }
+        if (res && res.ok) {
+          const data = await res.json();
+          if (isMounted && data) {
+            if (data.title) setTitle(data.title);
+            if (Array.isArray(data.sections) && data.sections.length > 0) {
+              setSections(data.sections);
+            }
           }
         }
-      })
-      .catch((err) => console.error('[ShippingPage] Failed to fetch policy:', err))
-      .finally(() => setLoading(false));
+      } catch (err) {
+        console.error('[ShippingPage] Failed to fetch policy:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchPolicy();
+    return () => { isMounted = false; };
   }, []);
 
   return (

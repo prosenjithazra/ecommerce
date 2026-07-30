@@ -39,8 +39,15 @@ export function PolicyPage({ type, title, subtitle, accentColor, initialSections
 
     const fetchPolicy = async () => {
       try {
-        const res = await fetch(`/api/policies/${type}`);
-        if (res.ok) {
+        // 1. Primary: Try direct backend API
+        let res = await fetch(getApiUrl(`/policies/${type}`)).catch(() => null);
+        
+        // 2. Fallback: Try local Next.js proxy route
+        if (!res || !res.ok) {
+          res = await fetch(`/api/policies/${type}`).catch(() => null);
+        }
+
+        if (res && res.ok) {
           const data = await res.json();
           if (isMounted && data && Array.isArray(data.sections)) {
             setSections(data.sections);
@@ -93,24 +100,65 @@ export function PolicyPage({ type, title, subtitle, accentColor, initialSections
 
   const publishAll = async () => {
     setSaving(true);
+    const payload = { type, title, subtitle, sections };
+
+    let success = false;
+    let errorMsg = "Failed to publish policy";
+
+    // 1. Try PUT to backend API
     try {
-      const payload = { title, subtitle, sections };
-      const res = await fetch(`/api/policies/${type}`, {
+      const res = await fetch(getApiUrl(`/policies/${type}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      if (res.ok) success = true;
+    } catch {}
 
-      if (res.ok) {
-        showToast("Policy Published", `${title} has been updated live on the storefront!`, "success");
-      } else {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || "Failed to publish policy");
+    // 2. Try POST to backend API if PUT failed
+    if (!success) {
+      try {
+        const res = await fetch(getApiUrl(`/policies/${type}`), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) success = true;
+      } catch {}
+    }
+
+    // 3. Fallback to local Next.js proxy route via PUT
+    if (!success) {
+      try {
+        const res = await fetch(`/api/policies/${type}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) success = true;
+      } catch {}
+    }
+
+    // 4. Fallback to local Next.js proxy route via POST
+    if (!success) {
+      try {
+        const res = await fetch(`/api/policies/${type}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) success = true;
+      } catch (err: any) {
+        errorMsg = err.message || errorMsg;
       }
-    } catch (err: any) {
-      showToast("Error", err.message || "Failed to publish policy.", "error");
-    } finally {
-      setSaving(false);
+    }
+
+    setSaving(false);
+
+    if (success) {
+      showToast("Policy Published", `${title} has been updated live on the storefront!`, "success");
+    } else {
+      showToast("Error", errorMsg, "error");
     }
   };
 
