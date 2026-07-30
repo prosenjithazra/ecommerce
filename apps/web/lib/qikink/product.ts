@@ -1,4 +1,5 @@
 import { getApiUrl } from '../../components/ApiConfig';
+import { QIKINK_EXCEL_COLORS, COLOR_SKU_CODE_MAP, getColorSkuCode } from './colors';
 
 export interface QikinkColor {
   name: string;
@@ -28,49 +29,7 @@ export interface QikinkProductItem {
   print_type_id?: number;
 }
 
-const COLOR_CODES: Record<string, string> = {
-  'white': 'Wh',
-  'black': 'Bk',
-  'dark navy': 'Ny',
-  'navy': 'Ny',
-  'navy blue': 'Ny',
-  'maroon': 'MR',
-  'burgundy': 'MR',
-  'baby pink': 'PK',
-  'light pink': 'PK',
-  'pink': 'PK',
-  'light lavender': 'LV',
-  'lavender': 'LV',
-  'lilac': 'LV',
-  'mint green': 'MG',
-  'ice mint': 'MG',
-  'mint': 'MG',
-  'sky blue': 'SB',
-  'light blue': 'SB',
-  'grey': 'Gy',
-  'gray': 'Gy',
-  'heather grey': 'Gy',
-  'charcoal': 'CH',
-  'charcoal grey': 'CH',
-  'sage green': 'SG',
-  'sage': 'SG',
-  'green': 'Gn',
-  'forest green': 'Gn',
-  'red': 'Rd',
-  'crimson red': 'Rd',
-  'peach': 'PC',
-  'coral': 'PC',
-  'mustard yellow': 'MY',
-  'mustard': 'MY',
-  'pastel yellow': 'YL',
-  'light yellow': 'YL',
-  'yellow': 'Yl',
-  'blue': 'Bl',
-  'royal blue': 'RB',
-  'sand beige': 'SD',
-  'sand': 'SD',
-  'beige': 'SD',
-};
+const COLOR_CODES: Record<string, string> = COLOR_SKU_CODE_MAP;
 
 /**
  * Normalizes raw backend product object into Qikink product format
@@ -88,7 +47,7 @@ export function normalizeQikinkProduct(item: any): QikinkProductItem {
   const skuMapping: Record<string, string> = { ...item.skuMapping };
   colors.forEach((colorObj: any) => {
     const cName = typeof colorObj === 'string' ? colorObj : colorObj.name || 'White';
-    const cCode = COLOR_CODES[cName.toLowerCase()] || cName.slice(0, 2).toUpperCase();
+    const cCode = getColorSkuCode(cName);
     sizes.forEach((s: string) => {
       const key = `${cName}_${s}`;
       if (!skuMapping[key]) {
@@ -204,7 +163,7 @@ export async function fetchProductVariants(productId: string): Promise<Array<{
     const cName = typeof c === 'string' ? c : c.name;
     sizes.forEach((s) => {
       const key = `${cName}_${s}`;
-      const mappedSku = product.skuMapping?.[key] || `${product.sku}-${COLOR_CODES[cName.toLowerCase()] || 'XX'}-${s}`;
+      const mappedSku = product.skuMapping?.[key] || `${product.sku}-${getColorSkuCode(cName)}-${s}`;
       variants.push({
         color: cName,
         size: s,

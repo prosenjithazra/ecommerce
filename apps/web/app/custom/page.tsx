@@ -38,27 +38,7 @@ import {
 import { getApiUrl } from "../../components/ApiConfig";
 import { CustomGarmentPreview } from "../../components/CustomGarmentPreview";
 import * as fabric from "fabric";
-
-const COLORS = [
-  { name: "White", hex: "#FFFFFF" },
-  { name: "Black", hex: "#18181B" },
-  { name: "Dark Navy", hex: "#1E293B" },
-  { name: "Maroon", hex: "#7F1D1D" },
-  { name: "Baby Pink", hex: "#F8C8DC" },
-  { name: "Light Lavender", hex: "#DDD6FE" },
-  { name: "Mint Green", hex: "#A7F3D0" },
-  { name: "Sky Blue", hex: "#7DD3FC" },
-  { name: "Heather Grey", hex: "#94A3B8" },
-  { name: "Charcoal Grey", hex: "#334155" },
-  { name: "Sage Green", hex: "#7E9677" },
-  { name: "Forest Green", hex: "#14532D" },
-  { name: "Crimson Red", hex: "#DC2626" },
-  { name: "Peach", hex: "#DF794D" },
-  { name: "Mustard Yellow", hex: "#F59E0B" },
-  { name: "Pastel Yellow", hex: "#FEF08A" },
-  { name: "Royal Blue", hex: "#2563EB" },
-  { name: "Sand Beige", hex: "#E5E0D8" },
-];
+import { QIKINK_EXCEL_COLORS as COLORS } from "../../lib/qikink/colors";
 
 const SIZES = ["S", "M", "L", "XL", "XXL"];
 
