@@ -273,7 +273,7 @@ export default function AdminProductsPage() {
                         className="w-10 h-10 rounded-lg object-cover border border-zinc-100"
                       />
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 w-[40%]">
                       <Link
                         href={`/products/${p.slug || slugify(p.name)}`}
                         target="_blank"
