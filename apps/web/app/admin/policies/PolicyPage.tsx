@@ -68,8 +68,8 @@ export function PolicyPage({ title, subtitle, accentColor, initialSections }: Po
     showToast("Policy Published", `${title} has been published to the storefront.`, "success");
   };
 
-  const inputCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3.5 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/10 transition-all placeholder:text-zinc-400";
-  const textareaCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-3 px-3.5 text-xs text-zinc-700 leading-relaxed outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/10 resize-none transition-all";
+  const inputCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3.5 text-xs text-zinc-800 outline-none focus:border-[#df794d] focus:ring-2 focus:ring-[#df794d]/10 transition-all placeholder:text-zinc-400";
+  const textareaCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-3 px-3.5 text-xs text-zinc-700 leading-relaxed outline-none focus:border-[#df794d] focus:ring-2 focus:ring-[#df794d]/10 resize-none transition-all";
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -88,7 +88,7 @@ export function PolicyPage({ title, subtitle, accentColor, initialSections }: Po
           <div className="flex gap-2">
             <button
               onClick={() => { setAddingNew(true); setEditingId(null); }}
-              className="flex items-center gap-1.5 text-xs font-extrabold py-2 px-4 rounded-lg border-2 border-dashed border-zinc-300 hover:border-[#F9A37E] text-zinc-500 hover:text-[#F9A37E] transition-all"
+              className="flex items-center gap-1.5 text-xs font-extrabold py-2 px-4 rounded-lg border-2 border-dashed border-zinc-300 hover:border-[#df794d] text-zinc-500 hover:text-[#df794d] transition-all"
             >
               <Plus className="w-3.5 h-3.5" /> Add Section
             </button>
@@ -174,7 +174,7 @@ export function PolicyPage({ title, subtitle, accentColor, initialSections }: Po
                     <div className="col-span-1 flex gap-1 justify-end pt-0.5">
                       <button
                         onClick={() => startEdit(s)}
-                        className="p-1.5 border border-zinc-200 hover:border-[#F9A37E]/40 hover:bg-[#F9A37E]/5 hover:text-[#F9A37E] text-zinc-400 rounded-lg transition-all"
+                        className="p-1.5 border border-zinc-200 hover:border-[#df794d]/40 hover:bg-[#df794d]/5 hover:text-[#df794d] text-zinc-400 rounded-lg transition-all"
                       >
                         <Edit2 className="w-3 h-3" />
                       </button>
@@ -229,7 +229,7 @@ export function PolicyPage({ title, subtitle, accentColor, initialSections }: Po
           {sections.length === 0 && !addingNew && (
             <div className="py-16 text-center">
               <p className="text-zinc-400 text-xs font-bold">No sections yet.</p>
-              <button onClick={() => setAddingNew(true)} className="mt-2 text-[#F9A37E] text-xs font-extrabold hover:underline">+ Add your first section</button>
+              <button onClick={() => setAddingNew(true)} className="mt-2 text-[#df794d] text-xs font-extrabold hover:underline">+ Add your first section</button>
             </div>
           )}
         </div>

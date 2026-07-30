@@ -56,7 +56,7 @@ export default function AddressesPage() {
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h1 className="text-3xl font-extrabold text-zinc-909 dark:text-white tracking-tight flex items-center gap-2">
-            <MapPin className="w-7 h-7 text-[#F9A37E]" /> Address Book
+            <MapPin className="w-7 h-7 text-[#df794d]" /> Address Book
           </h1>
           <p className="text-xs text-zinc-400">Add, edit, or delete shipping destinations.</p>
         </div>
@@ -145,7 +145,7 @@ export default function AddressesPage() {
               type="checkbox"
               checked={form.isDefault}
               onChange={(e) => setForm({ ...form, isDefault: e.target.checked })}
-              className="w-4 h-4 rounded border accent-[#F9A37E]"
+              className="w-4 h-4 rounded border accent-[#df794d]"
             />
             <span className="text-xs text-zinc-550 font-medium">Set as primary default shipping address</span>
           </label>
@@ -160,7 +160,7 @@ export default function AddressesPage() {
             >
               Cancel
             </button>
-            <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2 px-4 rounded-lg shadow-md">
+            <button type="submit" className="bg-[#df794d] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2 px-4 rounded-lg shadow-md">
               Save Shipping Details
             </button>
           </div>

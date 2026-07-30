@@ -39,7 +39,7 @@ export default function RefundPolicyPage() {
     <PolicyPage
       title="Refund Policy"
       subtitle="Define and manage refund eligibility rules for customers"
-      accentColor="#F9A37E"
+      accentColor="#df794d"
       initialSections={sections}
     />
   );

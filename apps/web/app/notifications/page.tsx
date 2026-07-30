@@ -21,9 +21,9 @@ export default function NotificationsPage() {
   const getIcon = (type: string) => {
     switch (type) {
       case 'promo':
-        return <Sparkles className="w-5 h-5 text-[#F9A37E]" />;
+        return <Sparkles className="w-5 h-5 text-[#df794d]" />;
       case 'shipping':
-        return <Truck className="w-5 h-5 text-[#A8C69F]" />;
+        return <Truck className="w-5 h-5 text-[#7e9677]" />;
       case 'order':
       default:
         return <ShieldAlert className="w-5 h-5 text-amber-500" />;
@@ -37,13 +37,13 @@ export default function NotificationsPage() {
       <div className="flex justify-between items-center pb-3 border-b border-zinc-150">
         <div className="space-y-1">
           <h1 className="text-3xl font-extrabold text-zinc-909 dark:text-white tracking-tight flex items-center gap-2">
-            <Bell className="w-7 h-7 text-[#F9A37E] animate-swing" /> Notifications
+            <Bell className="w-7 h-7 text-[#df794d] animate-swing" /> Notifications
           </h1>
           <p className="text-xs text-zinc-400">Stay updated on custom prints promotions and orders statuses.</p>
         </div>
         <button
           onClick={handleMarkAllRead}
-          className="text-xs font-bold text-[#F9A37E] hover:text-[#e8855a] flex items-center gap-1 hover:underline"
+          className="text-xs font-bold text-[#df794d] hover:text-[#e8855a] flex items-center gap-1 hover:underline"
         >
           <Check className="w-4 h-4" /> Mark all read
         </button>
@@ -60,7 +60,7 @@ export default function NotificationsPage() {
           {list.map(notif => (
             <div 
               key={notif.id} 
-              className={`p-4 border rounded-lg bg-white dark:bg-zinc-900/60 flex gap-4 transition-all ${notif.read ? 'border-zinc-200 dark:border-zinc-800 opacity-70' : 'border-[#F9A37E] shadow-md shadow-[#FBD5C1]/10'}`}
+              className={`p-4 border rounded-lg bg-white dark:bg-zinc-900/60 flex gap-4 transition-all ${notif.read ? 'border-zinc-200 dark:border-zinc-800 opacity-70' : 'border-[#df794d] shadow-md shadow-[#FBD5C1]/10'}`}
             >
               <div className="w-10 h-10 bg-zinc-55 dark:bg-zinc-850 rounded-lg flex items-center justify-center flex-shrink-0">
                 {getIcon(notif.type)}
@@ -76,7 +76,7 @@ export default function NotificationsPage() {
                 {!notif.read && (
                   <button
                     onClick={() => handleMarkRead(notif.id)}
-                    className="text-[10px] font-bold text-[#F9A37E] hover:text-[#e8855a] flex items-center gap-1 mt-3 hover:underline"
+                    className="text-[10px] font-bold text-[#df794d] hover:text-[#e8855a] flex items-center gap-1 mt-3 hover:underline"
                   >
                     <Eye className="w-3.5 h-3.5" /> Mark as Read
                   </button>

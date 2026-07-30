@@ -133,7 +133,7 @@ export default function SignUpPage() {
   };
 
   const getInputClass = (hasError?: boolean) =>
-    `mt-1.5 w-full bg-[#FDFAF6] border ${hasError ? 'border-red-500' : 'border-[#E8E2D6]'} rounded-lg py-3 px-4 text-sm outline-none focus:border-[#F9A37E] text-[#4A453E] placeholder-[#A89B8A]`;
+    `mt-1.5 w-full bg-[#FDFAF6] border ${hasError ? 'border-red-500' : 'border-[#E8E2D6]'} rounded-lg py-3 px-4 text-sm outline-none focus:border-[#df794d] text-[#4A453E] placeholder-[#A89B8A]`;
 
   return (
     <div className="min-h-screen bg-[#FDFAF6] flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8">
@@ -226,7 +226,7 @@ export default function SignUpPage() {
                     type={showPassword ? "text" : "password"}
                     {...register("password")}
                     placeholder="Minimum 8 characters"
-                    className={`w-full bg-[#FDFAF6] border ${errors.password ? 'border-red-500' : 'border-[#E8E2D6]'} rounded-lg py-3 px-4 pr-10 text-sm outline-none focus:border-[#F9A37E] text-[#4A453E] placeholder-[#A89B8A]`}
+                    className={`w-full bg-[#FDFAF6] border ${errors.password ? 'border-red-500' : 'border-[#E8E2D6]'} rounded-lg py-3 px-4 pr-10 text-sm outline-none focus:border-[#df794d] text-[#4A453E] placeholder-[#A89B8A]`}
                   />
                   <button type="button" onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A89B8A] hover:text-[#4A453E] transition-colors">
@@ -251,7 +251,7 @@ export default function SignUpPage() {
                     type={showConfirmPassword ? "text" : "password"}
                     {...register("confirmPassword")}
                     placeholder="Confirm password"
-                    className={`w-full bg-[#FDFAF6] border ${errors.confirmPassword ? 'border-red-500' : 'border-[#E8E2D6]'} rounded-lg py-3 px-4 pr-10 text-sm outline-none focus:border-[#F9A37E] text-[#4A453E] placeholder-[#A89B8A]`}
+                    className={`w-full bg-[#FDFAF6] border ${errors.confirmPassword ? 'border-red-500' : 'border-[#E8E2D6]'} rounded-lg py-3 px-4 pr-10 text-sm outline-none focus:border-[#df794d] text-[#4A453E] placeholder-[#A89B8A]`}
                   />
                   <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A89B8A] hover:text-[#4A453E] transition-colors">
@@ -271,13 +271,13 @@ export default function SignUpPage() {
                   <input
                     type="checkbox"
                     {...register("acceptTerms")}
-                    className="w-4 h-4 rounded border-[#E8E2D6] accent-[#F9A37E]"
+                    className="w-4 h-4 rounded border-[#E8E2D6] accent-[#df794d]"
                   />
                   <span className="text-[10px] text-[#7A736A] font-medium leading-[15px]">
                     I accept the{' '}
-                    <Link href="/terms" className="font-bold hover:underline text-[#F9A37E]">Terms of Service</Link>
+                    <Link href="/terms" className="font-bold hover:underline text-[#df794d]">Terms of Service</Link>
                     {' '}and{' '}
-                    <Link href="/privacy" className="font-bold hover:underline text-[#F9A37E]">Privacy Policy</Link>.
+                    <Link href="/privacy" className="font-bold hover:underline text-[#df794d]">Privacy Policy</Link>.
                   </span>
                 </label>
                 {errors.acceptTerms && (
@@ -291,7 +291,7 @@ export default function SignUpPage() {
               <button
                 type="submit"
                 disabled={isSubmitting || sendingOtp}
-                className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-sm py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95 disabled:opacity-70 mt-2"
+                className="w-full bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-sm py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#df794d]/25 active:scale-95 disabled:opacity-70 mt-2"
               >
                 {sendingOtp ? 'Sending OTP...' : isSubmitting ? 'Registering...' : 'Register Account'}
               </button>
@@ -320,8 +320,8 @@ export default function SignUpPage() {
                     onChange={e => handleOtpChange(i, e.target.value)}
                     onKeyDown={e => handleOtpKeyDown(i, e)}
                     className={`w-10 h-10 sm:w-12 sm:h-12 text-center text-lg font-bold border-2 rounded-lg outline-none transition-all
-                      ${digit ? 'border-[#F9A37E] bg-[#FFF4EE]' : 'border-[#E8E2D6] bg-[#FDFAF6]'}
-                      focus:border-[#F9A37E] focus:bg-[#FFF4EE] text-[#4A453E]`}
+                      ${digit ? 'border-[#df794d] bg-[#FFF4EE]' : 'border-[#E8E2D6] bg-[#FDFAF6]'}
+                      focus:border-[#df794d] focus:bg-[#FFF4EE] text-[#4A453E]`}
                   />
                 ))}
               </div>
@@ -336,7 +336,7 @@ export default function SignUpPage() {
               <button
                 onClick={handleVerifyAndRegister}
                 disabled={otpLoading || otp.join('').length !== 6}
-                className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95 disabled:opacity-70"
+                className="w-full bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#df794d]/25 active:scale-95 disabled:opacity-70"
               >
                 {otpLoading ? 'Verifying...' : 'Verify & Create Account'}
               </button>
@@ -345,7 +345,7 @@ export default function SignUpPage() {
                 {resendCountdown > 0 ? (
                   <span className="text-[#7A736A]">Resend code in <span className="font-bold text-[#4A453E]">0:{resendCountdown < 10 ? `0${resendCountdown}` : resendCountdown}</span></span>
                 ) : (
-                  <button type="button" onClick={handleResendOtp} className="font-bold text-[#F9A37E] hover:text-[#E8855A]">
+                  <button type="button" onClick={handleResendOtp} className="font-bold text-[#df794d] hover:text-[#E8855A]">
                     Resend OTP Code
                   </button>
                 )}
@@ -378,7 +378,7 @@ export default function SignUpPage() {
             </span>
             <Link
               href="/login"
-              className="w-full bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-sm py-3 px-4 rounded-lg transition-all shadow-md shadow-[#A8C69F]/20 flex items-center justify-center text-center animate-fade-in-up"
+              className="w-full bg-[#7e9677] hover:bg-[#92b089] text-white font-extrabold text-sm py-3 px-4 rounded-lg transition-all shadow-md shadow-[#7e9677]/20 flex items-center justify-center text-center animate-fade-in-up"
             >
               Sign In
             </Link>

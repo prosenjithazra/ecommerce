@@ -51,7 +51,7 @@ You may request access, correction, or deletion of your personal data by contact
     showToast("Policies Saved", `${label} updated successfully.`, "success");
   };
 
-  const textareaCls = "w-full bg-[#FDFAF6] border border-zinc-200 rounded-lg py-4 px-5 text-xs text-zinc-700 leading-relaxed outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/10 resize-none transition-all font-mono";
+  const textareaCls = "w-full bg-[#FDFAF6] border border-zinc-200 rounded-lg py-4 px-5 text-xs text-zinc-700 leading-relaxed outline-none focus:border-[#df794d] focus:ring-2 focus:ring-[#df794d]/10 resize-none transition-all font-mono";
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -62,8 +62,8 @@ You may request access, correction, or deletion of your personal data by contact
         <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between bg-zinc-50">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#F9A37E]/15 flex items-center justify-center">
-                <FileText className="w-4 h-4 text-[#F9A37E]" />
+              <div className="w-8 h-8 rounded-lg bg-[#df794d]/15 flex items-center justify-center">
+                <FileText className="w-4 h-4 text-[#df794d]" />
               </div>
               <div>
                 <h3 className="font-extrabold text-sm text-zinc-900">Terms of Service</h3>
@@ -73,7 +73,7 @@ You may request access, correction, or deletion of your personal data by contact
             <button
               onClick={() => handleSave("terms")}
               disabled={saving === "terms"}
-              className="flex items-center gap-1.5 bg-[#F9A37E] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-2 px-4 rounded-lg transition-all shadow-sm shadow-[#F9A37E]/20"
+              className="flex items-center gap-1.5 bg-[#df794d] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-2 px-4 rounded-lg transition-all shadow-sm shadow-[#df794d]/20"
             >
               <Save className="w-3.5 h-3.5" />
               {saving === "terms" ? "Saving..." : "Save Terms"}
@@ -93,8 +93,8 @@ You may request access, correction, or deletion of your personal data by contact
         <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between bg-zinc-50">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#A8C69F]/20 flex items-center justify-center">
-                <Shield className="w-4 h-4 text-[#A8C69F]" />
+              <div className="w-8 h-8 rounded-lg bg-[#7e9677]/20 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-[#7e9677]" />
               </div>
               <div>
                 <h3 className="font-extrabold text-sm text-zinc-900">Privacy Policy</h3>
@@ -104,7 +104,7 @@ You may request access, correction, or deletion of your personal data by contact
             <button
               onClick={() => handleSave("privacy")}
               disabled={saving === "privacy"}
-              className="flex items-center gap-1.5 bg-[#A8C69F] hover:bg-[#7dab73] disabled:opacity-60 text-white font-extrabold text-xs py-2 px-4 rounded-lg transition-all shadow-sm"
+              className="flex items-center gap-1.5 bg-[#7e9677] hover:bg-[#7dab73] disabled:opacity-60 text-white font-extrabold text-xs py-2 px-4 rounded-lg transition-all shadow-sm"
             >
               <Save className="w-3.5 h-3.5" />
               {saving === "privacy" ? "Saving..." : "Save Privacy"}

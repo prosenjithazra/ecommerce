@@ -42,7 +42,7 @@ export const SearchBar: React.FC<{ initialValue?: string }> = ({ initialValue = 
             setCollapsed(false);
             setTimeout(() => inputRef.current?.focus(), 50);
           }}
-          className="text-xs font-bold text-white bg-[#F9A37E] hover:bg-[#E8855A] flex items-center gap-1.5 px-3 py-1 rounded-full transition-all"
+          className="text-xs font-bold text-white bg-[#df794d] hover:bg-[#E8855A] flex items-center gap-1.5 px-3 py-1 rounded-full transition-all"
         >
           <Search className="w-3 h-3" /> Search again
         </button>
@@ -64,7 +64,7 @@ export const SearchBar: React.FC<{ initialValue?: string }> = ({ initialValue = 
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => setTimeout(() => setFocused(false), 200)}
-          className="w-full bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 focus:border-[#F9A37E] dark:focus:border-[#F9A37E]/80 rounded-lg py-3.5 pl-12 pr-12 text-sm outline-none shadow-sm transition-colors text-zinc-950 dark:text-zinc-50"
+          className="w-full bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 focus:border-[#df794d] dark:focus:border-[#df794d]/80 rounded-lg py-3.5 pl-12 pr-12 text-sm outline-none shadow-sm transition-colors text-zinc-950 dark:text-zinc-50"
         />
         {query && (
           <button
@@ -84,7 +84,7 @@ export const SearchBar: React.FC<{ initialValue?: string }> = ({ initialValue = 
             {/* Popular tags */}
             <div>
               <h4 className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 flex items-center gap-1.5 mb-2.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#F9A37E]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#df794d]" />
                 Popular Searches
               </h4>
               <div className="flex flex-wrap gap-2">
@@ -108,14 +108,14 @@ export const SearchBar: React.FC<{ initialValue?: string }> = ({ initialValue = 
               </h4>
               <ul className="space-y-1.5 text-xs text-zinc-600 dark:text-zinc-300">
                 <li
-                  className="hover:text-[#F9A37E] cursor-pointer py-1 px-1.5 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors flex items-center justify-between"
+                  className="hover:text-[#df794d] cursor-pointer py-1 px-1.5 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors flex items-center justify-between"
                   onClick={() => { setFocused(false); setCollapsed(true); router.push('/products'); }}
                 >
                   <span>Summer Collection 2026</span>
                   <span className="text-[9px] bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded font-bold">New</span>
                 </li>
                 <li
-                  className="hover:text-[#F9A37E] cursor-pointer py-1 px-1.5 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors flex items-center justify-between"
+                  className="hover:text-[#df794d] cursor-pointer py-1 px-1.5 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors flex items-center justify-between"
                   onClick={() => { setFocused(false); setCollapsed(true); router.push('/products'); }}
                 >
                   <span>Eco-Friendly Organic Cotton Apparel</span>

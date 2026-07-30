@@ -60,7 +60,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ title, description, acti
     <h3 className="font-extrabold text-lg text-[#4A453E] dark:text-white tracking-tight">{title}</h3>
     <p className="text-xs text-[#7A736A] dark:text-zinc-400 max-w-sm mt-2 leading-relaxed">{description}</p>
     {actionText && actionHref && (
-      <Link href={actionHref} className="mt-6 bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25">
+      <Link href={actionHref} className="mt-6 bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#df794d]/25">
         {actionText}
       </Link>
     )}
@@ -217,7 +217,7 @@ export const LoadingSpinner: React.FC = () => (
   <div className="flex items-center justify-center py-12">
     <div className="relative w-10 h-10">
       <div className="absolute inset-0 border-4 border-[#E8E2D6] rounded-full" />
-      <div className="absolute inset-0 border-4 border-t-[#F9A37E] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin" />
+      <div className="absolute inset-0 border-4 border-t-[#df794d] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin" />
     </div>
   </div>
 );
@@ -426,7 +426,7 @@ export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => 
                 }
               }}
               className={`h-1.5 rounded-full transition-all duration-300 ${
-                activeIndex === idx ? 'bg-[#F9A37E] w-4' : 'bg-[#E8E2D6] w-1.5'
+                activeIndex === idx ? 'bg-[#df794d] w-4' : 'bg-[#E8E2D6] w-1.5'
               }`}
               aria-label={`Go to slide ${idx + 1}`}
             />

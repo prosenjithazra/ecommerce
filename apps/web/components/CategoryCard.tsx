@@ -28,9 +28,9 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ name, image, count, 
         loading="lazy"
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 p-2 md:p-4">
-        <span className="text-[9px] uppercase font-extrabold tracking-widest text-[#F9A37E]">
+        <span className="text-[9px] uppercase font-extrabold tracking-widest text-[#f9a37e]">
           {count} Products
         </span>
         <h3 className="font-extrabold text-sm sm:text-base text-white mt-0.5 flex items-center gap-1 group-hover:translate-x-1 transition-transform">

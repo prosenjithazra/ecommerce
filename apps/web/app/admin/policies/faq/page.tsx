@@ -73,8 +73,8 @@ export default function AdminFaqPage() {
     showToast("FAQ Added", "New question has been added to the Help Center.", "success");
   };
 
-  const inputCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3.5 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/10 transition-all placeholder:text-zinc-400";
-  const textareaCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-3 px-3.5 text-xs text-zinc-700 leading-relaxed outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/10 resize-none transition-all";
+  const inputCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3.5 text-xs text-zinc-800 outline-none focus:border-[#df794d] focus:ring-2 focus:ring-[#df794d]/10 transition-all placeholder:text-zinc-400";
+  const textareaCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-3 px-3.5 text-xs text-zinc-700 leading-relaxed outline-none focus:border-[#df794d] focus:ring-2 focus:ring-[#df794d]/10 resize-none transition-all";
 
   const catColors: Record<string, string> = {
     Orders: "bg-amber-50 text-amber-700 border-amber-100",
@@ -98,12 +98,12 @@ export default function AdminFaqPage() {
               placeholder="Search questions..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#F9A37E] transition-colors text-zinc-700 placeholder:text-zinc-400"
+              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#df794d] transition-colors text-zinc-700 placeholder:text-zinc-400"
             />
           </div>
           <button
             onClick={() => { setAddingNew(true); setEditingId(null); }}
-            className="flex items-center gap-1.5 bg-[#F9A37E] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20 whitespace-nowrap"
+            className="flex items-center gap-1.5 bg-[#df794d] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg transition-all shadow-md shadow-[#df794d]/20 whitespace-nowrap"
           >
             <Plus className="w-4 h-4" /> Add FAQ
           </button>
@@ -115,7 +115,7 @@ export default function AdminFaqPage() {
             <button
               key={c}
               onClick={() => setFilterCat(c)}
-              className={`text-[10px] font-extrabold px-3 py-1.5 rounded-lg border transition-all ${filterCat === c ? "bg-[#F9A37E]/15 border-[#F9A37E] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
+              className={`text-[10px] font-extrabold px-3 py-1.5 rounded-lg border transition-all ${filterCat === c ? "bg-[#df794d]/15 border-[#df794d] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
             >
               {c} {c === "All" ? `(${faqs.length})` : `(${faqs.filter((f) => f.category === c).length})`}
             </button>
@@ -138,8 +138,8 @@ export default function AdminFaqPage() {
             {filtered.map((f, idx) => (
               <div key={f.id}>
                 {editingId === f.id ? (
-                  <div className="px-5 py-4 space-y-3 bg-amber-50/30 border-l-4 border-l-[#F9A37E]">
-                    <p className="text-[9px] font-black text-[#F9A37E] uppercase tracking-widest">Editing FAQ</p>
+                  <div className="px-5 py-4 space-y-3 bg-amber-50/30 border-l-4 border-l-[#df794d]">
+                    <p className="text-[9px] font-black text-[#df794d] uppercase tracking-widest">Editing FAQ</p>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="sm:col-span-1">
                         <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Category</label>
@@ -147,7 +147,7 @@ export default function AdminFaqPage() {
                           <select
                             value={editForm.category}
                             onChange={(e) => setEditForm((p) => ({ ...p, category: e.target.value }))}
-                            className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 pl-3.5 pr-10 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer font-bold"
+                            className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 pl-3.5 pr-10 text-xs text-zinc-800 outline-none focus:border-[#df794d] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer font-bold"
                           >
                             {CATEGORIES.filter((c) => c !== "All").map((c) => <option key={c} value={c}>{c}</option>)}
                           </select>
@@ -164,7 +164,7 @@ export default function AdminFaqPage() {
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => setEditingId(null)} className="flex items-center gap-1.5 text-xs font-bold py-2 px-4 rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-50 transition-colors"><X className="w-3.5 h-3.5" /> Cancel</button>
-                      <button onClick={() => saveEdit(f.id)} className="flex items-center gap-1.5 text-xs font-extrabold py-2 px-4 rounded-lg bg-[#F9A37E] hover:bg-[#e8855a] text-white transition-all shadow-sm"><Check className="w-3.5 h-3.5" /> Save</button>
+                      <button onClick={() => saveEdit(f.id)} className="flex items-center gap-1.5 text-xs font-extrabold py-2 px-4 rounded-lg bg-[#df794d] hover:bg-[#e8855a] text-white transition-all shadow-sm"><Check className="w-3.5 h-3.5" /> Save</button>
                     </div>
                   </div>
                 ) : (
@@ -184,13 +184,13 @@ export default function AdminFaqPage() {
                         <span className="text-[9px] font-bold text-zinc-400">{f.lastUpdated}</span>
                       </div>
                       <div className="col-span-1 flex gap-1 justify-end pt-0.5" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => startEdit(f)} className="p-1.5 border border-zinc-200 hover:border-[#F9A37E]/40 hover:bg-[#F9A37E]/5 hover:text-[#F9A37E] text-zinc-400 rounded-lg transition-all"><Edit2 className="w-3 h-3" /></button>
+                        <button onClick={() => startEdit(f)} className="p-1.5 border border-zinc-200 hover:border-[#df794d]/40 hover:bg-[#df794d]/5 hover:text-[#df794d] text-zinc-400 rounded-lg transition-all"><Edit2 className="w-3 h-3" /></button>
                         <button onClick={() => deleteItem(f.id)} className="p-1.5 border border-zinc-200 hover:border-red-200 hover:bg-red-50 hover:text-red-500 text-zinc-400 rounded-lg transition-all"><Trash2 className="w-3 h-3" /></button>
                       </div>
                     </div>
                     {/* Expanded Answer */}
                     {expandedId === f.id && (
-                      <div className="px-5 pb-4 ml-14 border-l-2 border-[#F9A37E]/20 ml-[72px]">
+                      <div className="px-5 pb-4 ml-14 border-l-2 border-[#df794d]/20 ml-[72px]">
                         <p className="text-xs text-zinc-600 leading-relaxed">{f.answer}</p>
                       </div>
                     )}
@@ -211,7 +211,7 @@ export default function AdminFaqPage() {
                     <select
                       value={newForm.category}
                       onChange={(e) => setNewForm((p) => ({ ...p, category: e.target.value }))}
-                      className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 pl-3.5 pr-10 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer font-bold"
+                      className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 pl-3.5 pr-10 text-xs text-zinc-800 outline-none focus:border-[#df794d] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer font-bold"
                     >
                       {CATEGORIES.filter((c) => c !== "All").map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>

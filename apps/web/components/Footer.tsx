@@ -94,12 +94,12 @@ export const Footer: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full sm:flex-1 h-11 bg-[#3A3530] border border-[rgba(255,255,255,0.1)] text-[#E8E2D6] text-sm rounded-lg px-4 outline-none focus:border-[#F9A37E] placeholder:text-[#6A635A]"
+                  className="w-full sm:flex-1 h-11 bg-[#3A3530] border border-[rgba(255,255,255,0.1)] text-[#E8E2D6] text-sm rounded-lg px-4 outline-none focus:border-[#df794d] placeholder:text-[#6A635A]"
                 />
                 <button
                   type="submit"
                   disabled={subscribing}
-                  className="w-full sm:w-auto bg-[#F9A37E] hover:bg-[#E8855A] disabled:opacity-60 text-white rounded-lg px-6 h-11 flex items-center justify-center gap-1.5 font-bold text-sm transition-colors flex-shrink-0"
+                  className="w-full sm:w-auto bg-[#df794d] hover:bg-[#E8855A] disabled:opacity-60 text-white rounded-lg px-6 h-11 flex items-center justify-center gap-1.5 font-bold text-sm transition-colors flex-shrink-0"
                 >
                   {subscribing ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -126,16 +126,16 @@ export const Footer: React.FC = () => {
             </p>
             <div className="space-y-2 text-sm text-[#A89B8A]">
               <div className="flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5 text-[#F9A37E] flex-shrink-0" />
+                <MapPin className="w-3.5 h-3.5 text-[#df794d] flex-shrink-0" />
                 <span>{companySettings.address}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Phone className="w-3.5 h-3.5 text-[#F9A37E] flex-shrink-0" />
-                <a href={`tel:${companySettings.phone.replace(/\s+/g, '')}`} className="hover:text-[#F9A37E] transition-colors">{companySettings.phone}</a>
+                <Phone className="w-3.5 h-3.5 text-[#df794d] flex-shrink-0" />
+                <a href={`tel:${companySettings.phone.replace(/\s+/g, '')}`} className="hover:text-[#df794d] transition-colors">{companySettings.phone}</a>
               </div>
               <div className="flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-[#F9A37E] flex-shrink-0" />
-                <a href={`mailto:${companySettings.email}`} className="hover:text-[#F9A37E] transition-colors">{companySettings.email}</a>
+                <Mail className="w-3.5 h-3.5 text-[#df794d] flex-shrink-0" />
+                <a href={`mailto:${companySettings.email}`} className="hover:text-[#df794d] transition-colors">{companySettings.email}</a>
               </div>
             </div>
           </div>
@@ -146,7 +146,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2.5 text-sm">
               {footerLinks.shop.map(link => (
                 <li key={link.name}>
-                  <Link href={link.href} className="hover:text-[#F9A37E] transition-colors">{link.name}</Link>
+                  <Link href={link.href} className="hover:text-[#df794d] transition-colors">{link.name}</Link>
                 </li>
               ))}
             </ul>
@@ -158,7 +158,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2.5 text-sm">
               {footerLinks.company.map(link => (
                 <li key={link.name}>
-                  <Link href={link.href} className="hover:text-[#F9A37E] transition-colors">{link.name}</Link>
+                  <Link href={link.href} className="hover:text-[#df794d] transition-colors">{link.name}</Link>
                 </li>
               ))}
             </ul>
@@ -170,7 +170,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2.5 text-sm">
               {footerLinks.support.map(link => (
                 <li key={link.name}>
-                  <Link href={link.href} className="hover:text-[#F9A37E] transition-colors">{link.name}</Link>
+                  <Link href={link.href} className="hover:text-[#df794d] transition-colors">{link.name}</Link>
                 </li>
               ))}
             </ul>
@@ -180,7 +180,7 @@ export const Footer: React.FC = () => {
         {/* Bottom bar */}
         <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4 pt-6 sm:pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
           <span className="text-sm text-[#d9d9d9] text-center sm:text-left">
-            © {currentYear} <Link href="/" className="hover:text-[#F9A37E] transition-colors">Kliamo Fashion</Link>. All rights reserved.
+            © {currentYear} <Link href="/" className="hover:text-[#df794d] transition-colors">Kliamo Fashion</Link>. All rights reserved.
           </span>
           <div className="flex gap-2 justify-center">
             {[
@@ -193,7 +193,7 @@ export const Footer: React.FC = () => {
                 href={s.href} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="w-8 h-8 rounded-lg bg-[rgba(255,255,255,0.08)] hover:bg-[#F9A37E] hover:text-white text-[#A89B8A] flex items-center justify-center transition-all"
+                className="w-8 h-8 rounded-lg bg-[rgba(255,255,255,0.08)] hover:bg-[#df794d] hover:text-white text-[#A89B8A] flex items-center justify-center transition-all"
               >
                 {s.icon}
               </a>

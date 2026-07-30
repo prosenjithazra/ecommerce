@@ -280,7 +280,7 @@ function HeroBanner() {
               <button
                 key={idx}
                 onClick={() => goTo(idx)}
-                className={`transition-all duration-300 rounded-full cursor-pointer ${idx === current ? 'w-6 h-2 bg-[#F9A37E]' : 'w-2 h-2 bg-white/70 shadow-xs'}`}
+                className={`transition-all duration-300 rounded-full cursor-pointer ${idx === current ? 'w-6 h-2 bg-[#df794d]' : 'w-2 h-2 bg-white/70 shadow-xs'}`}
               />
             ))}
           </div>
@@ -615,10 +615,10 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-6">
             {[
-              { icon: <ShieldCheck className="w-5 h-5 text-[#A8C69F]" />, label: "Quality Guarantee" },
-              { icon: <Truck className="w-5 h-5 text-[#F9A37E]" />,       label: "48hr Fulfillment" },
-              { icon: <Layers className="w-5 h-5 text-[#A8C69F]" />,      label: "No MOQ" },
-              { icon: <Sparkles className="w-5 h-5 text-[#F9A37E]" />,    label: "Premium Prints" },
+              { icon: <ShieldCheck className="w-5 h-5 text-[#7e9677]" />, label: "Quality Guarantee" },
+              { icon: <Truck className="w-5 h-5 text-[#df794d]" />,       label: "48hr Fulfillment" },
+              { icon: <Layers className="w-5 h-5 text-[#7e9677]" />,      label: "No MOQ" },
+              { icon: <Sparkles className="w-5 h-5 text-[#df794d]" />,    label: "Premium Prints" },
             ].map((item) => (
               <div
                 key={item.label}
@@ -642,7 +642,7 @@ export default function HomePage() {
               <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">Shop by Category</h2>
               <p className="text-xs text-[#7A736A] mt-0.5">Premium blanks ready for your design</p>
             </div>
-            <Link href="/categories" className="text-xs font-bold text-white bg-[#F9A37E] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+            <Link href="/categories" className="text-xs font-bold text-white bg-[#df794d] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
               View all <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -655,7 +655,7 @@ export default function HomePage() {
               <EmptyState
                 title="No categories found"
                 description="Our blanks categories collection is currently empty. Please check back later!"
-                icon={<SlidersHorizontal className="w-8 h-8 text-[#F9A37E]" />}
+                icon={<SlidersHorizontal className="w-8 h-8 text-[#df794d]" />}
               />
             </div>
           ) : (
@@ -674,11 +674,11 @@ export default function HomePage() {
           <div className="flex flex-row sm:items-center justify-between gap-1 sm:gap-3">
             <div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight flex items-center gap-2">
-                <Flame className="w-5.5 h-5.5 text-[#F9A37E]" /> Hot off the Press
+                <Flame className="w-5.5 h-5.5 text-[#df794d]" /> Hot off the Press
               </h2>
               <p className="text-xs text-[#7A736A] mt-0.5">Curated blanks and trending designs for your custom look</p>
             </div>
-            <Link href="/products" className="text-xs shrink-0 font-bold text-white bg-[#F9A37E] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+            <Link href="/products" className="text-xs shrink-0 font-bold text-white bg-[#df794d] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
               View All <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -693,7 +693,7 @@ export default function HomePage() {
               <EmptyState
                 title="No featured products found"
                 description="Our custom print blanks catalog is temporarily offline. Please check back shortly!"
-                icon={<ShoppingBag className="w-8 h-8 text-[#A8C69F]" />}
+                icon={<ShoppingBag className="w-8 h-8 text-[#7e9677]" />}
               />
             </div>
           ) : (
@@ -712,11 +712,11 @@ export default function HomePage() {
           <div className="flex flex-row sm:items-center justify-between gap-1 sm:gap-3">
             <div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight flex items-center gap-2">
-                <Sparkles className="w-5.5 h-5.5 text-[#F9A37E]" /> Best Sellers
+                <Sparkles className="w-5.5 h-5.5 text-[#df794d]" /> Best Sellers
               </h2>
               <p className="text-xs text-[#7A736A] mt-0.5">Most popular choices ordered by our custom print community</p>
             </div>
-            <Link href="/products?tag=best" className="text-xs shrink-0 font-bold text-white bg-[#F9A37E] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+            <Link href="/products?tag=best" className="text-xs shrink-0 font-bold text-white bg-[#df794d] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
               View All <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -731,7 +731,7 @@ export default function HomePage() {
               <EmptyState
                 title="No best sellers found"
                 description="Our custom print catalog is updating. Check back shortly!"
-                icon={<ShoppingBag className="w-8 h-8 text-[#A8C69F]" />}
+                icon={<ShoppingBag className="w-8 h-8 text-[#7e9677]" />}
               />
             </div>
           ) : (
@@ -750,11 +750,11 @@ export default function HomePage() {
           <div className="flex flex-row sm:items-center justify-between gap-1 sm:gap-3">
             <div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-[#334E68] tracking-tight flex items-center gap-2">
-                <Shirt className="w-5.5 h-5.5 text-[#F9A37E]" /> Men's Collection
+                <Shirt className="w-5.5 h-5.5 text-[#df794d]" /> Men's Collection
               </h2>
               <p className="text-xs text-[#627D98] mt-0.5">Tailored tees, polos, hoodies, and streetwear essentials for men</p>
             </div>
-            <Link href="/products?category=Men" className="text-xs shrink-0 font-bold text-white bg-[#F9A37E] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+            <Link href="/products?category=Men" className="text-xs shrink-0 font-bold text-white bg-[#df794d] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
               View All <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -788,11 +788,11 @@ export default function HomePage() {
           <div className="flex flex-row sm:items-center justify-between gap-1 sm:gap-3">
             <div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-[#702444] tracking-tight flex items-center gap-2">
-                <Heart className="w-5.5 h-5.5 text-[#F9A37E]" /> Women's Collection
+                <Heart className="w-5.5 h-5.5 text-[#df794d]" /> Women's Collection
               </h2>
               <p className="text-xs text-[#9E4A6F] mt-0.5">Stylish cropped tees, relaxed fits, and premium blanks for women</p>
             </div>
-            <Link href="/products?category=Women" className="text-xs shrink-0 font-bold text-white bg-[#F9A37E] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+            <Link href="/products?category=Women" className="text-xs shrink-0 font-bold text-white bg-[#df794d] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
               View All <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -826,11 +826,11 @@ export default function HomePage() {
           <div className="flex flex-row sm:items-center justify-between gap-1 sm:gap-3">
             <div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-[#264D29] tracking-tight flex items-center gap-2">
-                <Paintbrush className="w-5.5 h-5.5 text-[#F9A37E]" /> New Arrivals
+                <Paintbrush className="w-5.5 h-5.5 text-[#df794d]" /> New Arrivals
               </h2>
               <p className="text-xs text-[#446E47] mt-0.5">Fresh drops and newest blank garments ready for customization</p>
             </div>
-            <Link href="/products?tag=new" className="text-xs shrink-0 font-bold text-white bg-[#F9A37E] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+            <Link href="/products?tag=new" className="text-xs shrink-0 font-bold text-white bg-[#df794d] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
               View All <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -868,7 +868,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {processSteps.map((step, _idx) => (
               <div key={step.name} className="relative p-6 bg-white rounded-lg shadow-sm text-center">
-                <div className="w-12 h-12 bg-[#FBD5C1] text-[#F9A37E] rounded-lg flex items-center justify-center mx-auto mb-4">
+                <div className="w-12 h-12 bg-[#FBD5C1] text-[#df794d] rounded-lg flex items-center justify-center mx-auto mb-4">
                   {step.icon}
                 </div>
                 <span className="font-black text-4xl text-[#E8E2D6] absolute top-4 right-4 leading-none">{step.step}</span>
@@ -977,7 +977,7 @@ export default function HomePage() {
                   className="w-full flex items-center justify-between text-left font-bold text-sm text-[#4A453E]"
                 >
                   <span>{faq.q}</span>
-                  <span className="text-[#F9A37E] ml-3 text-base leading-none font-black flex-shrink-0">
+                  <span className="text-[#df794d] ml-3 text-base leading-none font-black flex-shrink-0">
                     {openFaq === idx ? "−" : "+"}
                   </span>
                 </button>

@@ -170,7 +170,7 @@ export default function AddProductPage() {
       });
   };
 
-  const inputCls = "w-full bg-white border border-zinc-200 rounded-lg py-3 px-4 text-xs font-medium text-zinc-800 outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/10 transition-all placeholder:text-zinc-400";
+  const inputCls = "w-full bg-white border border-zinc-200 rounded-lg py-3 px-4 text-xs font-medium text-zinc-800 outline-none focus:border-[#df794d] focus:ring-2 focus:ring-[#df794d]/10 transition-all placeholder:text-zinc-400";
   const labelCls = "block text-xs font-extrabold text-zinc-600 mb-1.5";
 
   return (
@@ -183,7 +183,7 @@ export default function AddProductPage() {
           {/* Back link */}
           <Link
             href="/admin/products"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-[#F9A37E] transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-[#df794d] transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Products
           </Link>
@@ -193,17 +193,17 @@ export default function AddProductPage() {
             <div className="lg:col-span-2 space-y-4">
               <div className="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm space-y-4">
                 <h3 className="font-extrabold text-sm text-zinc-800 flex items-center gap-2">
-                  <ImagePlus className="w-4 h-4 text-[#F9A37E]" /> Product Images
+                  <ImagePlus className="w-4 h-4 text-[#df794d]" /> Product Images
                 </h3>
 
                 {/* Drop Zone */}
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full border-2 border-dashed border-zinc-300 hover:border-[#F9A37E] rounded-lg p-8 flex flex-col items-center justify-center gap-2 transition-all hover:bg-[#F9A37E]/5 cursor-pointer group"
+                  className="w-full border-2 border-dashed border-zinc-300 hover:border-[#df794d] rounded-lg p-8 flex flex-col items-center justify-center gap-2 transition-all hover:bg-[#df794d]/5 cursor-pointer group"
                 >
-                  <Upload className="w-8 h-8 text-zinc-300 group-hover:text-[#F9A37E] transition-colors" />
-                  <span className="text-xs font-bold text-zinc-400 group-hover:text-[#F9A37E] transition-colors">Click to Upload Images</span>
+                  <Upload className="w-8 h-8 text-zinc-300 group-hover:text-[#df794d] transition-colors" />
+                  <span className="text-xs font-bold text-zinc-400 group-hover:text-[#df794d] transition-colors">Click to Upload Images</span>
                   <span className="text-[10px] text-zinc-400">PNG, JPG, WEBP up to 5MB each</span>
                 </button>
                 <input
@@ -222,7 +222,7 @@ export default function AddProductPage() {
                       <div key={idx} className="relative rounded-lg overflow-hidden aspect-square border border-zinc-200 group">
                         <img src={img.preview} alt={`preview-${idx}`} className="w-full h-full object-cover" />
                         {idx === 0 && (
-                          <span className="absolute top-1 left-1 text-[8px] font-extrabold bg-[#F9A37E] text-white px-1.5 py-0.5 rounded-md uppercase">Primary</span>
+                          <span className="absolute top-1 left-1 text-[8px] font-extrabold bg-[#df794d] text-white px-1.5 py-0.5 rounded-md uppercase">Primary</span>
                         )}
                         <button
                           type="button"
@@ -236,7 +236,7 @@ export default function AddProductPage() {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="aspect-square rounded-lg border-2 border-dashed border-zinc-200 hover:border-[#F9A37E] flex items-center justify-center text-zinc-400 hover:text-[#F9A37E] transition-all"
+                      className="aspect-square rounded-lg border-2 border-dashed border-zinc-200 hover:border-[#df794d] flex items-center justify-center text-zinc-400 hover:text-[#df794d] transition-all"
                     >
                       <Plus className="w-5 h-5" />
                     </button>
@@ -252,7 +252,7 @@ export default function AddProductPage() {
                 <label className="flex items-center gap-3 cursor-pointer">
                   <div
                     onClick={() => setForm((p) => ({ ...p, inStock: !p.inStock }))}
-                    className={`w-10 h-5.5 rounded-full relative transition-colors cursor-pointer ${form.inStock ? "bg-[#A8C69F]" : "bg-zinc-200"}`}
+                    className={`w-10 h-5.5 rounded-full relative transition-colors cursor-pointer ${form.inStock ? "bg-[#7e9677]" : "bg-zinc-200"}`}
                     style={{ height: '22px' }}
                   >
                     <span
@@ -269,7 +269,7 @@ export default function AddProductPage() {
                     <select
                       value={form.tag}
                       onChange={(e) => setForm((p) => ({ ...p, tag: e.target.value }))}
-                      className="w-full bg-white border border-zinc-200 rounded-lg py-3 pl-4 pr-10 text-xs font-semibold text-zinc-800 outline-none focus:border-[#F9A37E] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer"
+                      className="w-full bg-white border border-zinc-200 rounded-lg py-3 pl-4 pr-10 text-xs font-semibold text-zinc-800 outline-none focus:border-[#df794d] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer"
                     >
                       <option value="">No Tag</option>
                       <option value="Best Seller">Best Seller</option>
@@ -287,7 +287,7 @@ export default function AddProductPage() {
               {/* Basic Info */}
               <div className="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm space-y-4">
                 <h3 className="font-extrabold text-sm text-zinc-800 flex items-center gap-2">
-                  <Package className="w-4 h-4 text-[#F9A37E]" /> Product Details
+                  <Package className="w-4 h-4 text-[#df794d]" /> Product Details
                 </h3>
  
                 <div>
@@ -312,7 +312,7 @@ export default function AddProductPage() {
                 {/* Slug field */}
                 <div>
                   <label className={labelCls}>
-                    <span className="flex items-center gap-1.5"><Link2 className="w-3 h-3 text-[#F9A37E]" /> URL Slug</span>
+                    <span className="flex items-center gap-1.5"><Link2 className="w-3 h-3 text-[#df794d]" /> URL Slug</span>
                   </label>
                   <div className="relative">
                     <input
@@ -328,7 +328,7 @@ export default function AddProductPage() {
                     <button
                       type="button"
                       onClick={() => { setSlugManuallyEdited(false); setForm((p) => ({ ...p, slug: slugify(p.name) })); }}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-extrabold text-[#F9A37E] hover:underline"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-extrabold text-[#df794d] hover:underline"
                     >
                       Auto-generate
                     </button>
@@ -355,7 +355,7 @@ export default function AddProductPage() {
                   <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className={labelCls}>
-                        <span className="flex items-center gap-1.5"><Package className="w-3.5 h-3.5 text-[#F9A37E]" /> Primary Qikink Base SKU <span className="text-red-400">*</span></span>
+                        <span className="flex items-center gap-1.5"><Package className="w-3.5 h-3.5 text-[#df794d]" /> Primary Qikink Base SKU <span className="text-red-400">*</span></span>
                       </label>
                       <input
                         type="text"
@@ -401,7 +401,7 @@ export default function AddProductPage() {
 
                   <div>
                     <label className={labelCls}>
-                      <span className="flex items-center gap-1.5"><Link2 className="w-3.5 h-3.5 text-[#F9A37E]" /> Variant SKU Mappings (JSON)</span>
+                      <span className="flex items-center gap-1.5"><Link2 className="w-3.5 h-3.5 text-[#df794d]" /> Variant SKU Mappings (JSON)</span>
                     </label>
                     <textarea
                       rows={3}
@@ -485,7 +485,7 @@ export default function AddProductPage() {
                           category: catObj?.name || selectedId,
                         }));
                       }}
-                      className="w-full bg-white border border-zinc-200 rounded-lg py-3 pl-4 pr-10 text-xs font-semibold text-zinc-800 outline-none focus:border-[#F9A37E] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer"
+                      className="w-full bg-white border border-zinc-200 rounded-lg py-3 pl-4 pr-10 text-xs font-semibold text-zinc-800 outline-none focus:border-[#df794d] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer"
                     >
                       {categoriesList.length > 0 ? (
                         categoriesList.map((c) => (
@@ -521,7 +521,7 @@ export default function AddProductPage() {
                       onClick={() => toggleSize(s)}
                       className={`w-11 h-10 text-xs font-extrabold rounded-lg border-2 transition-all ${
                         form.selectedSizes.includes(s)
-                          ? "bg-[#F9A37E]/15 border-[#F9A37E] text-[#e8855a]"
+                          ? "bg-[#df794d]/15 border-[#df794d] text-[#e8855a]"
                           : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"
                       }`}
                     >
@@ -546,7 +546,7 @@ export default function AddProductPage() {
                       <span
                         className={`w-8 h-8 rounded-lg border-2 transition-all ${
                           form.selectedColors.includes(c.name)
-                            ? "border-[#F9A37E] scale-110 shadow-md shadow-[#F9A37E]/30"
+                            ? "border-[#df794d] scale-110 shadow-md shadow-[#df794d]/30"
                             : "border-zinc-200 group-hover:border-zinc-400"
                         }`}
                         style={{ backgroundColor: c.hex }}
@@ -568,7 +568,7 @@ export default function AddProductPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 flex items-center justify-center gap-2 bg-[#F9A37E] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20"
+                  className="flex-1 flex items-center justify-center gap-2 bg-[#df794d] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-md shadow-[#df794d]/20"
                 >
                   <Save className="w-4 h-4" />
                   {submitting ? "Saving..." : "Save Product"}

@@ -90,8 +90,8 @@ export default function AdminUsersPage() {
   };
 
   const avatarColors = [
-    "from-[#A8C69F] to-[#7dab73]",
-    "from-[#F9A37E] to-[#e8855a]",
+    "from-[#7e9677] to-[#7dab73]",
+    "from-[#df794d] to-[#e8855a]",
     "from-violet-400 to-violet-600",
     "from-sky-400 to-sky-600",
     "from-rose-400 to-rose-600"
@@ -111,7 +111,7 @@ export default function AdminUsersPage() {
               placeholder="Search by name, email, or phone..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#F9A37E] transition-colors text-zinc-700 placeholder:text-zinc-400"
+              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#df794d] transition-colors text-zinc-700 placeholder:text-zinc-400"
             />
           </div>
           <div className="flex gap-2">
@@ -119,7 +119,7 @@ export default function AdminUsersPage() {
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`text-[10px] font-extrabold px-3 py-1.5 rounded-lg border transition-all ${filter === f ? "bg-[#F9A37E]/15 border-[#F9A37E] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
+                className={`text-[10px] font-extrabold px-3 py-1.5 rounded-lg border transition-all ${filter === f ? "bg-[#df794d]/15 border-[#df794d] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
               >
                 {f}
               </button>
@@ -130,7 +130,7 @@ export default function AdminUsersPage() {
         {/* Loading Spinner */}
         {loading ? (
           <div className="py-20 flex flex-col items-center justify-center gap-3 text-zinc-400">
-            <Loader2 className="w-8 h-8 animate-spin text-[#F9A37E]" />
+            <Loader2 className="w-8 h-8 animate-spin text-[#df794d]" />
             <span className="text-xs font-bold">Loading users from backend...</span>
           </div>
         ) : (

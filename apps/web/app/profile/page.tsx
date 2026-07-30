@@ -99,7 +99,7 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
             title="Download PDF Invoice"
             className="flex items-center gap-1.5 text-xs font-extrabold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 rounded-lg transition-all active:scale-95 cursor-pointer disabled:opacity-50"
           >
-            {isDownloading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#F9A37E]" /> : <Download className="w-3.5 h-3.5 text-[#F9A37E]" />}
+            {isDownloading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#df794d]" /> : <Download className="w-3.5 h-3.5 text-[#df794d]" />}
             <span className="hidden sm:inline">Invoice</span>
           </button>
           <div className="p-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors">
@@ -126,7 +126,7 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
                       <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${
                           isActive
-                            ? 'bg-[#F9A37E] border-[#F9A37E] text-white shadow-md shadow-[#F9A37E]/30'
+                            ? 'bg-[#df794d] border-[#df794d] text-white shadow-md shadow-[#df794d]/30'
                             : isCompleted
                             ? 'bg-emerald-500 border-emerald-500 text-white'
                             : 'bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 text-zinc-400'
@@ -336,9 +336,9 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
             <button
               onClick={handleDownloadInvoice}
               disabled={isDownloading}
-              className="flex items-center gap-1.5 text-xs font-extrabold text-zinc-800 dark:text-zinc-100 hover:text-[#e8855a] border border-zinc-200 dark:border-zinc-700 hover:border-[#F9A37E] bg-white dark:bg-zinc-800 px-4 py-2 rounded-lg transition-all shadow-xs cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-1.5 text-xs font-extrabold text-zinc-800 dark:text-zinc-100 hover:text-[#e8855a] border border-zinc-200 dark:border-zinc-700 hover:border-[#df794d] bg-white dark:bg-zinc-800 px-4 py-2 rounded-lg transition-all shadow-xs cursor-pointer disabled:opacity-50"
             >
-              {isDownloading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#F9A37E]" /> : <Download className="w-3.5 h-3.5 text-[#F9A37E]" />}
+              {isDownloading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#df794d]" /> : <Download className="w-3.5 h-3.5 text-[#df794d]" />}
               Download PDF Invoice
             </button>
           </div>
@@ -904,7 +904,7 @@ export default function ProfilePage() {
                   <Link
                     href="/admin"
                     onClick={() => setIsMobileSidebarOpen(false)}
-                    className="flex items-center gap-2.5 text-xs font-extrabold py-2.5 px-4 rounded-lg text-left transition-all text-[#F9A37E] hover:bg-[#FBD5C1]/10"
+                    className="flex items-center gap-2.5 text-xs font-extrabold py-2.5 px-4 rounded-lg text-left transition-all text-[#df794d] hover:bg-[#FBD5C1]/10"
                   >
                     <LayoutDashboard className="w-4 h-4" /> Admin Console
                   </Link>
@@ -928,7 +928,7 @@ export default function ProfilePage() {
       <div className="lg:hidden">
         <button
           onClick={() => setIsMobileSidebarOpen(true)}
-          className="w-full flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-3.5 text-xs font-bold text-zinc-750 dark:text-zinc-300 shadow-sm hover:border-[#F9A37E] transition-colors"
+          className="w-full flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-3.5 text-xs font-bold text-zinc-750 dark:text-zinc-300 shadow-sm hover:border-[#df794d] transition-colors"
         >
           <span className="flex items-center gap-2">
             {activeTab === 'info' && <><User className="w-4.5 h-4.5 text-[#E8855A]" /> Personal Info</>}
@@ -990,7 +990,7 @@ export default function ProfilePage() {
             <div className="border-t border-[#E8E2D6] my-1.5 pt-1.5">
               <Link
                 href="/admin"
-                className="flex items-center gap-2.5 text-xs font-extrabold py-2.5 px-4 rounded-lg text-left transition-all text-[#F9A37E] hover:bg-[#FBD5C1]/10"
+                className="flex items-center gap-2.5 text-xs font-extrabold py-2.5 px-4 rounded-lg text-left transition-all text-[#df794d] hover:bg-[#FBD5C1]/10"
               >
                 <LayoutDashboard className="w-4 h-4" /> Admin Console
               </Link>
@@ -1028,7 +1028,7 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="absolute bottom-0 right-0 p-1.5 bg-[#F9A37E] hover:bg-[#E8855A] text-white rounded-full shadow transition-all hover:scale-110"
+                    className="absolute bottom-0 right-0 p-1.5 bg-[#df794d] hover:bg-[#E8855A] text-white rounded-full shadow transition-all hover:scale-110"
                     title="Change Avatar"
                   >
                     <Camera className="w-3.5 h-3.5" />
@@ -1056,7 +1056,7 @@ export default function ProfilePage() {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-900 dark:text-white"
+                    className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-[#df794d] focus:ring-2 focus:ring-[#df794d]/20 text-zinc-900 dark:text-white"
                   />
                 </div>
                 <div>
@@ -1066,7 +1066,7 @@ export default function ProfilePage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-900 dark:text-white"
+                    className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-[#df794d] focus:ring-2 focus:ring-[#df794d]/20 text-zinc-900 dark:text-white"
                   />
                 </div>
               </div>
@@ -1079,10 +1079,10 @@ export default function ProfilePage() {
                   placeholder="9876543210"
                   value={phone}
                   onChange={(e) => setPhone(sanitizePhoneInput(e.target.value))}
-                  className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-900 dark:text-white"
+                  className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-[#df794d] focus:ring-2 focus:ring-[#df794d]/20 text-zinc-900 dark:text-white"
                 />
               </div>
-              <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-lg transition-all">
+              <button type="submit" className="bg-[#df794d] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-lg transition-all">
                 Save Changes
               </button>
             </form>
@@ -1099,7 +1099,7 @@ export default function ProfilePage() {
                       setEditingAddress(null);
                       setShowAddressForm(true);
                     }}
-                    className="text-xs font-bold text-[#F9A37E] hover:text-[#E8855A] transition-colors"
+                    className="text-xs font-bold text-[#df794d] hover:text-[#E8855A] transition-colors"
                   >
                     + Add New Address
                   </button>
@@ -1224,7 +1224,7 @@ export default function ProfilePage() {
                       type="checkbox"
                       checked={addrForm.isDefault}
                       onChange={(e) => setAddrForm({ ...addrForm, isDefault: e.target.checked })}
-                      className="w-4 h-4 rounded border border-zinc-200 accent-[#F9A37E]"
+                      className="w-4 h-4 rounded border border-zinc-200 accent-[#df794d]"
                     />
                     <span className="text-xs text-zinc-550 dark:text-zinc-400 font-medium">Set as primary shipping address</span>
                   </label>
@@ -1239,7 +1239,7 @@ export default function ProfilePage() {
                     >
                       Cancel
                     </button>
-                    <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2 px-4 rounded-lg shadow-md">
+                    <button type="submit" className="bg-[#df794d] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2 px-4 rounded-lg shadow-md">
                       Save Details
                     </button>
                   </div>
@@ -1265,7 +1265,7 @@ export default function ProfilePage() {
             <div className="space-y-6">
               <div>
                 <h3 className="font-extrabold text-base text-zinc-900 dark:text-white pb-1 border-b border-zinc-150 flex items-center gap-2">
-                  <Tag className="w-4.5 h-4.5 text-[#F9A37E]" /> My Offers & Coupons
+                  <Tag className="w-4.5 h-4.5 text-[#df794d]" /> My Offers & Coupons
                 </h3>
                 <p className="text-xs text-zinc-500 mt-1">Copy coupon code and apply it at checkout to get exclusive discounts!</p>
               </div>
@@ -1290,10 +1290,10 @@ export default function ProfilePage() {
                     return (
                       <div
                         key={coupon.id}
-                        className="relative border-2 border-dashed border-[#F9A37E]/40 hover:border-[#F9A37E] bg-gradient-to-br from-[#FDFAF6] via-white to-[#FBD5C1]/10 dark:from-zinc-900 dark:to-zinc-950 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                        className="relative border-2 border-dashed border-[#df794d]/40 hover:border-[#df794d] bg-gradient-to-br from-[#FDFAF6] via-white to-[#FBD5C1]/10 dark:from-zinc-900 dark:to-zinc-950 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
                       >
                         {isExclusive && (
-                          <span className="absolute -top-2.5 right-4 bg-gradient-to-r from-[#F9A37E] to-[#E8855A] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm">
+                          <span className="absolute -top-2.5 right-4 bg-gradient-to-r from-[#df794d] to-[#E8855A] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm">
                             ★ Exclusive For You
                           </span>
                         )}
@@ -1328,7 +1328,7 @@ export default function ProfilePage() {
                           <button
                             onClick={() => handleCopyCouponCode(coupon.code)}
                             disabled={isExpired}
-                            className="bg-[#F9A37E] hover:bg-[#E8855A] disabled:opacity-50 text-white font-extrabold text-xs py-2 px-3.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+                            className="bg-[#df794d] hover:bg-[#E8855A] disabled:opacity-50 text-white font-extrabold text-xs py-2 px-3.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
                           >
                             {copiedCode === coupon.code ? (
                               <>
@@ -1403,7 +1403,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
-              <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-lg transition-all">
+              <button type="submit" className="bg-[#df794d] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-lg transition-all">
                 Update credentials
               </button>
             </form>
@@ -1416,7 +1416,7 @@ export default function ProfilePage() {
               
               {ordersLoading ? (
                 <div className="py-12 flex flex-col items-center justify-center gap-3">
-                  <Loader2 className="w-8 h-8 text-[#F9A37E] animate-spin" />
+                  <Loader2 className="w-8 h-8 text-[#df794d] animate-spin" />
                   <p className="text-xs text-zinc-500 font-bold">Loading your orders...</p>
                 </div>
               ) : orders.length === 0 ? (
@@ -1428,7 +1428,7 @@ export default function ProfilePage() {
                   <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto">You haven't placed any orders yet. Head to the custom shop to create your custom design shirt!</p>
                   <Link
                     href="/custom"
-                    className="mt-4 inline-block bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg shadow-sm transition-all"
+                    className="mt-4 inline-block bg-[#df794d] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg shadow-sm transition-all"
                   >
                     Start Customizing
                   </Link>
@@ -1461,7 +1461,7 @@ export default function ProfilePage() {
                     type="checkbox"
                     checked={prefOrderEmail}
                     onChange={(e) => setPrefOrderEmail(e.target.checked)}
-                    className="w-4 h-4 rounded border border-zinc-200 accent-[#F9A37E] mt-0.5"
+                    className="w-4 h-4 rounded border border-zinc-200 accent-[#df794d] mt-0.5"
                   />
                   <div>
                     <span className="text-xs font-bold text-zinc-800 block">Order Status Emails</span>
@@ -1474,7 +1474,7 @@ export default function ProfilePage() {
                     type="checkbox"
                     checked={prefNewsletter}
                     onChange={(e) => setPrefNewsletter(e.target.checked)}
-                    className="w-4 h-4 rounded border border-zinc-200 accent-[#F9A37E] mt-0.5"
+                    className="w-4 h-4 rounded border border-zinc-200 accent-[#df794d] mt-0.5"
                   />
                   <div>
                     <span className="text-xs font-bold text-zinc-800 block">Marketing Newsletter</span>
@@ -1482,7 +1482,7 @@ export default function ProfilePage() {
                   </div>
                 </label>
 
-                <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-colors shadow-sm">
+                <button type="submit" className="bg-[#df794d] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-colors shadow-sm">
                   Save Preferences
                 </button>
               </form>

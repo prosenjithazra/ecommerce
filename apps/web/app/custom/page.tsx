@@ -44,8 +44,8 @@ const COLORS = [
   { name: "Black", hex: "#18181B" },
   { name: "Navy Blue", hex: "#1E3A8A" },
   { name: "Heather Grey", hex: "#94A3B8" },
-  { name: "Sage Green", hex: "#A8C69F" },
-  { name: "Peach", hex: "#F9A37E" },
+  { name: "Sage Green", hex: "#7e9677" },
+  { name: "Peach", hex: "#df794d" },
   { name: "Crimson Red", hex: "#DC2626" },
   { name: "Mustard Yellow", hex: "#F59E0B" },
 ];
@@ -254,7 +254,7 @@ export default function CustomizerPage() {
   );
 
   // Object Styling Controls
-  const [objectFillColor, setObjectFillColor] = useState("#F9A37E");
+  const [objectFillColor, setObjectFillColor] = useState("#df794d");
   const [objectStrokeColor, setObjectStrokeColor] = useState("#18181B");
   const [objectOpacity, setObjectOpacity] = useState(100);
 
@@ -386,7 +386,7 @@ export default function CustomizerPage() {
       }
 
       if (active) {
-        setObjectFillColor((active.fill as string) || "#F9A37E");
+        setObjectFillColor((active.fill as string) || "#df794d");
         setObjectStrokeColor((active.stroke as string) || "#18181B");
         setObjectOpacity(Math.round((active.opacity || 1) * 100));
       }
@@ -578,9 +578,9 @@ export default function CustomizerPage() {
       fontWeight: textBold ? "bold" : "normal",
       fontStyle: textItalic ? "italic" : "normal",
       textAlign: textAlign,
-      cornerColor: "#F9A37E",
+      cornerColor: "#df794d",
       cornerStyle: "circle",
-      borderColor: "#F9A37E",
+      borderColor: "#df794d",
       cornerSize: 8,
     });
 
@@ -628,9 +628,9 @@ export default function CustomizerPage() {
             top: VIRTUAL_HEIGHT / 2,
             originX: "center",
             originY: "center",
-            cornerColor: "#F9A37E",
+            cornerColor: "#df794d",
             cornerStyle: "circle",
-            borderColor: "#F9A37E",
+            borderColor: "#df794d",
             cornerSize: 8,
           });
 
@@ -707,9 +707,9 @@ export default function CustomizerPage() {
       fill: objectFillColor,
       stroke: objectStrokeColor,
       strokeWidth: 2,
-      cornerColor: "#F9A37E",
+      cornerColor: "#df794d",
       cornerStyle: "circle" as const,
-      borderColor: "#F9A37E",
+      borderColor: "#df794d",
       cornerSize: 8,
     };
 
@@ -762,9 +762,9 @@ export default function CustomizerPage() {
         fontSize: 32,
         fill: textColor,
         fontWeight: "bold",
-        cornerColor: "#F9A37E",
+        cornerColor: "#df794d",
         cornerStyle: "circle",
-        borderColor: "#F9A37E",
+        borderColor: "#df794d",
         cornerSize: 8,
       });
       fc.add(nameText);
@@ -780,9 +780,9 @@ export default function CustomizerPage() {
         fontSize: 64,
         fill: textColor,
         fontWeight: "bold",
-        cornerColor: "#F9A37E",
+        cornerColor: "#df794d",
         cornerStyle: "circle",
-        borderColor: "#F9A37E",
+        borderColor: "#df794d",
         cornerSize: 8,
       });
       fc.add(numText);
@@ -1185,7 +1185,7 @@ export default function CustomizerPage() {
   if (settingsLoading) {
     return (
       <div className="min-h-screen bg-[#FDFAF6] flex items-center justify-center p-8">
-        <Sparkles className="w-8 h-8 text-[#F9A37E] animate-spin" />
+        <Sparkles className="w-8 h-8 text-[#df794d] animate-spin" />
       </div>
     );
   }
@@ -1197,7 +1197,7 @@ export default function CustomizerPage() {
       <div className="flex items-center justify-between flex-wrap gap-3 py-3 border-b border-[#E8E2D6] bg-white rounded-2xl px-2 sm:px-5">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 text-xs text-[#7A736A]">
-            <Shield className="w-3.5 h-3.5 text-[#F9A37E]" />
+            <Shield className="w-3.5 h-3.5 text-[#df794d]" />
             <span className="font-extrabold text-[#4A453E]">
               {garmentType === "polo" ? "Polo Shirt" : "Crewneck Tee"}
             </span>
@@ -1234,7 +1234,7 @@ export default function CustomizerPage() {
           <button
             onClick={handleAddToCart}
             disabled={uploading}
-            className="ml-auto sm:ml-2 bg-[#F9A37E] hover:bg-[#E8855A] disabled:opacity-60 text-white font-extrabold text-xs px-2 sm:px-5 py-2 rounded-md transition-all shadow-md flex items-center gap-1 sm:gap-2"
+            className="ml-auto sm:ml-2 bg-[#df794d] hover:bg-[#E8855A] disabled:opacity-60 text-white font-extrabold text-xs px-2 sm:px-5 py-2 rounded-md transition-all shadow-md flex items-center gap-1 sm:gap-2"
           >
             {uploading ? (
               <>
@@ -1256,15 +1256,15 @@ export default function CustomizerPage() {
         {/* ── 1. LEFT SIDEBAR: UPLOAD ARTWORK DRAWER ── */}
         <div className="lg:col-span-4 bg-white border border-[#E8E2D6] rounded-2xl p-4 shadow-sm space-y-4">
           <div className="flex items-center gap-2 border-b border-[#E8E2D6] pb-3">
-            <Upload className="w-5 h-5 text-[#F9A37E]" />
+            <Upload className="w-5 h-5 text-[#df794d]" />
             <h3 className="font-extrabold text-sm text-[#4A453E]">
               Upload Custom Artwork
             </h3>
           </div>
 
           <div className="space-y-4 animate-fade-in duration-150">
-            <label className="border-2 border-dashed border-[#E8E2D6] hover:border-[#F9A37E] rounded-2xl p-6 flex flex-col items-center justify-center gap-2 bg-[#FDFAF6] hover:bg-white cursor-pointer transition-all">
-              <Upload className="w-8 h-8 text-[#F9A37E]" />
+            <label className="border-2 border-dashed border-[#E8E2D6] hover:border-[#df794d] rounded-2xl p-6 flex flex-col items-center justify-center gap-2 bg-[#FDFAF6] hover:bg-white cursor-pointer transition-all">
+              <Upload className="w-8 h-8 text-[#df794d]" />
               <p className="text-xs font-bold text-[#4A453E]">
                 Choose Image (PNG / JPG / SVG)
               </p>
@@ -1281,19 +1281,19 @@ export default function CustomizerPage() {
 
             {activeObject && (
               <div className="p-3 border border-[#E8E2D6] rounded-xl bg-[#FDFAF6] space-y-2">
-                <span className="text-[10px] font-black uppercase text-[#F9A37E]">
+                <span className="text-[10px] font-black uppercase text-[#df794d]">
                   Artwork Position Controls
                 </span>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => alignActiveObject("centerH")}
-                    className="py-1.5 px-2 bg-white border border-[#E8E2D6] rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 hover:border-[#F9A37E]"
+                    className="py-1.5 px-2 bg-white border border-[#E8E2D6] rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 hover:border-[#df794d]"
                   >
                     <AlignCenter className="w-3 h-3" /> Center Horiz
                   </button>
                   <button
                     onClick={() => alignActiveObject("centerV")}
-                    className="py-1.5 px-2 bg-white border border-[#E8E2D6] rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 hover:border-[#F9A37E]"
+                    className="py-1.5 px-2 bg-white border border-[#E8E2D6] rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 hover:border-[#df794d]"
                   >
                     <Move className="w-3 h-3" /> Center Vert
                   </button>
@@ -1316,14 +1316,14 @@ export default function CustomizerPage() {
             <div className="flex gap-2 bg-[#FDFAF6] border border-[#E8E2D6] rounded-full p-1 shadow-xs">
               <button
                 onClick={() => switchView("front")}
-                className={`text-xs font-extrabold px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${currentView === "front" ? "bg-[#F9A37E] text-white shadow-xs" : "text-[#7A736A] hover:bg-[#E8E2D6]/40"}`}
+                className={`text-xs font-extrabold px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${currentView === "front" ? "bg-[#df794d] text-white shadow-xs" : "text-[#7A736A] hover:bg-[#E8E2D6]/40"}`}
               >
                 <Eye className="w-3.5 h-3.5" />
                 Front View
               </button>
               <button
                 onClick={() => switchView("back")}
-                className={`text-xs font-extrabold px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${currentView === "back" ? "bg-[#F9A37E] text-white shadow-xs" : "text-[#7A736A] hover:bg-[#E8E2D6]/40"}`}
+                className={`text-xs font-extrabold px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${currentView === "back" ? "bg-[#df794d] text-white shadow-xs" : "text-[#7A736A] hover:bg-[#E8E2D6]/40"}`}
               >
                 <Eye className="w-3.5 h-3.5" />
                 Back View
@@ -1365,7 +1365,7 @@ export default function CustomizerPage() {
 
             {/* Bounded Printable Area Box */}
             <div
-              className="absolute border-2 border-dashed border-[#F9A37E] bg-[#F9A37E]/5 rounded-xl z-20 pointer-events-none flex items-center justify-center"
+              className="absolute border-2 border-dashed border-[#df794d] bg-[#df794d]/5 rounded-xl z-20 pointer-events-none flex items-center justify-center"
               style={{
                 width: "45%",
                 height: "70%",
@@ -1373,7 +1373,7 @@ export default function CustomizerPage() {
                 left: "27%",
               }}
             >
-              <span className="absolute -top-10 sm:-top-6 text-center text-[8px] font-black text-[#e8855a] uppercase tracking-wider bg-white/95 px-2 py-0.5 rounded-full border border-[#F9A37E]/40 shadow-xs">
+              <span className="absolute -top-10 sm:-top-6 text-center text-[8px] font-black text-[#e8855a] uppercase tracking-wider bg-white/95 px-2 py-0.5 rounded-full border border-[#df794d]/40 shadow-xs">
                 Print Area ({currentView.toUpperCase()})
               </span>
 
@@ -1416,7 +1416,7 @@ export default function CustomizerPage() {
           </div>
 
           <div className="flex items-center gap-1.5 text-[10px] text-[#A89B8A] bg-[#FDFAF6] border border-[#E8E2D6] px-4 py-2 rounded-full w-full max-w-sm justify-center">
-            <HelpCircle className="w-3.5 h-3.5 text-[#F9A37E]" />
+            <HelpCircle className="w-3.5 h-3.5 text-[#df794d]" />
             <span>
               Click & drag your artwork graphics inside the dashed printable box
             </span>
@@ -1440,12 +1440,12 @@ export default function CustomizerPage() {
                   <button
                     key={g.id}
                     onClick={() => setGarmentType(g.id)}
-                    className={`p-2.5 rounded-xl border text-left transition-all ${garmentType === g.id ? "border-[#F9A37E] bg-[#FDFAF6] shadow-xs" : "border-[#E8E2D6] hover:border-zinc-300"}`}
+                    className={`p-2.5 rounded-xl border text-left transition-all ${garmentType === g.id ? "border-[#df794d] bg-[#FDFAF6] shadow-xs" : "border-[#E8E2D6] hover:border-zinc-300"}`}
                   >
                     <p className="font-black text-xs text-[#4A453E]">
                       {g.name}
                     </p>
-                    <p className="text-[10px] text-[#F9A37E] font-bold mt-0.5">
+                    <p className="text-[10px] text-[#df794d] font-bold mt-0.5">
                       ₹{g.basePrice}
                     </p>
                   </button>
@@ -1466,7 +1466,7 @@ export default function CustomizerPage() {
                   <button
                     key={c.name}
                     onClick={() => setSelectedColor(c)}
-                    className={`w-7 h-7 rounded-full border-2 transition-transform ${selectedColor.name === c.name ? "scale-110 border-[#F9A37E] shadow-md ring-2 ring-[#F9A37E]/20" : "border-zinc-300"}`}
+                    className={`w-7 h-7 rounded-full border-2 transition-transform ${selectedColor.name === c.name ? "scale-110 border-[#df794d] shadow-md ring-2 ring-[#df794d]/20" : "border-zinc-300"}`}
                     style={{ backgroundColor: c.hex }}
                     title={c.name}
                   />
@@ -1480,7 +1480,7 @@ export default function CustomizerPage() {
                 <label className="block text-[11px] font-bold text-[#7A736A]">
                   Size & Quantity Roster
                 </label>
-                <span className="text-[10px] font-black text-[#F9A37E]">
+                <span className="text-[10px] font-black text-[#df794d]">
                   Total: {totalQuantity} pcs
                 </span>
               </div>
@@ -1502,7 +1502,7 @@ export default function CustomizerPage() {
                         const val = Math.max(0, parseInt(e.target.value) || 0);
                         setSizeQuantities((prev) => ({ ...prev, [s]: val }));
                       }}
-                      className="w-full text-center bg-white border border-[#E8E2D6] rounded-lg text-xs font-bold py-1 text-[#4A453E] focus:outline-none focus:border-[#F9A37E]"
+                      className="w-full text-center bg-white border border-[#E8E2D6] rounded-lg text-xs font-bold py-1 text-[#4A453E] focus:outline-none focus:border-[#df794d]"
                     />
                   </div>
                 ))}
@@ -1625,14 +1625,14 @@ export default function CustomizerPage() {
               )}
               <div className="flex justify-between border-t border-[#E8E2D6] pt-2 text-sm font-black">
                 <span className="text-[#4A453E]">Total Estimated Price</span>
-                <span className="text-[#F9A37E]">₹{totalPrice.toFixed(2)}</span>
+                <span className="text-[#df794d]">₹{totalPrice.toFixed(2)}</span>
               </div>
             </div>
 
             <button
               onClick={handleAddToCart}
               disabled={uploading}
-              className="w-full bg-[#F9A37E] hover:bg-[#E8855A] disabled:opacity-60 text-white font-extrabold text-xs py-3.5 rounded-xl transition-all shadow-lg shadow-[#F9A37E]/25 flex items-center justify-center gap-2"
+              className="w-full bg-[#df794d] hover:bg-[#E8855A] disabled:opacity-60 text-white font-extrabold text-xs py-3.5 rounded-xl transition-all shadow-lg shadow-[#df794d]/25 flex items-center justify-center gap-2"
             >
               {uploading ? (
                 <>

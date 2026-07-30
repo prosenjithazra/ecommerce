@@ -104,7 +104,7 @@ export const ProductGallery: React.FC<{ images: string[]; name: string }> = ({ i
               <img src={img} alt={`${name} thumbnail ${idx + 1}`} width={80} height={80} loading="lazy" className="w-full h-full object-cover" />
               <div
                 className={`absolute inset-0 rounded-lg border-2 pointer-events-none transition-colors ${
-                  activeIdx === idx ? 'border-[#F9A37E]' : 'border-[#E8E2D6]/40'
+                  activeIdx === idx ? 'border-[#df794d]' : 'border-[#E8E2D6]/40'
                 }`}
               />
             </button>
@@ -199,17 +199,17 @@ export const CouponCard: React.FC<{ code: string; discountDesc: string; expiry: 
     showToast("Coupon Copied", `Promo code ${code} copied!`, "success");
   };
   return (
-    <div className="border border-dashed border-[#F9A37E]/50 bg-[#FBD5C1]/20 rounded-lg p-4 flex items-center justify-between gap-4">
+    <div className="border border-dashed border-[#df794d]/50 bg-[#FBD5C1]/20 rounded-lg p-4 flex items-center justify-between gap-4">
       <div className="space-y-1">
         <div className="flex items-center gap-2">
           <span className="font-extrabold text-xs text-[#4A453E] bg-white border border-[#E8E2D6] py-1 px-2.5 rounded-lg tracking-wider font-mono">
             {code}
           </span>
-          <span className="text-xs font-bold text-[#F9A37E]">{discountDesc}</span>
+          <span className="text-xs font-bold text-[#df794d]">{discountDesc}</span>
         </div>
         <p className="text-[10px] text-[#A89B8A]">Expires: {expiry}</p>
       </div>
-      <button onClick={handleCopy} className="p-2 bg-[#F9A37E] hover:bg-[#E8855A] text-white rounded-lg transition-all hover:scale-105" title="Copy Code">
+      <button onClick={handleCopy} className="p-2 bg-[#df794d] hover:bg-[#E8855A] text-white rounded-lg transition-all hover:scale-105" title="Copy Code">
         <Copy className="w-4 h-4" />
       </button>
     </div>
@@ -219,12 +219,12 @@ export const CouponCard: React.FC<{ code: string; discountDesc: string; expiry: 
 /* 4. ADDRESS CARD */
 interface AddressCardProps { address: Address; onEdit: (a: Address) => void; onDelete: (id: string) => void; onSetDefault: (id: string) => void; }
 export const AddressCard: React.FC<AddressCardProps> = ({ address, onEdit, onDelete, onSetDefault }) => (
-  <div className={`p-4 border rounded-lg bg-white flex flex-col justify-between gap-3 transition-all ${address.isDefault ? 'border-[#F9A37E] shadow-sm shadow-[#F9A37E]/20' : 'border-[#E8E2D6]'}`}>
+  <div className={`p-4 border rounded-lg bg-white flex flex-col justify-between gap-3 transition-all ${address.isDefault ? 'border-[#df794d] shadow-sm shadow-[#df794d]/20' : 'border-[#E8E2D6]'}`}>
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <h4 className="font-extrabold text-sm text-[#4A453E]">{address.fullName}</h4>
         {address.isDefault && (
-          <span className="bg-[#FBD5C1] text-[#E8855A] text-[9px] font-extrabold px-2 py-0.5 rounded-full border border-[#F9A37E]/30">
+          <span className="bg-[#FBD5C1] text-[#E8855A] text-[9px] font-extrabold px-2 py-0.5 rounded-full border border-[#df794d]/30">
             Default
           </span>
         )}
@@ -239,7 +239,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({ address, onEdit, onDel
     </div>
     <div className="flex items-center justify-between pt-3 border-t border-[#E8E2D6]">
       {!address.isDefault ? (
-        <button onClick={() => onSetDefault(address.id)} className="text-[10px] font-bold text-[#A89B8A] hover:text-[#F9A37E] transition-colors">
+        <button onClick={() => onSetDefault(address.id)} className="text-[10px] font-bold text-[#A89B8A] hover:text-[#df794d] transition-colors">
           Set Default
         </button>
       ) : (
@@ -297,7 +297,7 @@ export const OrderCard: React.FC<{ order: Order; onViewDetails: (id: string) => 
             Size: {order.items[0]?.size} · Color: {order.items[0]?.color} · Qty: {order.items[0]?.quantity}
           </p>
           {order.items.length > 1 && (
-            <p className="text-[10px] text-[#F9A37E] font-extrabold mt-1">+{order.items.length - 1} more item(s)</p>
+            <p className="text-[10px] text-[#df794d] font-extrabold mt-1">+{order.items.length - 1} more item(s)</p>
           )}
         </div>
         <div className="text-right">
@@ -307,20 +307,20 @@ export const OrderCard: React.FC<{ order: Order; onViewDetails: (id: string) => 
       </div>
       <div className="flex items-center justify-between pt-3 border-t border-[#E8E2D6] text-xs">
         <div className="flex items-center gap-1 text-[#A89B8A]">
-          <Truck className="w-3.5 h-3.5 text-[#A8C69F]" />
+          <Truck className="w-3.5 h-3.5 text-[#7e9677]" />
           <span className="text-[10px]">Tracking: <span className="font-semibold text-[#4A453E]">{order.trackingNumber || "N/A"}</span></span>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={handleDownloadInvoice}
             disabled={isDownloading}
-            className="flex items-center gap-1 text-xs font-bold text-zinc-700 hover:text-[#E8855A] border border-[#E8E2D6] hover:border-[#F9A37E] px-2.5 py-1 rounded transition-colors disabled:opacity-50"
+            className="flex items-center gap-1 text-xs font-bold text-zinc-700 hover:text-[#E8855A] border border-[#E8E2D6] hover:border-[#df794d] px-2.5 py-1 rounded transition-colors disabled:opacity-50"
             title="Download PDF Invoice"
           >
-            {isDownloading ? <Loader2 className="w-3 h-3 animate-spin text-[#F9A37E]" /> : <Download className="w-3 h-3 text-[#F9A37E]" />}
+            {isDownloading ? <Loader2 className="w-3 h-3 animate-spin text-[#df794d]" /> : <Download className="w-3 h-3 text-[#df794d]" />}
             <span>Invoice</span>
           </button>
-          <button onClick={() => onViewDetails(order.id)} className="text-xs font-bold text-[#F9A37E] hover:text-[#E8855A] hover:underline">
+          <button onClick={() => onViewDetails(order.id)} className="text-xs font-bold text-[#df794d] hover:text-[#E8855A] hover:underline">
             View Details →
           </button>
         </div>
@@ -334,7 +334,7 @@ export const TransactionCard: React.FC<{ txn: Transaction }> = ({ txn }) => (
   <div className="p-4 border border-[#E8E2D6] rounded-lg bg-white flex items-center justify-between gap-4">
     <div className="flex items-center gap-3">
       <div className="w-10 h-10 bg-[#E8E2D6] rounded-lg flex items-center justify-center">
-        <FileText className="w-5 h-5 text-[#A8C69F]" />
+        <FileText className="w-5 h-5 text-[#7e9677]" />
       </div>
       <div>
         <span className="font-bold text-xs text-[#4A453E] block">{txn.id}</span>

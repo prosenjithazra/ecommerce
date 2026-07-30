@@ -194,7 +194,7 @@ export default function AdminTestimonialsPage() {
           </div>
           <button
             onClick={openAdd}
-            className="flex items-center gap-2 px-4 py-2 bg-[#F9A37E] hover:bg-[#E8855A] text-white text-xs font-bold rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[#df794d] hover:bg-[#E8855A] text-white text-xs font-bold rounded-lg transition-colors"
           >
             <Plus className="w-3.5 h-3.5" /> Add Testimonial
           </button>
@@ -203,7 +203,7 @@ export default function AdminTestimonialsPage() {
         {/* List */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 animate-spin text-[#F9A37E]" />
+            <Loader2 className="w-6 h-6 animate-spin text-[#df794d]" />
           </div>
         ) : items.length === 0 ? (
           <div className="text-center py-20 text-zinc-400 text-sm">
@@ -327,7 +327,7 @@ export default function AdminTestimonialsPage() {
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="e.g. Alex Mercer"
-                  className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:border-[#F9A37E] transition-colors"
+                  className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:border-[#df794d] transition-colors"
                 />
               </div>
 
@@ -339,7 +339,7 @@ export default function AdminTestimonialsPage() {
                   value={form.avatar}
                   onChange={(e) => setForm({ ...form, avatar: e.target.value })}
                   placeholder="https://..."
-                  className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:border-[#F9A37E] transition-colors"
+                  className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:border-[#df794d] transition-colors"
                 />
               </div>
 
@@ -357,7 +357,7 @@ export default function AdminTestimonialsPage() {
                   value={form.productName}
                   onChange={(e) => setForm({ ...form, productName: e.target.value })}
                   placeholder="e.g. Custom T-Shirt"
-                  className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:border-[#F9A37E] transition-colors"
+                  className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:border-[#df794d] transition-colors"
                 />
               </div>
 
@@ -371,7 +371,7 @@ export default function AdminTestimonialsPage() {
                   onChange={(e) => setForm({ ...form, comment: e.target.value })}
                   rows={3}
                   placeholder="Customer's review text..."
-                  className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:border-[#F9A37E] transition-colors resize-none"
+                  className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:border-[#df794d] transition-colors resize-none"
                 />
               </div>
 
@@ -381,7 +381,7 @@ export default function AdminTestimonialsPage() {
                   type="button"
                   onClick={() => setForm({ ...form, isActive: !form.isActive })}
                   className={`relative w-10 h-5 rounded-full transition-colors ${
-                    form.isActive ? "bg-[#F9A37E]" : "bg-zinc-200"
+                    form.isActive ? "bg-[#df794d]" : "bg-zinc-200"
                   }`}
                 >
                   <span
@@ -412,7 +412,7 @@ export default function AdminTestimonialsPage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 bg-[#F9A37E] hover:bg-[#E8855A] text-white text-xs font-bold rounded-lg transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-[#df794d] hover:bg-[#E8855A] text-white text-xs font-bold rounded-lg transition-colors disabled:opacity-50"
               >
                 {saving ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />

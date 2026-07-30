@@ -36,7 +36,7 @@ A prominent Call-to-Action block at the footer redirects users needing personali
 ## 2. Brand Alignment (Design System)
 
 The UI utilizes colors aligned with the Kliamo storefront design standards:
-- **Peach Accents (`#F9A37E` / `#FBD5C1`)**: Applied on active pill tab borders, help icons, and action buttons (`btn-primary`).
+- **Peach Accents (`#df794d` / `#FBD5C1`)**: Applied on active pill tab borders, help icons, and action buttons (`btn-primary`).
 - **Cream Backgrounds (`#FDFAF6` / `#F5F0E8`)**: Used for containers and CTA highlights.
 - **Charcoal Texts (`#4A453E`)**: Assigned for titles and high-contrast texts.
 

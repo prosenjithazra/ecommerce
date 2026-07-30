@@ -60,7 +60,7 @@ function BannerForm({ initial, onSave, onCancel }: {
     r.readAsDataURL(f);
   };
 
-  const inputCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3.5 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] transition-all placeholder:text-zinc-400 font-medium";
+  const inputCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3.5 text-xs text-zinc-800 outline-none focus:border-[#df794d] transition-all placeholder:text-zinc-400 font-medium";
   const labelCls = "block text-[9px] font-black uppercase text-zinc-500 tracking-widest mb-1.5";
 
   return (
@@ -102,7 +102,7 @@ function BannerForm({ initial, onSave, onCancel }: {
             <select
               value={isActive ? "true" : "false"}
               onChange={(e) => setIsActive(e.target.value === "true")}
-              className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3.5 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] transition-all cursor-pointer font-extrabold"
+              className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3.5 text-xs text-zinc-800 outline-none focus:border-[#df794d] transition-all cursor-pointer font-extrabold"
             >
               <option value="true">Active (Published on Homepage)</option>
               <option value="false">Inactive (Draft / Hidden)</option>
@@ -132,9 +132,9 @@ function BannerForm({ initial, onSave, onCancel }: {
               <button
                 type="button"
                 onClick={() => desktopFileRef.current?.click()}
-                className="w-full h-28 border-2 border-dashed border-zinc-300 hover:border-[#F9A37E] rounded-xl flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-[#F9A37E] transition-all bg-zinc-50"
+                className="w-full h-28 border-2 border-dashed border-zinc-300 hover:border-[#df794d] rounded-xl flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-[#df794d] transition-all bg-zinc-50"
               >
-                <Upload className="w-5 h-5 text-[#F9A37E]" />
+                <Upload className="w-5 h-5 text-[#df794d]" />
                 <span className="text-xs font-bold text-zinc-600">Upload Desktop Banner Image</span>
                 <span className="text-[10px] text-zinc-400">Click to browse PNG, JPG or WEBP</span>
               </button>
@@ -162,9 +162,9 @@ function BannerForm({ initial, onSave, onCancel }: {
               <button
                 type="button"
                 onClick={() => mobileFileRef.current?.click()}
-                className="w-full h-24 border-2 border-dashed border-zinc-300 hover:border-[#F9A37E] rounded-xl flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-[#F9A37E] transition-all bg-zinc-50"
+                className="w-full h-24 border-2 border-dashed border-zinc-300 hover:border-[#df794d] rounded-xl flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-[#df794d] transition-all bg-zinc-50"
               >
-                <Upload className="w-5 h-5 text-[#F9A37E]" />
+                <Upload className="w-5 h-5 text-[#df794d]" />
                 <span className="text-xs font-bold text-zinc-600">Upload Mobile Banner Image</span>
                 <span className="text-[10px] text-zinc-400">Click to browse PNG, JPG or WEBP</span>
               </button>
@@ -195,7 +195,7 @@ function BannerForm({ initial, onSave, onCancel }: {
               isActive,
             });
           }}
-          className="flex items-center gap-1.5 bg-[#F9A37E] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20"
+          className="flex items-center gap-1.5 bg-[#df794d] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all shadow-md shadow-[#df794d]/20"
         >
           <Save className="w-4 h-4" /> Save Banner
         </button>
@@ -342,7 +342,7 @@ export default function AdminBannersPage() {
       <div className="flex flex-col h-full overflow-hidden">
         <AdminTopbar title="Home Banners" subtitle={mode === "add" ? "Upload desktop & mobile banner images" : `Edit banner details`} />
         <main className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-4">
-          <button onClick={() => { setMode("table"); setEditTarget(null); }} className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-[#F9A37E] transition-colors">
+          <button onClick={() => { setMode("table"); setEditTarget(null); }} className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-[#df794d] transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to List
           </button>
           <BannerForm
@@ -363,7 +363,7 @@ export default function AdminBannersPage() {
         <div className="flex justify-end">
           <button
             onClick={() => { setEditTarget(null); setMode("add"); }}
-            className="flex items-center gap-2 bg-[#F9A37E] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20"
+            className="flex items-center gap-2 bg-[#df794d] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg transition-all shadow-md shadow-[#df794d]/20"
           >
             <Plus className="w-4 h-4" /> Add Banner
           </button>
@@ -435,7 +435,7 @@ export default function AdminBannersPage() {
                         <div className="flex gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => { setEditTarget(b); setMode("edit"); }}
-                            className="p-1.5 border border-zinc-200 hover:border-[#F9A37E]/40 hover:bg-[#F9A37E]/5 hover:text-[#F9A37E] text-zinc-400 rounded-lg transition-all"
+                            className="p-1.5 border border-zinc-200 hover:border-[#df794d]/40 hover:bg-[#df794d]/5 hover:text-[#df794d] text-zinc-400 rounded-lg transition-all"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>

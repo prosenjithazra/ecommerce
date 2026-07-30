@@ -11,10 +11,10 @@ interface ToastProps {
 
 export const Toast: React.FC<ToastProps> = ({ toast, onDismiss }) => {
   const config = {
-    success: { icon: <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500" />, bar: '#A8C69F' },
-    error:   { icon: <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-rose-400" />,    bar: '#F9A37E' },
-    info:    { icon: <Info className="w-4 h-4 sm:w-5 sm:h-5 text-[#A8C69F]" />,          bar: '#E8E2D6' },
-  }[toast.type] ?? { icon: <Info className="w-4 h-4 sm:w-5 sm:h-5 text-[#A8C69F]" />, bar: '#E8E2D6' };
+    success: { icon: <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500" />, bar: '#7e9677' },
+    error:   { icon: <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-rose-400" />,    bar: '#df794d' },
+    info:    { icon: <Info className="w-4 h-4 sm:w-5 sm:h-5 text-[#7e9677]" />,          bar: '#E8E2D6' },
+  }[toast.type] ?? { icon: <Info className="w-4 h-4 sm:w-5 sm:h-5 text-[#7e9677]" />, bar: '#E8E2D6' };
 
   return (
     <div className="flex items-start gap-2 sm:gap-3 p-2.5 sm:p-4 bg-white border border-[#E8E2D6] shadow-xl rounded-lg max-w-[calc(100vw-2rem)] sm:max-w-sm w-full animate-fade-in-up pointer-events-auto overflow-hidden relative">

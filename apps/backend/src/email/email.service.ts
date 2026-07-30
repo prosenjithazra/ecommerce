@@ -249,7 +249,7 @@ export class EmailService {
           <div style="background-color: #FDFAF6; padding: 32px 24px; text-align: center; border-b: 1px solid #E8E2D6;">
             <img src="https://kliamo.com/kliamologoNew.png" alt="Kliamo Fashion India" style="height: 52px; width: auto; max-width: 200px; display: inline-block; border: 0;" />
             <h1 style="color: #4A453E; margin: 16px 0 4px 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Welcome to KLIAMO!</h1>
-            <p style="color: #F9A37E; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin: 0;">Style That Defines You</p>
+            <p style="color: #df794d; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin: 0;">Style That Defines You</p>
           </div>
 
           <!-- Body Content -->
@@ -265,14 +265,14 @@ export class EmailService {
 
             <!-- CTA Button -->
             <div style="text-align: center; margin: 32px 0 24px 0;">
-              <a href="https://kliamo.com" style="background-color: #F9A37E; color: #FFFFFF; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 800; font-size: 14px; display: inline-block; box-shadow: 0 4px 12px rgba(249, 163, 126, 0.35);">Explore Collections</a>
+              <a href="https://kliamo.com" style="background-color: #df794d; color: #FFFFFF; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 800; font-size: 14px; display: inline-block; box-shadow: 0 4px 12px rgba(249, 163, 126, 0.35);">Explore Collections</a>
             </div>
           </div>
 
           <!-- Footer -->
           <div style="background-color: #FDFAF6; padding: 20px 24px; text-align: center; border-top: 1px solid #E8E2D6; font-size: 12px; color: #7A736A;">
             <p style="margin: 0 0 6px 0; font-weight: 600;">Need assistance? We're here to help.</p>
-            <p style="margin: 0;">Contact us anytime at <a href="mailto:contact@kliamo.com" style="color: #F9A37E; text-decoration: none; font-weight: bold;">contact@kliamo.com</a></p>
+            <p style="margin: 0;">Contact us anytime at <a href="mailto:contact@kliamo.com" style="color: #df794d; text-decoration: none; font-weight: bold;">contact@kliamo.com</a></p>
             <p style="margin: 12px 0 0 0; font-size: 11px; color: #A89B8A;">© ${new Date().getFullYear()} Kliamo Fashion India. All rights reserved.</p>
           </div>
 
@@ -313,7 +313,7 @@ export class EmailService {
           const addr = items[0].address;
           shippingAddressHtml = `
             <div style="margin-top: 24px; background-color: #FDFAF6; border: 1px solid #E8E2D6; border-radius: 12px; padding: 16px 20px;">
-              <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 800; color: #F9A37E; text-transform: uppercase; letter-spacing: 1px;">Shipping Destination</p>
+              <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 800; color: #df794d; text-transform: uppercase; letter-spacing: 1px;">Shipping Destination</p>
               <p style="margin: 0; font-size: 14px; font-weight: 700; color: #2D2A26;">${addr.fullName || order.customer}</p>
               <p style="margin: 3px 0 0 0; font-size: 13px; color: #5C554C;">${addr.street || ''}${addr.city ? `, ${addr.city}` : ''}${addr.state ? `, ${addr.state}` : ''} ${addr.zip || ''}</p>
               ${addr.phone ? `<p style="margin: 4px 0 0 0; font-size: 12px; color: #7A736A;"><strong>Phone:</strong> ${addr.phone}</p>` : ''}
@@ -344,7 +344,7 @@ export class EmailService {
     if (!shippingAddressHtml) {
       shippingAddressHtml = `
         <div style="margin-top: 24px; background-color: #FDFAF6; border: 1px solid #E8E2D6; border-radius: 12px; padding: 16px 20px;">
-          <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 800; color: #F9A37E; text-transform: uppercase; letter-spacing: 1px;">Customer Details</p>
+          <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 800; color: #df794d; text-transform: uppercase; letter-spacing: 1px;">Customer Details</p>
           <p style="margin: 0; font-size: 14px; font-weight: 700; color: #2D2A26;">${order.customer}</p>
           <p style="margin: 2px 0 0 0; font-size: 13px; color: #5C554C;">${order.email}</p>
         </div>
@@ -370,7 +370,7 @@ export class EmailService {
           <div style="background-color: #FDFAF6; padding: 32px 24px; text-align: center; border-bottom: 1px solid #E8E2D6;">
             <img src="https://kliamo.com/kliamologoNew.png" alt="Kliamo Fashion India" style="height: 54px; width: auto; max-width: 210px; display: inline-block; border: 0;" />
             <h1 style="color: #4A453E; margin: 16px 0 4px 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Order Confirmation</h1>
-            <p style="color: #F9A37E; font-weight: 700; font-size: 14px; margin: 0;">Order #${order.id} &nbsp;·&nbsp; ${orderDateFormatted}</p>
+            <p style="color: #df794d; font-weight: 700; font-size: 14px; margin: 0;">Order #${order.id} &nbsp;·&nbsp; ${orderDateFormatted}</p>
           </div>
 
           <!-- Body Content -->
@@ -397,7 +397,7 @@ export class EmailService {
 
             <!-- Complete Payment Summary Box -->
             <div style="margin-top: 20px; background-color: #FDFAF6; border: 1px solid #E8E2D6; border-radius: 12px; padding: 18px 20px;">
-              <p style="margin: 0 0 12px 0; font-size: 11px; font-weight: 800; color: #F9A37E; text-transform: uppercase; letter-spacing: 1px;">Payment & Invoice Breakdown</p>
+              <p style="margin: 0 0 12px 0; font-size: 11px; font-weight: 800; color: #df794d; text-transform: uppercase; letter-spacing: 1px;">Payment & Invoice Breakdown</p>
               
               <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #5C554C;">
                 <tr>
@@ -410,7 +410,7 @@ export class EmailService {
                 </tr>
                 <tr>
                   <td style="padding: 4px 0;">Shipping Fee</td>
-                  <td style="padding: 4px 0; text-align: right; font-weight: 700; color: #A8C69F;">FREE</td>
+                  <td style="padding: 4px 0; text-align: right; font-weight: 700; color: #7e9677;">FREE</td>
                 </tr>
                 <tr>
                   <td style="padding: 4px 0;">Payment Method</td>
@@ -424,25 +424,25 @@ export class EmailService {
                 ` : ''}
                 <tr>
                   <td style="padding: 4px 0;">Payment Status</td>
-                  <td style="padding: 4px 0; text-align: right; font-weight: 700; color: #A8C69F; text-transform: uppercase;">${order.paymentStatus || 'Paid'}</td>
+                  <td style="padding: 4px 0; text-align: right; font-weight: 700; color: #7e9677; text-transform: uppercase;">${order.paymentStatus || 'Paid'}</td>
                 </tr>
                 <tr style="border-top: 1px solid #E8E2D6;">
                   <td style="padding: 12px 0 4px 0; font-size: 16px; font-weight: 800; color: #2D2A26;">Grand Total Paid</td>
-                  <td style="padding: 12px 0 4px 0; text-align: right; font-size: 18px; font-weight: 800; color: #F9A37E;">₹${Number(order.total).toLocaleString('en-IN')}</td>
+                  <td style="padding: 12px 0 4px 0; text-align: right; font-size: 18px; font-weight: 800; color: #df794d;">₹${Number(order.total).toLocaleString('en-IN')}</td>
                 </tr>
               </table>
             </div>
 
             <!-- CTA Live Tracking Button -->
             <div style="text-align: center; margin: 36px 0 24px 0;">
-              <a href="https://kliamo.com/orders/${order.id}/track" style="background-color: #F9A37E; color: #FFFFFF; text-decoration: none; padding: 14px 36px; border-radius: 10px; font-weight: 800; font-size: 14px; display: inline-block; box-shadow: 0 4px 14px rgba(249, 163, 126, 0.35);">Track Package Live</a>
+              <a href="https://kliamo.com/orders/${order.id}/track" style="background-color: #df794d; color: #FFFFFF; text-decoration: none; padding: 14px 36px; border-radius: 10px; font-weight: 800; font-size: 14px; display: inline-block; box-shadow: 0 4px 14px rgba(249, 163, 126, 0.35);">Track Package Live</a>
             </div>
           </div>
 
           <!-- Footer -->
           <div style="background-color: #FDFAF6; padding: 24px; text-align: center; border-top: 1px solid #E8E2D6; font-size: 12px; color: #7A736A;">
             <p style="margin: 0 0 6px 0; font-weight: 700; color: #4A453E;">Questions about your shipment or custom order?</p>
-            <p style="margin: 0;">Reply directly to this email or contact customer support at <a href="mailto:contact@kliamo.com" style="color: #F9A37E; text-decoration: none; font-weight: bold;">contact@kliamo.com</a></p>
+            <p style="margin: 0;">Reply directly to this email or contact customer support at <a href="mailto:contact@kliamo.com" style="color: #df794d; text-decoration: none; font-weight: bold;">contact@kliamo.com</a></p>
             <p style="margin: 14px 0 0 0; font-size: 11px; color: #A89B8A;">© ${new Date().getFullYear()} Kliamo Fashion India. All rights reserved.</p>
           </div>
 
@@ -488,7 +488,7 @@ export class EmailService {
         <!-- Header -->
         <div style="background-color: #FDFAF6; border-bottom: 1px solid #E8E2D6; padding: 32px 24px; text-align: center;">
           <img src="${logoSrc}" alt="KLIAMO" style="height: 48px; width: auto; max-width: 200px; display: inline-block; border: 0;" />
-          <p style="color: #F9A37E; font-weight: 700; margin: 8px 0 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase;">STYLE THAT DEFINES YOU</p>
+          <p style="color: #df794d; font-weight: 700; margin: 8px 0 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase;">STYLE THAT DEFINES YOU</p>
         </div>
 
         <!-- Body -->
@@ -499,14 +499,14 @@ export class EmailService {
           </p>
 
           <!-- OTP Box -->
-          <div style="background-color: #FDFAF6; border: 2px dashed #F9A37E; border-radius: 12px; padding: 24px; text-align: center; margin: 0 0 28px;">
+          <div style="background-color: #FDFAF6; border: 2px dashed #df794d; border-radius: 12px; padding: 24px; text-align: center; margin: 0 0 28px;">
             <p style="color: #A89B8A; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 10px;">Your Verification Code</p>
             <span style="display: inline-block; font-size: 36px; font-weight: 900; letter-spacing: 8px; color: #4A453E; font-family: 'Courier New', monospace;">${otp}</span>
             <p style="color: #A89B8A; font-size: 11px; margin: 12px 0 0;">Valid for ${expiryMinutes} minutes only</p>
           </div>
 
           <!-- Warning -->
-          <div style="background-color: #FFF8F0; border-left: 4px solid #F9A37E; border-radius: 0 8px 8px 0; padding: 14px 16px; margin-bottom: 24px;">
+          <div style="background-color: #FFF8F0; border-left: 4px solid #df794d; border-radius: 0 8px 8px 0; padding: 14px 16px; margin-bottom: 24px;">
             <p style="color: #7A736A; font-size: 12px; line-height: 1.6; margin: 0;">
               🔒 <strong>Never share this code</strong> with anyone. The KLIAMO team will never ask for your OTP.
               ${isSignup ? "If you didn't initiate this registration, please ignore this email." : "If you didn't request this, please ignore this email — your password will remain unchanged."}
@@ -514,7 +514,7 @@ export class EmailService {
           </div>
 
           <p style="color: #A89B8A; font-size: 12px; text-align: center; margin: 0;">
-            Need help? Contact us at <a href="mailto:contact@kliamo.com" style="color: #F9A37E; text-decoration: none; font-weight: 700;">contact@kliamo.com</a>
+            Need help? Contact us at <a href="mailto:contact@kliamo.com" style="color: #df794d; text-decoration: none; font-weight: 700;">contact@kliamo.com</a>
           </p>
         </div>
 
@@ -554,9 +554,9 @@ export class EmailService {
         </div>
         <div style="padding: 28px; background-color: #FFFFFF; color: #4A453E; line-height: 1.6; font-size: 14px;">
           <p><strong>Customer Name:</strong> ${data.name}</p>
-          <p><strong>Customer Email:</strong> <a href="mailto:${data.email}" style="color: #F9A37E;">${data.email}</a></p>
+          <p><strong>Customer Email:</strong> <a href="mailto:${data.email}" style="color: #df794d;">${data.email}</a></p>
           <p><strong>Subject:</strong> ${data.subject || 'General Inquiry'}</p>
-          <div style="margin-top: 16px; padding: 16px; background-color: #FDFAF6; border-left: 4px solid #F9A37E; border-radius: 4px;">
+          <div style="margin-top: 16px; padding: 16px; background-color: #FDFAF6; border-left: 4px solid #df794d; border-radius: 4px;">
             <p style="margin: 0; font-weight: 600; color: #4A453E;">Message Content:</p>
             <p style="margin: 8px 0 0 0; color: #5C554C; whitespace: pre-line;">${data.message}</p>
           </div>
@@ -581,20 +581,20 @@ export class EmailService {
         <div style="background-color: #FDFAF6; border-bottom: 1px solid #E8E2D6; padding: 32px 24px; text-align: center;">
           <img src="https://kliamo.com/kliamologoNew.png" alt="KLIAMO" style="height: 48px; width: auto; max-width: 200px; display: inline-block;" />
           <h1 style="color: #4A453E; margin: 16px 0 4px 0; font-size: 22px; font-weight: 800;">Thank You for Reaching Out!</h1>
-          <p style="color: #F9A37E; font-weight: 700; font-size: 12px; uppercase; letter-spacing: 1px; margin: 0;">We Have Received Your Message</p>
+          <p style="color: #df794d; font-weight: 700; font-size: 12px; uppercase; letter-spacing: 1px; margin: 0;">We Have Received Your Message</p>
         </div>
         <div style="padding: 32px 28px; background-color: #FFFFFF; color: #4A453E; line-height: 1.6; font-size: 15px;">
           <p>Hi <strong>${data.name}</strong>,</p>
           <p>Thank you for contacting <strong>KLIAMO Fashion India</strong>. We have received your query regarding <strong>"${data.subject || 'General Inquiry'}"</strong>.</p>
           <p>Our support team is reviewing your message and will get back to you within <strong>24 business hours</strong>.</p>
           <div style="margin: 24px 0; padding: 18px 20px; background-color: #FDFAF6; border: 1px solid #E8E2D6; border-radius: 12px;">
-            <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 800; color: #F9A37E; text-transform: uppercase; letter-spacing: 1px;">Summary of Your Message</p>
+            <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 800; color: #df794d; text-transform: uppercase; letter-spacing: 1px;">Summary of Your Message</p>
             <p style="margin: 0; font-size: 13px; color: #5C554C; font-style: italic;">"${data.message}"</p>
           </div>
           <p style="margin-bottom: 0;">Best regards,<br/><strong>KLIAMO Support Team</strong></p>
         </div>
         <div style="background-color: #FDFAF6; border-top: 1px solid #E8E2D6; padding: 20px 24px; text-align: center; font-size: 12px; color: #7A736A;">
-          <p style="margin: 0;">Contact us directly at <a href="mailto:contact@kliamo.com" style="color: #F9A37E; font-weight: bold; text-decoration: none;">contact@kliamo.com</a></p>
+          <p style="margin: 0;">Contact us directly at <a href="mailto:contact@kliamo.com" style="color: #df794d; font-weight: bold; text-decoration: none;">contact@kliamo.com</a></p>
           <p style="margin: 8px 0 0 0; font-size: 11px; color: #A89B8A;">© ${new Date().getFullYear()} Kliamo Fashion India. All rights reserved.</p>
         </div>
       </div>
@@ -625,7 +625,7 @@ export class EmailService {
         <div style="background-color: #FDFAF6; border-bottom: 1px solid #E8E2D6; padding: 32px 24px; text-align: center;">
           <img src="https://kliamo.com/kliamologoNew.png" alt="KLIAMO" style="height: 52px; width: auto; max-width: 200px; display: inline-block;" />
           <h1 style="color: #4A453E; margin: 16px 0 4px 0; font-size: 24px; font-weight: 800;">Welcome to the Creative Club! 🎉</h1>
-          <p style="color: #F9A37E; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin: 0;">Exclusive Drops & Special Discounts</p>
+          <p style="color: #df794d; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin: 0;">Exclusive Drops & Special Discounts</p>
         </div>
         <div style="padding: 32px 28px; background-color: #FFFFFF; color: #4A453E; line-height: 1.6; font-size: 15px;">
           <p style="margin-top: 0;">Hello Creator,</p>
@@ -637,7 +637,7 @@ export class EmailService {
             <li style="margin-bottom: 8px;"><strong>Design Inspiration</strong> & custom print fashion guides</li>
           </ul>
           <div style="text-align: center; margin: 32px 0 24px 0;">
-            <a href="https://kliamo.com/products" style="background-color: #F9A37E; color: #FFFFFF; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 800; font-size: 14px; display: inline-block; box-shadow: 0 4px 12px rgba(249, 163, 126, 0.35);">Shop Latest Trends</a>
+            <a href="https://kliamo.com/products" style="background-color: #df794d; color: #FFFFFF; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 800; font-size: 14px; display: inline-block; box-shadow: 0 4px 12px rgba(249, 163, 126, 0.35);">Shop Latest Trends</a>
           </div>
         </div>
         <div style="background-color: #FDFAF6; border-top: 1px solid #E8E2D6; padding: 20px 24px; text-align: center; font-size: 12px; color: #7A736A;">

@@ -99,7 +99,7 @@ export default function ProductDetailPage() {
           description="The product you are looking for does not exist or has been removed from our catalog."
           actionText="Browse Blanks Catalog"
           actionHref="/products"
-          icon={<ShoppingBag className="w-8 h-8 text-[#A8C69F]" />}
+          icon={<ShoppingBag className="w-8 h-8 text-[#7e9677]" />}
         />
       </div>
     );
@@ -120,7 +120,7 @@ export default function ProductDetailPage() {
 
           {/* Category + Tag */}
           <div className="flex items-center gap-2">
-            <span className="text-xs uppercase font-extrabold text-[#F9A37E] tracking-wider">
+            <span className="text-xs uppercase font-extrabold text-[#df794d] tracking-wider">
               {product.category}
             </span>
             {product.tag && (
@@ -151,7 +151,7 @@ export default function ProductDetailPage() {
           {product.colors && product.colors.length > 0 && (
             <div className="space-y-2">
               <span className="text-xs font-bold text-[#4A453E]">
-                Color: <span className="text-[#F9A37E]">{selectedColor}</span>
+                Color: <span className="text-[#df794d]">{selectedColor}</span>
               </span>
               <div className="flex gap-2.5">
                 {product.colors.map(color => (
@@ -160,7 +160,7 @@ export default function ProductDetailPage() {
                     onClick={() => setSelectedColor(color.name)}
                     className={`w-7 h-7 rounded-full border-2 transition-all hover:scale-105 ${
                       selectedColor === color.name
-                        ? 'border-[#F9A37E] scale-110 shadow-md shadow-[#F9A37E]/30'
+                        ? 'border-[#df794d] scale-110 shadow-md shadow-[#df794d]/30'
                         : 'border-[#E8E2D6]'
                     }`}
                     style={{ backgroundColor: color.hex }}
@@ -176,12 +176,12 @@ export default function ProductDetailPage() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-xs font-bold text-[#4A453E]">
-                  Size: <span className="text-[#F9A37E] uppercase">{selectedSize}</span>
+                  Size: <span className="text-[#df794d] uppercase">{selectedSize}</span>
                 </span>
                 <button
                   type="button"
                   onClick={() => setIsSizeChartOpen(true)}
-                  className="text-xs font-bold text-[#A89B8A] hover:text-[#F9A37E] transition-colors cursor-pointer"
+                  className="text-xs font-bold text-[#A89B8A] hover:text-[#df794d] transition-colors cursor-pointer"
                 >
                   Size Chart
                 </button>
@@ -230,14 +230,14 @@ export default function ProductDetailPage() {
           <div className="grid grid-cols-2 gap-3 pt-2">
             <button
               onClick={handleAddToCart}
-              className="flex items-center justify-center gap-2 bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-[14px] py-2 px-4 sm:py-3.5 sm:px-6 rounded-lg transition-all shadow-lg shadow-[#A8C69F]/25 active:scale-95"
+              className="flex items-center justify-center gap-2 bg-[#7e9677] hover:bg-[#92b089] text-white font-extrabold text-[14px] py-2 px-4 sm:py-3.5 sm:px-6 rounded-lg transition-all shadow-lg shadow-[#7e9677]/25 active:scale-95"
             >
               <ShoppingBag className="w-4 h-4" />
               Add to Cart
             </button>
             <button
               onClick={handleBuyNow}
-              className="bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-[14px] py-2 px-4 sm:py-3.5 sm:px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95"
+              className="bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-[14px] py-2 px-4 sm:py-3.5 sm:px-6 rounded-lg transition-all shadow-lg shadow-[#df794d]/25 active:scale-95"
             >
               Buy It Now
             </button>
@@ -257,15 +257,15 @@ export default function ProductDetailPage() {
           {/* Trust indicators */}
           <div className="grid grid-cols-3 gap-1.5 sm:gap-3 py-3 sm:py-4 border-t border-[#E8E2D6] text-[10px] text-[#7A736A] text-center">
             <div className="space-y-1.5">
-              <ShieldCheck className="w-5 h-5 text-[#A8C69F] mx-auto" />
+              <ShieldCheck className="w-5 h-5 text-[#7e9677] mx-auto" />
               <span className="font-bold text-[#4A453E] block">Safe Print</span>
             </div>
             <div className="space-y-1.5">
-              <Truck className="w-5 h-5 text-[#A8C69F] mx-auto" />
+              <Truck className="w-5 h-5 text-[#7e9677] mx-auto" />
               <span className="font-bold text-[#4A453E] block">Fast Delivery</span>
             </div>
             <div className="space-y-1.5">
-              <RefreshCw className="w-5 h-5 text-[#A8C69F] mx-auto" />
+              <RefreshCw className="w-5 h-5 text-[#7e9677] mx-auto" />
               <span className="font-bold text-[#4A453E] block">Easy Returns</span>
             </div>
           </div>
@@ -283,7 +283,7 @@ export default function ProductDetailPage() {
                 onClick={() => setActiveTab(tab)}
                 className={`pb-3 text-[12px] sm:text-sm md:text-lg font-bold p-2 sm:px-4 transition-all border-b-2 ${
                   activeTab === tab
-                    ? 'text-[#4A453E] border-[#F9A37E]'
+                    ? 'text-[#4A453E] border-[#df794d]'
                     : 'text-[#A89B8A] border-transparent hover:text-[#4A453E]'
                 }`}
               >
@@ -506,7 +506,7 @@ function SizeChartModal({ isOpen, onClose }: SizeChartModalProps) {
                 <button
                   type="button"
                   onClick={handleResetZoom}
-                  className="p-1.5 rounded text-[#F9A37E] hover:bg-[#F9A37E]/10 transition-colors"
+                  className="p-1.5 rounded text-[#df794d] hover:bg-[#df794d]/10 transition-colors"
                   title="Reset Zoom"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />

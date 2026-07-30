@@ -128,9 +128,9 @@ export default function AdminProductsPage() {
     });
 
   const SortButton = ({ field, label }: { field: "name" | "price" | "category"; label: string }) => (
-    <button onClick={() => toggleSort(field)} className="flex items-center gap-1 hover:text-[#F9A37E] transition-colors group">
+    <button onClick={() => toggleSort(field)} className="flex items-center gap-1 hover:text-[#df794d] transition-colors group">
       {label}
-      <ArrowUpDown className={`w-3 h-3 ${sortField === field ? "text-[#F9A37E]" : "text-zinc-400 group-hover:text-[#F9A37E]"}`} />
+      <ArrowUpDown className={`w-3 h-3 ${sortField === field ? "text-[#df794d]" : "text-zinc-400 group-hover:text-[#df794d]"}`} />
     </button>
   );
 
@@ -161,7 +161,7 @@ export default function AdminProductsPage() {
               placeholder="Search by name, SKU, or category..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#F9A37E] transition-colors text-zinc-700 placeholder:text-zinc-400"
+              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#df794d] transition-colors text-zinc-700 placeholder:text-zinc-400"
             />
           </div>
           <div className="flex items-center gap-2">
@@ -191,7 +191,7 @@ export default function AdminProductsPage() {
             </button>
             <Link
               href="/admin/products/add"
-              className="flex items-center gap-2 bg-[#F9A37E] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20 whitespace-nowrap"
+              className="flex items-center gap-2 bg-[#df794d] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg transition-all shadow-md shadow-[#df794d]/20 whitespace-nowrap"
             >
               <Plus className="w-4 h-4" /> Add New Product
             </Link>
@@ -205,7 +205,7 @@ export default function AdminProductsPage() {
             <button
               key={c}
               onClick={() => setFilterCat(c)}
-              className={`text-[10px] font-extrabold px-3 py-1 rounded-md border transition-all ${filterCat === c ? "bg-[#F9A37E]/15 border-[#F9A37E] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
+              className={`text-[10px] font-extrabold px-3 py-1 rounded-md border transition-all ${filterCat === c ? "bg-[#df794d]/15 border-[#df794d] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
             >
               {c}
             </button>
@@ -215,7 +215,7 @@ export default function AdminProductsPage() {
             <button
               key={s}
               onClick={() => setFilterStock(s)}
-              className={`text-[10px] font-extrabold px-3 py-1 rounded-md border transition-all ${filterStock === s ? "bg-[#F9A37E]/15 border-[#F9A37E] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
+              className={`text-[10px] font-extrabold px-3 py-1 rounded-md border transition-all ${filterStock === s ? "bg-[#df794d]/15 border-[#df794d] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
             >
               {s}
             </button>
@@ -275,7 +275,7 @@ export default function AdminProductsPage() {
                       <Link
                         href={`/products/${p.slug || slugify(p.name)}`}
                         target="_blank"
-                        className="font-extrabold text-zinc-900 leading-snug hover:text-[#F9A37E] transition-colors group-hover:underline block"
+                        className="font-extrabold text-zinc-900 leading-snug hover:text-[#df794d] transition-colors group-hover:underline block"
                         title="View on store"
                       >
                         {p.name}
@@ -329,7 +329,7 @@ export default function AdminProductsPage() {
                       <div className="flex gap-1.5 justify-end opacity-60 group-hover:opacity-100 transition-opacity">
                         <Link
                           href={`/admin/products/edit/${p.slug || slugify(p.name)}`}
-                          className="p-1.5 border border-zinc-200 hover:border-[#F9A37E]/40 hover:bg-[#F9A37E]/5 hover:text-[#F9A37E] text-zinc-400 rounded-lg transition-all"
+                          className="p-1.5 border border-zinc-200 hover:border-[#df794d]/40 hover:bg-[#df794d]/5 hover:text-[#df794d] text-zinc-400 rounded-lg transition-all"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </Link>

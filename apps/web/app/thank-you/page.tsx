@@ -61,7 +61,7 @@ function ThankYouPageContent() {
         </div>
         <div className="flex justify-between items-center text-xs">
           <span className="text-zinc-450">Fulfillment Status</span>
-          <span className="font-extrabold text-[#F9A37E]">In Print Queue</span>
+          <span className="font-extrabold text-[#df794d]">In Print Queue</span>
         </div>
         <div className="flex justify-between items-center text-xs border-t border-zinc-100 dark:border-zinc-800 pt-3">
           <span className="text-zinc-450">Estimated Dispatch</span>
@@ -82,12 +82,12 @@ function ThankYouPageContent() {
           disabled={isDownloading}
           className="border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
         >
-          {isDownloading ? <Loader2 className="w-4 h-4 animate-spin text-[#F9A37E]" /> : <Download className="w-4 h-4 text-[#F9A37E]" />}
+          {isDownloading ? <Loader2 className="w-4 h-4 animate-spin text-[#df794d]" /> : <Download className="w-4 h-4 text-[#df794d]" />}
           Invoice Receipt
         </button>
         <Link
           href="/orders"
-          className="text-xs font-bold text-[#F9A37E] hover:text-[#e8855a] hover:underline flex items-center gap-1"
+          className="text-xs font-bold text-[#df794d] hover:text-[#e8855a] hover:underline flex items-center gap-1"
         >
           Track Shipment <ArrowRight className="w-4 h-4" />
         </Link>

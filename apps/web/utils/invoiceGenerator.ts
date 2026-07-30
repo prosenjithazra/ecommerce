@@ -252,7 +252,7 @@ export function printPdfInvoice(order: any) {
           .totals-table tr.grand-total td {
             font-size: 15px;
             font-weight: 800;
-            color: #F9A37E;
+            color: #df794d;
             border-top: 2px solid #18181B;
             padding-top: 10px;
           }

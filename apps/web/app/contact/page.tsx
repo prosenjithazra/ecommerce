@@ -117,7 +117,7 @@ export default function ContactPage() {
                         setErrors({ ...errors, name: undefined });
                     }}
                     placeholder="Jane"
-                    className={`w-full bg-zinc-55 dark:bg-zinc-800 border ${errors.name ? "border-red-400 focus:border-red-500" : "border-zinc-200 dark:border-zinc-700 focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20"} rounded-lg py-3 px-4 text-xs outline-none text-zinc-955 dark:text-zinc-50`}
+                    className={`w-full bg-zinc-55 dark:bg-zinc-800 border ${errors.name ? "border-red-400 focus:border-red-500" : "border-zinc-200 dark:border-zinc-700 focus:border-[#df794d] focus:ring-2 focus:ring-[#df794d]/20"} rounded-lg py-3 px-4 text-xs outline-none text-zinc-955 dark:text-zinc-50`}
                   />
                   {errors.name && (
                     <p className="text-[10px] text-red-500 font-bold mt-1.5">
@@ -138,7 +138,7 @@ export default function ContactPage() {
                         setErrors({ ...errors, email: undefined });
                     }}
                     placeholder="jane@example.com"
-                    className={`w-full bg-zinc-55 dark:bg-zinc-800 border ${errors.email ? "border-red-400 focus:border-red-500" : "border-zinc-200 dark:border-zinc-700 focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20"} rounded-lg py-3 px-4 text-xs outline-none text-zinc-955 dark:text-zinc-50`}
+                    className={`w-full bg-zinc-55 dark:bg-zinc-800 border ${errors.email ? "border-red-400 focus:border-red-500" : "border-zinc-200 dark:border-zinc-700 focus:border-[#df794d] focus:ring-2 focus:ring-[#df794d]/20"} rounded-lg py-3 px-4 text-xs outline-none text-zinc-955 dark:text-zinc-50`}
                   />
                   {errors.email && (
                     <p className="text-[10px] text-red-500 font-bold mt-1.5">
@@ -159,7 +159,7 @@ export default function ContactPage() {
                     setFormData({ ...formData, subject: e.target.value })
                   }
                   placeholder="Bulk order inquiry"
-                  className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg py-3 px-4 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-955 dark:text-zinc-50"
+                  className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg py-3 px-4 text-xs outline-none focus:border-[#df794d] focus:ring-2 focus:ring-[#df794d]/20 text-zinc-955 dark:text-zinc-50"
                 />
               </div>
 
@@ -176,7 +176,7 @@ export default function ContactPage() {
                       setErrors({ ...errors, message: undefined });
                   }}
                   placeholder="Write details about your request..."
-                  className={`w-full bg-zinc-55 dark:bg-zinc-800 border ${errors.message ? "border-red-400 focus:border-red-500" : "border-zinc-200 dark:border-zinc-700 focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20"} rounded-lg py-3 px-4 text-xs outline-none text-zinc-955 dark:text-zinc-50 resize-none`}
+                  className={`w-full bg-zinc-55 dark:bg-zinc-800 border ${errors.message ? "border-red-400 focus:border-red-500" : "border-zinc-200 dark:border-zinc-700 focus:border-[#df794d] focus:ring-2 focus:ring-[#df794d]/20"} rounded-lg py-3 px-4 text-xs outline-none text-zinc-955 dark:text-zinc-50 resize-none`}
                 />
                 {errors.message && (
                   <p className="text-[10px] text-red-500 font-bold mt-1.5">
@@ -187,7 +187,7 @@ export default function ContactPage() {
 
               <button
                 type="submit"
-                className="w-full bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3.5 px-4 rounded-lg transition-all shadow-md shadow-[#F9A37E]/25 dark:shadow-none flex items-center justify-center gap-2"
+                className="w-full bg-[#df794d] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3.5 px-4 rounded-lg transition-all shadow-md shadow-[#df794d]/25 dark:shadow-none flex items-center justify-center gap-2"
               >
                 <Send className="w-4 h-4" /> Send Message
               </button>
@@ -212,7 +212,7 @@ export default function ContactPage() {
             </div>
             <button
               onClick={() => setIsSubmitted(false)}
-              className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-lg transition-all shadow-sm"
+              className="bg-[#df794d] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-lg transition-all shadow-sm"
             >
               Send Another Message
             </button>
@@ -227,23 +227,23 @@ export default function ContactPage() {
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Call Us */}
-              <div className="group relative overflow-hidden p-3 rounded-xl bg-gradient-to-br from-[#FFF8F4] to-[#FFF0E8] border border-[#F9A37E]/20 hover:border-[#F9A37E]/50 hover:shadow-lg hover:shadow-[#F9A37E]/10 transition-all duration-300">
+              <div className="group relative overflow-hidden p-3 rounded-xl bg-gradient-to-br from-[#FFF8F4] to-[#FFF0E8] border border-[#df794d]/20 hover:border-[#df794d]/50 hover:shadow-lg hover:shadow-[#df794d]/10 transition-all duration-300">
                 <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-[#F9A37E]/15 flex items-center justify-center group-hover:bg-[#F9A37E]/25 transition-colors">
-                    <Phone className="w-5 h-5 text-[#F9A37E]" />
+                  <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-[#df794d]/15 flex items-center justify-center group-hover:bg-[#df794d]/25 transition-colors">
+                    <Phone className="w-5 h-5 text-[#df794d]" />
                   </div>
                   <div className="space-y-1 min-w-0">
                     <p className="text-xs font-black text-[#4A453E] uppercase tracking-wider">Call Us</p>
                     <a
                       href={`tel:${companySettings.phone.replace(/\s+/g, "")}`}
-                      className="text-sm font-bold text-zinc-700 hover:text-[#F9A37E] transition-colors block"
+                      className="text-sm font-bold text-zinc-700 hover:text-[#df794d] transition-colors block"
                     >
                       {companySettings.phone}
                     </a>
                     <p className="text-xs text-zinc-600">{companySettings.hours}</p>
                   </div>
                 </div>
-                <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full bg-[#F9A37E]/5 group-hover:bg-[#F9A37E]/10 transition-colors" />
+                <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full bg-[#df794d]/5 group-hover:bg-[#df794d]/10 transition-colors" />
               </div>
 
               {/* Email */}
@@ -292,7 +292,7 @@ export default function ContactPage() {
                 href={companySettings.facebookUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 bg-[#F9A37E] hover:bg-[#E8855A] rounded-lg transition-colors text-white"
+                className="p-2 bg-[#df794d] hover:bg-[#E8855A] rounded-lg transition-colors text-white"
                 aria-label="Facebook"
               >
                 <FacebookIcon className="w-4 h-4" />
@@ -301,7 +301,7 @@ export default function ContactPage() {
                 href={companySettings.youtubeUrl || companySettings.twitterUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 bg-[#F9A37E] hover:bg-[#E8855A] rounded-lg transition-colors text-white"
+                className="p-2 bg-[#df794d] hover:bg-[#E8855A] rounded-lg transition-colors text-white"
                 aria-label="YouTube"
               >
                 <YoutubeIcon className="w-4 h-4" />
@@ -310,7 +310,7 @@ export default function ContactPage() {
                 href={companySettings.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 bg-[#F9A37E] hover:bg-[#E8855A] rounded-lg transition-colors text-white"
+                className="p-2 bg-[#df794d] hover:bg-[#E8855A] rounded-lg transition-colors text-white"
                 aria-label="Instagram"
               >
                 <InstagramIcon className="w-4 h-4" />

@@ -191,7 +191,7 @@ export default function AdminSettingsPage() {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="support@kliamofashion.com"
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#df794d] text-zinc-800 font-medium"
                 />
               </div>
 
@@ -206,7 +206,7 @@ export default function AdminSettingsPage() {
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="+1 555-0199"
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#df794d] text-zinc-800 font-medium"
                 />
               </div>
 
@@ -221,7 +221,7 @@ export default function AdminSettingsPage() {
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   placeholder="123 Creative Street, Suite 100, New York, NY 10001"
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#df794d] text-zinc-800 font-medium"
                 />
               </div>
 
@@ -236,7 +236,7 @@ export default function AdminSettingsPage() {
                   value={formData.hours}
                   onChange={(e) => setFormData({ ...formData, hours: e.target.value })}
                   placeholder="Mon - Fri, 9am - 6pm EST"
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#df794d] text-zinc-800 font-medium"
                 />
               </div>
             </div>
@@ -256,7 +256,7 @@ export default function AdminSettingsPage() {
                     value={formData.facebookUrl}
                     onChange={(e) => setFormData({ ...formData, facebookUrl: e.target.value })}
                     placeholder="https://facebook.com/kliamo"
-                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#df794d] text-zinc-800 font-medium"
                   />
                 </div>
 
@@ -270,7 +270,7 @@ export default function AdminSettingsPage() {
                     value={formData.youtubeUrl}
                     onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value })}
                     placeholder="https://youtube.com/@kliamo"
-                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#df794d] text-zinc-800 font-medium"
                   />
                 </div>
 
@@ -284,7 +284,7 @@ export default function AdminSettingsPage() {
                     value={formData.instagramUrl}
                     onChange={(e) => setFormData({ ...formData, instagramUrl: e.target.value })}
                     placeholder="https://instagram.com/kliamo"
-                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#df794d] text-zinc-800 font-medium"
                   />
                 </div>
               </div>
@@ -307,7 +307,7 @@ export default function AdminSettingsPage() {
                     value={formData.customTshirtPrice}
                     onChange={(e) => setFormData({ ...formData, customTshirtPrice: parseInt(e.target.value) || 0 })}
                     placeholder="599"
-                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#df794d] text-zinc-800 font-medium"
                   />
                 </div>
 
@@ -323,7 +323,7 @@ export default function AdminSettingsPage() {
                     value={formData.customPoloPrice}
                     onChange={(e) => setFormData({ ...formData, customPoloPrice: parseInt(e.target.value) || 0 })}
                     placeholder="799"
-                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#df794d] text-zinc-800 font-medium"
                   />
                 </div>
 
@@ -339,7 +339,7 @@ export default function AdminSettingsPage() {
                     value={formData.customShirtPrice}
                     onChange={(e) => setFormData({ ...formData, customShirtPrice: parseInt(e.target.value) || 0 })}
                     placeholder="999"
-                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#F9A37E] text-zinc-800 font-medium"
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3 text-xs outline-none focus:border-[#df794d] text-zinc-800 font-medium"
                   />
                 </div>
               </div>
@@ -351,7 +351,7 @@ export default function AdminSettingsPage() {
             <button
               type="submit"
               disabled={saving}
-              className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-8 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#df794d] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-8 rounded-lg transition-all shadow-md shadow-[#df794d]/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? (
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -427,7 +427,7 @@ export default function AdminSettingsPage() {
               </button>
               <button
                 onClick={() => testQikinkApi('create_order')}
-                className="px-3 py-1.5 bg-[#F9A37E] hover:bg-[#e8855a] text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-1.5 bg-[#df794d] hover:bg-[#e8855a] text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <Printer className="w-3.5 h-3.5" />
                 Submit Test Order

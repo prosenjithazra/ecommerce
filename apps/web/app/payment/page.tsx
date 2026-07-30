@@ -199,7 +199,7 @@ function PaymentPageContent() {
           contact: address.phone || "",
         },
         theme: {
-          color: "#F9A37E",
+          color: "#df794d",
         },
       };
 
@@ -252,7 +252,7 @@ function PaymentPageContent() {
       {/* Processing Loader Overlay */}
       {isProcessing && (
         <div className="fixed !top-0 !m-0 inset-0 bg-white/70 dark:bg-black/70 backdrop-blur-sm z-50 flex flex-col items-center justify-center gap-3">
-          <Loader2 className="w-10 h-10 animate-spin text-[#F9A37E]" />
+          <Loader2 className="w-10 h-10 animate-spin text-[#df794d]" />
           <p className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-wider">Processing Payment Securely...</p>
           <p className="text-xs text-zinc-400">Verifying signature & synchronizing order with print partner...</p>
         </div>
@@ -293,7 +293,7 @@ function PaymentPageContent() {
                 <div className="pt-2 space-y-2">
                   <button
                     onClick={() => setSimulatedError(null)}
-                    className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3 px-4 rounded-xl transition-all shadow-md"
+                    className="w-full bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3 px-4 rounded-xl transition-all shadow-md"
                   >
                     Try Another Payment Method
                   </button>
@@ -327,7 +327,7 @@ function PaymentPageContent() {
                 <div className="space-y-3">
                   <button
                     onClick={handleSimulatedSuccess}
-                    className="w-full bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-3.5 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
+                    className="w-full bg-[#7e9677] hover:bg-[#92b089] text-white font-extrabold text-xs py-3.5 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
                   >
                     <CheckCircle2 className="w-4 h-4" />
                     Simulate Successful Payment
@@ -432,7 +432,7 @@ function PaymentPageContent() {
 
                 <button
                   type="submit"
-                  className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-sm py-3.5 px-4 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 mt-4 sm:mt-6"
+                  className="w-full bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-sm py-3.5 px-4 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 mt-4 sm:mt-6"
                 >
                   <CreditCard className="w-4 h-4" />
                   Pay ₹{total.toFixed(2)} via Razorpay
@@ -457,7 +457,7 @@ function PaymentPageContent() {
 
                 <button
                   type="submit"
-                  className="w-full bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-3.5 px-4 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 mt-4 sm:mt-6 shadow-[#A8C69F]/20"
+                  className="w-full bg-[#7e9677] hover:bg-[#92b089] text-white font-extrabold text-xs py-3.5 px-4 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 mt-4 sm:mt-6 shadow-[#7e9677]/20"
                 >
                   Place Cash on Delivery Order (₹{total.toFixed(2)})
                 </button>

@@ -125,7 +125,7 @@ export default function CheckoutPage() {
               <h3 className="font-extrabold text-sm text-[#4A453E]">1. Shipping Address</h3>
               {!showAddForm && (
                 <button onClick={() => setShowAddForm(true)}
-                  className="text-xs font-bold text-[#F9A37E] hover:text-[#E8855A] transition-colors">
+                  className="text-xs font-bold text-[#df794d] hover:text-[#E8855A] transition-colors">
                   + Add New
                 </button>
               )}
@@ -156,7 +156,7 @@ export default function CheckoutPage() {
                     Cancel
                   </button>
                   <button type="submit"
-                    className="bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all shadow-lg shadow-[#A8C69F]/20">
+                    className="bg-[#7e9677] hover:bg-[#92b089] text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all shadow-lg shadow-[#7e9677]/20">
                     Save Address
                   </button>
                 </div>
@@ -167,7 +167,7 @@ export default function CheckoutPage() {
                   <div key={addr.id} onClick={() => setSelectedAddressId(addr.id)}
                     className={`cursor-pointer border-2 rounded-lg p-2 md:p-4 transition-all ${
                       selectedAddressId === addr.id
-                        ? 'border-[#F9A37E] bg-[#FBD5C1]/10'
+                        ? 'border-[#df794d] bg-[#FBD5C1]/10'
                         : 'border-[#E8E2D6] hover:border-[#A89B8A]'
                     }`}>
                     <span className="font-extrabold text-xs text-[#4A453E]">{addr.fullName}</span>
@@ -184,7 +184,7 @@ export default function CheckoutPage() {
             <label className="flex items-center gap-2.5 cursor-pointer">
               <input type="checkbox" checked={sameAsBilling}
                 onChange={(e) => setSameAsBilling(e.target.checked)}
-                className="w-4 h-4 rounded border-[#E8E2D6] accent-[#F9A37E]" />
+                className="w-4 h-4 rounded border-[#E8E2D6] accent-[#df794d]" />
               <span className="text-xs font-bold text-[#4A453E]">Billing address same as shipping</span>
             </label>
           </div>
@@ -200,26 +200,26 @@ export default function CheckoutPage() {
                 <label key={opt.id}
                   className={`flex items-center justify-between p-2 md:p-4 border rounded-lg cursor-pointer transition-all ${
                     shippingMethod === opt.id
-                      ? 'border-[#F9A37E] bg-[#FBD5C1]/10'
+                      ? 'border-[#df794d] bg-[#FBD5C1]/10'
                       : 'border-[#E8E2D6] hover:border-[#A89B8A]'
                   }`}
                   onClick={() => setShippingMethod(opt.id as 'standard' | 'express')}
                 >
                   <div className="flex items-center gap-2 md:gap-3">
-                    <input type="radio" checked={shippingMethod === opt.id} readOnly className="accent-[#F9A37E]" />
+                    <input type="radio" checked={shippingMethod === opt.id} readOnly className="accent-[#df794d]" />
                     <div className="text-xs">
                       <span className="font-extrabold text-[#4A453E] block">{opt.label}</span>
                       <span className="text-[10px] text-[#A89B8A] mt-0.5 block">{opt.sub}</span>
                     </div>
                   </div>
-                  <span className="font-extrabold text-xs text-[#F9A37E]">{opt.price}</span>
+                  <span className="font-extrabold text-xs text-[#df794d]">{opt.price}</span>
                 </label>
               ))}
             </div>
             <div className="mt-3 p-3 bg-[#FDFAF6] dark:bg-zinc-800/40 border border-[#E8E2D6] dark:border-zinc-700/60 rounded-xl flex items-start gap-2.5">
-              <Info className="w-4 h-4 text-[#F9A37E] flex-shrink-0 mt-0.5" />
+              <Info className="w-4 h-4 text-[#df794d] flex-shrink-0 mt-0.5" />
               <p className="text-[11px] text-[#7A736A] dark:text-zinc-350 font-semibold leading-relaxed">
-                Standard shipping is <span className="text-[#F9A37E] font-extrabold">FREE</span> for orders of <span className="text-[#4A453E] dark:text-zinc-200 font-extrabold">₹999</span> or more. A standard shipping charge of <span className="text-[#4A453E] dark:text-zinc-200 font-extrabold">₹49</span> is applicable on orders below ₹999.
+                Standard shipping is <span className="text-[#df794d] font-extrabold">FREE</span> for orders of <span className="text-[#4A453E] dark:text-zinc-200 font-extrabold">₹999</span> or more. A standard shipping charge of <span className="text-[#4A453E] dark:text-zinc-200 font-extrabold">₹49</span> is applicable on orders below ₹999.
               </p>
             </div>
           </div>
@@ -275,7 +275,7 @@ export default function CheckoutPage() {
                          {item.name} <span className="text-[10px] text-[#A89B8A]">×{item.quantity}</span>
                        </span>
                      ) : (
-                       <Link href={`/products/${item.slug || item.productId}`} className="hover:text-[#F9A37E] transition-colors truncate flex-1">
+                       <Link href={`/products/${item.slug || item.productId}`} className="hover:text-[#df794d] transition-colors truncate flex-1">
                          <span className="font-bold text-[#4A453E] truncate block">
                            {item.name} <span className="text-[10px] text-[#A89B8A]">×{item.quantity}</span>
                          </span>
@@ -300,16 +300,16 @@ export default function CheckoutPage() {
             </div>
             <div className="flex justify-between">
               <span className="text-[#7A736A]">Shipping</span>
-              <span className="font-bold text-[#A8C69F]">{shippingFee === 0 ? "FREE" : `₹${shippingFee.toFixed(2)}`}</span>
+              <span className="font-bold text-[#7e9677]">{shippingFee === 0 ? "FREE" : `₹${shippingFee.toFixed(2)}`}</span>
             </div>
             <div className="flex justify-between pt-3 border-t border-[#E8E2D6] text-sm font-black">
               <span className="text-[#4A453E]">Estimated Total</span>
-              <span className="text-[#F9A37E]">₹{total.toFixed(2)}</span>
+              <span className="text-[#df794d]">₹{total.toFixed(2)}</span>
             </div>
           </div>
 
           <button onClick={handleProceedToPayment}
-            className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 flex items-center justify-center active:scale-95">
+            className="w-full bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#df794d]/25 flex items-center justify-center active:scale-95">
             Continue to Payment →
           </button>
         </div>

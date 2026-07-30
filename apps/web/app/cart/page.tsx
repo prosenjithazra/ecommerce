@@ -105,7 +105,7 @@ export default function CartPage() {
           description="Design custom items or browse premium blanks to fill your cart."
           actionText="Start Shopping"
           actionHref="/products"
-          icon={<ShoppingBag className="w-8 h-8 text-[#A8C69F]" />}
+          icon={<ShoppingBag className="w-8 h-8 text-[#7e9677]" />}
         />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6 items-start">
@@ -139,7 +139,7 @@ export default function CartPage() {
                         {isCustom ? (
                           <h3 className="font-extrabold text-xs sm:text-sm text-[#4A453E] truncate flex-1">{item.name}</h3>
                         ) : (
-                          <Link href={`/products/${item.productId}`} className="hover:text-[#F9A37E] transition-colors truncate flex-1">
+                          <Link href={`/products/${item.productId}`} className="hover:text-[#df794d] transition-colors truncate flex-1">
                             <h3 className="font-extrabold text-xs sm:text-sm text-[#4A453E] truncate">{item.name}</h3>
                           </Link>
                         )}
@@ -209,13 +209,13 @@ export default function CartPage() {
                       placeholder="Coupon code"
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value)}
-                      className="w-full h-10 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] uppercase text-[#4A453E] font-mono"
+                      className="w-full h-10 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg pl-9 pr-3 text-xs outline-none focus:border-[#df794d] uppercase text-[#4A453E] font-mono"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={applyingCoupon}
-                    className="h-10 bg-[#A8C69F] hover:bg-[#92b089] disabled:opacity-60 text-white rounded-lg px-5 text-xs font-extrabold transition-all shadow-md shadow-[#A8C69F]/10 flex-shrink-0 flex items-center justify-center cursor-pointer"
+                    className="h-10 bg-[#7e9677] hover:bg-[#92b089] disabled:opacity-60 text-white rounded-lg px-5 text-xs font-extrabold transition-all shadow-md shadow-[#7e9677]/10 flex-shrink-0 flex items-center justify-center cursor-pointer"
                   >
                     {applyingCoupon ? "..." : "Apply"}
                   </button>
@@ -240,24 +240,24 @@ export default function CartPage() {
                 )}
                 <div className="flex justify-between">
                   <span className="text-[#7A736A]">Standard Shipping</span>
-                  <span className="font-extrabold text-[#A8C69F]">{shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}</span>
+                  <span className="font-extrabold text-[#7e9677]">{shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}</span>
                 </div>
                 <div className="flex justify-between pt-3 border-t border-[#E8E2D6] text-sm font-black">
                   <span className="text-[#4A453E]">Total Amount</span>
-                  <span className="text-[#F9A37E]">₹{total.toFixed(2)}</span>
+                  <span className="text-[#df794d]">₹{total.toFixed(2)}</span>
                 </div>
               </div>
               
               <div className="p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl flex items-start gap-2.5">
-                <Info className="w-4 h-4 text-[#F9A37E] flex-shrink-0 mt-0.5" />
+                <Info className="w-4 h-4 text-[#df794d] flex-shrink-0 mt-0.5" />
                 <p className="text-[11px] text-[#7A736A] font-semibold leading-relaxed">
-                  Standard shipping is <span className="text-[#F9A37E] font-extrabold">FREE</span> for orders of <span className="text-[#4A453E] font-extrabold">₹999</span> or more. A standard shipping charge of <span className="text-[#4A453E] font-extrabold">₹49</span> is applicable on orders below ₹999.
+                  Standard shipping is <span className="text-[#df794d] font-extrabold">FREE</span> for orders of <span className="text-[#4A453E] font-extrabold">₹999</span> or more. A standard shipping charge of <span className="text-[#4A453E] font-extrabold">₹49</span> is applicable on orders below ₹999.
                 </p>
               </div>
 
               {/* Delivery estimate */}
               <div className="p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg flex items-start gap-3">
-                <Calendar className="w-4 h-4 text-[#A8C69F] mt-0.5 flex-shrink-0" />
+                <Calendar className="w-4 h-4 text-[#7e9677] mt-0.5 flex-shrink-0" />
                 <div className="text-[10px] text-[#7A736A]">
                   <span className="font-bold text-[#4A453E] block">Estimated Delivery</span>
                   <span className="mt-0.5 block">{getEstimatedDelivery()}</span>
@@ -266,7 +266,7 @@ export default function CartPage() {
 
               <Link
                 href="/checkout"
-                className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#F9A37E]/25"
+                className="w-full bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#df794d]/25"
               >
                 Proceed to Checkout
               </Link>

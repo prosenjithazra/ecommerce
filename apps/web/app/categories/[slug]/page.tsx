@@ -165,7 +165,7 @@ export default function CategoryDetailPage() {
             description={error || "The category you are looking for does not exist or has been removed."}
             actionText="View All Categories"
             actionHref="/categories"
-            icon={<Package className="w-8 h-8 text-[#F9A37E]" />}
+            icon={<Package className="w-8 h-8 text-[#df794d]" />}
           />
         </div>
       </div>
@@ -186,7 +186,7 @@ export default function CategoryDetailPage() {
           )}
           <div className="relative z-10 max-w-2xl space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#F9A37E] bg-[#F9A37E]/20 px-3 py-1 rounded-full border border-[#F9A37E]/30 flex items-center gap-1">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#df794d] bg-[#df794d]/20 px-3 py-1 rounded-full border border-[#df794d]/30 flex items-center gap-1">
                 <Sparkles className="w-3 h-3" /> Category Collection
               </span>
               <span className="text-[10px] font-extrabold text-[#A89B8A] bg-white/10 px-3 py-1 rounded-full">
@@ -207,9 +207,9 @@ export default function CategoryDetailPage() {
           <div className="hidden lg:block bg-white border border-[#E8E2D6] rounded-xl p-5 space-y-5 lg:sticky lg:top-20 shadow-xs">
             <div className="flex items-center justify-between pb-3 border-b border-[#E8E2D6]">
               <h3 className="font-extrabold text-sm text-[#4A453E] flex items-center gap-1.5">
-                <SlidersHorizontal className="w-4 h-4 text-[#F9A37E]" /> Filters
+                <SlidersHorizontal className="w-4 h-4 text-[#df794d]" /> Filters
               </h3>
-              <button onClick={handleReset} className="text-[10px] font-bold text-[#A89B8A] hover:text-[#F9A37E] flex items-center gap-1 transition-colors">
+              <button onClick={handleReset} className="text-[10px] font-bold text-[#A89B8A] hover:text-[#df794d] flex items-center gap-1 transition-colors">
                 <RotateCcw className="w-3 h-3" /> Reset
               </button>
             </div>
@@ -225,7 +225,7 @@ export default function CategoryDetailPage() {
                   onClick={() => setIsFilterDrawerOpen(true)}
                   className="flex-none flex lg:hidden items-center justify-center gap-1.5 bg-white border border-[#E8E2D6] rounded-lg py-2 px-3.5 text-xs font-bold text-[#4A453E]"
                 >
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-[#F9A37E]" /> Filters
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-[#df794d]" /> Filters
                 </button>
                 <span className="text-xs text-[#A89B8A] flex-shrink-0 ml-auto sm:ml-0 font-semibold">Sort by:</span>
                 <Select
@@ -250,7 +250,7 @@ export default function CategoryDetailPage() {
                   description="We couldn't find any items matching your active search or filters in this category."
                   actionText="Reset Filters"
                   actionHref={`/categories/${category.slug}`}
-                  icon={<Search className="w-8 h-8 text-[#F9A37E]" />}
+                  icon={<Search className="w-8 h-8 text-[#df794d]" />}
                 />
               </div>
             ) : (
@@ -277,7 +277,7 @@ export default function CategoryDetailPage() {
           <div className="space-y-6 pt-2">
             <div className="flex justify-between items-center border-b border-[#E8E2D6] pb-4">
               <span className="text-xs font-bold text-[#7A736A]">{sortedProducts.length} results</span>
-              <button onClick={handleReset} className="text-[10px] font-bold text-[#A89B8A] hover:text-[#F9A37E] flex items-center gap-1 transition-colors">
+              <button onClick={handleReset} className="text-[10px] font-bold text-[#A89B8A] hover:text-[#df794d] flex items-center gap-1 transition-colors">
                 <RotateCcw className="w-3.5 h-3.5" /> Reset Filters
               </button>
             </div>
@@ -325,7 +325,7 @@ function FilterForm({
           placeholder="Search category products..."
           value={draftSearch}
           onChange={(e) => setDraftSearch(e.target.value)}
-          className="w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg py-2.5 pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E]"
+          className="w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg py-2.5 pl-9 pr-3 text-xs outline-none focus:border-[#df794d] text-[#4A453E]"
         />
       </div>
 
@@ -336,7 +336,7 @@ function FilterForm({
             type="checkbox"
             checked={draftInStockOnly}
             onChange={(e) => setDraftInStockOnly(e.target.checked)}
-            className="w-4 h-4 rounded border-[#E8E2D6] accent-[#F9A37E]"
+            className="w-4 h-4 rounded border-[#E8E2D6] accent-[#df794d]"
           />
           <span className="text-xs text-[#7A736A] font-medium">In stock only</span>
         </label>
@@ -372,7 +372,7 @@ function FilterForm({
                 key={size}
                 onClick={() => handleSizeToggle(size)}
                 className={`min-w-8 h-8 px-2 rounded-lg text-[10px] font-extrabold border transition-all ${
-                  isSelected ? 'bg-[#F9A37E] text-white border-[#F9A37E]' : 'text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
+                  isSelected ? 'bg-[#df794d] text-white border-[#df794d]' : 'text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
                 }`}
               >{size}</button>
             );
@@ -383,7 +383,7 @@ function FilterForm({
       <div className="pt-2">
         <button
           type="submit"
-          className="w-full bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2.5 px-4 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20 flex items-center justify-center gap-2 active:scale-[0.98]"
+          className="w-full bg-[#df794d] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2.5 px-4 rounded-lg transition-all shadow-md shadow-[#df794d]/20 flex items-center justify-center gap-2 active:scale-[0.98]"
         >
           <SlidersHorizontal className="w-3.5 h-3.5" /> Apply Filters
         </button>

@@ -32,7 +32,7 @@ export const StickyAddToCart: React.FC<StickyAddToCartProps> = ({
       <button
         onClick={onAddToCart}
         disabled={!inStock}
-        className="flex items-center gap-2 bg-[#A8C69F] hover:bg-[#92b089] disabled:bg-[#E8E2D6] disabled:text-[#A89B8A] text-white font-extrabold text-xs py-2 px-3 rounded-lg transition-all shadow-lg shadow-[#A8C69F]/25 flex-shrink-0"
+        className="flex items-center gap-2 bg-[#7e9677] hover:bg-[#92b089] disabled:bg-[#E8E2D6] disabled:text-[#A89B8A] text-white font-extrabold text-xs py-2 px-3 rounded-lg transition-all shadow-lg shadow-[#7e9677]/25 flex-shrink-0"
       >
         <ShoppingBag className="w-3.5 h-3.5" />
         <span className='text-xs'>{inStock ? "Add to Cart" : "Out of Stock"}</span>
