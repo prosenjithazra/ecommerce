@@ -11,12 +11,24 @@ import { getApiUrl } from "../../../../components/ApiConfig";
 const CATEGORIES = ["T-Shirts", "Hoodies", "Jackets", "Mugs", "Accessories", "Bags", "Phone Cases"];
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL", "3XL"];
 const COLORS = [
-  { name: "White", hex: "#ffffff" },
-  { name: "Black", hex: "#0f172a" },
-  { name: "Heather Grey", hex: "#94a3b8" },
-  { name: "Navy Blue", hex: "#1e3a8a" },
-  { name: "Forest Green", hex: "#14532d" },
-  { name: "Crimson Red", hex: "#991b1b" },
+  { name: "White", hex: "#FFFFFF" },
+  { name: "Black", hex: "#18181B" },
+  { name: "Dark Navy", hex: "#1E293B" },
+  { name: "Maroon", hex: "#7F1D1D" },
+  { name: "Baby Pink", hex: "#F8C8DC" },
+  { name: "Light Lavender", hex: "#DDD6FE" },
+  { name: "Mint Green", hex: "#A7F3D0" },
+  { name: "Sky Blue", hex: "#7DD3FC" },
+  { name: "Heather Grey", hex: "#94A3B8" },
+  { name: "Charcoal Grey", hex: "#334155" },
+  { name: "Sage Green", hex: "#7E9677" },
+  { name: "Forest Green", hex: "#14532D" },
+  { name: "Crimson Red", hex: "#DC2626" },
+  { name: "Peach", hex: "#DF794D" },
+  { name: "Mustard Yellow", hex: "#F59E0B" },
+  { name: "Pastel Yellow", hex: "#FEF08A" },
+  { name: "Royal Blue", hex: "#2563EB" },
+  { name: "Sand Beige", hex: "#E5E0D8" },
 ];
 
 const slugify = (name: string) =>
@@ -381,7 +393,27 @@ export default function AddProductPage() {
                           const colors = form.selectedColors.length > 0 ? form.selectedColors : ['White', 'Black'];
                           const sizes = form.selectedSizes.length > 0 ? form.selectedSizes : ['S', 'M', 'L', 'XL'];
                           const map: Record<string, string> = {};
-                          const COLOR_MAP: Record<string, string> = { 'White': 'Wh', 'Black': 'Bk', 'Heather Grey': 'Gy', 'Navy Blue': 'Ny', 'Forest Green': 'Gn', 'Crimson Red': 'Rd' };
+                          const COLOR_MAP: Record<string, string> = {
+                            'White': 'Wh',
+                            'Black': 'Bk',
+                            'Dark Navy': 'Ny',
+                            'Navy Blue': 'Ny',
+                            'Maroon': 'MR',
+                            'Baby Pink': 'PK',
+                            'Light Lavender': 'LV',
+                            'Mint Green': 'MG',
+                            'Sky Blue': 'SB',
+                            'Heather Grey': 'Gy',
+                            'Charcoal Grey': 'CH',
+                            'Sage Green': 'SG',
+                            'Forest Green': 'Gn',
+                            'Crimson Red': 'Rd',
+                            'Peach': 'PC',
+                            'Mustard Yellow': 'MY',
+                            'Pastel Yellow': 'YL',
+                            'Royal Blue': 'RB',
+                            'Sand Beige': 'SD',
+                          };
                           colors.forEach(c => {
                             const cCode = COLOR_MAP[c] || c.slice(0, 2).toUpperCase();
                             sizes.forEach(s => {
