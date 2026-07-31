@@ -34,3 +34,6 @@ export class Category {
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category);
+
+CategorySchema.index({ status: 1, createdAt: 1 });
+CategorySchema.index({ name: 1 });

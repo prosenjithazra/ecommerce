@@ -46,6 +46,8 @@ export class CloudinaryService {
       this.logger.log('Uploading image to Cloudinary...');
       const uploadResponse = await cloudinary.uploader.upload(base64Str, {
         folder: 'my-turborepo-ecommerce',
+        quality: 'auto',
+        fetch_format: 'auto',
       });
       this.logger.log(
         `Successfully uploaded image: ${uploadResponse.secure_url}`,
@@ -53,7 +55,6 @@ export class CloudinaryService {
       return uploadResponse.secure_url;
     } catch (error: any) {
       this.logger.error(`Cloudinary upload failed: ${error.message || error}`);
-      // Return the base64 string as fallback to avoid breaking the application
       return base64Str;
     }
   }

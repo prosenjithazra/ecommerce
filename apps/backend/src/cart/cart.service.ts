@@ -24,13 +24,14 @@ export class CartService implements OnModuleInit {
   }
 
   async getCart(userId: string): Promise<Cart> {
-    let cart = await this.cartModel.findOne({ userId });
-    if (!cart) {
-      const now = new Date();
-      cart = new this.cartModel({ userId, items: [], createdAt: now, updatedAt: now });
-      await cart.save();
-    }
-    return cart;
+    const existing = await this.cartModel.findOne({ userId }).lean();
+    if (existing) return existing as unknown as Cart;
+
+    const now = new Date();
+    const created = new this.cartModel({ userId, items: [], createdAt: now, updatedAt: now });
+    await created.save();
+    const newCart = await this.cartModel.findOne({ userId }).lean();
+    return newCart as unknown as Cart;
   }
 
   async addItem(

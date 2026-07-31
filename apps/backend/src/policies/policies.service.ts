@@ -1,6 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { Policy, PolicyType, PolicySectionItem } from './schemas/policy.schema';
 
 const DEFAULT_POLICIES: Record<PolicyType, { title: string; subtitle: string; sections: PolicySectionItem[] }> = {
@@ -170,29 +172,49 @@ const DEFAULT_POLICIES: Record<PolicyType, { title: string; subtitle: string; se
 
 @Injectable()
 export class PoliciesService {
-  constructor(@InjectModel(Policy.name) private policyModel: Model<Policy>) {}
+  constructor(
+    @InjectModel(Policy.name)
+    private readonly policyModel: Model<Policy>,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
+  ) {}
+
+  private async invalidateCache(type?: string) {
+    try {
+      if (type) {
+        await this.cacheManager.del(`cache_policy_${type}`);
+      }
+      await this.cacheManager.del('cache_all_policies');
+    } catch (err) {}
+  }
 
   async findByType(type: string): Promise<Policy> {
     const normType = (type || '').toLowerCase().trim() as PolicyType;
-    let policy = await this.policyModel.findOne({ type: normType });
+    const cacheKey = `cache_policy_${normType}`;
+    const cached = await this.cacheManager.get<Policy>(cacheKey);
+    if (cached) return cached;
 
-    if (!policy && DEFAULT_POLICIES[normType]) {
+    let policyObj: any = await this.policyModel.findOne({ type: normType }).lean();
+
+    if (!policyObj && DEFAULT_POLICIES[normType]) {
       const def = DEFAULT_POLICIES[normType];
-      policy = new this.policyModel({
+      const created = new this.policyModel({
         type: normType,
         title: def.title,
         subtitle: def.subtitle,
         sections: def.sections,
         isPublished: true,
       });
-      await policy.save();
+      const saved = await created.save();
+      policyObj = saved.toObject ? saved.toObject() : saved;
     }
 
-    if (!policy) {
+    if (!policyObj) {
       throw new NotFoundException(`Policy type '${type}' not found`);
     }
 
-    return policy;
+    await this.cacheManager.set(cacheKey, policyObj, 600000);
+    return policyObj as Policy;
   }
 
   async updatePolicy(type: string, data: { title?: string; subtitle?: string; sections: PolicySectionItem[] }): Promise<Policy> {
@@ -209,7 +231,9 @@ export class PoliciesService {
       policy.sections = updatedSections;
       if (data.title) policy.title = data.title;
       if (data.subtitle) policy.subtitle = data.subtitle;
-      return policy.save();
+      const saved = await policy.save();
+      this.invalidateCache(normType);
+      return saved;
     } else {
       const def = DEFAULT_POLICIES[normType] || { title: `${type} Policy`, subtitle: 'Policy guidelines' };
       policy = new this.policyModel({
@@ -219,16 +243,21 @@ export class PoliciesService {
         sections: updatedSections,
         isPublished: true,
       });
-      return policy.save();
+      const saved = await policy.save();
+      this.invalidateCache(normType);
+      return saved;
     }
   }
 
   async findAll(): Promise<Policy[]> {
-    // Ensure all 5 default policy types exist
+    const cached = await this.cacheManager.get<Policy[]>('cache_all_policies');
+    if (cached) return cached;
+
     const types: PolicyType[] = ['refund', 'shipping', 'terms', 'privacy', 'faq'];
-    for (const t of types) {
-      await this.findByType(t);
-    }
-    return this.policyModel.find().exec();
+    await Promise.all(types.map((t) => this.findByType(t)));
+    
+    const policies = (await this.policyModel.find().lean()) as unknown as Policy[];
+    await this.cacheManager.set('cache_all_policies', policies, 600000);
+    return policies;
   }
 }

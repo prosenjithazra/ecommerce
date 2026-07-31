@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CacheModule } from '@nestjs/cache-manager';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { OrdersModule } from './orders/orders.module';
@@ -27,6 +28,11 @@ import { PoliciesModule } from './policies/policies.module';
       isGlobal: true,
       envFilePath: ['apps/backend/.env', '.env'],
     }),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 300000, // 5 minutes in milliseconds
+      max: 500, // max items in cache
+    }),
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
@@ -34,12 +40,18 @@ import { PoliciesModule } from './policies/policies.module';
           configService.get<string>('MONGODB_URI') ||
           configService.get<string>('MONGDB_URI') ||
           configService.get<string>('DATABASE_URL');
+        if (process.env.NODE_ENV !== 'production') {
           console.log('[AppModule] Connecting to MongoDB URL:', mongoUrl?.replace(/:([^@]+)@/, ':****@'));
+        }
 
         return {
           uri: mongoUrl,
-          serverSelectionTimeoutMS: 10000,
+          maxPoolSize: 10,
+          minPoolSize: 2,
+          serverSelectionTimeoutMS: 5000,
           connectTimeoutMS: 10000,
+          socketTimeoutMS: 45000,
+          autoIndex: true,
         };
       },
     }),

@@ -1,6 +1,8 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { Category, CategoryDocument } from './schemas/category.schema';
 import { Product, ProductDocument } from '../products/schemas/product.schema';
 import { randomUUID } from 'crypto';
@@ -13,49 +15,63 @@ const slugify = (name: string): string =>
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
 
+const CACHE_KEY_ALL_CATEGORIES = 'cache_all_categories';
+
 @Injectable()
-export class CategoryService implements OnModuleInit {
+export class CategoryService {
   constructor(
     @InjectModel(Category.name)
     private readonly categoryModel: Model<CategoryDocument>,
     @InjectModel(Product.name)
     private readonly productModel: Model<ProductDocument>,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
   ) {}
 
-  async onModuleInit() {
-    // Seeding optional
+  private async invalidateCache() {
+    try {
+      await this.cacheManager.del(CACHE_KEY_ALL_CATEGORIES);
+    } catch (err) {}
   }
 
-  private async attachProductCounts(categories: CategoryDocument[]): Promise<Category[]> {
-    const products = await this.productModel.find();
+  private async attachProductCounts(categories: any[]): Promise<Category[]> {
+    if (!categories || categories.length === 0) return [];
+    
+    // Only select minimal fields needed for counting
+    const products = await this.productModel.find().select('categoryId category').lean();
+    
     return categories.map((cat) => {
-      const catObj = cat.toObject ? cat.toObject() : cat;
       const count = products.filter((p) => {
         if (p.categoryId && p.categoryId === cat.id) return true;
         if (p.category && p.category.toLowerCase() === cat.name.toLowerCase()) return true;
         if (p.category && slugify(p.category) === cat.slug) return true;
         return false;
       }).length;
-      return { ...catObj, count };
+      return { ...cat, count: count > 0 ? count : (cat.count || 0) };
     });
   }
 
   async findAll(): Promise<Category[]> {
-    const categories = await this.categoryModel.find().sort({ createdAt: 1 });
-    return this.attachProductCounts(categories);
+    const cached = await this.cacheManager.get<Category[]>(CACHE_KEY_ALL_CATEGORIES);
+    if (cached) return cached;
+
+    const categories = await this.categoryModel.find().sort({ createdAt: 1 }).lean();
+    const result = await this.attachProductCounts(categories);
+    await this.cacheManager.set(CACHE_KEY_ALL_CATEGORIES, result, 300000);
+    return result;
   }
 
   async findOne(id: string): Promise<Category | null> {
-    let cat = await this.categoryModel.findOne({ id });
-    if (!cat) cat = await this.categoryModel.findOne({ slug: id });
+    let cat = await this.categoryModel.findOne({ id }).lean();
+    if (!cat) cat = await this.categoryModel.findOne({ slug: id }).lean();
     if (!cat) return null;
     const [withCount] = await this.attachProductCounts([cat]);
     return withCount || null;
   }
 
   async findBySlug(slug: string): Promise<Category | null> {
-    let cat = await this.categoryModel.findOne({ slug });
-    if (!cat) cat = await this.categoryModel.findOne({ id: slug });
+    let cat = await this.categoryModel.findOne({ slug }).lean();
+    if (!cat) cat = await this.categoryModel.findOne({ id: slug }).lean();
     if (!cat) return null;
     const [withCount] = await this.attachProductCounts([cat]);
     return withCount || null;
@@ -74,7 +90,9 @@ export class CategoryService implements OnModuleInit {
       createdAt: now,
       updatedAt: now,
     });
-    return cat.save();
+    const saved = await cat.save();
+    this.invalidateCache();
+    return saved;
   }
 
   async update(id: string, data: Partial<Category>): Promise<Category> {
@@ -90,10 +108,13 @@ export class CategoryService implements OnModuleInit {
     if (data.status !== undefined) cat.status = data.status;
     cat.updatedAt = new Date();
 
-    return cat.save();
+    const saved = await cat.save();
+    this.invalidateCache();
+    return saved;
   }
 
   async remove(id: string): Promise<void> {
     await this.categoryModel.deleteOne({ id });
+    this.invalidateCache();
   }
 }

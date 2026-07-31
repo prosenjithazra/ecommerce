@@ -33,7 +33,9 @@ export class UserService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.seedAdminUser();
+    setImmediate(() => {
+      this.seedAdminUser().catch(() => {});
+    });
   }
 
   async seedAdminUser() {
@@ -46,11 +48,10 @@ export class UserService implements OnModuleInit {
       }
 
       let user = await this.userModel.findOne({ id: 'admin-default-uuid-1111' });
-
-      const hashedPassword = await bcrypt.hash(adminPassword, 10);
       const now = new Date();
 
       if (!user) {
+        const hashedPassword = await bcrypt.hash(adminPassword, 10);
         const emailExists = await this.userModel.findOne({
           email: adminEmail.toLowerCase(),
         });
@@ -64,7 +65,6 @@ export class UserService implements OnModuleInit {
             emailExists.password = hashedPassword;
           }
           await emailExists.save();
-          console.log(`Updated existing user to admin: ${adminEmail}`);
           return;
         }
 
@@ -80,26 +80,17 @@ export class UserService implements OnModuleInit {
           updatedAt: now,
         });
         await user.save();
-        console.log(
-          `Seeded default admin user from environment: ${adminEmail}`,
-        );
       } else {
-        const isPasswordMatch = await bcrypt.compare(
-          adminPassword,
-          user.password,
-        );
-        if (user.email !== adminEmail.toLowerCase() || !isPasswordMatch) {
+        if (user.email !== adminEmail.toLowerCase()) {
+          const hashedPassword = await bcrypt.hash(adminPassword, 10);
           user.email = adminEmail.toLowerCase();
           user.password = hashedPassword;
           user.updatedAt = now;
           await user.save();
-          console.log(
-            `Updated admin credentials in database from environment: ${adminEmail}`,
-          );
         }
       }
     } catch (err) {
-      console.error('Error seeding admin user:', err);
+      // Quiet background catch
     }
   }
 
@@ -256,14 +247,11 @@ export class UserService implements OnModuleInit {
   }
 
   async getProfile(userId: string): Promise<any> {
-    const user = await this.userModel.findOne({ id: userId });
+    const user = await this.userModel.findOne({ id: userId }).select('-password').lean();
     if (!user) {
       throw new NotFoundException('User not found');
     }
-
-    const obj = user.toObject();
-    delete (obj as any).password;
-    return obj;
+    return user;
   }
 
   async updateProfile(userId: string, dto: any): Promise<any> {
@@ -298,12 +286,7 @@ export class UserService implements OnModuleInit {
   }
 
   async findAll(): Promise<any[]> {
-    const users = await this.userModel.find().sort({ createdAt: -1 });
-    return users.map((u) => {
-      const obj = u.toObject();
-      delete (obj as any).password;
-      return obj;
-    });
+    return this.userModel.find().select('-password').sort({ createdAt: -1 }).lean();
   }
 
   async toggleStatus(id: string): Promise<any> {

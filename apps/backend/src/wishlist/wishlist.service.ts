@@ -19,13 +19,14 @@ export class WishlistService implements OnModuleInit {
   }
 
   async getWishlist(userId: string): Promise<Wishlist> {
-    let wishlist = await this.wishlistModel.findOne({ userId });
-    if (!wishlist) {
-      const now = new Date();
-      wishlist = new this.wishlistModel({ userId, items: [], createdAt: now, updatedAt: now });
-      await wishlist.save();
-    }
-    return wishlist;
+    const existing = await this.wishlistModel.findOne({ userId }).lean();
+    if (existing) return existing as unknown as Wishlist;
+
+    const now = new Date();
+    const created = new this.wishlistModel({ userId, items: [], createdAt: now, updatedAt: now });
+    await created.save();
+    const newWishlist = await this.wishlistModel.findOne({ userId }).lean();
+    return newWishlist as unknown as Wishlist;
   }
 
   async toggleItem(

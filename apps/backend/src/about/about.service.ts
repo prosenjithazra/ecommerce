@@ -13,12 +13,14 @@ export class AboutService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.seedAbout();
+    setImmediate(() => {
+      this.seedAbout().catch(() => {});
+    });
   }
 
   private async seedAbout() {
     try {
-      const existing = await this.aboutModel.findOne({ id: 'default' });
+      const existing = await this.aboutModel.findOne({ id: 'default' }).select('_id').lean();
       if (existing) return;
 
       const now = new Date();
@@ -88,14 +90,11 @@ export class AboutService implements OnModuleInit {
       });
 
       await about.save();
-      console.log('Seeded default About Us content successfully.');
-    } catch (err) {
-      console.error('Error seeding About Us content:', err);
-    }
+    } catch (err) {}
   }
 
   async getAbout(): Promise<About | null> {
-    return this.aboutModel.findOne({ id: 'default' });
+    return this.aboutModel.findOne({ id: 'default' }).lean();
   }
 
   async updateAbout(data: Partial<About>): Promise<About> {
@@ -127,18 +126,19 @@ export class AboutService implements OnModuleInit {
     if (data.milestones !== undefined) about.milestones = data.milestones;
 
     if (data.team !== undefined) {
-      const updatedTeam: { name: string; role: string; image: string }[] = [];
-      for (const member of data.team) {
-        let avatarUrl = member.image;
-        if (avatarUrl && avatarUrl.startsWith('data:image/')) {
-          avatarUrl = await this.cloudinaryService.uploadImage(avatarUrl);
-        }
-        updatedTeam.push({
-          name: member.name,
-          role: member.role,
-          image: avatarUrl,
-        });
-      }
+      const updatedTeam = await Promise.all(
+        data.team.map(async (member) => {
+          let avatarUrl = member.image;
+          if (avatarUrl && avatarUrl.startsWith('data:image/')) {
+            avatarUrl = await this.cloudinaryService.uploadImage(avatarUrl);
+          }
+          return {
+            name: member.name,
+            role: member.role,
+            image: avatarUrl,
+          };
+        }),
+      );
       about.team = updatedTeam;
     }
 

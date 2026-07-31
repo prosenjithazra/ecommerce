@@ -33,13 +33,13 @@ export class OrdersService implements OnModuleInit {
 
   async findAll(email?: string): Promise<Order[]> {
     if (email) {
-      return this.orderModel.find({ email }).sort({ createdAt: -1 });
+      return this.orderModel.find({ email }).sort({ createdAt: -1 }).lean();
     }
-    return this.orderModel.find().sort({ createdAt: -1 });
+    return this.orderModel.find().sort({ createdAt: -1 }).lean();
   }
 
   async findOne(id: string): Promise<Order | null> {
-    return this.orderModel.findOne({ id });
+    return this.orderModel.findOne({ id }).lean();
   }
 
   /**
