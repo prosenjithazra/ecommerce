@@ -502,12 +502,16 @@ export default function HomePage() {
               if (Array.isArray(catData) && catData.length > 0) {
                 const mapped = catData.map((c: any) => {
                   const realCount = prods.filter(
-                    (p: any) => p.category?.toLowerCase() === c.name?.toLowerCase()
+                    (p: any) =>
+                      (p.categoryId && c.id && p.categoryId === c.id) ||
+                      (p.category && c.name && p.category.toLowerCase() === c.name.toLowerCase()) ||
+                      (c.slug && p.category && p.category.toLowerCase().replace(/\s+/g, '-') === c.slug)
                   ).length;
+                  const finalCount = realCount > 0 ? realCount : (typeof c.count === 'number' ? c.count : 0);
                   return {
                     name: c.name,
                     image: c.image || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80",
-                    count: realCount,
+                    count: finalCount,
                     href: `/products?category=${encodeURIComponent(c.name)}`,
                   };
                 });

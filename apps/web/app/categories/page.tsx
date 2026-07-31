@@ -32,13 +32,22 @@ export default function CategoriesPage() {
     ])
       .then(([catData, prodData]) => {
         setProducts(prodData || []);
-        const mapped = (catData || []).map((c: any) => ({
-          name: c.name,
-          slug: c.slug || c.name.toLowerCase().replace(/\s+/g, '-'),
-          image: c.image || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80",
-          count: c.count || 0,
-          href: `/categories/${c.slug || encodeURIComponent(c.name.toLowerCase().replace(/\s+/g, '-'))}`
-        }));
+        const mapped = (catData || []).map((c: any) => {
+          const realCount = (prodData || []).filter(
+            (p: any) =>
+              (p.categoryId && c.id && p.categoryId === c.id) ||
+              (p.category && c.name && p.category.toLowerCase() === c.name.toLowerCase()) ||
+              (c.slug && p.category && p.category.toLowerCase().replace(/\s+/g, '-') === c.slug)
+          ).length;
+          const finalCount = realCount > 0 ? realCount : (typeof c.count === 'number' ? c.count : 0);
+          return {
+            name: c.name,
+            slug: c.slug || c.name.toLowerCase().replace(/\s+/g, '-'),
+            image: c.image || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80",
+            count: finalCount,
+            href: `/categories/${c.slug || encodeURIComponent(c.name.toLowerCase().replace(/\s+/g, '-'))}`
+          };
+        });
         setCategories(mapped);
         setLoading(false);
       })
