@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { Testimonial, TestimonialDocument } from './schemas/testimonial.schema';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { randomUUID } from 'crypto';
 
 const CACHE_KEY_ACTIVE_TESTIMONIALS = 'cache_active_testimonials';
@@ -14,6 +15,7 @@ export class TestimonialsService implements OnModuleInit {
   constructor(
     @InjectModel(Testimonial.name)
     private readonly testimonialModel: Model<TestimonialDocument>,
+    private readonly cloudinaryService: CloudinaryService,
     @Inject(CACHE_MANAGER)
     private readonly cacheManager: Cache,
   ) {}
@@ -93,10 +95,11 @@ export class TestimonialsService implements OnModuleInit {
   }
 
   async create(data: Partial<Testimonial>): Promise<Testimonial> {
+    const avatar = data.avatar ? await this.cloudinaryService.uploadImage(data.avatar) : '';
     const item = new this.testimonialModel({
       id: randomUUID(),
       name: data.name || 'Anonymous',
-      avatar: data.avatar || '',
+      avatar,
       rating: Math.min(5, Math.max(1, Number(data.rating) || 5)),
       comment: data.comment || '',
       productName: data.productName || '',
@@ -113,7 +116,9 @@ export class TestimonialsService implements OnModuleInit {
     const item = await this.testimonialModel.findOne({ id });
     if (!item) throw new NotFoundException('Testimonial not found');
     if (data.name !== undefined) item.name = data.name;
-    if (data.avatar !== undefined) item.avatar = data.avatar;
+    if (data.avatar !== undefined) {
+      item.avatar = data.avatar ? await this.cloudinaryService.uploadImage(data.avatar) : '';
+    }
     if (data.rating !== undefined) item.rating = Math.min(5, Math.max(1, Number(data.rating)));
     if (data.comment !== undefined) item.comment = data.comment;
     if (data.productName !== undefined) item.productName = data.productName;

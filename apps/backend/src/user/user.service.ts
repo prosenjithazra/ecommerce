@@ -262,11 +262,7 @@ export class UserService implements OnModuleInit {
 
     if (dto.name !== undefined) user.name = dto.name;
     if (dto.avatar !== undefined) {
-      if (dto.avatar && dto.avatar.startsWith('data:image/')) {
-        user.avatar = await this.cloudinaryService.uploadImage(dto.avatar);
-      } else {
-        user.avatar = dto.avatar;
-      }
+      user.avatar = dto.avatar ? await this.cloudinaryService.uploadImage(dto.avatar) : '';
     }
 
     if (dto.phone !== undefined) user.phone = dto.phone;

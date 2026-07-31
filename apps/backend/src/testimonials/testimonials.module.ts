@@ -4,6 +4,7 @@ import { Testimonial, TestimonialSchema } from './schemas/testimonial.schema';
 import { TestimonialsController } from './testimonials.controller';
 import { TestimonialsService } from './testimonials.service';
 import { UserModule } from '../user/user.module';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { UserModule } from '../user/user.module';
       { name: Testimonial.name, schema: TestimonialSchema },
     ]),
     UserModule,
+    CloudinaryModule,
   ],
   controllers: [TestimonialsController],
   providers: [TestimonialsService],

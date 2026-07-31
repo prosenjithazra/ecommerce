@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { Product, ProductDocument } from './schemas/product.schema';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { randomUUID } from 'crypto';
 
 const slugify = (name: string): string =>
@@ -21,6 +22,7 @@ export class ProductsService implements OnModuleInit {
   constructor(
     @InjectModel(Product.name)
     private readonly productModel: Model<ProductDocument>,
+    private readonly cloudinaryService: CloudinaryService,
     @Inject(CACHE_MANAGER)
     private readonly cacheManager: Cache,
   ) {}
@@ -243,6 +245,11 @@ export class ProductsService implements OnModuleInit {
         ? [rawHomeSection.trim()]
         : [];
 
+    const uploadedImage = data.image ? await this.cloudinaryService.uploadImage(data.image) : '';
+    const uploadedImages = Array.isArray(data.images) && data.images.length > 0
+      ? await Promise.all(data.images.map((img) => this.cloudinaryService.uploadImage(img)))
+      : [];
+
     const prod = new this.productModel({
       id: data.id || randomUUID(),
       name,
@@ -251,8 +258,8 @@ export class ProductsService implements OnModuleInit {
       originalPrice: Number(data.originalPrice) || 0,
       rating: Number(data.rating) || 5.0,
       reviewsCount: Number(data.reviewsCount) || 0,
-      image: data.image || '',
-      images: data.images || [],
+      image: uploadedImage,
+      images: uploadedImages,
       category: data.category || 'T-Shirts',
       categoryId: data.categoryId || '',
       tag: data.tag || '',
@@ -293,8 +300,14 @@ export class ProductsService implements OnModuleInit {
     if (data.originalPrice !== undefined) prod.originalPrice = Number(data.originalPrice) || 0;
     if (data.rating !== undefined) prod.rating = Number(data.rating) || 5.0;
     if (data.reviewsCount !== undefined) prod.reviewsCount = Number(data.reviewsCount) || 0;
-    if (data.image !== undefined) prod.image = data.image;
-    if (data.images !== undefined) prod.images = data.images;
+    if (data.image !== undefined) {
+      prod.image = data.image ? await this.cloudinaryService.uploadImage(data.image) : '';
+    }
+    if (data.images !== undefined) {
+      prod.images = Array.isArray(data.images) && data.images.length > 0
+        ? await Promise.all(data.images.map((img) => this.cloudinaryService.uploadImage(img)))
+        : [];
+    }
     if (data.category !== undefined) prod.category = data.category;
     if (data.categoryId !== undefined) prod.categoryId = data.categoryId;
     if (data.tag !== undefined) prod.tag = data.tag;

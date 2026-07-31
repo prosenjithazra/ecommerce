@@ -5,6 +5,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { Category, CategoryDocument } from './schemas/category.schema';
 import { Product, ProductDocument } from '../products/schemas/product.schema';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { randomUUID } from 'crypto';
 
 const slugify = (name: string): string =>
@@ -24,6 +25,7 @@ export class CategoryService {
     private readonly categoryModel: Model<CategoryDocument>,
     @InjectModel(Product.name)
     private readonly productModel: Model<ProductDocument>,
+    private readonly cloudinaryService: CloudinaryService,
     @Inject(CACHE_MANAGER)
     private readonly cacheManager: Cache,
   ) {}
@@ -79,12 +81,13 @@ export class CategoryService {
 
   async create(data: Partial<Category>): Promise<Category> {
     const now = new Date();
+    const uploadedImage = data.image ? await this.cloudinaryService.uploadImage(data.image) : '';
     const cat = new this.categoryModel({
       id: randomUUID(),
       name: data.name!,
       slug: data.slug || data.name!.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
       count: data.count ?? 0,
-      image: data.image!,
+      image: uploadedImage,
       description: data.description || '',
       status: data.status || 'Active',
       createdAt: now,
@@ -103,7 +106,9 @@ export class CategoryService {
     if (data.name !== undefined) cat.name = data.name;
     if (data.slug !== undefined) cat.slug = data.slug;
     if (data.count !== undefined) cat.count = data.count;
-    if (data.image !== undefined) cat.image = data.image;
+    if (data.image !== undefined) {
+      cat.image = data.image ? await this.cloudinaryService.uploadImage(data.image) : '';
+    }
     if (data.description !== undefined) cat.description = data.description;
     if (data.status !== undefined) cat.status = data.status;
     cat.updatedAt = new Date();

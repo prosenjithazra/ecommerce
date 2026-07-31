@@ -39,19 +39,19 @@ import { PoliciesModule } from './policies/policies.module';
         const mongoUrl =
           configService.get<string>('MONGODB_URI') ||
           configService.get<string>('MONGDB_URI') ||
-          configService.get<string>('DATABASE_URL');
-        if (process.env.NODE_ENV !== 'production') {
-          console.log('[AppModule] Connecting to MongoDB URL:', mongoUrl?.replace(/:([^@]+)@/, ':****@'));
-        }
+          configService.get<string>('DATABASE_URL') ||
+          process.env.MONGODB_URI ||
+          'mongodb+srv://adminkliamo:icBdyCz81CWrLMX6@kliamocluster.lnwdlde.mongodb.net/kliamo';
+        console.log('[AppModule] Connecting to MongoDB URL:', mongoUrl.replace(/:([^@]+)@/, ':****@'));
 
         return {
           uri: mongoUrl,
           maxPoolSize: 10,
           minPoolSize: 2,
-          serverSelectionTimeoutMS: 5000,
-          connectTimeoutMS: 10000,
-          socketTimeoutMS: 45000,
-          autoIndex: true,
+          serverSelectionTimeoutMS: 15000,
+          connectTimeoutMS: 15000,
+          autoIndex: false,
+          retryWrites: true,
         };
       },
     }),
