@@ -95,6 +95,11 @@ export interface Order {
   date: string;
   status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled' | 'Returned';
   items: OrderItem[];
+  subtotal?: number;
+  tax?: number;
+  shippingFee?: number;
+  discountAmount?: number;
+  couponCode?: string;
   total: number;
   address: Address;
   paymentMethod: string;
@@ -171,7 +176,7 @@ interface AppContextType {
   updateAddress: (address: Address) => void;
   deleteAddress: (id: string) => void;
   setDefaultAddress: (id: string) => void;
-  createOrder: (address: Address, paymentMethod: string, paymentId?: string, paymentStatus?: string) => Order;
+  createOrder: (address: Address, paymentMethod: string, paymentId?: string, paymentStatus?: string, customShippingFee?: number, customTotal?: number) => Order;
   cancelOrder: (id: string, reason: string) => Promise<boolean>;
   returnOrder: (id: string, reason: string) => Promise<boolean>;
   markNotificationsAsRead: () => void;
@@ -203,57 +208,7 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// Dummy Initial Data
-const INITIAL_PRODUCTS: Product[] = [
-  {
-    id: "p1",
-    name: "Premium Soft Cotton Tee",
-    price: 29.99,
-    originalPrice: 39.99,
-    rating: 4.8,
-    reviewsCount: 124,
-    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=800&auto=format&fit=crop&q=80"
-    ],
-    category: "T-Shirts",
-    tag: "Best Seller",
-    description: "Tailored with a modern fit and crafted from ultra-soft combed cotton, this premium t-shirt is designed to be the perfect base for your high-quality custom prints. Featuring reinforced stitching and a premium ribbed collar that holds its shape.",
-    colors: [
-      { name: "White", hex: "#ffffff" },
-      { name: "Black", hex: "#0f172a" },
-      { name: "Heather Grey", hex: "#94a3b8" },
-      { name: "Navy Blue", hex: "#1e3a8a" }
-    ],
-    sizes: ["S", "M", "L", "XL", "XXL"],
-    inStock: true
-  },
-  {
-    id: "p2",
-    name: "Heavyweight Fleece Hoodie",
-    price: 49.99,
-    originalPrice: 59.99,
-    rating: 4.9,
-    reviewsCount: 88,
-    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&auto=format&fit=crop&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=800&auto=format&fit=crop&q=80"
-    ],
-    category: "Hoodies",
-    tag: "New",
-    description: "Stay warm in style. This heavy fleece hoodie offers a comfortable boxy fit, lined hood, double-stitched kangaroo pocket, and premium cuffs. Ideal for bold back designs and cozy vibes.",
-    colors: [
-      { name: "Black", hex: "#0f172a" },
-      { name: "Sand", hex: "#e2e8f0" },
-      { name: "Forest Green", hex: "#14532d" }
-    ],
-    sizes: ["M", "L", "XL", "XXL"],
-    inStock: true
-  }
-];
+
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const router = useRouter();
@@ -858,28 +813,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Orders
-  const createOrder = (address: Address, paymentMethod: string, paymentId?: string, paymentStatus?: string) => {
+  const createOrder = (
+    address: Address,
+    paymentMethod: string,
+    paymentId?: string,
+    paymentStatus?: string,
+    customShippingFee?: number,
+    customTotal?: number
+  ) => {
     const orderId = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
     const items: OrderItem[] = cart.map(c => ({
       productId: c.productId,
       name: c.name,
-      price: c.price,
-      quantity: c.quantity,
+      price: Number(c.price || 0),
+      quantity: Number(c.quantity || 1),
       image: c.image,
       size: c.size,
       color: c.color
     }));
-    const subtotal = cart.reduce((acc, c) => acc + c.price * c.quantity, 0);
-    const tax = subtotal * 0.05;
-    const shipping = subtotal > 999 ? 0 : 49;
-    const discount = appliedCoupon ? appliedCoupon.discountAmount : 0;
-    const total = Math.max(0, subtotal + tax + shipping - discount);
+    const subtotal = Math.round(cart.reduce((acc, c) => acc + (Number(c.price) || 0) * (Number(c.quantity) || 1), 0) * 100) / 100;
+    const tax = Math.round(subtotal * 0.05 * 100) / 100;
+    const shippingFee = customShippingFee !== undefined ? Number(customShippingFee) : (subtotal > 999 || subtotal === 0 ? 0 : 49);
+    const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+    const couponCode = appliedCoupon ? appliedCoupon.code : undefined;
+    const total = customTotal !== undefined ? Number(customTotal) : Math.max(0, Math.round((subtotal + tax + shippingFee - discountAmount) * 100) / 100);
 
     const newOrder: Order = {
       id: orderId,
       date: new Date().toISOString().split('T')[0] || "",
       status: "Pending",
       items,
+      subtotal,
+      tax,
+      shippingFee,
+      discountAmount,
+      couponCode,
       total,
       address,
       paymentMethod,
@@ -919,6 +887,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         email: currentUser?.email || "guest@example.com",
         date: newOrder.date,
         items: items.length,
+        subtotal,
+        tax,
+        shippingFee,
+        discountAmount,
+        couponCode: couponCode || null,
         total: total,
         status: "Pending",
         itemsJson: cart,
@@ -949,6 +922,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         orderId,
         address,
         cart,
+        email: currentUser?.email || (address as any).email || 'customer@example.com',
         gateway: paymentMethod.toUpperCase().includes('COD') ? 'COD' : 'PREPAID',
         total
       })

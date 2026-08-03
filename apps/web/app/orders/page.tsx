@@ -37,6 +37,11 @@ export default function OrdersPage() {
             id: o.id,
             date: o.date || new Date(o.createdAt).toLocaleDateString(),
             status: o.status,
+            subtotal: Number(o.subtotal || 0),
+            tax: Number(o.tax || 0),
+            shippingFee: Number(o.shippingFee || 0),
+            discountAmount: Number(o.discountAmount || 0),
+            couponCode: o.couponCode || null,
             total: Number(o.total || 0),
             address: o.itemsJson && Array.isArray(o.itemsJson) && o.itemsJson[0]?.address ? o.itemsJson[0].address : {
               id: 'default', fullName: o.customer || 'Customer', street: 'Address details on invoice', city: '', state: '', zip: '', country: '', phone: '', isDefault: true

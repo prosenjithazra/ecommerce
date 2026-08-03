@@ -19,8 +19,8 @@ const kaushanScript = Kaushan_Script({
 });
 
 export const metadata = getMetadata({
-  title: 'Premium Storefront',
-  description: 'Order custom printed hoodies, premium cotton tees, polo shirts, and accessories with zero minimums. Heavyweight blanks, high-fidelity print quality, and instant delivery tracking.',
+  title: 'Kliamo | Custom Printed T-Shirts, Oversized Tees, Polo T-Shirts & Hoodies',
+  description: 'Shop premium custom printed T-shirts, oversized tees, polo T-shirts, hoodies, sweatshirts, mugs, and caps at Kliamo. High-quality printing, secure shopping, and fast delivery.',
   path: '/',
 });
 

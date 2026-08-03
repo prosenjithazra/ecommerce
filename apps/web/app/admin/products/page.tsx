@@ -7,14 +7,7 @@ import { AdminTopbar } from "../AdminSidebar";
 import { useApp } from "../../../components/AppContext";
 import { getApiUrl } from "../../../components/ApiConfig";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const INITIAL_PRODUCTS = [
-  { id: "p1", name: "Premium Soft Cotton Tee", price: 2549, originalPrice: 3399, category: "T-Shirts", image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=200&auto=format&fit=crop&q=80", inStock: true, tag: "Best Seller", sku: "PHT-001" },
-  { id: "p2", name: "Heavyweight Fleece Hoodie", price: 4249, originalPrice: 5099, category: "Hoodies", image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&auto=format&fit=crop&q=80", inStock: true, tag: "New", sku: "PHH-002" },
-  { id: "p3", name: "Embroidery Custom Canvas Cap", price: 1699, originalPrice: 2199, category: "Accessories", image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=200&auto=format&fit=crop&q=80", inStock: false, tag: "", sku: "PHA-003" },
-  { id: "p4", name: "Zip-Up Lightweight Bomber", price: 5499, originalPrice: 6999, category: "Jackets", image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=200&auto=format&fit=crop&q=80", inStock: true, tag: "Sale", sku: "PHJ-004" },
-  { id: "p5", name: "Classic Logo Mug 350ml", price: 799, originalPrice: 999, category: "Mugs", image: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=200&auto=format&fit=crop&q=80", inStock: true, tag: "", sku: "PHM-005" },
-];
+
 
 const TAG_STYLES: Record<string, string> = {
   "Best Seller": "bg-amber-50 text-amber-700 border-amber-100",

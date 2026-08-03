@@ -45,9 +45,18 @@ export class OrdersService implements OnModuleInit {
   /**
    * Helper to ensure image URL is a public HTTPS URL (uploads base64 data URIs to Cloudinary if needed)
    */
+  /**
+   * Helper to ensure image URL is a public HTTPS URL (uploads base64 data URIs or relative paths to Cloudinary if needed)
+   */
   private async ensurePublicUrl(url: string | undefined): Promise<string> {
     const defaultSampleUrl = 'https://sgp1.digitaloceanspaces.com/cdn.qikink.com/erp2/assets/designs/83/1696668376.jpg';
     if (!url || typeof url !== 'string') return defaultSampleUrl;
+
+    if (url.startsWith('/')) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'https://kliamo.com';
+      url = `${appUrl.replace(/\/+$/, '')}${url}`;
+    }
+
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
 
     if (url.startsWith('data:image')) {
@@ -67,22 +76,22 @@ export class OrdersService implements OnModuleInit {
    * Dynamically resolves Qikink SKU and search_from_my_products based on product specs and category
    */
   private resolveDynamicQikinkSku(item: any): { sku: string; searchFromMyProducts: number } {
-    if (item.search_from_my_products === 1) {
+    if (item.search_from_my_products === 1 || item.searchFromMyProducts === 1 || item.isQikinkSynced) {
       return {
-        sku: item.sku || `${item.productId}-${item.size}-${item.color}`,
+        sku: item.sku || item.qikinkSku || `${item.productId}-${item.size || 'M'}-${item.color || 'White'}`,
         searchFromMyProducts: 1,
       };
     }
 
     const colorName = item.color || 'White';
-    const sizeName = item.size || 'M';
+    const sizeName = (item.size || 'M').toUpperCase();
     const COLOR_CODES: Record<string, string> = {
-      white: 'Wh', black: 'Bk', grey: 'Gy', navy: 'Ny', green: 'Gn', red: 'Rd', blue: 'Bl', yellow: 'Yl', maroon: 'Mr', pink: 'Pk',
+      white: 'Wh', black: 'Bk', grey: 'Gy', gray: 'Gy', navy: 'Ny', green: 'Gn', red: 'Rd', blue: 'Bl', yellow: 'Yl', maroon: 'Mr', pink: 'Pk', lavender: 'Lv', orange: 'Or', beige: 'Bg',
     };
     const cCode = COLOR_CODES[colorName.toLowerCase()] || 'Wh';
     const sCode = sizeName || 'M';
 
-    const candidateSku = item.sku || '';
+    const candidateSku = item.sku || item.qikinkSku || '';
     if (candidateSku && candidateSku.includes('-') && candidateSku.length >= 6 && !candidateSku.startsWith('PHT-') && !candidateSku.startsWith('PHH-')) {
       return {
         sku: candidateSku,
@@ -91,13 +100,17 @@ export class OrdersService implements OnModuleInit {
     }
 
     const catLower = `${item.category || ''} ${item.name || ''}`.toLowerCase();
-    let basePrefix = 'MVnHs';
+    let basePrefix = 'MVnTs'; // Default to Men's Round Neck T-Shirt
     if (catLower.includes('hoodie')) {
-      basePrefix = 'MVnHs'; // Universal blank for direct print fulfillment
+      basePrefix = 'MVnHs';
     } else if (catLower.includes('polo')) {
       basePrefix = 'MPlHs';
     } else if (catLower.includes('sweatshirt')) {
       basePrefix = 'MSwFs';
+    } else if (catLower.includes('oversize')) {
+      basePrefix = 'MOvTs';
+    } else if (catLower.includes('v neck') || catLower.includes('v-neck')) {
+      basePrefix = 'MVnVs';
     } else if (catLower.includes('cap') || catLower.includes('accessory')) {
       basePrefix = 'ACpCv';
     } else if (catLower.includes('jacket')) {
@@ -142,7 +155,7 @@ export class OrdersService implements OnModuleInit {
       const cleanOrderNum = rawOrderNo.length > 15 ? rawOrderNo.slice(-15) : (rawOrderNo || `ORD${Date.now().toString().slice(-8)}`);
 
       const itemsList = Array.isArray(orderData.itemsJson) ? orderData.itemsJson : [];
-      const address = orderData.shippingAddress || itemsList[0]?.address || {
+      const address = orderData.shippingAddress || orderData.address || itemsList[0]?.address || {
         fullName: orderData.customer || 'Customer',
         street: '123 Main Street',
         city: 'Bengaluru',
@@ -155,8 +168,10 @@ export class OrdersService implements OnModuleInit {
       const cleanPhone = rawPhone.length >= 10 ? rawPhone.slice(-10) : '9876543210';
       const cleanZip = (address.zip || '560001').replace(/[^a-zA-Z0-9]/g, '') || '560001';
 
-      const first_name = address.fullName ? address.fullName.split(' ')[0] || address.fullName : 'Customer';
-      const last_name = address.fullName && address.fullName.includes(' ') ? address.fullName.split(' ').slice(1).join(' ') : '';
+      const customerFullName = address.fullName || orderData.customer || 'Customer';
+      const nameParts = customerFullName.trim().split(/\s+/);
+      const first_name = nameParts[0] || 'Customer';
+      const last_name = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
 
       const lineItems = await Promise.all(
         itemsList.map(async (item: any) => {
@@ -174,10 +189,10 @@ export class OrdersService implements OnModuleInit {
           const design = item.customDesign;
           const fallbackImg = await this.ensurePublicUrl(item.image);
 
-          const rawFront = design?.rawFrontArtworkUrl || design?.frontDesignUrl || design?.front?.imageUrl || design?.front?.rawArtworkUrl;
+          const rawFront = design?.rawFrontArtworkUrl || design?.frontDesignUrl || design?.front?.imageUrl || design?.front?.rawArtworkUrl || design?.frontMockupUrl || item.image;
           const rawFrontMockup = design?.frontMockupUrl || rawFront;
 
-          const rawBack = design?.rawBackArtworkUrl || design?.backDesignUrl || design?.back?.imageUrl || design?.back?.rawArtworkUrl;
+          const rawBack = design?.rawBackArtworkUrl || design?.backDesignUrl || design?.back?.imageUrl || design?.back?.rawArtworkUrl || design?.backMockupUrl;
           const rawBackMockup = design?.backMockupUrl || rawBack;
 
           const frontDesignUrl = await this.ensurePublicUrl(rawFront || fallbackImg);
@@ -229,7 +244,7 @@ export class OrdersService implements OnModuleInit {
           address1: address.street || '123 Main Street',
           address2: '',
           phone: cleanPhone,
-          email: orderData.email || 'customer@example.com',
+          email: orderData.email || address.email || 'customer@example.com',
           city: address.city || 'Bengaluru',
           zip: cleanZip,
           province: address.state || 'Karnataka',
@@ -237,7 +252,7 @@ export class OrdersService implements OnModuleInit {
         },
         line_items: lineItems.length > 0 ? lineItems : [
           {
-            sku: 'MVnHs-Wh-M',
+            sku: 'MVnTs-Wh-M',
             quantity: '1',
             price: String(orderData.total || 0),
             search_from_my_products: 0,
@@ -303,8 +318,15 @@ export class OrdersService implements OnModuleInit {
       date: data.date || now.toISOString().split('T')[0],
       items: data.items ?? 1,
       total: Number(data.total) || 0,
+      subtotal: Number(data.subtotal) || 0,
+      tax: Number(data.tax) || 0,
+      shippingFee: Number(data.shippingFee) || 0,
+      discountAmount: Number(data.discountAmount) || 0,
+      couponCode: data.couponCode || null,
       status: data.status || 'Pending',
       itemsJson: data.itemsJson || null,
+      shippingAddress: data.shippingAddress || data.address || null,
+      address: data.address || data.shippingAddress || null,
       paymentMethod: data.paymentMethod || 'Pending',
       paymentId: data.paymentId || null,
       paymentStatus: data.paymentStatus || 'Pending',

@@ -20,7 +20,7 @@ const QIKINK_COLOR_CODES: Record<string, string> = {
 
 export async function POST(request: Request) {
   try {
-    const { orderId, address, cart, gateway, total } = await request.json();
+    const { orderId, address, cart, gateway, total, email } = await request.json();
 
     const clientId = process.env.QIKINK_CLIENT_ID;
     const clientSecret = process.env.QIKINK_CLIENT_SECRET;
@@ -70,17 +70,23 @@ export async function POST(request: Request) {
     }
 
     // 2. Prepare Order Payload for Qikink (sanitize order_number to max 15 alphanumeric characters as required by Qikink API)
-    const first_name = address.fullName ? address.fullName.split(' ')[0] || address.fullName : 'Customer';
-    const last_name = address.fullName && address.fullName.includes(' ') ? address.fullName.split(' ').slice(1).join(' ') : '';
+    const customerFullName = address?.fullName || 'Customer';
+    const nameParts = customerFullName.trim().split(/\s+/);
+    const first_name = nameParts[0] || 'Customer';
+    const last_name = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
     const rawOrderNum = String(orderId).replace(/[^a-zA-Z0-9]/g, '');
     const cleanOrderNumber = rawOrderNum.length > 15 ? rawOrderNum.slice(-15) : (rawOrderNum || `ORD${Date.now().toString().slice(-8)}`);
 
-    const defaultSearchFromMyProducts = process.env.QIKINK_SEARCH_FROM_MY_PRODUCTS !== undefined
-      ? Number(process.env.QIKINK_SEARCH_FROM_MY_PRODUCTS)
-      : (apiUrl.includes('sandbox') ? 0 : 1);
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'https://kliamo.com';
+
+    const formatPublicImg = (imgUrl?: string) => {
+      if (!imgUrl || typeof imgUrl !== 'string') return 'https://sgp1.digitaloceanspaces.com/cdn.qikink.com/erp2/assets/designs/83/1696668376.jpg';
+      if (imgUrl.startsWith('/')) return `${appUrl.replace(/\/+$/, '')}${imgUrl}`;
+      return imgUrl;
+    };
 
     const lineItems = await Promise.all(
-      cart.map(async (item: any) => {
+      (cart || []).map(async (item: any) => {
         const customDesign = item.customDesign;
         let designMeta: any = null;
         if (customDesign?.baseImage) {
@@ -111,7 +117,7 @@ export async function POST(request: Request) {
             } else if (product.sku) {
               const basePart = product.sku;
               const colorCode = QIKINK_COLOR_CODES[colorName.toLowerCase()] || 'Wh';
-              const sizeCode = sizeName || 'M';
+              const sizeCode = (sizeName || 'M').toUpperCase();
               resolvedSku = `${basePart}-${colorCode}-${sizeCode}`;
             }
           }
@@ -120,19 +126,23 @@ export async function POST(request: Request) {
         }
 
         const colorCode = QIKINK_COLOR_CODES[(item.color || 'White').toLowerCase()] || 'Wh';
-        const sizeCode = item.size || 'M';
+        const sizeCode = (item.size || 'M').toUpperCase();
         const catLower = `${categoryName} ${item.name || ''}`.toLowerCase();
 
-        if (item.search_from_my_products === 1) {
+        if (item.search_from_my_products === 1 || item.isQikinkSynced) {
           resolvedSku = item.sku || resolvedSku || `${item.productId}-${sizeCode}-${colorCode}`;
         } else if (!resolvedSku || resolvedSku.startsWith('PHT-') || resolvedSku.startsWith('PHH-') || !resolvedSku.includes('-')) {
-          let basePrefix = 'MVnHs';
+          let basePrefix = 'MVnTs'; // Default to Men's Round Neck T-Shirt
           if (catLower.includes('hoodie')) {
             basePrefix = 'MVnHs';
           } else if (catLower.includes('polo')) {
             basePrefix = 'MPlHs';
           } else if (catLower.includes('sweatshirt')) {
             basePrefix = 'MSwFs';
+          } else if (catLower.includes('oversize')) {
+            basePrefix = 'MOvTs';
+          } else if (catLower.includes('v neck') || catLower.includes('v-neck')) {
+            basePrefix = 'MVnVs';
           } else if (catLower.includes('cap') || catLower.includes('accessory')) {
             basePrefix = 'ACpCv';
           } else if (catLower.includes('jacket')) {
@@ -143,14 +153,14 @@ export async function POST(request: Request) {
           resolvedSku = `${basePrefix}-${colorCode}-${sizeCode}`;
         }
 
-        const fallbackImageUrl = item.image || item.primaryImage || 'https://sgp1.digitaloceanspaces.com/cdn.qikink.com/erp2/assets/designs/83/1696668376.jpg';
-        const frontDesign = designMeta?.rawFrontArtworkUrl || designMeta?.frontDesignUrl || designMeta?.front?.imageUrl || item.customDesign?.frontDesignUrl;
-        const frontMockup = designMeta?.frontMockupUrl || item.customDesign?.frontMockupUrl || frontDesign;
+        const fallbackImageUrl = formatPublicImg(item.image || item.primaryImage);
+        const frontDesign = formatPublicImg(designMeta?.rawFrontArtworkUrl || designMeta?.frontDesignUrl || designMeta?.front?.imageUrl || item.customDesign?.frontDesignUrl);
+        const frontMockup = formatPublicImg(designMeta?.frontMockupUrl || item.customDesign?.frontMockupUrl || frontDesign);
 
-        const backDesign = designMeta?.rawBackArtworkUrl || designMeta?.backDesignUrl || designMeta?.back?.imageUrl || item.customDesign?.backDesignUrl;
-        const backMockup = designMeta?.backMockupUrl || item.customDesign?.backMockupUrl || backDesign;
+        const backDesign = designMeta?.rawBackArtworkUrl || designMeta?.backDesignUrl || designMeta?.back?.imageUrl || item.customDesign?.backDesignUrl ? formatPublicImg(designMeta?.rawBackArtworkUrl || designMeta?.backDesignUrl || designMeta?.back?.imageUrl || item.customDesign?.backDesignUrl) : null;
+        const backMockup = designMeta?.backMockupUrl || item.customDesign?.backMockupUrl || backDesign ? formatPublicImg(designMeta?.backMockupUrl || item.customDesign?.backMockupUrl || backDesign) : null;
 
-        const forceMyProducts = item.search_from_my_products === 1 || process.env.QIKINK_SEARCH_FROM_MY_PRODUCTS === '1';
+        const forceMyProducts = item.search_from_my_products === 1 || item.isQikinkSynced;
 
         if (forceMyProducts && !frontDesign && !backDesign) {
           return {
@@ -194,26 +204,27 @@ export async function POST(request: Request) {
       })
     );
 
-    const rawPhone = (address.phone || '').replace(/\D/g, '');
+    const rawPhone = (address?.phone || '').replace(/\D/g, '');
     const cleanPhone = rawPhone.length >= 10 ? rawPhone.slice(-10) : '9876543210';
-    const cleanZip = (address.zip || '560001').replace(/[^a-zA-Z0-9]/g, '') || '560001';
+    const cleanZip = (address?.zip || '560001').replace(/[^a-zA-Z0-9]/g, '') || '560001';
+    const customerEmail = email || address?.email || 'customer@example.com';
 
     const payload = {
       order_number: cleanOrderNumber,
-      qikink_shipping: "1", // Pass string "1" as required by Qikink API
+      qikink_shipping: "1",
       gateway: gateway || 'Prepaid',
       total_order_value: String(total || 0),
       shipping_address: {
         first_name: first_name || 'Customer',
         last_name: last_name || '',
-        address1: address.street || '123 Main Street',
+        address1: address?.street || '123 Main Street',
         address2: '',
         phone: cleanPhone,
-        email: 'customer@example.com',
-        city: address.city || 'Bengaluru',
+        email: customerEmail,
+        city: address?.city || 'Bengaluru',
         zip: cleanZip,
-        province: address.state || 'Karnataka',
-        country_code: 'IN', // Default to India
+        province: address?.state || 'Karnataka',
+        country_code: 'IN',
       },
       line_items: lineItems,
     };

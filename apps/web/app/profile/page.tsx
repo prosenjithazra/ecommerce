@@ -288,7 +288,7 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-zinc-400 dark:text-zinc-500 font-bold">Payment Status</p>
+                <p className="text-zinc-400 dark:text-zinc-500 font-bold">Status</p>
                 <p className={`font-extrabold inline-block px-2.5 py-0.5 rounded text-[9px] uppercase tracking-wider ${
                   order.paymentStatus === 'Paid' || order.paymentStatus === 'Success'
                     ? 'bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30'
@@ -611,7 +611,20 @@ export default function ProfilePage() {
           throw new Error("Failed to load orders");
         })
         .then((data) => {
-          setOrders(data);
+          if (Array.isArray(data)) {
+            const mapped = data.map((o: any) => ({
+              ...o,
+              subtotal: Number(o.subtotal || 0),
+              tax: Number(o.tax || 0),
+              shippingFee: Number(o.shippingFee || 0),
+              discountAmount: Number(o.discountAmount || 0),
+              couponCode: o.couponCode || null,
+              total: Number(o.total || 0)
+            }));
+            setOrders(mapped);
+          } else {
+            setOrders([]);
+          }
           setOrdersLoading(false);
         })
         .catch((err) => {
