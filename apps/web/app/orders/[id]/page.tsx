@@ -59,6 +59,11 @@ export default function OrderDetailPage() {
           id: o.id,
           date: o.date || new Date(o.createdAt).toLocaleDateString(),
           status: o.status,
+          subtotal: Number(o.subtotal || 0),
+          tax: Number(o.tax || 0),
+          shippingFee: Number(o.shippingFee || 0),
+          discountAmount: Number(o.discountAmount || 0),
+          couponCode: o.couponCode || null,
           total: Number(o.total || 0),
           address: o.itemsJson && Array.isArray(o.itemsJson) && o.itemsJson[0]?.address ? o.itemsJson[0].address : {
             id: 'default', fullName: o.customer || 'Customer', street: 'Address details on invoice', city: '', state: '', zip: '', country: '', phone: '', isDefault: true
@@ -266,14 +271,48 @@ export default function OrderDetailPage() {
                   {order.paymentMethod === 'COD' ? 'COD' : 'Online'}
                 </span>
               </div>
-              <div className="flex justify-between text-zinc-500 font-medium">
-                <span>Subtotal</span>
-                <span className="font-bold text-zinc-800 dark:text-zinc-250">₹{(order.total / 1.05).toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-zinc-500 font-medium">
-                <span>Tax / GST (5%)</span>
-                <span className="font-bold text-zinc-800 dark:text-zinc-250">₹{(order.total - order.total / 1.05).toFixed(2)}</span>
-              </div>
+              {(() => {
+                const subtotalVal = (order.subtotal && order.subtotal > 0) ? order.subtotal : (Array.isArray(order.items) ? order.items.reduce((s: number, i: any) => s + (Number(i.price || 0) * Number(i.quantity || 1)), 0) : order.total / 1.05);
+                const taxVal = (order.tax && order.tax > 0) ? order.tax : Math.round(subtotalVal * 0.05 * 100) / 100;
+                const discountVal = order.discountAmount || 0;
+                const storedTotal = order.total || 0;
+                let shippingVal = (typeof order.shippingFee === 'number' && order.shippingFee > 0) ? order.shippingFee : undefined;
+
+                if (shippingVal === undefined) {
+                  if (storedTotal > 0 && Math.abs(storedTotal - (subtotalVal + taxVal - discountVal)) > 0.01) {
+                    shippingVal = Math.max(0, Math.round((storedTotal - (subtotalVal + taxVal - discountVal)) * 100) / 100);
+                  } else {
+                    shippingVal = subtotalVal > 999 || subtotalVal === 0 ? 0 : 49;
+                  }
+                }
+
+                return (
+                  <>
+                    <div className="flex justify-between text-zinc-500 font-medium">
+                      <span>Items Subtotal</span>
+                      <span className="font-bold text-zinc-800 dark:text-zinc-250">₹{subtotalVal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-zinc-500 font-medium">
+                      <span>GST / Tax (5%)</span>
+                      <span className="font-bold text-zinc-800 dark:text-zinc-250">₹{taxVal.toFixed(2)}</span>
+                    </div>
+                    {discountVal > 0 && (
+                      <div className="flex justify-between text-red-500 font-medium">
+                        <span className="flex items-center gap-1">
+                          Coupon Discount {order.couponCode && <span className="text-[9px] bg-red-100 dark:bg-red-950/40 text-red-600 px-1.5 py-0.5 rounded font-mono font-bold">{order.couponCode}</span>}
+                        </span>
+                        <span className="font-bold">-₹{discountVal.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-zinc-500 font-medium">
+                      <span>Shipping Fee</span>
+                      <span className={`font-bold ${shippingVal === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-800 dark:text-zinc-250'}`}>
+                        {shippingVal === 0 ? 'FREE' : `₹${shippingVal.toFixed(2)}`}
+                      </span>
+                    </div>
+                  </>
+                );
+              })()}
               <div className="flex justify-between pt-2 border-t border-zinc-150 dark:border-zinc-800 font-extrabold text-sm text-zinc-900 dark:text-white">
                 <span>Total Amount Paid</span>
                 <span className="text-[#e8855a] dark:text-[#df794d] font-black">₹{order.total.toFixed(2)}</span>
@@ -285,7 +324,7 @@ export default function OrderDetailPage() {
           {qikinkPodDetails && (
             <div className="bg-[#FDFAF6] dark:bg-zinc-850 border border-[#df794d]/30 dark:border-zinc-700 rounded-2xl p-4 sm:p-5 shadow-xs space-y-2.5 text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase text-[#e8855a] tracking-wider">Fulfillment Status</span>
+                <span className="text-[10px] font-black uppercase text-[#e8855a] tracking-wider">Status</span>
                 <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 uppercase">
                   {qikinkPodDetails.status}
                 </span>

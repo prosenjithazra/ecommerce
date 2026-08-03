@@ -26,6 +26,8 @@ function PaymentPageContent() {
   const searchParams = useSearchParams();
   const { cart, addresses, createOrder, showToast, currentUser, profileLoading, cartLoading, appliedCoupon } = useApp();
 
+  const [isOrderPlaced, setIsOrderPlaced] = useState(false);
+
   React.useEffect(() => {
     if (profileLoading || cartLoading) return;
     const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
@@ -34,13 +36,13 @@ function PaymentPageContent() {
     }
   }, [currentUser, profileLoading, cartLoading, router]);
 
-  // Guard: if cart is empty after loading completes (e.g. user completed order), redirect to orders
+  // Guard: if cart is empty after loading completes (and order was not just placed), redirect
   React.useEffect(() => {
-    if (profileLoading || cartLoading) return;
+    if (profileLoading || cartLoading || isOrderPlaced) return;
     if (cart.length === 0) {
-      router.replace('/orders');
+      router.replace('/cart');
     }
-  }, [cart, profileLoading, cartLoading, router]);
+  }, [cart, profileLoading, cartLoading, isOrderPlaced, router]);
 
   const addressId = searchParams?.get('addressId') || "";
   const shippingMethod = searchParams?.get('shipping') || "standard";
@@ -96,21 +98,23 @@ function PaymentPageContent() {
     setIsProcessing(true);
 
     try {
-      const order = createOrder(address!, "COD", "COD_PAYMENT_" + Math.floor(100000 + Math.random() * 900000), "Pending");
+      setIsOrderPlaced(true);
+      const order = createOrder(address!, "COD", "COD_PAYMENT_" + Math.floor(100000 + Math.random() * 900000), "Pending", shippingFee, total);
       showToast("Order Placed", `Your COD Order ${order.id} has been placed successfully!`, "success");
       router.push(`/thank-you?orderId=${order.id}`);
     } catch (err: any) {
+      setIsOrderPlaced(false);
       showToast("Error", err.message || "Failed to place COD order.", "error");
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const subtotal = cart.reduce((acc, item) => acc + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
-  const tax = subtotal * 0.05;
+  const subtotal = Math.round(cart.reduce((acc, item) => acc + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0) * 100) / 100;
+  const tax = Math.round(subtotal * 0.05 * 100) / 100;
   const shippingFee = shippingMethod === 'express' ? 99 : (subtotal > 999 || subtotal === 0 ? 0 : 49);
   const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
-  const total = Math.max(0, subtotal + tax + shippingFee - discountAmount);
+  const total = Math.max(0, Math.round((subtotal + tax + shippingFee - discountAmount) * 100) / 100);
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -183,10 +187,12 @@ function PaymentPageContent() {
             }
 
             // 6. Create order in PostgreSQL + Qikink sync
-            const order = createOrder(address!, "RAZORPAY", paymentRes.razorpay_payment_id, "Paid");
+            setIsOrderPlaced(true);
+            const order = createOrder(address!, "RAZORPAY", paymentRes.razorpay_payment_id, "Paid", shippingFee, total);
             showToast("Payment Success", `Order ${order.id} placed successfully!`, "success");
             router.push(`/thank-you?orderId=${order.id}`);
           } catch (err: any) {
+            setIsOrderPlaced(false);
             showToast("Payment Verification Error", err.message || "Failed to confirm payment details.", "error");
           } finally {
             setIsProcessing(false);
@@ -232,10 +238,12 @@ function PaymentPageContent() {
       if (!verifyData.verified) throw new Error('Sandbox payment invalid');
 
       // 2. Save order in PostgreSQL database and sync to print partner Qikink
-      const order = createOrder(address!, "RAZORPAY_SANDBOX", "pay_simulated", "Paid");
+      setIsOrderPlaced(true);
+      const order = createOrder(address!, "RAZORPAY_SANDBOX", "pay_simulated", "Paid", shippingFee, total);
       showToast("Order Created", `Sandbox Order ${order.id} verified and placed!`, "success");
       router.push(`/thank-you?orderId=${order.id}`);
     } catch (err: any) {
+      setIsOrderPlaced(false);
       showToast("Error", err.message || "Payment verification failed", "error");
     } finally {
       setIsProcessing(false);

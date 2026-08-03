@@ -23,11 +23,32 @@ export class Order {
   @Prop({ required: true })
   total: number;
 
+  @Prop({ default: 0 })
+  subtotal: number;
+
+  @Prop({ default: 0 })
+  tax: number;
+
+  @Prop({ default: 0 })
+  shippingFee: number;
+
+  @Prop({ default: 0 })
+  discountAmount: number;
+
+  @Prop({ default: null })
+  couponCode: string;
+
   @Prop({ default: 'Pending' })
   status: string;
 
   @Prop({ type: Object, default: null })
   itemsJson: any;
+
+  @Prop({ type: Object, default: null })
+  shippingAddress: any;
+
+  @Prop({ type: Object, default: null })
+  address: any;
 
   @Prop({ default: null })
   paymentMethod: string;

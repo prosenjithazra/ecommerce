@@ -37,7 +37,7 @@ export function normalizeOrderForInvoice(o: any) {
           customDesign: it.customDesign
         }));
       }
-    } catch {}
+    } catch { }
   }
 
   if (items.length === 0) {
@@ -64,7 +64,7 @@ export function normalizeOrderForInvoice(o: any) {
       if (Array.isArray(parsed) && parsed[0]?.address) {
         address = parsed[0].address;
       }
-    } catch {}
+    } catch { }
   }
 
   if (!address) {
@@ -81,12 +81,35 @@ export function normalizeOrderForInvoice(o: any) {
     };
   }
 
+  const itemsSubtotal = Math.round(items.reduce((sum, item) => sum + (Number(item.price || 0) * Number(item.quantity || 1)), 0) * 100) / 100;
+  const subtotal = typeof o.subtotal === 'number' && o.subtotal > 0 ? o.subtotal : itemsSubtotal;
+  const tax = typeof o.tax === 'number' && o.tax > 0 ? o.tax : Math.round(subtotal * 0.05 * 100) / 100;
+  const discountAmount = typeof o.discountAmount === 'number' ? o.discountAmount : 0;
+  const couponCode = o.couponCode || o.coupon || null;
+  const storedTotal = Number(o.total || 0);
+
+  let shippingFee = typeof o.shippingFee === 'number' && o.shippingFee > 0 ? o.shippingFee : undefined;
+  if (shippingFee === undefined) {
+    if (storedTotal > 0 && Math.abs(storedTotal - (subtotal + tax - discountAmount)) > 0.01) {
+      shippingFee = Math.max(0, Math.round((storedTotal - (subtotal + tax - discountAmount)) * 100) / 100);
+    } else {
+      shippingFee = (subtotal > 999 || subtotal === 0) ? 0 : 49;
+    }
+  }
+
+  const total = storedTotal > 0 ? storedTotal : Math.max(0, Math.round((subtotal + tax + shippingFee - discountAmount) * 100) / 100);
+
   return {
     id: o.id,
     date: o.date || (o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-IN') : new Date().toLocaleDateString('en-IN')),
     status: o.status || 'Processing',
-    total: Number(o.total || 0),
-    address,
+    subtotal: Number(subtotal.toFixed(2)),
+    tax: Number(tax.toFixed(2)),
+    shippingFee: Number(shippingFee.toFixed(2)),
+    discountAmount: Number(discountAmount.toFixed(2)),
+    couponCode,
+    total: Number(total.toFixed(2)),
+    address: o.address || o.shippingAddress,
     paymentMethod: o.paymentMethod || 'CARD',
     paymentId: o.paymentId,
     paymentStatus: o.paymentStatus || 'PAID',
@@ -114,8 +137,11 @@ export function printPdfInvoice(order: any, companySettings?: any) {
   const items = normalized.items || [];
   const itemsJson = normalized.itemsJson || [];
   const totalAmount = Number(normalized.total || 0);
-  const subtotal = (totalAmount / 1.05).toFixed(2);
-  const taxGst = (totalAmount - Number(subtotal)).toFixed(2);
+  const subtotalVal = typeof normalized.subtotal === 'number' && normalized.subtotal >= 0 ? normalized.subtotal : (totalAmount > 0 ? Math.round((totalAmount / 1.05) * 100) / 100 : 0);
+  const taxVal = typeof normalized.tax === 'number' && normalized.tax >= 0 ? normalized.tax : Math.round(subtotalVal * 0.05 * 100) / 100;
+  const shippingVal = typeof normalized.shippingFee === 'number' && normalized.shippingFee >= 0 ? normalized.shippingFee : 0;
+  const discountVal = typeof normalized.discountAmount === 'number' ? normalized.discountAmount : 0;
+  const couponCodeStr = normalized.couponCode || '';
 
   const compEmail = companySettings?.email || 'support@kliamofashion.com';
   const compPhone = companySettings?.phone || '+1 555-0199';
@@ -287,7 +313,7 @@ export function printPdfInvoice(order: any, companySettings?: any) {
               <div class="title">INVOICE RECEIPT</div>
               <div class="sub-title">Invoice No: <b>INV-${normalized.id}</b></div>
               <div class="sub-title">Date: <b>${normalized.date || new Date().toLocaleDateString('en-IN')}</b></div>
-              <div class="sub-title">Payment Status: <b style="color: #10B981; text-transform: uppercase;">${normalized.paymentStatus || 'PAID'}</b></div>
+              <div class="sub-title">Status: <b style="color: #10B981; text-transform: uppercase;">${normalized.paymentStatus || 'PAID'}</b></div>
             </div>
           </div>
 
@@ -324,16 +350,28 @@ export function printPdfInvoice(order: any, companySettings?: any) {
 
           <table class="totals-table">
             <tr>
-              <td style="color: #71717A;">Subtotal:</td>
-              <td style="text-align: right; font-weight: 600;">₹${totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+              <td style="color: #71717A;">Items Subtotal:</td>
+              <td style="text-align: right; font-weight: 600;">₹${subtotalVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             </tr>
             <tr>
+              <td style="color: #71717A;">GST / Tax (5%):</td>
+              <td style="text-align: right; font-weight: 600;">₹${taxVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            </tr>
+            ${discountVal > 0 ? `
+            <tr>
+              <td style="color: #DC2626; font-weight: 600;">Coupon Discount ${couponCodeStr ? `(${couponCodeStr})` : ''}:</td>
+              <td style="text-align: right; font-weight: 700; color: #DC2626;">-₹${discountVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            </tr>
+            ` : ''}
+            <tr>
               <td style="color: #71717A;">Shipping Fee:</td>
-              <td style="text-align: right; font-weight: 700; color: #10B981;">FREE</td>
+              <td style="text-align: right; font-weight: 700; color: ${shippingVal === 0 ? '#10B981' : '#18181B'};">
+                ${shippingVal === 0 ? 'FREE' : `₹${shippingVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+              </td>
             </tr>
             <tr class="grand-total">
               <td>Total Amount Paid:</td>
-              <td style="text-align: right;">₹${totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+              <td style="text-align: right;">₹${totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             </tr>
           </table>
 
@@ -390,7 +428,7 @@ export async function downloadOrderInvoice(orderId: string, existingOrder?: any,
       if (sRes && sRes.ok) {
         settings = await sRes.json();
       }
-    } catch {}
+    } catch { }
   }
 
   // Fetch full details from API if items or address detail is missing

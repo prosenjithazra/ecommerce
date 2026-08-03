@@ -9,10 +9,7 @@ import { useApp } from "../../../../../components/AppContext";
 import { getApiUrl } from "../../../../../components/ApiConfig";
 import { QIKINK_EXCEL_COLORS as COLORS, getColorSkuCode } from "../../../../../lib/qikink/colors";
 
-const PRODUCT_DB: Record<string, { name: string; price: string; originalPrice: string; category: string; description: string; inStock: boolean; tag: string; images: string[]; selectedSizes: string[]; selectedColors: string[] }> = {
-  p1: { name: "Premium Soft Cotton Tee", price: "2549", originalPrice: "3399", category: "T-Shirts", description: "Tailored with a modern fit and crafted from ultra-soft combed cotton.", inStock: true, tag: "Best Seller", images: ["https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=200&auto=format&fit=crop&q=80"], selectedSizes: ["S", "M", "L", "XL"], selectedColors: ["White", "Black"] },
-  p2: { name: "Heavyweight Fleece Hoodie", price: "4249", originalPrice: "5099", category: "Hoodies", description: "Stay warm in style with this premium fleece hoodie.", inStock: true, tag: "New", images: ["https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&auto=format&fit=crop&q=80"], selectedSizes: ["M", "L", "XL", "XXL"], selectedColors: ["Black", "Forest Green"] },
-};
+
 
 const CATEGORIES = ["T-Shirts", "Hoodies", "Jackets", "Mugs", "Accessories", "Bags", "Phone Cases"];
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL", "3XL"];

@@ -351,8 +351,27 @@ export class EmailService {
       `;
     }
 
-    const subtotal = Number(order.total) / 1.05;
-    const taxGst = Number(order.total) - subtotal;
+    let itemsList: any[] = [];
+    try {
+      itemsList = typeof order.itemsJson === 'string' ? JSON.parse(order.itemsJson) : (Array.isArray(order.itemsJson) ? order.itemsJson : []);
+    } catch {}
+
+    const rawSubtotal = itemsList.reduce((sum: number, it: any) => sum + (Number(it.price || 0) * Number(it.quantity || 1)), 0);
+    const itemsSubtotal = Number(order.subtotal) > 0 ? Number(order.subtotal) : (rawSubtotal > 0 ? rawSubtotal : Number(order.total || 0) / 1.05);
+    const taxGst = Number(order.tax) > 0 ? Number(order.tax) : Math.round(itemsSubtotal * 0.05 * 100) / 100;
+    const discountAmount = Number(order.discountAmount || 0);
+    const couponCode = order.couponCode || null;
+    const storedTotal = Number(order.total || 0);
+
+    let shippingFee = typeof order.shippingFee === 'number' && Number(order.shippingFee) > 0 ? Number(order.shippingFee) : undefined;
+    if (shippingFee === undefined) {
+      if (storedTotal > 0 && Math.abs(storedTotal - (itemsSubtotal + taxGst - discountAmount)) > 0.01) {
+        shippingFee = Math.max(0, Math.round((storedTotal - (itemsSubtotal + taxGst - discountAmount)) * 100) / 100);
+      } else {
+        shippingFee = (itemsSubtotal > 999 || itemsSubtotal === 0) ? 0 : 49;
+      }
+    }
+
     const orderDateFormatted = order.date || (order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN') : new Date().toLocaleDateString('en-IN'));
 
     const htmlContent = `
@@ -401,16 +420,26 @@ export class EmailService {
               
               <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #5C554C;">
                 <tr>
-                  <td style="padding: 4px 0;">Subtotal (Excl. GST)</td>
-                  <td style="padding: 4px 0; text-align: right; font-weight: 600;">₹${subtotal.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</td>
+                  <td style="padding: 4px 0;">Items Subtotal</td>
+                  <td style="padding: 4px 0; text-align: right; font-weight: 600;">₹${itemsSubtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 4px 0;">Tax / GST (5%)</td>
-                  <td style="padding: 4px 0; text-align: right; font-weight: 600;">₹${taxGst.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</td>
+                  <td style="padding: 4px 0;">GST / Tax (5%)</td>
+                  <td style="padding: 4px 0; text-align: right; font-weight: 600;">₹${taxGst.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 </tr>
+                ${discountAmount > 0 ? `
+                <tr>
+                  <td style="padding: 4px 0; color: #DC2626; font-weight: 600;">
+                    Coupon Discount ${couponCode ? `<span style="font-family: monospace; font-size: 11px; background: #FEE2E2; color: #DC2626; padding: 1px 6px; border-radius: 4px; font-weight: bold;">${couponCode}</span>` : ''}
+                  </td>
+                  <td style="padding: 4px 0; text-align: right; font-weight: 700; color: #DC2626;">-₹${discountAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                </tr>
+                ` : ''}
                 <tr>
                   <td style="padding: 4px 0;">Shipping Fee</td>
-                  <td style="padding: 4px 0; text-align: right; font-weight: 700; color: #7e9677;">FREE</td>
+                  <td style="padding: 4px 0; text-align: right; font-weight: 700; color: ${shippingFee === 0 ? '#7e9677' : '#4A453E'};">
+                    ${shippingFee === 0 ? 'FREE' : `₹${shippingFee.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  </td>
                 </tr>
                 <tr>
                   <td style="padding: 4px 0;">Payment Method</td>
@@ -423,7 +452,7 @@ export class EmailService {
                 </tr>
                 ` : ''}
                 <tr>
-                  <td style="padding: 4px 0;">Payment Status</td>
+                  <td style="padding: 4px 0;">Status</td>
                   <td style="padding: 4px 0; text-align: right; font-weight: 700; color: #7e9677; text-transform: uppercase;">${order.paymentStatus || 'Paid'}</td>
                 </tr>
                 <tr style="border-top: 1px solid #E8E2D6;">
