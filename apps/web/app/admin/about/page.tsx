@@ -175,11 +175,11 @@ export default function AdminAboutPage() {
   const tabCls = (tab: typeof activeTab) => 
     `flex items-center gap-2 px-4 py-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer ${
       activeTab === tab 
-        ? "border-[#F9A37E] text-[#e8855a] bg-[#F9A37E]/5" 
+        ? "border-[#df794d] text-[#e8855a] bg-[#df794d]/5" 
         : "border-transparent text-zinc-500 hover:text-zinc-700 hover:bg-zinc-50"
     }`;
 
-  const inputCls = "w-full bg-white border border-zinc-200 rounded-lg py-2.5 px-3.5 text-xs font-medium text-zinc-800 outline-none focus:border-[#F9A37E] transition-all placeholder:text-zinc-400";
+  const inputCls = "w-full bg-white border border-zinc-200 rounded-lg py-2.5 px-3.5 text-xs font-medium text-zinc-800 outline-none focus:border-[#df794d] transition-all placeholder:text-zinc-400";
   const labelCls = "block text-xs font-extrabold text-zinc-600 mb-1.5";
 
   if (loading) {
@@ -187,7 +187,7 @@ export default function AdminAboutPage() {
       <div className="flex flex-col h-full overflow-hidden">
         <AdminTopbar title="About Us Editor" subtitle="Loading page settings..." />
         <main className="flex-1 flex items-center justify-center p-8 bg-[#FDFAF6]">
-          <Loader2 className="w-8 h-8 text-[#F9A37E] animate-spin" />
+          <Loader2 className="w-8 h-8 text-[#df794d] animate-spin" />
         </main>
       </div>
     );
@@ -265,7 +265,7 @@ export default function AdminAboutPage() {
                     <button
                       type="button"
                       onClick={() => storyFileInputRef.current?.click()}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-zinc-200 hover:border-[#F9A37E] text-zinc-700 text-xs font-bold rounded-lg transition-all shadow-sm"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-zinc-200 hover:border-[#df794d] text-zinc-700 text-xs font-bold rounded-lg transition-all shadow-sm"
                     >
                       <Upload className="w-3.5 h-3.5" /> Upload Photo
                     </button>
@@ -307,7 +307,7 @@ export default function AdminAboutPage() {
                 <button
                   onClick={() => handleSave("Story", storyForm)}
                   disabled={saving}
-                  className="flex items-center gap-2 bg-[#F9A37E] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20"
+                  className="flex items-center gap-2 bg-[#df794d] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all shadow-md shadow-[#df794d]/20"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   {saving ? "Uploading..." : "Save Story Changes"}
@@ -372,7 +372,7 @@ export default function AdminAboutPage() {
                 <button
                   onClick={() => handleSave("Mission & Vision", missionForm)}
                   disabled={saving}
-                  className="flex items-center gap-2 bg-[#F9A37E] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all"
+                  className="flex items-center gap-2 bg-[#df794d] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all"
                 >
                   <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save Values"}
                 </button>
@@ -460,7 +460,7 @@ export default function AdminAboutPage() {
                 <button
                   onClick={() => handleSave("Timeline", { milestones })}
                   disabled={saving}
-                  className="flex items-center gap-2 bg-[#F9A37E] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all"
+                  className="flex items-center gap-2 bg-[#df794d] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all"
                 >
                   <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save Timeline Changes"}
                 </button>
@@ -542,7 +542,7 @@ export default function AdminAboutPage() {
                       <button
                         type="button"
                         onClick={() => memberFileInputRef.current?.click()}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-zinc-200 hover:border-[#F9A37E] text-zinc-700 text-[10px] font-bold rounded-lg transition-all"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-zinc-200 hover:border-[#df794d] text-zinc-700 text-[10px] font-bold rounded-lg transition-all"
                       >
                         <Upload className="w-3 h-3" /> Select Avatar
                       </button>
@@ -572,7 +572,7 @@ export default function AdminAboutPage() {
                 <button
                   onClick={() => handleSave("Team Leadership", { team })}
                   disabled={saving}
-                  className="flex items-center gap-2 bg-[#F9A37E] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20"
+                  className="flex items-center gap-2 bg-[#df794d] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all shadow-md shadow-[#df794d]/20"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   {saving ? "Uploading..." : "Save Team Changes"}
@@ -613,7 +613,7 @@ export default function AdminAboutPage() {
                 <button
                   onClick={() => handleSave("Call To Action", ctaForm)}
                   disabled={saving}
-                  className="flex items-center gap-2 bg-[#F9A37E] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all"
+                  className="flex items-center gap-2 bg-[#df794d] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all"
                 >
                   <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save CTA Settings"}
                 </button>

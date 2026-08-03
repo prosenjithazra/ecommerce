@@ -12,8 +12,8 @@ export default {
       colors: {
         // Brand palette
         brand: {
-          peach:    '#F9A37E',
-          sage:     '#A8C69F',
+          peach:    '#df794d',
+          sage:     '#7e9677',
           cream:    '#E8E2D6',
           brown:    '#4A453E',
           'peach-light': '#FBD5C1',
@@ -25,10 +25,10 @@ export default {
         },
       },
       fontFamily: {
-        heading: ['Quintessential', 'Georgia', 'serif'],
-        body:    ['Elm Sans', 'system-ui', 'sans-serif'],
-        sans:    ['Elm Sans', 'system-ui', 'sans-serif'],
-        serif:   ['Quintessential', 'Georgia', 'serif'],
+        heading: ['var(--font-kaushan-script)', 'Kaushan Script', 'cursive'],
+        body:    ['var(--font-elms-sans)', 'Elms Sans', 'sans-serif'],
+        sans:    ['var(--font-elms-sans)', 'Elms Sans', 'sans-serif'],
+        serif:   ['var(--font-kaushan-script)', 'Kaushan Script', 'cursive'],
       },
       keyframes: {
         'fade-in-up': {

@@ -31,14 +31,14 @@ export const MobileBottomNav: React.FC = () => {
               href={item.href}
               className={`flex flex-col items-center justify-center py-1 px-3 relative transition-all rounded-lg ${
                 pathname === item.href
-                  ? 'text-[#F9A37E]'
+                  ? 'text-[#df794d]'
                   : 'text-[#A89B8A] hover:text-[#4A453E]'
               }`}
             >
               <div className="flex items-center justify-center relative">
                 {item.icon}
                 {!!item.count && item.count > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#F9A37E] text-white rounded-full flex items-center justify-center text-[9px] font-bold">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#df794d] text-white rounded-full flex items-center justify-center text-[9px] font-bold">
                     {item.count}
                   </span>
                 )}

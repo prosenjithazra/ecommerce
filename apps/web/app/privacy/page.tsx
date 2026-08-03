@@ -1,37 +1,85 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Breadcrumb } from '../../components/UIComponents';
+import { RefreshCw } from 'lucide-react';
+import { getApiUrl } from '../../components/ApiConfig';
+
+interface PolicySection {
+  id: string;
+  heading: string;
+  content: string;
+  lastUpdated?: string;
+}
 
 export default function PrivacyPage() {
+  const [sections, setSections] = useState<PolicySection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [title, setTitle] = useState("Privacy Policy");
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchPolicy = async () => {
+      try {
+        let res = await fetch(getApiUrl('/policies/privacy')).catch(() => null);
+        if (!res || !res.ok) {
+          res = await fetch('/api/policies/privacy').catch(() => null);
+        }
+        if (res && res.ok) {
+          const data = await res.json();
+          if (isMounted && data) {
+            if (data.title) setTitle(data.title);
+            if (Array.isArray(data.sections) && data.sections.length > 0) {
+              setSections(data.sections);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('[PrivacyPage] Failed to fetch policy:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchPolicy();
+    return () => { isMounted = false; };
+  }, []);
+
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pb-16">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-12 sm:pb-20">
       <Breadcrumb items={[{ name: "Privacy Policy" }]} />
 
-      <article className="prose prose-zinc dark:prose-invert space-y-6 text-xs text-zinc-650 dark:text-zinc-400 leading-relaxed">
-        <h1 className="text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">Privacy Policy</h1>
-        <p className="text-[10px] text-zinc-400">Last updated: July 10, 2026</p>
+      <div className="bg-white border border-[#E8E2D6] rounded-2xl p-6 sm:p-10 shadow-sm space-y-6">
+        <div className="border-b border-zinc-100 pb-5">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A453E] tracking-tight">{title}</h1>
+          <p className="text-xs text-[#7A736A] mt-1">Data privacy standards, security policies, and user rights</p>
+        </div>
 
-        <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-zinc-900 dark:text-white">1. Information We Collect</h2>
-          <p>We collect personal information that you provide directly to us when setting up an account, using our interactive design canvas designer, or placing custom print orders. This includes name, billing details, shipping address, phone number, and uploaded custom graphics/images.</p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-zinc-900 dark:text-white">2. How We Use Your Data</h2>
-          <p>We utilize your data strictly to fulfill order print logistics, verify payments, manage account dashboards, and send shipment notifications. We do not sell or lease your custom designs or personal information to third parties.</p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-zinc-900 dark:text-white">3. Image & Asset Ownership</h2>
-          <p>You retain 100% intellectual property ownership of all custom texts and design images you upload onto the Kliamo Fashion workspace. We hold assets temporarily in secure cache memory to print onto physical blanks before deleting them according to security compliance.</p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-base font-extrabold text-zinc-900 dark:text-white">4. Cookies & Security</h2>
-          <p>We use standard functional cookies to persist your checkout details and cart/wishlist items across sessions. All payments are verified securely via 256-bit SSL encrypted channels.</p>
-        </section>
-      </article>
+        {loading ? (
+          <div className="py-12 text-center flex flex-col items-center justify-center gap-3">
+            <RefreshCw className="w-6 h-6 animate-spin text-emerald-600" />
+            <p className="text-xs text-zinc-500 font-bold">Loading Privacy Policy...</p>
+          </div>
+        ) : sections.length === 0 ? (
+          <div className="py-8 text-center text-xs text-zinc-400">No privacy policy published yet.</div>
+        ) : (
+          <div className="space-y-8">
+            {sections.map((sec, idx) => (
+              <section key={sec.id || idx} className="space-y-2">
+                <h2 className="text-base sm:text-lg font-extrabold text-[#4A453E] flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 text-xs flex items-center justify-center font-black">
+                    {idx + 1}
+                  </span>
+                  {sec.heading}
+                </h2>
+                <p className="text-xs sm:text-sm text-zinc-650 leading-relaxed pl-8 whitespace-pre-line">
+                  {sec.content}
+                </p>
+              </section>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,128 +1,125 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { CategoryEntity } from './entities/category.entity';
+import { Injectable, Inject } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
+import { Category, CategoryDocument } from './schemas/category.schema';
+import { Product, ProductDocument } from '../products/schemas/product.schema';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { randomUUID } from 'crypto';
 
+const slugify = (name: string): string =>
+  name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+
+const CACHE_KEY_ALL_CATEGORIES = 'cache_all_categories';
+
 @Injectable()
-export class CategoryService implements OnModuleInit {
+export class CategoryService {
   constructor(
-    @InjectRepository(CategoryEntity)
-    private readonly categoryRepository: Repository<CategoryEntity>,
+    @InjectModel(Category.name)
+    private readonly categoryModel: Model<CategoryDocument>,
+    @InjectModel(Product.name)
+    private readonly productModel: Model<ProductDocument>,
+    private readonly cloudinaryService: CloudinaryService,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
   ) {}
 
-  async onModuleInit() {
-    // Disable automatic seeding as per user request to manage categories dynamically only
-    // await this.seedCategories();
-  }
-
-  private async seedCategories() {
+  private async invalidateCache() {
     try {
-      const count = await this.categoryRepository.count();
-      if (count > 0) return;
-
-      const initial = [
-        {
-          name: 'T-Shirts',
-          slug: 't-shirts',
-          count: 18,
-          image:
-            'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300&auto=format&fit=crop&q=80',
-          status: 'Active',
-        },
-        {
-          name: 'Hoodies',
-          slug: 'hoodies',
-          count: 12,
-          image:
-            'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=300&auto=format&fit=crop&q=80',
-          status: 'Active',
-        },
-        {
-          name: 'Accessories',
-          slug: 'accessories',
-          count: 8,
-          image:
-            'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=300&auto=format&fit=crop&q=80',
-          status: 'Active',
-        },
-        {
-          name: 'Jackets',
-          slug: 'jackets',
-          count: 5,
-          image:
-            'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=300&auto=format&fit=crop&q=80',
-          status: 'Active',
-        },
-        {
-          name: 'Mugs',
-          slug: 'mugs',
-          count: 3,
-          image:
-            'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=300&auto=format&fit=crop&q=80',
-          status: 'Inactive',
-        },
-      ];
-
-      const now = new Date();
-      for (const item of initial) {
-        const cat = new CategoryEntity();
-        cat.id = randomUUID();
-        cat.name = item.name;
-        cat.slug = item.slug;
-        cat.count = item.count;
-        cat.image = item.image;
-        cat.status = item.status;
-        cat.createdAt = now;
-        cat.updatedAt = now;
-        await this.categoryRepository.save(cat);
-      }
-      console.log('Seeded initial categories successfully.');
-    } catch (err) {
-      console.error('Error seeding categories:', err);
-    }
+      await this.cacheManager.del(CACHE_KEY_ALL_CATEGORIES);
+    } catch (err) {}
   }
 
-  async findAll(): Promise<CategoryEntity[]> {
-    return this.categoryRepository.find({ order: { createdAt: 'ASC' } });
+  private async attachProductCounts(categories: any[]): Promise<Category[]> {
+    if (!categories || categories.length === 0) return [];
+    
+    // Only select minimal fields needed for counting
+    const products = await this.productModel.find().select('categoryId category').lean();
+    
+    return categories.map((cat) => {
+      const count = products.filter((p) => {
+        if (p.categoryId && p.categoryId === cat.id) return true;
+        if (p.category && p.category.toLowerCase() === cat.name.toLowerCase()) return true;
+        if (p.category && slugify(p.category) === cat.slug) return true;
+        return false;
+      }).length;
+      return { ...cat, count: count > 0 ? count : (cat.count || 0) };
+    });
   }
 
-  async findOne(id: string): Promise<CategoryEntity | null> {
-    return this.categoryRepository.findOne({ where: { id } });
+  async findAll(): Promise<Category[]> {
+    const cached = await this.cacheManager.get<Category[]>(CACHE_KEY_ALL_CATEGORIES);
+    if (cached) return cached;
+
+    const categories = await this.categoryModel.find().sort({ createdAt: 1 }).lean();
+    const result = await this.attachProductCounts(categories);
+    await this.cacheManager.set(CACHE_KEY_ALL_CATEGORIES, result, 300000);
+    return result;
   }
 
-  async create(data: Partial<CategoryEntity>): Promise<CategoryEntity> {
+  async findOne(id: string): Promise<Category | null> {
+    let cat = await this.categoryModel.findOne({ id }).lean();
+    if (!cat) cat = await this.categoryModel.findOne({ slug: id }).lean();
+    if (!cat) return null;
+    const [withCount] = await this.attachProductCounts([cat]);
+    return withCount || null;
+  }
+
+  async findBySlug(slug: string): Promise<Category | null> {
+    let cat = await this.categoryModel.findOne({ slug }).lean();
+    if (!cat) cat = await this.categoryModel.findOne({ id: slug }).lean();
+    if (!cat) return null;
+    const [withCount] = await this.attachProductCounts([cat]);
+    return withCount || null;
+  }
+
+  async create(data: Partial<Category>): Promise<Category> {
     const now = new Date();
-    const cat = new CategoryEntity();
-    cat.id = randomUUID();
-    cat.name = data.name!;
-    cat.slug = data.slug || data.name!.toLowerCase().replace(/\s+/g, '-');
-    cat.count = data.count ?? 0;
-    cat.image = data.image!;
-    cat.status = data.status || 'Active';
-    cat.createdAt = now;
-    cat.updatedAt = now;
-    return this.categoryRepository.save(cat);
+    const uploadedImage = data.image ? await this.cloudinaryService.uploadImage(data.image) : '';
+    const cat = new this.categoryModel({
+      id: randomUUID(),
+      name: data.name!,
+      slug: data.slug || data.name!.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+      count: data.count ?? 0,
+      image: uploadedImage,
+      description: data.description || '',
+      status: data.status || 'Active',
+      createdAt: now,
+      updatedAt: now,
+    });
+    const saved = await cat.save();
+    this.invalidateCache();
+    return saved;
   }
 
-  async update(
-    id: string,
-    data: Partial<CategoryEntity>,
-  ): Promise<CategoryEntity> {
-    const cat = await this.categoryRepository.findOne({ where: { id } });
+  async update(id: string, data: Partial<Category>): Promise<Category> {
+    let cat = await this.categoryModel.findOne({ id });
+    if (!cat) cat = await this.categoryModel.findOne({ slug: id });
     if (!cat) throw new Error('Category not found');
 
     if (data.name !== undefined) cat.name = data.name;
     if (data.slug !== undefined) cat.slug = data.slug;
     if (data.count !== undefined) cat.count = data.count;
-    if (data.image !== undefined) cat.image = data.image;
+    if (data.image !== undefined) {
+      cat.image = data.image ? await this.cloudinaryService.uploadImage(data.image) : '';
+    }
+    if (data.description !== undefined) cat.description = data.description;
     if (data.status !== undefined) cat.status = data.status;
     cat.updatedAt = new Date();
 
-    return this.categoryRepository.save(cat);
+    const saved = await cat.save();
+    this.invalidateCache();
+    return saved;
   }
 
   async remove(id: string): Promise<void> {
-    await this.categoryRepository.delete(id);
+    await this.categoryModel.deleteOne({ id });
+    this.invalidateCache();
   }
 }

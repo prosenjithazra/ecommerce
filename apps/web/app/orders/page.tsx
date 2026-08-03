@@ -15,7 +15,6 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'All' | 'Pending' | 'Processing' | 'Shipped' | 'Delivered'>('All');
   const [searchQuery, setSearchQuery] = useState("");
-  const [responseTime, setResponseTime] = useState<number | null>(null);
 
   useEffect(() => {
     const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
@@ -33,7 +32,6 @@ export default function OrdersPage() {
           return res.text().then(text => text ? JSON.parse(text) : []);
         })
         .then((data) => {
-          setResponseTime(Math.round(performance.now() - startTime));
           // Map backend order structure
           const mapped = data.map((o: any) => ({
             id: o.id,
@@ -116,7 +114,7 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-12 md:pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-6 pb-10 md:pb-16">
       <Breadcrumb items={[{ name: "My Orders" }]} />
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
@@ -124,12 +122,6 @@ export default function OrdersPage() {
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A453E] tracking-tight">Order History</h1>
           <p className="text-xs text-[#A89B8A] mt-1">View and track all your orders.</p>
         </div>
-        {responseTime !== null && (
-          <span className="text-[10px] font-extrabold text-zinc-400 bg-zinc-100 border border-zinc-200/60 rounded-full px-2.5 py-1 tracking-wider uppercase flex items-center gap-1 animate-fade-in">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-            API Latency: {responseTime}ms
-          </span>
-        )}
       </div>
 
       {/* Filters + Search */}
@@ -141,7 +133,7 @@ export default function OrdersPage() {
               onClick={() => setStatusFilter(status)}
               className={`text-[10px] sm:text-xs font-extrabold py-1.5 sm:py-2 px-2.5 sm:px-4 rounded-lg border transition-all ${
                 statusFilter === status
-                  ? 'bg-[#A8C69F] border-[#A8C69F] text-white shadow-md shadow-[#A8C69F]/20'
+                  ? 'bg-[#7e9677] border-[#7e9677] text-white shadow-md shadow-[#7e9677]/20'
                   : 'bg-transparent text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
               }`}
             >
@@ -155,7 +147,7 @@ export default function OrdersPage() {
           <input
             type="text" placeholder="Search orders..."
             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg py-2 pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E]"
+            className="w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg py-2 pl-9 pr-3 text-xs outline-none focus:border-[#df794d] text-[#4A453E]"
           />
         </div>
       </div>
@@ -166,7 +158,7 @@ export default function OrdersPage() {
           description="You haven't placed any print orders matching this query."
           actionText="Browse Products"
           actionHref="/products"
-          icon={<ShoppingBag className="w-8 h-8 text-[#A8C69F]" />}
+          icon={<ShoppingBag className="w-8 h-8 text-[#7e9677]" />}
         />
       ) : (
         <div className="grid grid-cols-1 gap-4">

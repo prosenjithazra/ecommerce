@@ -1,11 +1,15 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
-import { ProductEntity } from './entities/product.entity';
+import { Product, ProductSchema } from './schemas/product.schema';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ProductEntity])],
+  imports: [
+    MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
+    CloudinaryModule,
+  ],
   providers: [ProductsService],
   controllers: [ProductsController],
   exports: [ProductsService],

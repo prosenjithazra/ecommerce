@@ -1,7 +1,11 @@
 export class CreateBannerDto {
+  title?: string;
+  desktopImage?: string;
+  mobileImage?: string;
+  link?: string;
   badge?: string;
-  headline1!: string;
-  headline2!: string;
+  headline1?: string;
+  headline2?: string;
   headline2Color?: string;
   sub?: string;
   productImg?: string;

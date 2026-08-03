@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AdminTopbar } from "../AdminSidebar";
-import { Search, Loader2, X, ShoppingBag, Mail, Calendar, CreditCard, Tag, Download, ExternalLink } from "lucide-react";
+import { Search, Loader2, X, ShoppingBag, Mail, Calendar, CreditCard, Tag, Download, ExternalLink, Eye } from "lucide-react";
 import { useApp } from "../../../components/AppContext";
 import { getApiUrl } from "../../../components/ApiConfig";
 import { CustomGarmentPreview } from "../../../components/CustomGarmentPreview";
@@ -43,6 +43,37 @@ export default function AdminOrdersPage() {
   // Selected order details drawer state
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showRawJson, setShowRawJson] = useState(false);
+
+  // Qikink Live API state
+  const [qikinkDetails, setQikinkDetails] = useState<any | null>(null);
+  const [qikinkLoading, setQikinkLoading] = useState(false);
+  const [qikinkError, setQikinkError] = useState<string | null>(null);
+
+  const fetchQikinkDetails = async (orderId: string) => {
+    setQikinkLoading(true);
+    setQikinkError(null);
+    try {
+      const res = await fetch(`/api/qikink/orders?orderId=${encodeURIComponent(orderId)}`);
+      const data = await res.json();
+      if (data.success && data.order) {
+        setQikinkDetails(data.order);
+      } else {
+        setQikinkError(data.error || 'Qikink order sync pending or not found in partners account.');
+      }
+    } catch (err: any) {
+      setQikinkError(err.message || 'Failed to connect to Qikink Print-On-Demand API.');
+    } finally {
+      setQikinkLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedOrder) {
+      setQikinkDetails(null);
+      setQikinkError(null);
+      fetchQikinkDetails(selectedOrder.id);
+    }
+  }, [selectedOrder]);
 
   useEffect(() => {
     fetch(getApiUrl("/orders"))
@@ -100,7 +131,7 @@ export default function AdminOrdersPage() {
       <div className="flex flex-col h-full overflow-hidden">
         <AdminTopbar title="Orders" subtitle="Loading..." />
         <main className="flex-1 flex items-center justify-center p-8 bg-[#FDFAF6]">
-          <Loader2 className="w-8 h-8 text-[#F9A37E] animate-spin" />
+          <Loader2 className="w-8 h-8 text-[#df794d] animate-spin" />
         </main>
       </div>
     );
@@ -120,7 +151,7 @@ export default function AdminOrdersPage() {
               placeholder="Search by order ID or customer..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#F9A37E] transition-colors text-zinc-700 placeholder:text-zinc-400"
+              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#df794d] transition-colors text-zinc-700 placeholder:text-zinc-400"
             />
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -128,7 +159,7 @@ export default function AdminOrdersPage() {
               <button
                 key={s}
                 onClick={() => setFilterStatus(s)}
-                className={`text-[10px] font-extrabold px-3 py-1.5 rounded-lg border transition-all ${filterStatus === s ? "bg-[#F9A37E]/15 border-[#F9A37E] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
+                className={`text-[10px] font-extrabold px-3 py-1.5 rounded-lg border transition-all ${filterStatus === s ? "bg-[#df794d]/15 border-[#df794d] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
               >
                 {s}
               </button>
@@ -187,7 +218,7 @@ export default function AdminOrdersPage() {
                         <select
                           value={o.status}
                           onChange={(e) => updateStatus(o.id, e.target.value)}
-                          className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-1.5 pl-2.5 pr-8 text-[10px] font-black text-zinc-700 outline-none hover:border-[#F9A37E] transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1rem_1rem] bg-[right_0.4rem_center] bg-no-repeat"
+                          className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-1.5 pl-2.5 pr-8 text-[10px] font-black text-zinc-700 outline-none hover:border-[#df794d] transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1rem_1rem] bg-[right_0.4rem_center] bg-no-repeat"
                         >
                           {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
                         </select>
@@ -244,7 +275,7 @@ export default function AdminOrdersPage() {
                     <select
                       value={selectedOrder.status}
                       onChange={(e) => updateStatus(selectedOrder.id, e.target.value)}
-                      className="w-full bg-white border border-zinc-200 rounded-lg py-2 pl-3 pr-10 text-xs font-bold text-zinc-700 outline-none hover:border-[#F9A37E] transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat"
+                      className="w-full bg-white border border-zinc-200 rounded-lg py-2 pl-3 pr-10 text-xs font-bold text-zinc-700 outline-none hover:border-[#df794d] transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat"
                     >
                       {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
                     </select>
@@ -264,6 +295,73 @@ export default function AdminOrdersPage() {
                     Reason for Return: <span className="font-extrabold text-violet-700">{selectedOrder.returnReason}</span>
                   </div>
                 )}
+              </div>
+
+              {/* Qikink POD Live Sync Status Card */}
+              <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 text-white rounded-xl p-4 space-y-3 shadow-md border border-zinc-700">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-400">
+                      Qikink Print-On-Demand Status
+                    </h4>
+                  </div>
+                  <button
+                    onClick={() => fetchQikinkDetails(selectedOrder.id)}
+                    disabled={qikinkLoading}
+                    className="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-white rounded-md text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                  >
+                    {qikinkLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Tag className="w-3 h-3 text-emerald-400" />}
+                    Refresh Live API
+                  </button>
+                </div>
+
+                {qikinkLoading ? (
+                  <div className="flex items-center gap-2 py-2 text-xs text-zinc-300">
+                    <Loader2 className="w-4 h-4 animate-spin text-[#df794d]" />
+                    <span>Connecting to Qikink Print-On-Demand API (https://api.qikink.com)...</span>
+                  </div>
+                ) : qikinkDetails ? (
+                  <div className="space-y-2 text-xs border-t border-zinc-700/80 pt-2.5 font-mono">
+                    <div className="flex justify-between">
+                      <span className="text-zinc-400">Qikink Order ID:</span>
+                      <span className="font-extrabold text-amber-300">{qikinkDetails.order_id}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-400">Order Number:</span>
+                      <span className="font-bold text-zinc-200">{qikinkDetails.number || selectedOrder.id}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-400">POD Status:</span>
+                      <span className="font-black px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase text-[10px]">
+                        {qikinkDetails.status}
+                      </span>
+                    </div>
+                    {qikinkDetails.shipping_type && (
+                      <div className="flex justify-between">
+                        <span className="text-zinc-400">Shipping Type:</span>
+                        <span className="text-zinc-200">{qikinkDetails.shipping_type}</span>
+                      </div>
+                    )}
+                    {qikinkDetails.payment_type && (
+                      <div className="flex justify-between">
+                        <span className="text-zinc-400">Payment Type:</span>
+                        <span className="text-zinc-200">{qikinkDetails.payment_type}</span>
+                      </div>
+                    )}
+                    {qikinkDetails.total_order_value && (
+                      <div className="flex justify-between">
+                        <span className="text-zinc-400">Total Value:</span>
+                        <span className="text-emerald-400 font-bold">₹{qikinkDetails.total_order_value}</span>
+                      </div>
+                    )}
+                  </div>
+                ) : qikinkError ? (
+                  <div className="text-[11px] text-amber-300 bg-amber-950/40 p-2.5 rounded-lg border border-amber-500/30">
+                    <p className="font-bold">Sync Info:</p>
+                    <p className="text-zinc-300 mt-0.5">{qikinkError}</p>
+                  </div>
+                ) : null}
               </div>
 
               {/* Customer Info */}
@@ -327,99 +425,313 @@ export default function AdminOrdersPage() {
                 {selectedOrder.itemsJson && Array.isArray(selectedOrder.itemsJson) ? (
                   <div className="space-y-3">
                     {selectedOrder.itemsJson.map((item: any, i: number) => {
-                      const designStr = item.customDesign?.baseImage;
-                      let designMeta = null;
-                      if (designStr) {
-                        try {
-                          designMeta = JSON.parse(designStr);
-                        } catch (err) {
-                          console.warn("Error parsing design meta:", err);
+                      let designMeta: any = null;
+                      const baseImg = item.customDesign?.baseImage;
+                      if (baseImg) {
+                        if (typeof baseImg === 'string') {
+                          try {
+                            designMeta = JSON.parse(baseImg);
+                          } catch {
+                            designMeta = null;
+                          }
+                        } else if (typeof baseImg === 'object') {
+                          designMeta = baseImg;
                         }
                       }
+                      if (!designMeta && item.customDesign && typeof item.customDesign === 'object') {
+                        designMeta = item.customDesign;
+                      }
+
+                      const triggerDownload = (url: string, filename: string) => {
+                        if (!url) return;
+                        if (url.startsWith('data:')) {
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = filename;
+                          document.body.appendChild(a);
+                          a.click();
+                          document.body.removeChild(a);
+                          return;
+                        }
+                        const downloadUrl = `/api/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
+                        const a = document.createElement('a');
+                        a.href = downloadUrl;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                      };
+
+                      const generateRealViewMockupPng = async (
+                        garmentType: string = 'tshirt',
+                        colorHex: string = '#FFFFFF',
+                        view: 'front' | 'back' = 'front',
+                        artworkUrl?: string
+                      ): Promise<string> => {
+                        return new Promise((resolve) => {
+                          const isPolo = garmentType === 'polo';
+                          const isBack = view === 'back';
+                          const isWhite = !colorHex || colorHex.toUpperCase() === '#FFFFFF' || colorHex.toUpperCase() === '#FFF';
+
+                          const baseImgSrc = isPolo
+                            ? (isBack ? '/poloTshirtBack.png' : '/poloTshirtFront.png')
+                            : (isBack ? '/whiteTshirtBack.png' : '/whiteTshirtFront.png');
+
+                          const canvas = document.createElement('canvas');
+                          canvas.width = 800;
+                          canvas.height = 800;
+                          const ctx = canvas.getContext('2d');
+                          if (!ctx) return resolve('');
+
+                          const baseImg = new Image();
+                          baseImg.crossOrigin = 'anonymous';
+                          baseImg.src = baseImgSrc;
+
+                          baseImg.onload = () => {
+                            if (!isWhite) {
+                              ctx.drawImage(baseImg, 0, 0, 800, 800);
+                              ctx.globalCompositeOperation = 'source-in';
+                              ctx.fillStyle = colorHex;
+                              ctx.fillRect(0, 0, 800, 800);
+                              ctx.globalCompositeOperation = 'multiply';
+                              ctx.drawImage(baseImg, 0, 0, 800, 800);
+                              ctx.globalCompositeOperation = 'source-over';
+                            } else {
+                              ctx.drawImage(baseImg, 0, 0, 800, 800);
+                            }
+
+                            if (!artworkUrl) {
+                              return resolve(canvas.toDataURL('image/png'));
+                            }
+
+                            const artImg = new Image();
+                            artImg.crossOrigin = 'anonymous';
+                            artImg.src = artworkUrl;
+                            artImg.onload = () => {
+                              const printW = 336;
+                              const printH = 384;
+                              const printX = (800 - printW) / 2;
+                              const printY = 200;
+
+                              const scale = Math.min(printW / artImg.width, printH / artImg.height);
+                              const drawW = artImg.width * scale;
+                              const drawH = artImg.height * scale;
+                              const drawX = printX + (printW - drawW) / 2;
+                              const drawY = printY + (printH - drawH) / 2;
+
+                              ctx.drawImage(artImg, drawX, drawY, drawW, drawH);
+                              resolve(canvas.toDataURL('image/png'));
+                            };
+                            artImg.onerror = () => resolve(canvas.toDataURL('image/png'));
+                          };
+                          baseImg.onerror = () => resolve('');
+                        });
+                      };
+
+                      const frontDesignUrl = designMeta?.frontDesignUrl || designMeta?.front?.imageUrl || item.customDesign?.frontDesignUrl;
+                      const backDesignUrl = designMeta?.backDesignUrl || designMeta?.back?.imageUrl || item.customDesign?.backDesignUrl;
+                      const rawFrontArtwork = designMeta?.rawFrontArtworkUrl || designMeta?.front?.rawArtworkUrl || frontDesignUrl;
+                      const rawBackArtwork = designMeta?.rawBackArtworkUrl || designMeta?.back?.rawArtworkUrl || backDesignUrl;
+                      const frontMockupUrl = designMeta?.frontMockupUrl || item.customDesign?.frontMockupUrl;
+                      const backMockupUrl = designMeta?.backMockupUrl || item.customDesign?.backMockupUrl;
+
+                      const hasFrontSide = !!(frontDesignUrl || frontMockupUrl || rawFrontArtwork);
+                      const hasBackSide = !!(backDesignUrl || backMockupUrl || (rawBackArtwork && rawBackArtwork !== rawFrontArtwork));
+
+                      const handleDownloadMockup = async (view: 'front' | 'back') => {
+                        let targetUrl = view === 'front' ? frontMockupUrl : backMockupUrl;
+                        if (!targetUrl) {
+                          const dUrl = view === 'front' ? frontDesignUrl : backDesignUrl;
+                          targetUrl = await generateRealViewMockupPng(
+                            designMeta?.productType || 'tshirt',
+                            designMeta?.colorHex || '#FFFFFF',
+                            view,
+                            dUrl
+                          );
+                        }
+                        triggerDownload(targetUrl, `real_view_${view}_${selectedOrder.id}.png`);
+                      };
 
                       return (
                         <div key={i} className="border border-zinc-200 rounded-xl p-3 bg-white space-y-3">
-                          <div className="flex gap-3">
-                            <CustomGarmentPreview
-                              customDesign={item.customDesign}
-                              defaultImage={item.image}
-                              view="front"
-                              className="w-12 h-12"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <h5 className="font-extrabold text-xs text-zinc-800 truncate">{item.name}</h5>
-                              <p className="text-[10px] text-zinc-400 mt-0.5">
-                                Size: <span className="font-bold text-zinc-650">{item.size}</span> · Qty: <span className="font-bold text-zinc-650">{item.quantity}</span>
-                              </p>
-                              <p className="text-xs font-black text-zinc-900 mt-1">₹{(item.price * item.quantity).toLocaleString()}</p>
+                          <div className="flex gap-3 items-center justify-between">
+                            <div className="flex gap-3 items-center min-w-0">
+                              <CustomGarmentPreview
+                                customDesign={item.customDesign}
+                                defaultImage={item.image}
+                                view="front"
+                                className="w-12 h-12"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <h5 className="font-extrabold text-xs text-zinc-800 truncate">{item.name}</h5>
+                                <p className="text-[10px] text-zinc-400 mt-0.5">
+                                  Size: <span className="font-bold text-zinc-650">{item.size}</span> · Qty: <span className="font-bold text-zinc-650">{item.quantity}</span>
+                                </p>
+                                <p className="text-xs font-black text-zinc-900 mt-1">₹{(item.price * item.quantity).toLocaleString()}</p>
+                              </div>
                             </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadMockup('front')}
+                              className="px-2.5 py-1.5 bg-[#df794d] hover:bg-[#e8855a] text-white font-extrabold text-[10px] rounded-lg transition-all flex items-center gap-1 shadow-xs flex-shrink-0 cursor-pointer"
+                            >
+                              <Download className="w-3 h-3" />
+                              Download
+                            </button>
                           </div>
 
-                          {/* Dynamic Custom Mockups */}
-                          {designMeta && (
+                          {/* Dynamic Custom Mockups & Downloads */}
+                          {(designMeta || item.customDesign || item.image) && (
                             <div className="p-3 bg-zinc-50 rounded-lg border border-dashed border-zinc-200 space-y-3">
                               <div className="flex items-center gap-1.5 text-[9px] font-extrabold text-[#e8855a] uppercase">
                                 <Tag className="w-3.5 h-3.5" />
                                 <span>Custom Print Specifications</span>
                               </div>
                               
-                              {/* Side-by-side composite previews */}
+                              {/* Side-by-side composite previews with print markers */}
                               <div className="flex justify-center">
                                 <CustomGarmentPreview
                                   customDesign={item.customDesign}
                                   defaultImage={item.image}
                                   view="both"
                                   className="w-20 h-20"
+                                  showMarkers={true}
                                 />
                               </div>
 
                               {/* Specs summary */}
-                              <div className="text-[9px] text-zinc-500 space-y-1 border-t border-zinc-150 pt-2 font-medium">
-                                <p>Garment style: <span className="font-bold capitalize text-zinc-700">{designMeta.productType}</span></p>
-                                <p>Color: <span className="font-bold text-zinc-700">{designMeta.color}</span> ({designMeta.colorHex})</p>
-                              </div>
-
-                              {/* Standalone original graphics download panel */}
-                              <div className="border-t border-zinc-150 pt-2.5 space-y-2">
-                                <p className="text-[8px] font-black uppercase text-zinc-400 tracking-wider">Original Graphic Files (Original Resolution)</p>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                                  {designMeta.front?.imageUrl && (
-                                    <div className="p-2 border border-zinc-200 rounded-lg bg-white flex flex-col items-center gap-1.5">
-                                      <span className="text-[8px] font-bold text-zinc-400 uppercase">Front Artwork</span>
-                                      <div className="w-12 h-12 border border-zinc-150 rounded flex items-center justify-center bg-zinc-50 overflow-hidden">
-                                        <img src={designMeta.front.imageUrl} className="w-full h-full object-contain" alt="" />
-                                      </div>
-                                      <a
-                                        href={designMeta.front.imageUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-full text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-extrabold text-[8px] py-1 rounded border border-indigo-150 flex items-center justify-center gap-1"
-                                      >
-                                        <Download className="w-2.5 h-2.5" />
-                                        Download Original
-                                      </a>
-                                    </div>
-                                  )}
-                                  {designMeta.back?.imageUrl && (
-                                    <div className="p-2 border border-zinc-200 rounded-lg bg-white flex flex-col items-center gap-1.5">
-                                      <span className="text-[8px] font-bold text-zinc-400 uppercase">Back Artwork</span>
-                                      <div className="w-12 h-12 border border-zinc-150 rounded flex items-center justify-center bg-zinc-50 overflow-hidden">
-                                        <img src={designMeta.back.imageUrl} className="w-full h-full object-contain" alt="" />
-                                      </div>
-                                      <a
-                                        href={designMeta.back.imageUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-full text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-extrabold text-[8px] py-1 rounded border border-indigo-150 flex items-center justify-center gap-1"
-                                      >
-                                        <Download className="w-2.5 h-2.5" />
-                                        Download Original
-                                      </a>
-                                    </div>
+                              {designMeta && (
+                                <div className="text-[9px] text-zinc-500 space-y-1.5 border-t border-zinc-150 pt-2 font-medium">
+                                  <p>Garment Style: <span className="font-extrabold capitalize text-zinc-800">{designMeta.productType === 'polo' ? 'Polo T-Shirt' : 'Crewneck T-Shirt'}</span></p>
+                                  {designMeta.color && <p>Garment Color: <span className="font-extrabold text-zinc-800">{designMeta.color}</span> ({designMeta.colorHex})</p>}
+                                  <p>Print Positions: <span className="font-extrabold text-[#e8855a]">{hasFrontSide && hasBackSide ? 'Front & Back Both Sides' : hasBackSide ? 'Back Side Only' : 'Front Side Only'}</span></p>
+                                  {designMeta.sizeQuantities && (
+                                    <p>Size Matrix: <span className="font-bold text-zinc-800">{
+                                      Object.entries(designMeta.sizeQuantities)
+                                        .filter(([_, q]: any) => Number(q) > 0)
+                                        .map(([s, q]: any) => `${s}: ${q}`)
+                                        .join(', ') || item.size
+                                    }</span></p>
                                   )}
                                 </div>
-                              </div>
+                              )}
 
+                              {/* Real View Garment Mockups & Original Artwork Downloads */}
+                              <div className="border-t border-zinc-150 pt-2.5 space-y-3">
+                                {/* Real View Shirt Mockups Section */}
+                                <div>
+                                  <p className="text-[9px] font-black uppercase text-[#e8855a] tracking-wider mb-2 flex items-center gap-1">
+                                    <Eye className="w-3 h-3" /> Real View Product Mockup Downloads
+                                  </p>
+                                  <div className={`grid grid-cols-1 ${hasFrontSide && hasBackSide ? 'sm:grid-cols-1' : ''} gap-2`}>
+                                    {hasFrontSide && (
+                                      <div className="p-2.5 border border-zinc-200 rounded-xl bg-white flex flex-col items-center gap-2 shadow-xs">
+                                        <span className="text-[9px] font-black text-zinc-600 uppercase">Real View Front Product</span>
+                                        <div className="w-24 h-24 border border-zinc-150 rounded-lg flex items-center justify-center bg-[#FDFAF6] overflow-hidden">
+                                          {frontMockupUrl ? (
+                                            <img src={frontMockupUrl} className="w-full h-full object-contain" alt="Real View Front" />
+                                          ) : (
+                                            <CustomGarmentPreview customDesign={item.customDesign} defaultImage={item.image} view="front" className="w-full h-full" />
+                                          )}
+                                        </div>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDownloadMockup('front')}
+                                          className="w-full text-center bg-[#df794d] hover:bg-[#e8855a] text-white font-extrabold text-[9px] py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+                                        >
+                                          <Download className="w-3 h-3" />
+                                          Download Front Mockup
+                                        </button>
+                                      </div>
+                                    )}
+
+                                    {hasBackSide && (
+                                      <div className="p-2.5 border border-zinc-200 rounded-xl bg-white flex flex-col items-center gap-2 shadow-xs">
+                                        <span className="text-[9px] font-black text-zinc-600 uppercase">Real View Back Product</span>
+                                        <div className="w-24 h-24 border border-zinc-150 rounded-lg flex items-center justify-center bg-[#FDFAF6] overflow-hidden">
+                                          {backMockupUrl ? (
+                                            <img src={backMockupUrl} className="w-full h-full object-contain" alt="Real View Back" />
+                                          ) : (
+                                            <CustomGarmentPreview customDesign={item.customDesign} defaultImage={item.image} view="back" className="w-full h-full" />
+                                          )}
+                                        </div>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDownloadMockup('back')}
+                                          className="w-full text-center bg-[#df794d] hover:bg-[#e8855a] text-white font-extrabold text-[9px] py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+                                        >
+                                          <Download className="w-3 h-3" />
+                                          Download Back Mockup
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Original Print Artwork Section */}
+                                <div>
+                                  <p className="text-[9px] font-black uppercase text-zinc-500 tracking-wider mb-2">
+                                    Original Artwork Files (Print Resolution PNG)
+                                  </p>
+                                  <div className={`grid grid-cols-1 ${hasFrontSide && hasBackSide ? 'sm:grid-cols-1' : ''} gap-2`}>
+                                    {hasFrontSide && (rawFrontArtwork || frontDesignUrl) && (
+                                      <div className="p-2 border border-zinc-200 rounded-lg bg-white flex flex-col items-center gap-1.5">
+                                        <span className="text-[8px] font-bold text-zinc-400 uppercase">Front Artwork File</span>
+                                        <div className="w-16 h-16 border border-zinc-150 rounded flex items-center justify-center bg-zinc-50 overflow-hidden">
+                                          <img src={rawFrontArtwork || frontDesignUrl} className="w-full h-full object-contain" alt="Original Front Design" />
+                                        </div>
+                                        <button
+                                          type="button"
+                                          onClick={() => triggerDownload(rawFrontArtwork || frontDesignUrl, `print_front_artwork_${selectedOrder.id}.png`)}
+                                          className="w-full text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-extrabold text-[9px] py-1 rounded border border-indigo-150 flex items-center justify-center gap-1 cursor-pointer"
+                                        >
+                                          <Download className="w-2.5 h-2.5" />
+                                          Download Front Artwork
+                                        </button>
+                                      </div>
+                                    )}
+
+                                    {hasBackSide && (rawBackArtwork || backDesignUrl) && (
+                                      <div className="p-2 border border-zinc-200 rounded-lg bg-white flex flex-col items-center gap-1.5">
+                                        <span className="text-[8px] font-bold text-zinc-400 uppercase">Back Artwork File</span>
+                                        <div className="w-16 h-16 border border-zinc-150 rounded flex items-center justify-center bg-zinc-50 overflow-hidden">
+                                          <img src={rawBackArtwork || backDesignUrl} className="w-full h-full object-contain" alt="Original Back Design" />
+                                        </div>
+                                        <button
+                                          type="button"
+                                          onClick={() => triggerDownload(rawBackArtwork || backDesignUrl, `print_back_artwork_${selectedOrder.id}.png`)}
+                                          className="w-full text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-extrabold text-[9px] py-1 rounded border border-indigo-150 flex items-center justify-center gap-1 cursor-pointer"
+                                        >
+                                          <Download className="w-2.5 h-2.5" />
+                                          Download Back Artwork
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    if (hasFrontSide) {
+                                      await handleDownloadMockup('front');
+                                      if (rawFrontArtwork || frontDesignUrl) {
+                                        triggerDownload(rawFrontArtwork || frontDesignUrl, `print_front_artwork_${selectedOrder.id}.png`);
+                                      }
+                                    }
+                                    if (hasBackSide) {
+                                      await handleDownloadMockup('back');
+                                      if (rawBackArtwork || backDesignUrl) {
+                                        triggerDownload(rawBackArtwork || backDesignUrl, `print_back_artwork_${selectedOrder.id}.png`);
+                                      }
+                                    }
+                                  }}
+                                  className="w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[11px] py-2 px-1 rounded-md transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer mt-3"
+                                >
+                                  <Download className="w-3.5 h-3.5" />
+                                  Download All Items (Mockups & Artworks)
+                                </button>
+                              </div>
                             </div>
                           )}
                         </div>

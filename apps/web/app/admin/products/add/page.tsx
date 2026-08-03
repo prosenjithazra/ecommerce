@@ -3,40 +3,62 @@
 import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Upload, X, ImagePlus, Save, Package } from "lucide-react";
+import { ArrowLeft, Upload, X, ImagePlus, Save, Package, Link2, Star } from "lucide-react";
 import { AdminTopbar } from "../../AdminSidebar";
 import { useApp } from "../../../../components/AppContext";
 import { getApiUrl } from "../../../../components/ApiConfig";
+import { QIKINK_EXCEL_COLORS as COLORS, getColorSkuCode } from "../../../../lib/qikink/colors";
 
 const CATEGORIES = ["T-Shirts", "Hoodies", "Jackets", "Mugs", "Accessories", "Bags", "Phone Cases"];
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL", "3XL"];
-const COLORS = [
-  { name: "White", hex: "#ffffff" },
-  { name: "Black", hex: "#0f172a" },
-  { name: "Heather Grey", hex: "#94a3b8" },
-  { name: "Navy Blue", hex: "#1e3a8a" },
-  { name: "Forest Green", hex: "#14532d" },
-  { name: "Crimson Red", hex: "#991b1b" },
-];
+
+const slugify = (name: string) =>
+  name.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
 
 export default function AddProductPage() {
   const { showToast } = useApp();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [categoriesList, setCategoriesList] = useState<{ id: string; name: string }[]>([]);
 
   const [form, setForm] = useState({
     name: "",
+    slug: "",
+    sku: "",
+    skuMappingStr: "",
     price: "",
     originalPrice: "",
     category: "T-Shirts",
+    categoryId: "",
     description: "",
     inStock: true,
     selectedSizes: [] as string[],
     selectedColors: [] as string[],
     tag: "",
+    rating: 5,
+    reviewsCount: 0,
+    homeSection: [] as string[],
+    targetGender: "Both" as "Men" | "Women" | "Both",
   });
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [images, setImages] = useState<{ file: File; preview: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  React.useEffect(() => {
+    fetch(getApiUrl("/category"))
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCategoriesList(data.map((c: any) => ({ id: c.id, name: c.name })));
+          setForm(prev => ({
+            ...prev,
+            category: prev.category || data[0].name,
+            categoryId: prev.categoryId || data[0].id
+          }));
+        }
+      })
+      .catch(err => console.error("Error fetching categories:", err));
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -82,17 +104,30 @@ export default function AddProductPage() {
       showToast("No Images", "Please upload at least one product image.", "error");
       return;
     }
+    let skuMapping = {};
+    if (form.skuMappingStr.trim()) {
+      try {
+        skuMapping = JSON.parse(form.skuMappingStr);
+      } catch (e) {
+        showToast("Invalid JSON", "Variant SKU Overrides must be a valid JSON object.", "error");
+        setSubmitting(false);
+        return;
+      }
+    }
+
     setSubmitting(true);
     
     const colors = form.selectedColors
       .map((name) => COLORS.find((c) => c.name === name))
-      .filter((c): c is { name: string; hex: string } => !!c);
+      .filter((c): c is typeof COLORS[number] => !!c);
 
     const payload = {
       name: form.name,
+      slug: form.slug || slugify(form.name),
       price: parseFloat(form.price) || 0,
       originalPrice: parseFloat(form.originalPrice) || parseFloat(form.price) || 0,
       category: form.category,
+      categoryId: form.categoryId,
       description: form.description,
       inStock: form.inStock,
       tag: form.tag,
@@ -100,7 +135,12 @@ export default function AddProductPage() {
       colors,
       image: images[0]?.preview || "",
       images: images.map((img) => img.preview),
-      sku: "SKU-" + Math.floor(100000 + Math.random() * 900000)
+      sku: form.sku.trim() || "SKU-" + Math.floor(100000 + Math.random() * 900000),
+      rating: form.rating,
+      reviewsCount: form.reviewsCount,
+      skuMapping,
+      homeSection: form.homeSection,
+      targetGender: form.targetGender,
     };
 
     fetch(getApiUrl("/products"), {
@@ -110,9 +150,32 @@ export default function AddProductPage() {
       },
       body: JSON.stringify(payload)
     })
-      .then(res => {
-        if (res.ok) return res.json();
-        throw new Error("Failed to add product");
+      .then(async (res) => {
+        const text = await res.text();
+        let body: any = {};
+        try {
+          body = text ? JSON.parse(text) : {};
+        } catch {}
+
+        if (res.ok) {
+          return body;
+        }
+
+        // Fallback to local Qikink API route if primary endpoint returns error
+        return fetch('/api/qikink/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+          .then(async (r) => {
+            const rText = await r.text();
+            let rBody: any = {};
+            try { rBody = rText ? JSON.parse(rText) : {}; } catch {}
+            if (r.ok && rBody.success !== false) {
+              return rBody;
+            }
+            throw new Error(rBody.error || body.message || body.error || `Server responded with status ${res.status}`);
+          });
       })
       .then(() => {
         showToast("Product Created", `${form.name} has been added to the catalog.`, "success");
@@ -124,7 +187,7 @@ export default function AddProductPage() {
       });
   };
 
-  const inputCls = "w-full bg-white border border-zinc-200 rounded-lg py-3 px-4 text-xs font-medium text-zinc-800 outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/10 transition-all placeholder:text-zinc-400";
+  const inputCls = "w-full bg-white border border-zinc-200 rounded-lg py-3 px-4 text-xs font-medium text-zinc-800 outline-none focus:border-[#df794d] focus:ring-2 focus:ring-[#df794d]/10 transition-all placeholder:text-zinc-400";
   const labelCls = "block text-xs font-extrabold text-zinc-600 mb-1.5";
 
   return (
@@ -137,7 +200,7 @@ export default function AddProductPage() {
           {/* Back link */}
           <Link
             href="/admin/products"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-[#F9A37E] transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-[#df794d] transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Products
           </Link>
@@ -147,17 +210,17 @@ export default function AddProductPage() {
             <div className="lg:col-span-2 space-y-4">
               <div className="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm space-y-4">
                 <h3 className="font-extrabold text-sm text-zinc-800 flex items-center gap-2">
-                  <ImagePlus className="w-4 h-4 text-[#F9A37E]" /> Product Images
+                  <ImagePlus className="w-4 h-4 text-[#df794d]" /> Product Images
                 </h3>
 
                 {/* Drop Zone */}
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full border-2 border-dashed border-zinc-300 hover:border-[#F9A37E] rounded-lg p-8 flex flex-col items-center justify-center gap-2 transition-all hover:bg-[#F9A37E]/5 cursor-pointer group"
+                  className="w-full border-2 border-dashed border-zinc-300 hover:border-[#df794d] rounded-lg p-8 flex flex-col items-center justify-center gap-2 transition-all hover:bg-[#df794d]/5 cursor-pointer group"
                 >
-                  <Upload className="w-8 h-8 text-zinc-300 group-hover:text-[#F9A37E] transition-colors" />
-                  <span className="text-xs font-bold text-zinc-400 group-hover:text-[#F9A37E] transition-colors">Click to Upload Images</span>
+                  <Upload className="w-8 h-8 text-zinc-300 group-hover:text-[#df794d] transition-colors" />
+                  <span className="text-xs font-bold text-zinc-400 group-hover:text-[#df794d] transition-colors">Click to Upload Images</span>
                   <span className="text-[10px] text-zinc-400">PNG, JPG, WEBP up to 5MB each</span>
                 </button>
                 <input
@@ -171,28 +234,46 @@ export default function AddProductPage() {
 
                 {/* Image previews */}
                 {images.length > 0 && (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2.5">
                     {images.map((img, idx) => (
-                      <div key={idx} className="relative rounded-lg overflow-hidden aspect-square border border-zinc-200 group">
+                      <div key={idx} className="relative rounded-lg overflow-hidden aspect-square border border-zinc-200 group shadow-sm">
                         <img src={img.preview} alt={`preview-${idx}`} className="w-full h-full object-cover" />
-                        {idx === 0 && (
-                          <span className="absolute top-1 left-1 text-[8px] font-extrabold bg-[#F9A37E] text-white px-1.5 py-0.5 rounded-md uppercase">Primary</span>
+                        {idx === 0 ? (
+                          <span className="absolute top-1.5 left-1.5 text-[8px] font-extrabold bg-[#df794d] text-white px-2 py-0.5 rounded-md uppercase shadow-sm">Primary</span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setImages((prev) => {
+                                const copy = [...prev];
+                                const target = copy.splice(idx, 1)[0];
+                                if (target) copy.unshift(target);
+                                return copy;
+                              });
+                              showToast("Primary Updated", "Image moved to primary position.", "info");
+                            }}
+                            className="absolute top-1.5 left-1.5 text-[8px] font-extrabold bg-zinc-800/80 hover:bg-[#df794d] text-white px-1.5 py-0.5 rounded-md uppercase opacity-80 hover:opacity-100 transition-all"
+                          >
+                            Make Primary
+                          </button>
                         )}
                         <button
                           type="button"
                           onClick={() => removeImage(idx)}
-                          className="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-110 cursor-pointer z-10"
+                          title="Delete image"
                         >
-                          <X className="w-3 h-3 text-white" />
+                          <X className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     ))}
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="aspect-square rounded-lg border-2 border-dashed border-zinc-200 hover:border-[#F9A37E] flex items-center justify-center text-zinc-400 hover:text-[#F9A37E] transition-all"
+                      className="aspect-square rounded-lg border-2 border-dashed border-zinc-200 hover:border-[#df794d] flex flex-col items-center justify-center text-zinc-400 hover:text-[#df794d] transition-all bg-zinc-50/50 hover:bg-[#df794d]/5"
                     >
-                      <Plus className="w-5 h-5" />
+                      <Plus className="w-5 h-5 mb-1" />
+                      <span className="text-[10px] font-bold">Add More</span>
                     </button>
                   </div>
                 )}
@@ -206,7 +287,7 @@ export default function AddProductPage() {
                 <label className="flex items-center gap-3 cursor-pointer">
                   <div
                     onClick={() => setForm((p) => ({ ...p, inStock: !p.inStock }))}
-                    className={`w-10 h-5.5 rounded-full relative transition-colors cursor-pointer ${form.inStock ? "bg-[#A8C69F]" : "bg-zinc-200"}`}
+                    className={`w-10 h-5.5 rounded-full relative transition-colors cursor-pointer ${form.inStock ? "bg-[#7e9677]" : "bg-zinc-200"}`}
                     style={{ height: '22px' }}
                   >
                     <span
@@ -223,7 +304,7 @@ export default function AddProductPage() {
                     <select
                       value={form.tag}
                       onChange={(e) => setForm((p) => ({ ...p, tag: e.target.value }))}
-                      className="w-full bg-white border border-zinc-200 rounded-lg py-3 pl-4 pr-10 text-xs font-semibold text-zinc-800 outline-none focus:border-[#F9A37E] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer"
+                      className="w-full bg-white border border-zinc-200 rounded-lg py-3 pl-4 pr-10 text-xs font-semibold text-zinc-800 outline-none focus:border-[#df794d] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer"
                     >
                       <option value="">No Tag</option>
                       <option value="Best Seller">Best Seller</option>
@@ -233,6 +314,66 @@ export default function AddProductPage() {
                     </select>
                   </div>
                 </div>
+
+                {/* Homepage Section(s) */}
+                <div>
+                  <label className={labelCls}>Homepage Section(s)</label>
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {["Best Seller", "New Arrival", "Featured", "None"].map((sec) => {
+                      const isNone = sec === "None";
+                      const isSelected = isNone
+                        ? form.homeSection.length === 0 || form.homeSection.includes("None")
+                        : form.homeSection.includes(sec);
+
+                      return (
+                        <button
+                          key={sec}
+                          type="button"
+                          onClick={() => {
+                            setForm((prev) => {
+                              if (isNone) return { ...prev, homeSection: [] };
+                              const current = prev.homeSection.filter((s) => s !== "None");
+                              const next = current.includes(sec)
+                                ? current.filter((s) => s !== sec)
+                                : [...current, sec];
+                              return { ...prev, homeSection: next };
+                            });
+                          }}
+                          className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${
+                            isSelected
+                              ? "bg-[#df794d] text-white border-[#df794d] shadow-sm"
+                              : "bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300"
+                          }`}
+                        >
+                          {sec}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[9px] text-zinc-400 mt-1">Assign product to specific sections on the homepage</p>
+                </div>
+
+                {/* Target Gender */}
+                <div>
+                  <label className={labelCls}>Target Gender</label>
+                  <div className="grid grid-cols-3 gap-2 mt-1">
+                    {(["Men", "Women", "Both"] as const).map((g) => (
+                      <button
+                        key={g}
+                        type="button"
+                        onClick={() => setForm((p) => ({ ...p, targetGender: g }))}
+                        className={`py-2 px-3 text-xs font-bold rounded-lg border transition-all ${
+                          form.targetGender === g
+                            ? "bg-[#4A453E] text-white border-[#4A453E] shadow-sm"
+                            : "bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300"
+                        }`}
+                      >
+                        {g}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[9px] text-zinc-400 mt-1">Controls rendering in Men's or Women's homepage collections</p>
+                </div>
               </div>
             </div>
  
@@ -241,7 +382,7 @@ export default function AddProductPage() {
               {/* Basic Info */}
               <div className="bg-white border border-zinc-200 rounded-lg p-5 shadow-sm space-y-4">
                 <h3 className="font-extrabold text-sm text-zinc-800 flex items-center gap-2">
-                  <Package className="w-4 h-4 text-[#F9A37E]" /> Product Details
+                  <Package className="w-4 h-4 text-[#df794d]" /> Product Details
                 </h3>
  
                 <div>
@@ -250,12 +391,152 @@ export default function AddProductPage() {
                     type="text"
                     required
                     value={form.name}
-                    onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                    onChange={(e) => {
+                      const name = e.target.value;
+                      setForm((p) => ({
+                        ...p,
+                        name,
+                        slug: slugManuallyEdited ? p.slug : slugify(name),
+                      }));
+                    }}
                     placeholder="e.g. Vintage Oversized Graphic Tee"
                     className={inputCls}
                   />
                 </div>
- 
+
+                {/* Slug field */}
+                <div>
+                  <label className={labelCls}>
+                    <span className="flex items-center gap-1.5"><Link2 className="w-3 h-3 text-[#df794d]" /> URL Slug</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={form.slug}
+                      onChange={(e) => {
+                        setSlugManuallyEdited(true);
+                        setForm((p) => ({ ...p, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-') }));
+                      }}
+                      placeholder="auto-generated-from-name"
+                      className={inputCls + " pr-24"}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => { setSlugManuallyEdited(false); setForm((p) => ({ ...p, slug: slugify(p.name) })); }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-extrabold text-[#df794d] hover:underline"
+                    >
+                      Auto-generate
+                    </button>
+                  </div>
+                  <p className="text-[9px] text-zinc-400 mt-1 truncate">
+                    Preview: <span className="text-zinc-600 font-medium">/products/{form.slug || slugify(form.name) || 'your-product-slug'}</span>
+                  </p>
+                </div>
+
+                {/* Qikink My Products Library Mapping */}
+                <div className="bg-amber-50/70 border border-amber-200/80 rounded-lg p-5 shadow-sm space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-amber-500/10 rounded-lg text-amber-700">
+                      <Link2 className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-extrabold text-sm text-zinc-900">Qikink My Products Library Mapping</h3>
+                      <p className="text-[11px] font-medium text-amber-800 leading-relaxed mt-1">
+                        For syncing orders from your store to Qikink, make sure to map the products present in your store with the products in the Qikink My Products Library. This step is crucial for the orders to be pulled correctly from your store.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className={labelCls}>
+                        <span className="flex items-center gap-1.5"><Package className="w-3.5 h-3.5 text-[#df794d]" /> Primary Qikink Base SKU <span className="text-red-400">*</span></span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={form.sku}
+                        onChange={(e) => setForm((p) => ({ ...p, sku: e.target.value }))}
+                        placeholder="e.g. MVnHs-Wh-S"
+                        className={inputCls}
+                      />
+                      <p className="text-[9px] text-zinc-500 mt-1">
+                        Must match the SKU registered in your Qikink Seller Dashboard.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className={labelCls}>
+                        <span>Quick Variant SKU Generator</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const base = form.sku.trim() || 'PHT-001';
+                          const colors = form.selectedColors.length > 0 ? form.selectedColors : ['White', 'Black'];
+                          const sizes = form.selectedSizes.length > 0 ? form.selectedSizes : ['S', 'M', 'L', 'XL'];
+                          const map: Record<string, string> = {};
+                          colors.forEach(c => {
+                            const cCode = getColorSkuCode(c);
+                            sizes.forEach(s => {
+                              map[`${c}_${s}`] = `${base}-${cCode}-${s}`;
+                            });
+                          });
+                          setForm(p => ({ ...p, skuMappingStr: JSON.stringify(map, null, 2) }));
+                          showToast("SKUs Auto-Generated", "Variant SKUs mapped for Qikink My Products Library.", "info");
+                        }}
+                        className="w-full py-3 px-4 bg-white border border-amber-300 hover:bg-amber-100/50 text-amber-900 font-extrabold text-xs rounded-lg transition-all flex items-center justify-center gap-2 shadow-sm"
+                      >
+                        ⚡ Generate Qikink Variant SKUs
+                      </button>
+                      <p className="text-[9px] text-zinc-500 mt-1">Auto-maps color & size variants to standard Qikink format.</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelCls}>
+                      <span className="flex items-center gap-1.5"><Link2 className="w-3.5 h-3.5 text-[#df794d]" /> Variant SKU Mappings (JSON)</span>
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={form.skuMappingStr}
+                      onChange={(e) => setForm((p) => ({ ...p, skuMappingStr: e.target.value }))}
+                      placeholder='{"White_S": "MVnHs-Wh-S", "Black_M": "MVnHs-Bk-M"}'
+                      className={inputCls + " resize-none font-mono text-[10px]"}
+                    />
+                    <p className="text-[9px] text-zinc-500 mt-1">
+                      Mapped color_size keys ensure orders pull automatically from Qikink My Products Library (`search_from_my_products: 1`).
+                    </p>
+                  </div>
+                </div>
+
+                {/* Rating & Reviews */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelCls}>Rating (1–5)</label>
+                    <div className="flex gap-1 mt-1">
+                      {[1,2,3,4,5].map(star => (
+                        <button key={star} type="button" onClick={() => setForm(p => ({ ...p, rating: star }))} className="focus:outline-none">
+                          <Star className={`w-6 h-6 transition-colors ${star <= form.rating ? 'text-amber-400 fill-amber-400' : 'text-zinc-200 fill-zinc-200'}`} />
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[9px] text-zinc-400 mt-1">Shown as star rating on product page</p>
+                  </div>
+                  <div>
+                    <label className={labelCls}>Customer Reviews Count</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={form.reviewsCount}
+                      onChange={(e) => setForm(p => ({ ...p, reviewsCount: parseInt(e.target.value) || 0 }))}
+                      placeholder="e.g. 128"
+                      className={inputCls}
+                    />
+                    <p className="text-[9px] text-zinc-400 mt-1">Number of customer reviews shown</p>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className={labelCls}>Selling Price (₹) <span className="text-red-400">*</span></label>
@@ -288,13 +569,25 @@ export default function AddProductPage() {
                   <label className={labelCls}>Category <span className="text-red-400">*</span></label>
                   <div className="relative">
                     <select
-                      value={form.category}
-                      onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
-                      className="w-full bg-white border border-zinc-200 rounded-lg py-3 pl-4 pr-10 text-xs font-semibold text-zinc-800 outline-none focus:border-[#F9A37E] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer"
+                      value={form.categoryId || form.category}
+                      onChange={(e) => {
+                        const selectedId = e.target.value;
+                        const catObj = categoriesList.find((c) => c.id === selectedId || c.name === selectedId);
+                        setForm((p) => ({
+                          ...p,
+                          categoryId: catObj?.id || selectedId,
+                          category: catObj?.name || selectedId,
+                        }));
+                      }}
+                      className="w-full bg-white border border-zinc-200 rounded-lg py-3 pl-4 pr-10 text-xs font-semibold text-zinc-800 outline-none focus:border-[#df794d] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.25rem_1.25rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer"
                     >
-                      {CATEGORIES.map((c) => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
+                      {categoriesList.length > 0 ? (
+                        categoriesList.map((c) => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))
+                      ) : (
+                        <option value="">No categories created yet. Add a category in Admin first.</option>
+                      )}
                     </select>
                   </div>
                 </div>
@@ -322,7 +615,7 @@ export default function AddProductPage() {
                       onClick={() => toggleSize(s)}
                       className={`w-11 h-10 text-xs font-extrabold rounded-lg border-2 transition-all ${
                         form.selectedSizes.includes(s)
-                          ? "bg-[#F9A37E]/15 border-[#F9A37E] text-[#e8855a]"
+                          ? "bg-[#df794d]/15 border-[#df794d] text-[#e8855a]"
                           : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"
                       }`}
                     >
@@ -347,7 +640,7 @@ export default function AddProductPage() {
                       <span
                         className={`w-8 h-8 rounded-lg border-2 transition-all ${
                           form.selectedColors.includes(c.name)
-                            ? "border-[#F9A37E] scale-110 shadow-md shadow-[#F9A37E]/30"
+                            ? "border-[#df794d] scale-110 shadow-md shadow-[#df794d]/30"
                             : "border-zinc-200 group-hover:border-zinc-400"
                         }`}
                         style={{ backgroundColor: c.hex }}
@@ -369,7 +662,7 @@ export default function AddProductPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 flex items-center justify-center gap-2 bg-[#F9A37E] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20"
+                  className="flex-1 flex items-center justify-center gap-2 bg-[#df794d] hover:bg-[#e8855a] disabled:opacity-60 text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-md shadow-[#df794d]/20"
                 >
                   <Save className="w-4 h-4" />
                   {submitting ? "Saving..." : "Save Product"}

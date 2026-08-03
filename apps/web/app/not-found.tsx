@@ -8,8 +8,8 @@ export default function NotFoundPage() {
   return (
     <div className="min-h-[78vh] flex flex-col items-center justify-center py-12 px-4 text-center relative overflow-hidden bg-[#FDFAF6]">
       {/* Background Animated Accents */}
-      <div className="absolute top-10 left-10 w-32 h-32 bg-[#F9A37E]/10 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '4s' }} />
-      <div className="absolute bottom-10 right-10 w-44 h-44 bg-[#A8C69F]/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s' }} />
+      <div className="absolute top-10 left-10 w-32 h-32 bg-[#df794d]/10 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '4s' }} />
+      <div className="absolute bottom-10 right-10 w-44 h-44 bg-[#7e9677]/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s' }} />
 
       <div className="relative space-y-8 max-w-lg z-10">
         {/* Animated Icon Card */}
@@ -21,7 +21,7 @@ export default function NotFoundPage() {
         <div className="relative">
           <h1 className="text-9xl font-black tracking-tighter text-[#E8E2D6] select-none font-serif leading-none relative">
             404
-            <span className="absolute inset-0 text-transparent bg-clip-text bg-gradient-to-br from-[#F9A37E] to-[#A8C69F] opacity-10 filter blur-[1px]">404</span>
+            <span className="absolute inset-0 text-transparent bg-clip-text bg-gradient-to-br from-[#df794d] to-[#7e9677] opacity-10 filter blur-[1px]">404</span>
           </h1>
           <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white border border-[#E8E2D6] text-[10px] font-extrabold px-4 py-1 rounded-full shadow-md text-[#7A736A] tracking-[0.25em] uppercase whitespace-nowrap">
             Page Not Found
@@ -39,11 +39,11 @@ export default function NotFoundPage() {
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 pt-4 justify-center">
           <Link href="/"
-            className="bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-4 px-8 rounded-lg transition-all shadow-lg shadow-[#A8C69F]/20 flex items-center justify-center gap-2 active:scale-95">
+            className="bg-[#7e9677] hover:bg-[#92b089] text-white font-extrabold text-xs py-4 px-8 rounded-lg transition-all shadow-lg shadow-[#7e9677]/20 flex items-center justify-center gap-2 active:scale-95">
             <Home className="w-4 h-4" /> Back to Home
           </Link>
           <Link href="/products"
-            className="bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-4 px-8 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/20 flex items-center justify-center gap-2 active:scale-95">
+            className="bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-4 px-8 rounded-lg transition-all shadow-lg shadow-[#df794d]/20 flex items-center justify-center gap-2 active:scale-95">
             <Compass className="w-4 h-4" /> Browse Shop
           </Link>
         </div>

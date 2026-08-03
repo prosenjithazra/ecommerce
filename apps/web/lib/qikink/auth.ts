@@ -14,18 +14,23 @@ const globalForQikinkToken = global as unknown as {
  * Retrieves the cached Qikink access token, or fetches a new one if expired/missing.
  * Prevents multiple token requests by keeping a single active session token in global state.
  */
-export async function getAccessToken(): Promise<string> {
+export async function getAccessToken(forceRefresh = false): Promise<string> {
   const clientId = process.env.QIKINK_CLIENT_ID;
   const clientSecret = process.env.QIKINK_CLIENT_SECRET;
-  const baseUrl = process.env.QIKINK_SANDBOX_BASE_URL || process.env.QIKINK_API_URL || 'https://sandbox.qikink.com';
+  const baseUrl = process.env.QIKINK_API_URL || process.env.QIKINK_SANDBOX_BASE_URL || 'https://api.qikink.com';
 
   if (!clientId || !clientSecret) {
     throw new Error('Missing Qikink API Credentials (QIKINK_CLIENT_ID or QIKINK_CLIENT_SECRET) in .env.local');
   }
 
+  if (forceRefresh) {
+    globalForQikinkToken.qikinkCachedToken = undefined;
+  }
+
   const now = Date.now();
   // Return cached token if valid (with 60 seconds buffer)
   if (
+    !forceRefresh &&
     globalForQikinkToken.qikinkCachedToken &&
     globalForQikinkToken.qikinkCachedToken.expiresAt > now + 60 * 1000
   ) {
@@ -47,12 +52,16 @@ export async function getAccessToken(): Promise<string> {
     }),
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Qikink Token Authentication failed: ${response.status} - ${errorText}`);
+  const resText = await response.text();
+  if (!resText || !resText.trim()) {
+    throw new Error(`Qikink Token response was empty (Status ${response.status})`);
   }
-
-  const rawJson = await response.json();
+  let rawJson: any;
+  try {
+    rawJson = JSON.parse(resText);
+  } catch (err) {
+    throw new Error(`Invalid JSON from Qikink Token endpoint: ${resText.slice(0, 100)}`);
+  }
   const parsed = QikinkTokenResponseSchema.parse(rawJson);
 
   // Store token in global caching

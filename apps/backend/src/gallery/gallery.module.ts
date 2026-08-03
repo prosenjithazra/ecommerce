@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Gallery, GallerySchema } from './schemas/gallery.schema';
 import { GalleryController } from './gallery.controller';
 import { GalleryService } from './gallery.service';
-import { GalleryEntity } from './entities/gallery.entity';
 import { UserModule } from '../user/user.module';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([GalleryEntity]),
+    MongooseModule.forFeature([{ name: Gallery.name, schema: GallerySchema }]),
     UserModule,
     CloudinaryModule,
   ],

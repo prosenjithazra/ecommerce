@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getApiUrl } from '../components/ApiConfig';
 import Link from 'next/link';
-import { ArrowRight, Paintbrush, ShieldCheck, Sparkles, ShoppingBag, Flame, Truck, Layers, Leaf, Palette, Play, SlidersHorizontal } from 'lucide-react';
+import { ArrowRight, Paintbrush, ShieldCheck, Sparkles, ShoppingBag, Flame, Truck, Layers, Leaf, Palette, Play, SlidersHorizontal, Printer, Code2, CheckCircle2, Terminal, Loader2, X, ChevronLeft, ChevronRight, Shirt, Heart } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { CategoryCard } from '../components/CategoryCard';
 import { ReviewCard } from '../components/InfoCards';
@@ -15,6 +15,10 @@ import { Slider, EmptyState } from '../components/UIComponents';
 /* ─── Hero Slides Data ─── */
 interface Slide {
   id: number | string;
+  title?: string;
+  desktopImage?: string;
+  mobileImage?: string;
+  link?: string;
   badge?: string;
   headline1?: string;
   headline2?: string;
@@ -103,8 +107,12 @@ const FEATURE_ICONS: Record<string, React.ElementType> = {
 function HeroBanner() {
   const [slides, setSlides] = useState<Slide[]>(HERO_SLIDES);
   const [current, setCurrent] = useState(0);
-  const [animKey, setAnimKey] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  // Drag & Touch gesture state
+  const [dragStartX, setDragStartX] = useState<number | null>(null);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -128,115 +136,200 @@ function HeroBanner() {
 
   const goTo = useCallback((idx: number) => {
     setCurrent(idx);
-    setAnimKey(k => k + 1);
+    setDragOffset(0);
   }, []);
+
+  const nextSlide = useCallback(() => {
+    if (slides.length <= 1) return;
+    setCurrent(prev => (prev + 1) % slides.length);
+    setDragOffset(0);
+  }, [slides.length]);
+
+  const prevSlide = useCallback(() => {
+    if (slides.length <= 1) return;
+    setCurrent(prev => (prev - 1 + slides.length) % slides.length);
+    setDragOffset(0);
+  }, [slides.length]);
+
+  // Auto-play timer (4.5s)
+  useEffect(() => {
+    if (slides.length <= 1 || isDragging || loading) return;
+    const timer = setInterval(() => {
+      nextSlide();
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [nextSlide, slides.length, isDragging, loading]);
+
+  // Touch Swipe Handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!e.targetTouches[0]) return;
+    setDragStartX(e.targetTouches[0].clientX);
+    setIsDragging(true);
+    setDragOffset(0);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (dragStartX === null || !e.targetTouches[0]) return;
+    const diff = e.targetTouches[0].clientX - dragStartX;
+    setDragOffset(diff);
+  };
+
+  const handleTouchEnd = () => {
+    if (dragStartX !== null) {
+      const minSwipeDistance = 40;
+      if (dragOffset < -minSwipeDistance) {
+        nextSlide();
+      } else if (dragOffset > minSwipeDistance) {
+        prevSlide();
+      }
+    }
+    setDragStartX(null);
+    setIsDragging(false);
+    setDragOffset(0);
+  };
+
+  // Mouse Drag Handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('a, button')) return;
+    setDragStartX(e.clientX);
+    setIsDragging(true);
+    setDragOffset(0);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || dragStartX === null) return;
+    const diff = e.clientX - dragStartX;
+    setDragOffset(diff);
+  };
+
+  const handleMouseUp = () => {
+    if (isDragging && dragStartX !== null) {
+      const minSwipeDistance = 40;
+      if (dragOffset < -minSwipeDistance) {
+        nextSlide();
+      } else if (dragOffset > minSwipeDistance) {
+        prevSlide();
+      }
+    }
+    setDragStartX(null);
+    setIsDragging(false);
+    setDragOffset(0);
+  };
 
   if (loading) {
     return (
-      <section className="relative overflow-hidden select-none min-h-[500px] sm:min-h-[580px] lg:min-h-[640px] flex items-center bg-[#F4F4F4]">
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
-          {/* Left Column Skeleton */}
-          <div className="space-y-6 text-center lg:text-left order-1">
-            {/* Badge */}
-            <div className="h-6 w-32 mx-auto lg:mx-0 rounded-[36px] bg-zinc-250 animate-pulse" />
-            
-            {/* Headlines */}
-            <div className="space-y-3">
-              <div className="h-12 sm:h-16 w-3/4 mx-auto lg:mx-0 rounded bg-zinc-250 animate-pulse" />
-              <div className="h-12 sm:h-16 w-1/2 mx-auto lg:mx-0 rounded bg-zinc-250 animate-pulse" />
-            </div>
-
-            {/* Subtitle */}
-            <div className="space-y-2 max-w-sm mx-auto lg:mx-0">
-              <div className="h-4 w-full rounded bg-zinc-250 animate-pulse" />
-              <div className="h-4 w-5/6 rounded bg-zinc-250 animate-pulse" />
-            </div>
-
-            {/* Feature Badges */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-1">
-              {[1, 2, 3].map((n) => (
-                <div key={n} className="flex flex-col items-center lg:items-start gap-2">
-                  <div className="w-6 h-6 rounded-full bg-zinc-250 animate-pulse" />
-                  <div className="h-3 w-16 rounded bg-zinc-250 animate-pulse" />
-                </div>
-              ))}
-            </div>
-
-            {/* Button */}
-            <div className="flex justify-center lg:justify-start pt-3">
-              <div className="h-12 w-40 rounded-md bg-zinc-250 animate-pulse" />
-            </div>
-          </div>
-
-          {/* Right Column Skeleton */}
-          <div className="flex items-center justify-center order-2">
-            <div className="w-64 h-64 sm:w-[380px] sm:h-[380px] lg:w-[450px] lg:h-[450px] rounded-full bg-zinc-200/60 animate-pulse flex items-center justify-center">
-              <img
-                src="/kliamologoNew.png"
-                alt="Loading Logo"
-                className="w-28 sm:w-44 h-auto object-contain opacity-35 animate-pulse"
-              />
-            </div>
-          </div>
+      <section className="relative overflow-hidden select-none min-h-[220px] sm:min-h-[380px] lg:min-h-[480px] flex items-center bg-[#F4F4F4] animate-pulse">
+        <div className="w-full h-full flex items-center justify-center py-16">
+          <img src="/kliamologoNew.png" alt="Loading Banner" className="w-32 sm:w-44 h-auto opacity-40 animate-pulse" />
         </div>
       </section>
     );
   }
 
   const slide = slides[current] || HERO_SLIDES[0]!;
-  const slideBadges = slide.badges || (
-    (slide.accent === '#1E40AF' || slide.headline2 === 'TO IMPRESS')
-      ? [
-          { icon: "👕", label: "PREMIUM QUALITY\nFABRIC" },
-          { icon: "🖨️", label: "LONG LASTING\nPRINTS" },
-          { icon: "👥", label: "UNISEX\nCOLLECTION" },
-        ]
-      : (!slide.textDark || slide.headline2 === 'REAL YOU.')
-        ? [
-            { icon: "🌿", label: "SOFT &\nBREATHABLE" },
-            { icon: "🎨", label: "VIBRANT\nPRINTS" },
-            { icon: "🛡️", label: "DURABLE\nQUALITY" },
-          ]
-        : [
-            { icon: "🌿", label: "100%\nCOTTON" },
-            { icon: "🎨", label: "HIGH QUALITY\nPRINT" },
-            { icon: "🛡️", label: "DURABLE &\nLONG LASTING" },
-            { icon: "🚚", label: "FAST\nDELIVERY" },
-          ]
-  );
+  const desktopImg = slide.desktopImage || slide.bgImg || "";
+  const mobileImg = slide.mobileImage || slide.productImg || desktopImg;
+  const targetLink = slide.link || "/products";
+
+  const isImageBanner = !!(slide.desktopImage || slide.mobileImage || (!slide.headline1 && (desktopImg || mobileImg)));
+
+  if (isImageBanner) {
+    const bannerContent = (
+      <div className="relative w-full overflow-hidden group">
+        {/* Desktop Banner Image (Visible on Medium+ screens) */}
+        {desktopImg && (
+          <img
+            src={desktopImg}
+            alt={slide.title || "Desktop Storefront Banner"}
+            className="hidden md:block w-full h-auto max-h-[800px] object-cover transition-transform duration-700 group-hover:scale-[1.01]"
+          />
+        )}
+        {/* Mobile Banner Image (Visible on Small screens) */}
+        {mobileImg && (
+          <img
+            src={mobileImg}
+            alt={slide.title || "Mobile Storefront Banner"}
+            className="block md:hidden w-full h-auto object-cover"
+          />
+        )}
+      </div>
+    );
+
+    return (
+      <section
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className={`w-full relative overflow-hidden bg-zinc-100 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      >
+        {targetLink ? (
+          <Link href={targetLink} className="block w-full cursor-pointer">
+            {bannerContent}
+          </Link>
+        ) : (
+          bannerContent
+        )}
+
+        {slides.length > 1 && (
+          <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2 z-20 pointer-events-auto">
+            {slides.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => goTo(idx)}
+                className={`transition-all duration-300 rounded-full cursor-pointer ${idx === current ? 'w-6 h-2 bg-[#df794d]' : 'w-2 h-2 bg-white/70 shadow-xs'}`}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    );
+  }
+
   const isDarkTheme = !slide.textDark;
   const hasBgImg = !!(slide.bgImg && slide.bgImg.length > 10);
   const headline1Color = slide.headline1Color || (isDarkTheme ? '#FFFFFF' : '#2E2B26');
   const subColor = slide.subColor || (isDarkTheme ? '#D4D4D8' : '#52525B');
   const badgeColor = slide.badgeColor || slide.accent || '#E5A93B';
 
-  // Parse overlay color (hex → rgba with opacity)
   const overlayHex = slide.overlayColor || '#000000';
-  const overlayR = parseInt(overlayHex.slice(1, 3), 16);
-  const overlayG = parseInt(overlayHex.slice(3, 5), 16);
-  const overlayB = parseInt(overlayHex.slice(5, 7), 16);
+  const overlayR = parseInt(overlayHex.slice(1, 3), 16) || 0;
+  const overlayG = parseInt(overlayHex.slice(3, 5), 16) || 0;
+  const overlayB = parseInt(overlayHex.slice(5, 7), 16) || 0;
   const overlayRgba = (opacity: number) => `rgba(${overlayR},${overlayG},${overlayB},${opacity})`;
 
   return (
     <section
-      className="relative overflow-hidden select-none min-h-[500px] sm:min-h-[580px] lg:min-h-[640px] flex items-center"
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      className={`relative overflow-hidden select-none w-full bg-[#111] ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
       style={{
         backgroundColor: hasBgImg ? '#111' : (isDarkTheme ? '#111' : (slide.bg || '#F4F4F4')),
+        transition: 'background-color 0.5s ease',
       }}
     >
-      {/* Full-width background image */}
+      {/* Background Image */}
       {hasBgImg && (
         <img
+          key={`bg-${current}`}
           src={slide.bgImg}
           alt="banner background"
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-700"
           style={{ objectPosition: 'center', zIndex: 0 }}
         />
       )}
 
-      {/* Overlay — dynamic color from admin, always on top of bgImg */}
+      {/* Dynamic Overlay */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none transition-all duration-700"
         style={{
           zIndex: 2,
           background: hasBgImg
@@ -247,26 +340,29 @@ function HeroBanner() {
         }}
       />
 
-      {/* Content wrapper */}
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center relative" style={{ zIndex: 10 }}>
-
-        {/* ─── LEFT COLUMN: Text and Actions ─── */}
-        <div key={`content-${animKey}`} className="space-y-3 md:space-y-6 animate-slide-in-left text-center lg:text-left order-1 lg:order-1">
-
-          {/* Chip Badge */}
+      {/* Relative Content Grid */}
+      <div
+        key={`slide-${current}`}
+        className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center relative z-10 animate-slide-fade-in transition-all duration-500 ease-out"
+        style={{
+          opacity: isDragging ? Math.max(0.3, 1 - Math.abs(dragOffset) / 350) : undefined,
+          transform: isDragging ? `translateX(${dragOffset * 0.35}px)` : undefined,
+        }}
+      >
+        {/* Left Column: Text & CTA */}
+        <div className="space-y-4 sm:space-y-6 text-center lg:text-left order-1">
           {slide.badge && (
             <span
-              className="inline-block text-[10px] font-black tracking-[0.2em] uppercase px-4 py-1.5 rounded-[36px] mb-1"
+              className="inline-block text-[10px] sm:text-xs font-black tracking-[0.2em] uppercase px-4 py-1.5 rounded-[36px]"
               style={{ backgroundColor: badgeColor, color: '#fff' }}
             >
               {slide.badge}
             </span>
           )}
 
-          {/* Headlines */}
-          <div className="space-y-[8px] md:space-y-1">
+          <div className="space-y-2 md:space-y-3">
             <h1
-              className="text-3xl sm:text-[65px] lg:text-[70px] font-black leading-none tracking-tight normal"
+              className="text-3xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tight"
               style={{
                 fontFamily: "'Faculty Glyphic', sans-serif",
                 color: headline1Color,
@@ -276,7 +372,7 @@ function HeroBanner() {
               {slide.headline1}
             </h1>
             <h2
-              className="text-3xl sm:text-[65px] lg:text-[70px] font-black leading-none tracking-tight normal"
+              className="text-3xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tight"
               style={{
                 fontFamily: "'Faculty Glyphic', sans-serif",
                 color: slide.headline2Color || '#E5A93B',
@@ -287,44 +383,16 @@ function HeroBanner() {
             </h2>
           </div>
 
-          {/* Subtitle */}
           <p
-            className="text-sm sm:text-base font-bold leading-relaxed max-w-sm mx-auto lg:mx-0"
+            className="text-sm sm:text-base font-bold leading-relaxed max-w-lg mx-auto lg:mx-0"
             style={{ color: subColor }}
           >
             {slide.sub}
           </p>
 
-          {/* Feature Badges */}
-          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-y-4 pt-1">
-            {slideBadges.map((b: { icon: string; label: string }, idx: number) => {
-              const labelKey = b.label.replace(/\n/g, ' ').trim().toUpperCase();
-              const IconComp = FEATURE_ICONS[labelKey] || Leaf;
-              const featureColor = hasBgImg || isDarkTheme ? '#e4e4e7' : '#3f3f46';
-              const dividerColor = hasBgImg || isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)';
-              return (
-                <div key={idx} className="flex items-center">
-                  {idx > 0 && (
-                    <div className="block h-8 w-px mx-4" style={{ backgroundColor: dividerColor }} />
-                  )}
-                  <div className="flex flex-col items-center lg:items-start gap-1.5">
-                    <IconComp className="w-5 h-5" style={{ color: featureColor }} strokeWidth={1.8} />
-                    <span
-                      className="text-[9px] font-black tracking-widest uppercase whitespace-pre-line leading-tight text-center lg:text-left"
-                      style={{ color: featureColor }}
-                    >
-                      {b.label}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* CTA Button */}
           <div className="flex justify-center lg:justify-start pt-3">
             <Link
-              href="/products"
+              href={targetLink}
               className="inline-flex items-center gap-2 font-black text-xs md:text-sm px-6 py-3 md:px-8 md:py-4 text-white rounded-md transition-all hover:scale-105 active:scale-95 shadow-lg"
               style={{ backgroundColor: slide.accent || '#E5A93B' }}
             >
@@ -333,23 +401,25 @@ function HeroBanner() {
           </div>
         </div>
 
-        {/* ─── RIGHT COLUMN: Product Image ─── */}
-        <div key={`img-${animKey}`} className="relative flex items-center justify-center order-2 lg:order-2 animate-slide-in-right">
-          <img
-            src={slide.productImg}
-            alt={slide.headline1}
-            className="w-64 h-64 sm:w-[380px] sm:h-[380px] lg:w-full lg:h-full object-contain drop-shadow-2xl transition-all duration-700 ease-in-out hover:scale-105"
-          />
+        {/* Right Column: Product Image */}
+        <div className="relative flex items-center justify-center order-2">
+          {slide.productImg && (
+            <img
+              src={slide.productImg}
+              alt={slide.headline1 || "Product"}
+              className="w-64 h-64 sm:w-[380px] sm:h-[380px] lg:w-full lg:h-full max-h-[500px] object-contain drop-shadow-2xl transition-all duration-700 ease-in-out hover:scale-105"
+            />
+          )}
         </div>
       </div>
 
       {/* Slider Dots */}
-      <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-2.5 z-20">
+      <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 flex items-center justify-center gap-2.5 z-20">
         {slides.map((_, idx) => (
           <button
             key={idx}
             onClick={() => goTo(idx)}
-            className="transition-all duration-300"
+            className="transition-all duration-300 cursor-pointer"
             style={{
               width: idx === current ? '24px' : '7px',
               height: '7px',
@@ -359,7 +429,6 @@ function HeroBanner() {
           />
         ))}
       </div>
-
     </section>
   );
 }
@@ -379,6 +448,8 @@ const DEFAULT_GALLERY: GalleryItem[] = [
   { id: "g4", mediaUrl: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=500&auto=format&fit=crop&q=80", link: "https://instagram.com", mediaType: "image", isActive: true },
 ];
 
+/* ─── GALLERY DEFINITION ─── */
+
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<'trending' | 'best' | 'new'>('trending');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -389,6 +460,10 @@ export default function HomePage() {
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
+  const [activeProductIdx, setActiveProductIdx] = useState(0);
+  const mobileProductScrollRef = React.useRef<HTMLDivElement>(null);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [testimonialsLoading, setTestimonialsLoading] = useState(true);
 
   React.useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 900);
@@ -404,61 +479,118 @@ export default function HomePage() {
           setGallery(data);
         }
       })
-      .catch(() => {
-        // Fallback quietly
-      })
-      .finally(() => {
-        setGalleryLoading(false);
-      });
+      .catch(() => {})
+      .finally(() => { setGalleryLoading(false); });
 
+    setTestimonialsLoading(true);
+    fetch(getApiUrl('/testimonials'))
+      .then(res => res.ok ? res.json() : [])
+      .then(data => { if (Array.isArray(data) && data.length > 0) setTestimonials(data); })
+      .catch(() => {})
+      .finally(() => setTestimonialsLoading(false));
+
+    setProductsLoading(true);
     setCategoriesLoading(true);
-    fetch(getApiUrl("/category"))
-      .then(res => {
-        if (res.ok) return res.json();
-        throw new Error("failed");
-      })
-      .then(data => {
-        if (data && data.length > 0) {
-          const mapped = data.map((c: any) => ({
-            name: c.name,
-            image: c.image || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80",
-            count: c.count || 0,
-            href: `/products?category=${encodeURIComponent(c.name)}`,
-          }));
-          setCategories(mapped);
+    fetch(getApiUrl("/products"))
+      .then(res => (res.ok ? res.json() : []))
+      .then(prodData => {
+        const hasProducts = Array.isArray(prodData) && prodData.length > 0;
+        const loadCategories = (prods: any[]) => {
+          return fetch(getApiUrl("/category"))
+            .then(res => (res.ok ? res.json() : []))
+            .then(catData => {
+              if (Array.isArray(catData) && catData.length > 0) {
+                const mapped = catData.map((c: any) => {
+                  const realCount = prods.filter(
+                    (p: any) =>
+                      (p.categoryId && c.id && p.categoryId === c.id) ||
+                      (p.category && c.name && p.category.toLowerCase() === c.name.toLowerCase()) ||
+                      (c.slug && p.category && p.category.toLowerCase().replace(/\s+/g, '-') === c.slug)
+                  ).length;
+                  const finalCount = realCount > 0 ? realCount : (typeof c.count === 'number' ? c.count : 0);
+                  return {
+                    name: c.name,
+                    image: c.image || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80",
+                    count: finalCount,
+                    href: `/products?category=${encodeURIComponent(c.name)}`,
+                  };
+                });
+                setCategories(mapped);
+              }
+            });
+        };
+
+        if (hasProducts) {
+          setProducts(prodData);
+          return loadCategories(prodData);
+        } else {
+          return fetch('/api/qikink/products')
+            .then(r => r.json())
+            .then(qData => {
+              const qProds = qData.products || [];
+              setProducts(qProds);
+              return loadCategories(qProds);
+            });
         }
       })
-      .catch(() => {})
+      .catch(() => {
+        fetch('/api/qikink/products')
+          .then(r => r.json())
+          .then(qData => {
+            setProducts(qData.products || []);
+          })
+          .catch(() => {});
+      })
       .finally(() => {
+        setProductsLoading(false);
         setCategoriesLoading(false);
       });
 
-    setProductsLoading(true);
-    fetch(getApiUrl("/products"))
-      .then(res => {
-        if (res.ok) return res.json();
-        throw new Error("failed");
-      })
-      .then(data => {
-        if (data && data.length > 0) {
-          setProducts(data);
-        }
-      })
-      .catch(() => {})
-      .finally(() => {
-        setProductsLoading(false);
-      });
 
     return () => clearTimeout(timer);
   }, []);
 
-  const getFilteredProducts = () => {
-    switch (activeTab) {
-      case 'best': return products.filter(p => p.tag === 'Best Seller');
-      case 'new':  return products.filter(p => p.tag === 'New' || p.tag === 'Eco');
-      default:     return products;
+  const hasHomeSection = (p: any, secName: string) => {
+    if (!p.homeSection) return false;
+    const secLower = secName.trim().toLowerCase();
+    if (Array.isArray(p.homeSection)) {
+      return p.homeSection.some((s: string) => String(s).trim().toLowerCase() === secLower);
     }
+    if (typeof p.homeSection === 'string') {
+      return p.homeSection.split(',').map((s: string) => s.trim().toLowerCase()).includes(secLower);
+    }
+    return false;
   };
+
+  const trendingProducts = React.useMemo(() => {
+    return products.filter(p => hasHomeSection(p, 'Featured')).slice(0, 8);
+  }, [products]);
+
+  const bestSellerProducts = React.useMemo(() => {
+    return products.filter(p => hasHomeSection(p, 'Best Seller') || (p.tag || '').toLowerCase() === 'best seller').slice(0, 8);
+  }, [products]);
+
+  const mensProducts = React.useMemo(() => {
+    return products.filter(p => {
+      const g = (p.targetGender || 'Both').trim().toLowerCase();
+      if (g === 'women') return false;
+      return g === 'men' || g === 'both';
+    }).slice(0, 8);
+  }, [products]);
+
+  const womensProducts = React.useMemo(() => {
+    return products.filter(p => {
+      const g = (p.targetGender || 'Both').trim().toLowerCase();
+      if (g === 'men') return false;
+      return g === 'women' || g === 'both';
+    }).slice(0, 8);
+  }, [products]);
+
+  const newArrivalProducts = React.useMemo(() => {
+    return products.filter(p => hasHomeSection(p, 'New Arrival') || (p.tag || '').toLowerCase() === 'new' || (p.tag || '').toLowerCase() === 'new arrival').slice(0, 8);
+  }, [products]);
+
+
 
   const activeGallery = gallery.length > 0 ? gallery.filter(item => item.isActive) : DEFAULT_GALLERY;
 
@@ -474,118 +606,265 @@ export default function HomePage() {
     { q: "How long does shipping take?",          a: "Production takes 2-3 business days. Domestic shipping takes 3-5 days. Express options are available at checkout." },
   ];
 
-  const reviews = [
-    { name: "Alex Mercer",     rating: 5, date: "2 days ago",   comment: "Print quality exceeded expectations! Vibrant colors and super soft fabric.", verified: true },
-    { name: "Sarah Jenkins",   rating: 5, date: "1 week ago",   comment: "Intuitive designer and incredibly fast delivery. Outstanding service!",       verified: true },
-    { name: "Marcus Thorne",   rating: 4, date: "2 weeks ago",  comment: "Great material, lovely fit. The canvas text editor is really fun to use.",    verified: true },
-  ];
+
 
   return (
-    <div className="space-y-6 sm:space-y-16 pb-16">
+    <div className="pb-10 sm:pb-16">
 
       {/* ── HERO SLIDER ── */}
       <HeroBanner />
 
       {/* ── TRUST BAR ── */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            { icon: <ShieldCheck className="w-5 h-5 text-[#A8C69F]" />, label: "Quality Guarantee" },
-            { icon: <Truck className="w-5 h-5 text-[#F9A37E]" />,       label: "48hr Fulfillment" },
-            { icon: <Layers className="w-5 h-5 text-[#A8C69F]" />,      label: "No MOQ" },
-            { icon: <Sparkles className="w-5 h-5 text-[#F9A37E]" />,    label: "Premium Prints" },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center gap-2.5 p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg">
-              <div className="w-8 h-8 bg-[#E8E2D6] rounded-lg flex items-center justify-center flex-shrink-0">
-                {item.icon}
+      <section className="w-full bg-[#FDFAF6] py-6 sm:py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-6">
+            {[
+              { icon: <ShieldCheck className="w-5 h-5 text-[#7e9677]" />, label: "Quality Guarantee" },
+              { icon: <Truck className="w-5 h-5 text-[#df794d]" />,       label: "48hr Fulfillment" },
+              { icon: <Layers className="w-5 h-5 text-[#7e9677]" />,      label: "No MOQ" },
+              { icon: <Sparkles className="w-5 h-5 text-[#df794d]" />,    label: "Premium Prints" },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="flex items-center gap-2 md:gap-3 p-2 sm:p-4 md:p-5 rounded-xl sm:rounded-2xl bg-white border border-zinc-100 shadow-md sm:shadow-lg shadow-zinc-200/50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+              >
+                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl flex items-center justify-center flex-shrink-0 shadow-xs">
+                  {item.icon}
+                </div>
+                <span className="text-xs md:text-sm font-extrabold text-[#4A453E] leading-tight">{item.label}</span>
               </div>
-              <span className="text-xs font-bold text-[#4A453E] leading-tight">{item.label}</span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
       {/* ── FEATURED CATEGORIES ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">Shop by Category</h2>
-            <p className="text-xs text-[#7A736A] mt-0.5">Premium blanks ready for your design</p>
+      <section className="w-full bg-white py-10 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">Shop by Category</h2>
+              <p className="text-xs text-[#7A736A] mt-0.5">Premium blanks ready for your design</p>
+            </div>
+            <Link href="/categories" className="text-xs font-bold text-white bg-[#df794d] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+              View all <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-          <Link href="/products" className="text-xs font-bold text-[#F9A37E] hover:text-[#E8855A] flex items-center gap-1 transition-colors">
-            View all <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          {categoriesLoading || loading ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-3 md:gap-4">
+              {Array(4).fill(0).map((_, i) => <CategoryCard key={i} loading={true} />)}
+            </div>
+          ) : categories.length === 0 ? (
+            <div className="w-full py-4">
+              <EmptyState
+                title="No categories found"
+                description="Our blanks categories collection is currently empty. Please check back later!"
+                icon={<SlidersHorizontal className="w-8 h-8 text-[#df794d]" />}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-3 md:gap-4">
+              {categories.map((cat) => (
+                <CategoryCard key={cat.name} name={cat.name} image={cat.image} count={cat.count} href={cat.href} />
+              ))}
+            </div>
+          )}
         </div>
-        {categoriesLoading || loading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {Array(4).fill(0).map((_, i) => <CategoryCard key={i} loading={true} />)}
-          </div>
-        ) : categories.length === 0 ? (
-          <div className="w-full py-4">
-            <EmptyState
-              title="No categories found"
-              description="Our blanks categories collection is currently empty. Please check back later!"
-              icon={<SlidersHorizontal className="w-8 h-8 text-[#F9A37E]" />}
-            />
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {categories.map((cat) => (
-              <CategoryCard key={cat.name} name={cat.name} image={cat.image} count={cat.count} href={cat.href} />
-            ))}
-          </div>
-        )}
       </section>
 
-      {/* ── PRODUCT TABS ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight flex items-center gap-2">
-              <Flame className="w-5 h-5 text-[#F9A37E]" /> Hot off the Press
-            </h2>
-            <p className="text-xs text-[#7A736A] mt-0.5">Curated blanks for your custom look</p>
+      {/* ── 1. TRENDING PRODUCTS (Full Warm Beige Band) ── */}
+      <section className="w-full bg-[#FAF7F2] py-10 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="flex flex-row sm:items-center justify-between gap-2 sm:gap-3">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight flex items-center gap-2">
+                <Flame className="w-5.5 h-5.5 text-[#df794d]" /> Hot off the Press
+              </h2>
+              <p className="text-xs text-[#7A736A] mt-0.5">Curated blanks and trending designs for your custom look</p>
+            </div>
+            <Link href="/products" className="text-xs shrink-0 font-bold text-white bg-[#df794d] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+              View All <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-          <div className="flex bg-[#E8E2D6] p-1 rounded-lg self-start sm:self-auto">
-            {(['trending', 'best', 'new'] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`text-xs font-bold py-1.5 px-3 rounded-lg transition-all capitalize ${
-                  activeTab === tab
-                    ? 'bg-white text-[#4A453E] shadow-sm'
-                    : 'text-[#7A736A] hover:text-[#4A453E]'
-                }`}
-              >
-                {tab === 'trending' ? 'Trending' : tab === 'best' ? 'Best Sellers' : 'New'}
-              </button>
-            ))}
-          </div>
+          {productsLoading || loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              {Array(4).fill(0).map((_, i) => (
+                <ProductCard key={i} loading={true} />
+              ))}
+            </div>
+          ) : trendingProducts.length === 0 ? (
+            <div className="w-full py-4">
+              <EmptyState
+                title="No featured products found"
+                description="Our custom print blanks catalog is temporarily offline. Please check back shortly!"
+                icon={<ShoppingBag className="w-8 h-8 text-[#7e9677]" />}
+              />
+            </div>
+          ) : (
+            <Slider desktopCols={4}>
+              {trendingProducts.map((product) => (
+                <ProductCard key={`trending-${product.id}`} product={product} />
+              ))}
+            </Slider>
+          )}
         </div>
-        {productsLoading || loading ? (
-          <Slider desktopCols={4}>
-            {Array(4).fill(0).map((_, i) => <ProductCard key={i} loading={true} />)}
-          </Slider>
-        ) : getFilteredProducts().length === 0 ? (
-          <div className="w-full py-4">
-            <EmptyState
-              title="No featured products found"
-              description="Our custom print blanks catalog is temporarily offline. Please check back shortly!"
-              icon={<ShoppingBag className="w-8 h-8 text-[#A8C69F]" />}
-            />
+      </section>
+
+      {/* ── 2. BEST SELLERS (Full Rich Sand Band) ── */}
+      <section className="w-full bg-[#F5F0E8] py-10 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="flex flex-row sm:items-center justify-between gap-2 sm:gap-3">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight flex items-center gap-2">
+                <Sparkles className="w-5.5 h-5.5 text-[#df794d]" /> Best Sellers
+              </h2>
+              <p className="text-xs text-[#7A736A] mt-0.5">Most popular choices ordered by our custom print community</p>
+            </div>
+            <Link href="/products?tag=best" className="text-xs shrink-0 font-bold text-white bg-[#df794d] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+              View All <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-        ) : (
-          <Slider desktopCols={4}>
-            {getFilteredProducts().map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </Slider>
-        )}
+          {productsLoading || loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              {Array(4).fill(0).map((_, i) => (
+                <ProductCard key={i} loading={true} />
+              ))}
+            </div>
+          ) : bestSellerProducts.length === 0 ? (
+            <div className="w-full py-4">
+              <EmptyState
+                title="No best sellers found"
+                description="Our custom print catalog is updating. Check back shortly!"
+                icon={<ShoppingBag className="w-8 h-8 text-[#7e9677]" />}
+              />
+            </div>
+          ) : (
+            <Slider desktopCols={4}>
+              {bestSellerProducts.map((product) => (
+                <ProductCard key={`best-${product.id}`} product={product} />
+              ))}
+            </Slider>
+          )}
+        </div>
+      </section>
+
+      {/* ── 3. MEN'S COLLECTION (Full Cool Slate Band) ── */}
+      <section className="w-full bg-[#F0F4F8] py-10 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="flex flex-row sm:items-center justify-between gap-2 sm:gap-3">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-[#334E68] tracking-tight flex items-center gap-2">
+                <Shirt className="w-5.5 h-5.5 text-[#df794d]" /> Men's Collection
+              </h2>
+              <p className="text-xs text-[#627D98] mt-0.5">Tailored tees, polos, hoodies, and streetwear essentials for men</p>
+            </div>
+            <Link href="/products?category=Men" className="text-xs shrink-0 font-bold text-white bg-[#df794d] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+              View All <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+          {productsLoading || loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              {Array(4).fill(0).map((_, i) => (
+                <ProductCard key={i} loading={true} />
+              ))}
+            </div>
+          ) : mensProducts.length === 0 ? (
+            <div className="w-full py-4">
+              <EmptyState
+                title="No men's products found"
+                description="Men's collection catalog is updating. Check back shortly!"
+                icon={<Shirt className="w-8 h-8 text-[#3B82F6]" />}
+              />
+            </div>
+          ) : (
+            <Slider desktopCols={4}>
+              {mensProducts.map((product) => (
+                <ProductCard key={`mens-${product.id}`} product={product} />
+              ))}
+            </Slider>
+          )}
+        </div>
+      </section>
+
+      {/* ── 4. WOMEN'S COLLECTION (Full Soft Blush Band) ── */}
+      <section className="w-full bg-[#FAF0F4] py-10 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="flex flex-row sm:items-center justify-between gap-2 sm:gap-3">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-[#702444] tracking-tight flex items-center gap-2">
+                <Heart className="w-5.5 h-5.5 text-[#df794d]" /> Women's Collection
+              </h2>
+              <p className="text-xs text-[#9E4A6F] mt-0.5">Stylish cropped tees, relaxed fits, and premium blanks for women</p>
+            </div>
+            <Link href="/products?category=Women" className="text-xs shrink-0 font-bold text-white bg-[#df794d] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+              View All <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+          {productsLoading || loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              {Array(4).fill(0).map((_, i) => (
+                <ProductCard key={i} loading={true} />
+              ))}
+            </div>
+          ) : womensProducts.length === 0 ? (
+            <div className="w-full py-4">
+              <EmptyState
+                title="No women's products found"
+                description="Women's collection catalog is updating. Check back shortly!"
+                icon={<Heart className="w-8 h-8 text-[#EC4899]" />}
+              />
+            </div>
+          ) : (
+            <Slider desktopCols={4}>
+              {womensProducts.map((product) => (
+                <ProductCard key={`womens-${product.id}`} product={product} />
+              ))}
+            </Slider>
+          )}
+        </div>
+      </section>
+
+      {/* ── 5. NEW ARRIVALS (Full Fresh Mint Band) ── */}
+      <section className="w-full bg-[#F2F7F2] py-10 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="flex flex-row sm:items-center justify-between gap-2 sm:gap-3">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-[#264D29] tracking-tight flex items-center gap-2">
+                <Paintbrush className="w-5.5 h-5.5 text-[#df794d]" /> New Arrivals
+              </h2>
+              <p className="text-xs text-[#446E47] mt-0.5">Fresh drops and newest blank garments ready for customization</p>
+            </div>
+            <Link href="/products?tag=new" className="text-xs shrink-0 font-bold text-white bg-[#df794d] hover:bg-[#E8855A] flex items-center gap-1.5 transition-all self-start sm:self-auto py-1.5 px-3.5 rounded-full shadow-xs hover:shadow-md">
+              View All <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+          {productsLoading || loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              {Array(4).fill(0).map((_, i) => (
+                <ProductCard key={i} loading={true} />
+              ))}
+            </div>
+          ) : newArrivalProducts.length === 0 ? (
+            <div className="w-full py-4">
+              <EmptyState
+                title="No new arrivals found"
+                description="Our custom print catalog is updating. Check back shortly!"
+                icon={<ShoppingBag className="w-8 h-8 text-[#10B981]" />}
+              />
+            </div>
+          ) : (
+            <Slider desktopCols={4}>
+              {newArrivalProducts.map((product) => (
+                <ProductCard key={`new-${product.id}`} product={product} />
+              ))}
+            </Slider>
+          )}
+        </div>
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="py-12 sm:py-16" style={{ background: '#F5F0E8' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <section className="w-full bg-[#F5F0E8] py-10 sm:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-8">
           <div className="text-center">
             <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">How It Works</h2>
             <p className="text-xs text-[#7A736A] mt-1">From studio to your doorstep in 3 simple steps</p>
@@ -593,7 +872,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {processSteps.map((step, _idx) => (
               <div key={step.name} className="relative p-6 bg-white rounded-lg shadow-sm text-center">
-                <div className="w-12 h-12 bg-[#FBD5C1] text-[#F9A37E] rounded-lg flex items-center justify-center mx-auto mb-4">
+                <div className="w-12 h-12 bg-[#FBD5C1] text-[#df794d] rounded-lg flex items-center justify-center mx-auto mb-4">
                   {step.icon}
                 </div>
                 <span className="font-black text-4xl text-[#E8E2D6] absolute top-4 right-4 leading-none">{step.step}</span>
@@ -605,90 +884,115 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── CUSTOMER REVIEWS ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-        <div className="text-center">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">Loved by Creators</h2>
-          <p className="text-xs text-[#7A736A] mt-1">See what our customers have designed.</p>
+      {/* ── TESTIMONIALS ── */}
+      <section className="w-full bg-[#FDFAF6] py-10 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="text-center">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight">Loved by Creators</h2>
+            <p className="text-xs text-[#7A736A] mt-1">See what our customers have designed.</p>
+          </div>
+          {testimonialsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[1,2,3].map(i => (
+                <div key={i} className="p-4 rounded-lg bg-white space-y-3 animate-pulse">
+                  <div className="h-3 bg-zinc-100 rounded w-1/2" />
+                  <div className="h-2 bg-zinc-100 rounded w-1/3" />
+                  <div className="h-8 bg-zinc-100 rounded" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Slider desktopCols={3}>
+              {testimonials.map((rev) => (
+                <ReviewCard
+                  key={rev.id}
+                  name={rev.name}
+                  rating={rev.rating}
+                  date={new Date(rev.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  comment={rev.comment}
+                  verified={true}
+                />
+              ))}
+            </Slider>
+          )}
         </div>
-        <Slider desktopCols={3}>
-          {reviews.map((rev) => (
-            <ReviewCard key={rev.name} name={rev.name} rating={rev.rating} date={rev.date} comment={rev.comment} verified={rev.verified} />
-          ))}
-        </Slider>
       </section>
 
       {/* ── INSTAGRAM GALLERY ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-        <div className="text-center">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E]">#WearYourCreativity</h2>
-          <p className="text-xs text-[#7A736A] mt-1">Tag us on Instagram to get featured</p>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {activeGallery.map((item, i) => {
-            const isVideo = item.mediaType === "video";
-            const cardMarkup = (
-              <div className="relative aspect-square rounded-lg overflow-hidden group bg-zinc-100 border border-zinc-200">
-                <img
-                  src={item.mediaUrl}
-                  alt={`Gallery ${i + 1}`}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                {isVideo && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
-                    <div className="w-10 h-10 bg-white/95 text-[#4A453E] rounded-full flex items-center justify-center shadow-md transform group-hover:scale-110 transition-transform duration-300">
-                      <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+      <section className="w-full bg-white py-10 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="text-center">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E]">#WearYourCreativity</h2>
+            <p className="text-xs text-[#7A736A] mt-1">Tag us on Instagram to get featured</p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {activeGallery.map((item, i) => {
+              const isVideo = item.mediaType === "video";
+              const cardMarkup = (
+                <div className="relative aspect-square rounded-lg overflow-hidden group bg-zinc-100">
+                  <img
+                    src={item.mediaUrl}
+                    alt={`Gallery ${i + 1}`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  {isVideo && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
+                      <div className="w-10 h-10 bg-white/95 text-[#4A453E] rounded-full flex items-center justify-center shadow-md transform group-hover:scale-110 transition-transform duration-300">
+                        <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            );
-
-            if (item.link) {
-              return (
-                <a
-                  key={item.id}
-                  href={item.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block cursor-pointer"
-                >
-                  {cardMarkup}
-                </a>
+                  )}
+                </div>
               );
-            }
 
-            return (
-              <div key={item.id}>
-                {cardMarkup}
-              </div>
-            );
-          })}
+              if (item.link) {
+                return (
+                  <a
+                    key={item.id}
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block cursor-pointer"
+                  >
+                    {cardMarkup}
+                  </a>
+                );
+              }
+
+              return (
+                <div key={item.id}>
+                  {cardMarkup}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
       {/* ── FAQ ── */}
-      <section className="max-w-2xl mx-auto px-4 space-y-4">
-        <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] text-center">Frequently Asked Questions</h2>
-        <div className="rounded-lg bg-white border border-[#E8E2D6] overflow-hidden divide-y divide-[#E8E2D6]">
-          {faqs.map((faq, idx) => (
-            <div key={idx} className="p-4 sm:p-5">
-              <button
-                onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                className="w-full flex items-center justify-between text-left font-bold text-sm text-[#4A453E]"
-              >
-                <span>{faq.q}</span>
-                <span className="text-[#F9A37E] ml-3 text-base leading-none font-black flex-shrink-0">
-                  {openFaq === idx ? "−" : "+"}
-                </span>
-              </button>
-              {openFaq === idx && (
-                <p className="text-xs text-[#7A736A] mt-3 leading-relaxed animate-fade-in-up">
-                  {faq.a}
-                </p>
-              )}
-            </div>
-          ))}
+      <section className="w-full bg-[#FDFAF6] py-10 sm:py-14">
+        <div className="max-w-2xl mx-auto px-4 space-y-4">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] text-center">Frequently Asked Questions</h2>
+          <div className="rounded-lg bg-white overflow-hidden">
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="p-4 sm:p-5">
+                <button
+                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                  className="w-full flex items-center justify-between text-left font-bold text-sm text-[#4A453E]"
+                >
+                  <span>{faq.q}</span>
+                  <span className="text-[#df794d] ml-3 text-base leading-none font-black flex-shrink-0">
+                    {openFaq === idx ? "−" : "+"}
+                  </span>
+                </button>
+                {openFaq === idx && (
+                  <p className="text-xs text-[#7A736A] mt-3 leading-relaxed animate-fade-in-up">
+                    {faq.a}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

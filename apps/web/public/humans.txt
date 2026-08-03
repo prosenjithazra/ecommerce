@@ -1,7 +1,7 @@
 /* TEAM */
 Chef: Kliamo Fashion Dev Team
-Contact: tech@kliamofashion.com
-Website: https://kliamofashion.com
+Contact: contact@kliamo.com
+Website: https://kliamo.com
 
 /* SITE */
 Last update: 2026-07-16

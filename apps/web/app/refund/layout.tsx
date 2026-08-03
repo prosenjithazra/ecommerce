@@ -1,20 +1,25 @@
 import { Metadata } from 'next';
+import { getMetadata, getBreadcrumbSchema } from '../../components/SeoConfig';
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kliamofashion.com';
-
-export const metadata: Metadata = {
-  title: "Refund & Cancellation Policy",
-  description: "Read Kliamo Fashion's refund and cancellation policies. Returns accepted for print errors or damaged blanks within 30 days of delivery.",
-  alternates: {
-    canonical: `${baseUrl}/refund`,
-  },
-  openGraph: {
-    title: "Refund & Cancellation | Kliamo Fashion",
-    description: "Read Kliamo Fashion's refund and cancellation policies.",
-    url: `${baseUrl}/refund`,
-  }
-};
+export const metadata: Metadata = getMetadata({
+  title: 'Refund & Returns Policy',
+  description: "Read Kliamo Fashion's return & refund policy. Learn how we handle custom print errors, exchange policies, shipping defects, and timelines.",
+  path: '/refund',
+});
 
 export default function RefundLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'Refund Policy', path: '/refund' },
+  ]);
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      {children}
+    </>
+  );
 }

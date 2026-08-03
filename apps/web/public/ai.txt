@@ -13,6 +13,6 @@ Disallow: /profile
 
 # Canonical description
 Description: Kliamo Fashion is a premium custom storefront offering heavyweight cotton apparel with zero minimum order quantities.
-Info: https://kliamofashion.com/about
-Sitemap: https://kliamofashion.com/sitemap.xml
-LLM-Data: https://kliamofashion.com/llms.txt
+Info: https://kliamo.com/about
+Sitemap: https://kliamo.com/sitemap.xml
+LLM-Data: https://kliamo.com/llms.txt

@@ -1,14 +1,46 @@
 import { MetadataRoute } from 'next';
+import { baseUrl } from '../components/SeoConfig';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kliamofashion.com';
-  
   return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-      disallow: ['/admin', '/dashboard', '/api', '/private', '/wishlist', '/cart', '/checkout', '/profile'],
-    },
+    rules: [
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow: [
+          '/admin',
+          '/admin/*',
+          '/api/*',
+          '/cart',
+          '/checkout',
+          '/profile',
+          '/orders',
+          '/wishlist',
+          '/notifications',
+          '/payment',
+          '/verify-otp',
+          '/reset-password',
+        ],
+      },
+      {
+        userAgent: ['GPTBot', 'ChatGPT-User', 'PerplexityBot', 'ClaudeBot', 'Google-Extended', 'AnthropicBot'],
+        allow: [
+          '/',
+          '/products',
+          '/products/*',
+          '/categories',
+          '/about',
+          '/contact',
+          '/faq',
+          '/refund',
+          '/shipping',
+          '/terms',
+          '/privacy',
+          '/custom',
+        ],
+        disallow: ['/admin/*', '/cart', '/checkout', '/profile', '/orders'],
+      },
+    ],
     sitemap: `${baseUrl}/sitemap.xml`,
   };
 }

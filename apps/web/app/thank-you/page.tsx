@@ -1,14 +1,16 @@
 "use client";
 
-import React, { useEffect, Suspense } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { CheckCircle2, ShoppingBag, Download, ArrowRight } from 'lucide-react';
+import { CheckCircle2, ShoppingBag, Download, ArrowRight, Loader2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { downloadOrderInvoice } from '../../utils/invoiceGenerator';
 
 function ThankYouPageContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams?.get('orderId') || `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Run Confetti on mount!
   useEffect(() => {
@@ -19,8 +21,16 @@ function ThankYouPageContent() {
     });
   }, []);
 
-  const handleDownloadInvoice = () => {
-    alert("Simulating PDF invoice generation and download for " + orderId);
+  const handleDownloadInvoice = async () => {
+    if (!orderId) return;
+    setIsDownloading(true);
+    try {
+      await downloadOrderInvoice(orderId);
+    } catch (err) {
+      console.error("Error downloading invoice:", err);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -51,7 +61,7 @@ function ThankYouPageContent() {
         </div>
         <div className="flex justify-between items-center text-xs">
           <span className="text-zinc-450">Fulfillment Status</span>
-          <span className="font-extrabold text-indigo-500">In Print Queue</span>
+          <span className="font-extrabold text-[#df794d]">In Print Queue</span>
         </div>
         <div className="flex justify-between items-center text-xs border-t border-zinc-100 dark:border-zinc-800 pt-3">
           <span className="text-zinc-450">Estimated Dispatch</span>
@@ -69,13 +79,15 @@ function ThankYouPageContent() {
         </Link>
         <button
           onClick={handleDownloadInvoice}
-          className="border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all flex items-center gap-1.5"
+          disabled={isDownloading}
+          className="border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
         >
-          <Download className="w-4 h-4" /> Invoice Receipt
+          {isDownloading ? <Loader2 className="w-4 h-4 animate-spin text-[#df794d]" /> : <Download className="w-4 h-4 text-[#df794d]" />}
+          Invoice Receipt
         </button>
         <Link
           href="/orders"
-          className="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1"
+          className="text-xs font-bold text-[#df794d] hover:text-[#e8855a] hover:underline flex items-center gap-1"
         >
           Track Shipment <ArrowRight className="w-4 h-4" />
         </Link>

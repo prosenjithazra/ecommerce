@@ -49,7 +49,7 @@ export default function AdminDashboardPage() {
 
   const stats = [
     { label: "Total Revenue", value: `₹${totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: "Revenue from active orders", icon: DollarSign, up: true, color: "from-emerald-500 to-emerald-600" },
-    { label: "Total Orders", value: orders.length.toString(), sub: `${pendingCount} pending fulfillment`, icon: ShoppingBag, up: true, color: "from-[#F9A37E] to-[#e8855a]" },
+    { label: "Total Orders", value: orders.length.toString(), sub: `${pendingCount} pending fulfillment`, icon: ShoppingBag, up: true, color: "from-[#df794d] to-[#e8855a]" },
     { label: "Registered Users", value: users.length.toString(), sub: "Total customer accounts", icon: Users, up: true, color: "from-violet-500 to-violet-600" },
     { label: "Product Catalog", value: `${products.length} SKUs`, sub: "Active listed items", icon: Layers, up: true, color: "from-sky-500 to-sky-600" },
   ];
@@ -64,7 +64,7 @@ export default function AdminDashboardPage() {
       <div className="flex flex-col h-full overflow-hidden">
         <AdminTopbar title="Dashboard Overview" subtitle="Loading..." />
         <main className="flex-1 flex items-center justify-center p-8 bg-[#FDFAF6]">
-          <Loader2 className="w-8 h-8 text-[#F9A37E] animate-spin" />
+          <Loader2 className="w-8 h-8 text-[#df794d] animate-spin" />
         </main>
       </div>
     );
@@ -107,7 +107,7 @@ export default function AdminDashboardPage() {
           <div className="lg:col-span-3 bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
               <h2 className="font-extrabold text-sm text-zinc-800">Recent Orders</h2>
-              <Link href="/admin/orders" className="text-[10px] font-bold text-[#F9A37E] hover:underline flex items-center gap-1">
+              <Link href="/admin/orders" className="text-[10px] font-bold text-[#df794d] hover:underline flex items-center gap-1">
                 View All <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
@@ -140,7 +140,7 @@ export default function AdminDashboardPage() {
 
           {/* Quick Nav Tiles */}
           <div className="lg:col-span-2 space-y-3">
-            <div className="bg-gradient-to-br from-[#F9A37E] to-[#e8855a] rounded-lg p-5 shadow-md text-white">
+            <div className="bg-gradient-to-br from-[#df794d] to-[#e8855a] rounded-lg p-5 shadow-md text-white">
               <Package className="w-6 h-6 mb-2 opacity-80" />
               <p className="font-black text-base leading-tight">Add New Product</p>
               <p className="text-xs opacity-70 mb-3">Expand your catalog with a new listing</p>

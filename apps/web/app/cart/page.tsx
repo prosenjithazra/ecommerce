@@ -3,15 +3,16 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Trash2, Tag, Calendar, ShieldCheck, Minus, Plus } from 'lucide-react';
+import { ShoppingBag, Trash2, Tag, Calendar, ShieldCheck, Minus, Plus, Info } from 'lucide-react';
 import { useApp } from '../../components/AppContext';
 import { Breadcrumb, EmptyState } from '../../components/UIComponents';
-import { CouponCard } from '../../components/InfoCards';
 import { CustomGarmentPreview } from '../../components/CustomGarmentPreview';
+import { getApiUrl } from '../../components/ApiConfig';
+
 
 export default function CartPage() {
   const router = useRouter();
-  const { cart, removeFromCart, updateCartQty, showToast, currentUser, profileLoading } = useApp();
+  const { cart, removeFromCart, updateCartQty, showToast, currentUser, profileLoading, appliedCoupon, applyCoupon, removeCoupon } = useApp();
 
   React.useEffect(() => {
     if (profileLoading) return;
@@ -20,22 +21,35 @@ export default function CartPage() {
       router.push('/login');
     }
   }, [currentUser, profileLoading, router]);
-  const [couponCode, setCouponCode] = useState("");
-  const [discountAmount, setDiscountAmount] = useState(0);
+
+  const [couponInput, setCouponInput] = useState("");
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
 
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const tax = subtotal * 0.18;
-  const shipping = subtotal > 50 || subtotal === 0 ? 0 : 5.99;
-  const total = subtotal + tax + shipping - discountAmount;
+  const tax = subtotal * 0.05;
+  const shipping = subtotal > 999 || subtotal === 0 ? 0 : 49;
+  const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+  const total = Math.max(0, subtotal + tax + shipping - discountAmount);
 
-  const handleApplyCoupon = (e: React.FormEvent) => {
+  const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (couponCode.toUpperCase() === 'CREATOR10') {
-      setDiscountAmount(subtotal * 0.10);
-      showToast("Coupon Applied", "10% discount applied to your order.", "success");
+    if (!couponInput.trim()) return;
+
+    setApplyingCoupon(true);
+    const res = await applyCoupon(couponInput.trim(), subtotal);
+    setApplyingCoupon(false);
+    if (res.success) {
+      showToast("Coupon Applied", res.message || `Coupon ${couponInput.trim().toUpperCase()} applied!`, "success");
+      setCouponInput("");
     } else {
-      showToast("Invalid Coupon", "This promo code does not exist or has expired.", "error");
+      showToast("Coupon Error", res.message || "Failed to apply coupon", "error");
     }
+  };
+
+  const handleRemoveCoupon = () => {
+    removeCoupon();
+    setCouponInput("");
+    showToast("Coupon Removed", "Promo code has been removed.", "info");
   };
 
   const getEstimatedDelivery = () => {
@@ -45,7 +59,7 @@ export default function CartPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-12 md:pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-6 pb-10 md:pb-16">
       <Breadcrumb items={[{ name: "Shopping Cart" }]} />
       <h1 className="text-2xl sm:text-3xl font-extrabold text-[#4A453E] tracking-tight">Shopping Cart</h1>
 
@@ -55,25 +69,44 @@ export default function CartPage() {
           description="Design custom items or browse premium blanks to fill your cart."
           actionText="Start Shopping"
           actionHref="/products"
-          icon={<ShoppingBag className="w-8 h-8 text-[#A8C69F]" />}
+          icon={<ShoppingBag className="w-8 h-8 text-[#7e9677]" />}
         />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6 items-start">
 
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-3">
-            {cart.map((item) => (
-              <div key={item.id} className="p-3 sm:p-4 border border-[#E8E2D6] bg-white rounded-lg flex gap-3 sm:gap-4 hover:shadow-sm transition-shadow">
-                <CustomGarmentPreview
-                  customDesign={item.customDesign}
-                  defaultImage={item.image}
-                  view="both"
-                  className="w-14 h-14 sm:w-16 sm:h-16"
-                />
-                <div className="flex-1 min-w-0 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-extrabold text-xs sm:text-sm text-[#4A453E] truncate">{item.name}</h3>
+            {cart.map((item) => {
+              const isCustom = item.productId === "custom" || !!item.customDesign;
+              return (
+                <div key={item.id} className="p-3 sm:p-4 border border-[#E8E2D6] bg-white rounded-lg flex gap-3 sm:gap-4 hover:shadow-sm transition-shadow">
+                  {isCustom ? (
+                    <CustomGarmentPreview
+                      customDesign={item.customDesign}
+                      defaultImage={item.image}
+                      view="both"
+                      className="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0"
+                    />
+                  ) : (
+                    <Link href={`/products/${item.productId}`} className="cursor-pointer hover:opacity-85 transition-opacity flex-shrink-0">
+                      <CustomGarmentPreview
+                        customDesign={item.customDesign}
+                        defaultImage={item.image}
+                        view="both"
+                        className="w-14 h-14 sm:w-16 sm:h-16"
+                      />
+                    </Link>
+                  )}
+                  <div className="flex-1 min-w-0 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-start justify-between gap-2">
+                        {isCustom ? (
+                          <h3 className="font-extrabold text-xs sm:text-sm text-[#4A453E] truncate flex-1">{item.name}</h3>
+                        ) : (
+                          <Link href={`/products/${item.productId}`} className="hover:text-[#df794d] transition-colors truncate flex-1">
+                            <h3 className="font-extrabold text-xs sm:text-sm text-[#4A453E] truncate">{item.name}</h3>
+                          </Link>
+                        )}
                       <button
                         onClick={() => removeFromCart(item.id)}
                         className="text-[#C4B8A8] hover:text-red-400 transition-colors p-1 flex-shrink-0"
@@ -105,13 +138,8 @@ export default function CartPage() {
                   </div>
                 </div>
               </div>
-            ))}
-
-            {/* Coupons */}
-            <div className="space-y-2 pt-2">
-              <h4 className="text-xs font-bold text-[#4A453E]">Available Offers</h4>
-              <CouponCard code="CREATOR10" discountDesc="Get 10% off your entire order" expiry="Dec 31, 2026" />
-            </div>
+            );
+          })}
           </div>
 
           {/* Order Summary */}
@@ -119,20 +147,44 @@ export default function CartPage() {
             <div className="bg-white border border-[#E8E2D6] rounded-lg p-3 sm:p-5 space-y-5 shadow-sm">
               <h3 className="font-extrabold text-base text-[#4A453E] pb-3 border-b border-[#E8E2D6]">Order Summary</h3>
 
-              {/* Coupon input */}
-              <form onSubmit={handleApplyCoupon} className="flex gap-2">
-                <div className="relative flex-1">
-                  <Tag className="w-3.5 h-3.5 text-[#A89B8A] absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text" placeholder="Coupon code"
-                    value={couponCode} onChange={(e) => setCouponCode(e.target.value)}
-                    className="w-full h-10 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] uppercase text-[#4A453E] font-mono"
-                  />
+              {/* Dynamic Coupon Section */}
+              {appliedCoupon ? (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-emerald-600" />
+                    <div>
+                      <span className="text-xs font-black text-emerald-800 uppercase tracking-wide">{appliedCoupon.code}</span>
+                      <span className="text-[10px] font-bold text-emerald-600 block">Applied (-₹{appliedCoupon.discountAmount.toFixed(2)})</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleRemoveCoupon}
+                    className="text-xs font-bold text-rose-500 hover:text-rose-700 hover:underline"
+                  >
+                    Remove
+                  </button>
                 </div>
-                <button type="submit" className="h-10 bg-[#A8C69F] hover:bg-[#92b089] text-white rounded-lg px-5 text-xs font-extrabold transition-all shadow-md shadow-[#A8C69F]/10 flex-shrink-0 flex items-center justify-center">
-                  Apply
-                </button>
-              </form>
+              ) : (
+                <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Tag className="w-3.5 h-3.5 text-[#A89B8A] absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Coupon code"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value)}
+                      className="w-full h-10 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg pl-9 pr-3 text-xs outline-none focus:border-[#df794d] uppercase text-[#4A453E] font-mono"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={applyingCoupon}
+                    className="h-10 bg-[#7e9677] hover:bg-[#92b089] disabled:opacity-60 text-white rounded-lg px-5 text-xs font-extrabold transition-all shadow-md shadow-[#7e9677]/10 flex-shrink-0 flex items-center justify-center cursor-pointer"
+                  >
+                    {applyingCoupon ? "..." : "Apply"}
+                  </button>
+                </form>
+              )}
 
               {/* Breakdown */}
               <div className="space-y-2.5 text-xs">
@@ -140,8 +192,8 @@ export default function CartPage() {
                   <span className="text-[#7A736A]">Cart Subtotal</span>
                   <span className="font-extrabold text-[#4A453E]">₹{subtotal.toFixed(2)}</span>
                 </div>
-                 <div className="flex justify-between">
-                  <span className="text-[#7A736A]">Tax / GST (18%)</span>
+                <div className="flex justify-between">
+                  <span className="text-[#7A736A]">Tax / GST (5%)</span>
                   <span className="font-extrabold text-[#4A453E]">₹{tax.toFixed(2)}</span>
                 </div>
                 {discountAmount > 0 && (
@@ -152,17 +204,24 @@ export default function CartPage() {
                 )}
                 <div className="flex justify-between">
                   <span className="text-[#7A736A]">Standard Shipping</span>
-                  <span className="font-extrabold text-[#A8C69F]">{shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}</span>
+                  <span className="font-extrabold text-[#7e9677]">{shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}</span>
                 </div>
                 <div className="flex justify-between pt-3 border-t border-[#E8E2D6] text-sm font-black">
                   <span className="text-[#4A453E]">Total Amount</span>
-                  <span className="text-[#F9A37E]">₹{total.toFixed(2)}</span>
+                  <span className="text-[#df794d]">₹{total.toFixed(2)}</span>
                 </div>
+              </div>
+              
+              <div className="p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl flex items-start gap-2.5">
+                <Info className="w-4 h-4 text-[#df794d] flex-shrink-0 mt-0.5" />
+                <p className="text-[11px] text-[#7A736A] font-semibold leading-relaxed">
+                  Standard shipping is <span className="text-[#df794d] font-extrabold">FREE</span> for orders of <span className="text-[#4A453E] font-extrabold">₹999</span> or more. A standard shipping charge of <span className="text-[#4A453E] font-extrabold">₹49</span> is applicable on orders below ₹999.
+                </p>
               </div>
 
               {/* Delivery estimate */}
               <div className="p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg flex items-start gap-3">
-                <Calendar className="w-4 h-4 text-[#A8C69F] mt-0.5 flex-shrink-0" />
+                <Calendar className="w-4 h-4 text-[#7e9677] mt-0.5 flex-shrink-0" />
                 <div className="text-[10px] text-[#7A736A]">
                   <span className="font-bold text-[#4A453E] block">Estimated Delivery</span>
                   <span className="mt-0.5 block">{getEstimatedDelivery()}</span>
@@ -171,7 +230,7 @@ export default function CartPage() {
 
               <Link
                 href="/checkout"
-                className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#F9A37E]/25"
+                className="w-full bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#df794d]/25"
               >
                 Proceed to Checkout
               </Link>

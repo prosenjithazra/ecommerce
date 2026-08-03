@@ -4,7 +4,7 @@ import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useApp } from '../../components/AppContext';
 import { Breadcrumb, Select } from '../../components/UIComponents';
-import { CreditCard, Wallet, Landmark, PhoneCall, ShieldCheck, Loader2, CheckCircle2, AlertCircle, X, Layers, Package } from 'lucide-react';
+import { CreditCard, ShieldCheck, Loader2, CheckCircle2, AlertCircle, X, Layers, Package } from 'lucide-react';
 import { getApiUrl } from '../../components/ApiConfig';
 
 const loadRazorpayScript = () => {
@@ -24,30 +24,48 @@ const loadRazorpayScript = () => {
 function PaymentPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { cart, addresses, createOrder, showToast, currentUser, profileLoading } = useApp();
+  const { cart, addresses, createOrder, showToast, currentUser, profileLoading, cartLoading, appliedCoupon } = useApp();
 
   React.useEffect(() => {
-    if (profileLoading) return;
+    if (profileLoading || cartLoading) return;
     const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
     if (!token && !currentUser) {
       router.push('/login');
     }
-  }, [currentUser, profileLoading, router]);
+  }, [currentUser, profileLoading, cartLoading, router]);
+
+  // Guard: if cart is empty after loading completes (e.g. user completed order), redirect to orders
+  React.useEffect(() => {
+    if (profileLoading || cartLoading) return;
+    if (cart.length === 0) {
+      router.replace('/orders');
+    }
+  }, [cart, profileLoading, cartLoading, router]);
 
   const addressId = searchParams?.get('addressId') || "";
   const shippingMethod = searchParams?.get('shipping') || "standard";
   const address = addresses.find(a => a.id === addressId) || addresses.find(a => a.isDefault) || addresses[0];
 
+  const hasCustomProduct = cart.some(item => 
+    item.customDesign || 
+    item.productId?.toLowerCase().includes('custom') || 
+    item.name?.toLowerCase().includes('custom')
+  );
 
-
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbank' | 'wallet'>('card');
   const [paymentMode, setPaymentMode] = useState<'online' | 'cod'>('online');
+
+  React.useEffect(() => {
+    if (hasCustomProduct && paymentMode === 'cod') {
+      setPaymentMode('online');
+    }
+  }, [hasCustomProduct, paymentMode]);
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSimulatedModal, setShowSimulatedModal] = useState(false);
   const [simulatedOrderId, setSimulatedOrderId] = useState("");
   const [simulatedError, setSimulatedError] = useState<string | null>(null);
 
-  if (profileLoading) {
+  if (profileLoading || cartLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-16 pt-8">
         <div className="h-4 w-48 bg-zinc-200 animate-pulse rounded" />
@@ -71,7 +89,7 @@ function PaymentPageContent() {
   const handleCodOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!address) {
-      showToast("Checkout Error", "Please verify your shipping details before paying.", "error");
+      showToast("Select Address", "Please select a shipping address.", "error");
       return;
     }
 
@@ -88,15 +106,16 @@ function PaymentPageContent() {
     }
   };
 
-  const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const tax = subtotal * 0.18;
-  const shippingFee = shippingMethod === 'express' ? 14.99 : (subtotal > 50 ? 0 : 5.99);
-  const total = subtotal + tax + shippingFee;
+  const subtotal = cart.reduce((acc, item) => acc + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
+  const tax = subtotal * 0.05;
+  const shippingFee = shippingMethod === 'express' ? 99 : (subtotal > 999 || subtotal === 0 ? 0 : 49);
+  const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+  const total = Math.max(0, subtotal + tax + shippingFee - discountAmount);
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!address) {
-      showToast("Checkout Error", "Please verify your shipping details before paying.", "error");
+      showToast("Select Address", "Please select a shipping address.", "error");
       return;
     }
 
@@ -111,7 +130,8 @@ function PaymentPageContent() {
       });
 
       if (!res.ok) {
-        throw new Error('Failed to communicate with payment server.');
+        const errorData = await res.json().catch(() => null);
+        throw new Error(errorData?.message || 'Failed to communicate with payment server.');
       }
 
       const razorpayOrder = await res.json();
@@ -178,7 +198,7 @@ function PaymentPageContent() {
           contact: address.phone || "",
         },
         theme: {
-          color: "#F9A37E",
+          color: "#df794d",
         },
       };
 
@@ -230,8 +250,8 @@ function PaymentPageContent() {
 
       {/* Processing Loader Overlay */}
       {isProcessing && (
-        <div className="fixed inset-0 bg-white/70 dark:bg-black/70 backdrop-blur-sm z-50 flex flex-col items-center justify-center gap-3">
-          <Loader2 className="w-10 h-10 animate-spin text-[#F9A37E]" />
+        <div className="fixed !top-0 !m-0 inset-0 bg-white/70 dark:bg-black/70 backdrop-blur-sm z-50 flex flex-col items-center justify-center gap-3">
+          <Loader2 className="w-10 h-10 animate-spin text-[#df794d]" />
           <p className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-wider">Processing Payment Securely...</p>
           <p className="text-xs text-zinc-400">Verifying signature & synchronizing order with print partner...</p>
         </div>
@@ -272,7 +292,7 @@ function PaymentPageContent() {
                 <div className="pt-2 space-y-2">
                   <button
                     onClick={() => setSimulatedError(null)}
-                    className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3 px-4 rounded-xl transition-all shadow-md"
+                    className="w-full bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3 px-4 rounded-xl transition-all shadow-md"
                   >
                     Try Another Payment Method
                   </button>
@@ -306,7 +326,7 @@ function PaymentPageContent() {
                 <div className="space-y-3">
                   <button
                     onClick={handleSimulatedSuccess}
-                    className="w-full bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-3.5 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
+                    className="w-full bg-[#7e9677] hover:bg-[#92b089] text-white font-extrabold text-xs py-3.5 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
                   >
                     <CheckCircle2 className="w-4 h-4" />
                     Simulate Successful Payment
@@ -337,11 +357,11 @@ function PaymentPageContent() {
             </h3>
 
             {/* Top-level Payment Mode Selector */}
-            <div className="grid grid-cols-2 gap-4 pb-1">
+            <div className="grid grid-cols-2 gap-2 sm:gap-4 pb-1">
               <button
                 type="button"
                 onClick={() => setPaymentMode('online')}
-                className={`flex flex-col items-center justify-center p-5 border-2 rounded-xl gap-2 font-black text-xs transition-all ${
+                className={`flex flex-col items-center justify-center p-2 sm:p-5 border-2 rounded-xl gap-1 font-black text-xs transition-all ${
                   paymentMode === 'online'
                     ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]'
                     : 'border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950/20'
@@ -349,30 +369,43 @@ function PaymentPageContent() {
               >
                 <CreditCard className="w-5 h-5" />
                 <span>Online Payment</span>
-                <span className="text-[9px] font-medium text-zinc-400 mt-0.5">Card, UPI, Net Banking, Wallet</span>
+                <span className="text-[12px] font-medium text-zinc-400 mt-0.5">Card, UPI, Net Banking, Wallet</span>
               </button>
               
               <button
                 type="button"
-                onClick={() => setPaymentMode('cod')}
-                className={`flex flex-col items-center justify-center p-5 border-2 rounded-xl gap-2 font-black text-xs transition-all ${
-                  paymentMode === 'cod'
+                onClick={() => {
+                  if (hasCustomProduct) {
+                    showToast("COD Unavailable", "Cash on Delivery is not available for customized products.", "info");
+                    return;
+                  }
+                  setPaymentMode('cod');
+                }}
+                disabled={hasCustomProduct}
+                className={`flex flex-col items-center justify-center p-2 sm:p-5 border-2 rounded-xl gap-1 font-black text-xs transition-all ${
+                  hasCustomProduct ? 'opacity-40 cursor-not-allowed bg-zinc-55 dark:bg-zinc-900 border-zinc-200 text-zinc-450' : ''
+                } ${
+                  paymentMode === 'cod' && !hasCustomProduct
                     ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]'
                     : 'border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950/20'
                 }`}
               >
                 <Layers className="w-5 h-5" />
                 <span>Cash on Delivery (COD)</span>
-                <span className="text-[9px] font-medium text-zinc-400 mt-0.5">Pay in cash upon delivery</span>
+                {hasCustomProduct ? (
+                  <span className="text-[10px] font-bold text-red-500 mt-1 uppercase">Not available for custom items</span>
+                ) : (
+                  <span className="text-[12px] font-medium text-zinc-400 mt-0.5">Pay in cash upon delivery</span>
+                )}
               </button>
             </div>
 
             {paymentMode === 'online' ? (
               <form onSubmit={handlePay} className="pt-4 border-t border-zinc-100 dark:border-zinc-800/80 space-y-4 animate-fade-in-up duration-200">
-                <div className="flex justify-between items-center pb-2">
+                <div className="flex justify-between items-center gap-1 pb-2">
                   <div>
                     <h4 className="font-extrabold text-sm text-zinc-900 dark:text-white">Razorpay Secure Checkout</h4>
-                    <p className="text-[10px] text-zinc-400 mt-0.5">Redirects to Razorpay payment gateway modal</p>
+                    <p className="text-[10px] text-zinc-400 mt-0.5">Opens Razorpay — choose Card, UPI, Net Banking or Wallet inside</p>
                   </div>
                   <img 
                     src="https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg" 
@@ -380,57 +413,28 @@ function PaymentPageContent() {
                     alt="Razorpay Logo" 
                   />
                 </div>
-                
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('card')}
-                    className={`flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg gap-1.5 sm:gap-2 font-bold text-xs transition-all ${paymentMethod === 'card' ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]' : 'border-zinc-150 text-zinc-550'}`}
-                  >
-                    <CreditCard className="w-5 h-5" />
-                    <span>Credit / Debit Card</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('upi')}
-                    className={`flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg gap-1.5 sm:gap-2 font-bold text-xs transition-all ${paymentMethod === 'upi' ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]' : 'border-zinc-150 text-zinc-550'}`}
-                  >
-                    <PhoneCall className="w-5 h-5" />
-                    <span>UPI (GPay / PhonePe)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('netbank')}
-                    className={`flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg gap-1.5 sm:gap-2 font-bold text-xs transition-all ${paymentMethod === 'netbank' ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]' : 'border-zinc-150 text-zinc-550'}`}
-                  >
-                    <Landmark className="w-5 h-5" />
-                    <span>Net Banking</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('wallet')}
-                    className={`flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg gap-1.5 sm:gap-2 font-bold text-xs transition-all ${paymentMethod === 'wallet' ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]' : 'border-zinc-150 text-zinc-550'}`}
-                  >
-                    <Wallet className="w-5 h-5" />
-                    <span>Wallets</span>
-                  </button>
-                </div>
 
-                <div className="p-4 bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-150 dark:border-zinc-850 rounded-xl space-y-2">
+                <div className="p-4 bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-150 dark:border-zinc-850 rounded-xl space-y-3">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-emerald-500" />
                     <span className="text-xs font-extrabold text-zinc-850 dark:text-zinc-100">Razorpay Trusted & Secured Payment Gateway</span>
                   </div>
                   <p className="text-[10px] text-zinc-500 leading-relaxed">
-                    Clicking the payment button below will open the secure Razorpay overlay where you can finish your payment using your chosen {paymentMethod === 'card' ? 'Credit or Debit Card' : paymentMethod === 'upi' ? 'UPI App (GPay, PhonePe, Paytm)' : paymentMethod === 'netbank' ? 'Net Banking Portal' : 'Mobile Wallet'}.
+                    Clicking Pay will open the Razorpay secure checkout where you can pay using Card, UPI (GPay, PhonePe, Paytm), Net Banking, or Wallet — all in one place.
                   </p>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {['Credit / Debit Card', 'UPI', 'Net Banking', 'Wallets'].map((m) => (
+                      <span key={m} className="text-[9px] font-black px-2 py-1 rounded-full bg-white border border-zinc-200 text-zinc-500 uppercase tracking-wide">{m}</span>
+                    ))}
+                  </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-4 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 mt-4 sm:mt-6"
+                  className="w-full bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-sm py-3.5 px-4 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 mt-4 sm:mt-6"
                 >
-                  Pay ₹{total.toFixed(2)} Securely with Razorpay
+                  <CreditCard className="w-4 h-4" />
+                  Pay ₹{total.toFixed(2)} via Razorpay
                 </button>
               </form>
             ) : (
@@ -452,7 +456,7 @@ function PaymentPageContent() {
 
                 <button
                   type="submit"
-                  className="w-full bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-3.5 px-4 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 mt-4 sm:mt-6 shadow-[#A8C69F]/20"
+                  className="w-full bg-[#7e9677] hover:bg-[#92b089] text-white font-extrabold text-xs py-3.5 px-4 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 mt-4 sm:mt-6 shadow-[#7e9677]/20"
                 >
                   Place Cash on Delivery Order (₹{total.toFixed(2)})
                 </button>
@@ -474,9 +478,15 @@ function PaymentPageContent() {
                 <span className="font-bold text-zinc-800 dark:text-zinc-200">₹{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Tax / GST (18%)</span>
+                <span className="text-zinc-500">Tax / GST (5%)</span>
                 <span className="font-bold text-zinc-800 dark:text-zinc-200">₹{tax.toFixed(2)}</span>
               </div>
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-emerald-600 font-bold">
+                  <span>Coupon Discount ({appliedCoupon?.code})</span>
+                  <span>-₹{discountAmount.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-zinc-500">Shipping Fees</span>
                 <span className="font-bold text-zinc-800 dark:text-zinc-200">

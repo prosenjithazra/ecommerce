@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { AboutService } from './about.service';
 import { AboutController } from './about.controller';
-import { AboutEntity } from './entities/about.entity';
+import { About, AboutSchema } from './schemas/about.schema';
 import { UserModule } from '../user/user.module';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AboutEntity]),
+    MongooseModule.forFeature([{ name: About.name, schema: AboutSchema }]),
     UserModule,
     CloudinaryModule,
   ],

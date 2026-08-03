@@ -1,32 +1,44 @@
 import { NextResponse } from 'next/server';
-import { createOrder, getOrderDetails } from '../../../../lib/qikink/order';
+import { createOrder, getOrderDetails, getAllOrders } from '../../../../lib/qikink/order';
 import { QikinkCreateOrderInputSchema } from '../../../../lib/qikink/types';
 import { ZodError } from 'zod';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const orderId = searchParams.get('orderId');
+    const orderId = searchParams.get('orderId') || searchParams.get('id');
+    const fromDate = searchParams.get('from_date') || undefined;
+    const toDate = searchParams.get('to_date') || undefined;
 
-    if (!orderId) {
-      return NextResponse.json(
-        { success: false, error: 'Query parameter orderId is required' },
-        { status: 400 }
-      );
+    if (orderId) {
+      try {
+        const details = await getOrderDetails(orderId, fromDate, toDate);
+        return NextResponse.json({
+          success: true,
+          order: details,
+        });
+      } catch (err: any) {
+        return NextResponse.json({
+          success: false,
+          order: null,
+          message: err.message || `Order "${orderId}" not found in Qikink account history.`,
+        });
+      }
     }
 
-    const details = await getOrderDetails(orderId);
+    const ordersList = await getAllOrders(fromDate, toDate);
     return NextResponse.json({
       success: true,
-      order: details,
+      orders: ordersList,
+      count: ordersList.length,
     });
   } catch (error: any) {
-    console.error('Qikink Order Details Route GET Error:', error);
-    const statusCode = error.message.includes('not found') ? 404 : 500;
-    return NextResponse.json(
-      { success: false, error: error.message || 'Failed to retrieve order details' },
-      { status: statusCode }
-    );
+    console.error('Qikink Orders Route GET Error:', error);
+    return NextResponse.json({
+      success: false,
+      orders: [],
+      error: error.message || 'Failed to retrieve orders from Qikink API',
+    });
   }
 }
 

@@ -2,7 +2,9 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Mail, Phone, MapPin, Send, Instagram, Facebook, Loader2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Loader2 } from 'lucide-react';
+import { FacebookIcon, InstagramIcon, YoutubeIcon } from './BrandIcons';
+
 import { useApp } from './AppContext';
 import { getApiUrl } from './ApiConfig';
 
@@ -69,35 +71,35 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-[#4A453E] text-[#C4B8A8] pt-12 pb-24 md:pb-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+    <footer className="bg-[#4A453E] text-[#C4B8A8] pt-8 sm:pt-12 pb-24 md:pb-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10">
 
         {/* Newsletter */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-10" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 pb-8 sm:pb-10" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+          <div className="lg:col-span-3 space-y-2">
             <h4 className="text-white font-extrabold text-xl">Join the Creative Club</h4>
-            <p className="text-sm text-[#A89B8A] max-w-xs">Sign up for updates, exclusive drops, and 10% off your first order.</p>
+            <p className="text-sm text-[#A89B8A] max-w-lg">Join our Creative Club for exclusive updates, inspiring events, creative resources, member-only opportunities, and connect with passionate creators worldwide.</p>
           </div>
-          <div className="lg:col-span-2 flex items-center">
+          <div className="lg:col-span-3 flex items-center">
             {subscribed ? (
               <div className="flex items-center gap-3 text-emerald-400 bg-emerald-900/20 border border-emerald-700/30 rounded-lg px-4 py-3">
                 <Mail className="w-4 h-4 flex-shrink-0" />
                 <span className="text-sm font-bold">You&apos;re on the list! Welcome to the Creative Club. 🎉</span>
               </div>
             ) : (
-              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2.5 w-full max-w-lg">
+              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2.5 w-full">
                 <input
                   type="email"
                   placeholder="Enter your email address"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full sm:flex-1 h-11 bg-[#3A3530] border border-[rgba(255,255,255,0.1)] text-[#E8E2D6] text-sm rounded-lg px-4 outline-none focus:border-[#F9A37E] placeholder:text-[#6A635A]"
+                  className="w-full sm:flex-1 h-11 bg-[#3A3530] border border-[rgba(255,255,255,0.1)] text-[#E8E2D6] text-sm rounded-lg px-4 outline-none focus:border-[#df794d] placeholder:text-[#6A635A]"
                 />
                 <button
                   type="submit"
                   disabled={subscribing}
-                  className="w-full sm:w-auto bg-[#F9A37E] hover:bg-[#E8855A] disabled:opacity-60 text-white rounded-lg px-6 h-11 flex items-center justify-center gap-1.5 font-bold text-sm transition-colors flex-shrink-0"
+                  className="w-full sm:w-auto bg-[#df794d] hover:bg-[#E8855A] disabled:opacity-60 text-white rounded-lg px-6 h-11 flex items-center justify-center gap-1.5 font-bold text-sm transition-colors flex-shrink-0"
                 >
                   {subscribing ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -124,16 +126,16 @@ export const Footer: React.FC = () => {
             </p>
             <div className="space-y-2 text-sm text-[#A89B8A]">
               <div className="flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5 text-[#F9A37E] flex-shrink-0" />
+                <MapPin className="w-3.5 h-3.5 text-[#df794d] flex-shrink-0" />
                 <span>{companySettings.address}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Phone className="w-3.5 h-3.5 text-[#F9A37E] flex-shrink-0" />
-                <a href={`tel:${companySettings.phone.replace(/\s+/g, '')}`} className="hover:text-[#F9A37E] transition-colors">{companySettings.phone}</a>
+                <Phone className="w-3.5 h-3.5 text-[#df794d] flex-shrink-0" />
+                <a href={`tel:${companySettings.phone.replace(/\s+/g, '')}`} className="hover:text-[#df794d] transition-colors">{companySettings.phone}</a>
               </div>
               <div className="flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-[#F9A37E] flex-shrink-0" />
-                <a href={`mailto:${companySettings.email}`} className="hover:text-[#F9A37E] transition-colors">{companySettings.email}</a>
+                <Mail className="w-3.5 h-3.5 text-[#df794d] flex-shrink-0" />
+                <a href={`mailto:${companySettings.email}`} className="hover:text-[#df794d] transition-colors">{companySettings.email}</a>
               </div>
             </div>
           </div>
@@ -144,7 +146,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2.5 text-sm">
               {footerLinks.shop.map(link => (
                 <li key={link.name}>
-                  <Link href={link.href} className="hover:text-[#F9A37E] transition-colors">{link.name}</Link>
+                  <Link href={link.href} className="hover:text-[#df794d] transition-colors">{link.name}</Link>
                 </li>
               ))}
             </ul>
@@ -156,7 +158,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2.5 text-sm">
               {footerLinks.company.map(link => (
                 <li key={link.name}>
-                  <Link href={link.href} className="hover:text-[#F9A37E] transition-colors">{link.name}</Link>
+                  <Link href={link.href} className="hover:text-[#df794d] transition-colors">{link.name}</Link>
                 </li>
               ))}
             </ul>
@@ -168,7 +170,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2.5 text-sm">
               {footerLinks.support.map(link => (
                 <li key={link.name}>
-                  <Link href={link.href} className="hover:text-[#F9A37E] transition-colors">{link.name}</Link>
+                  <Link href={link.href} className="hover:text-[#df794d] transition-colors">{link.name}</Link>
                 </li>
               ))}
             </ul>
@@ -176,29 +178,22 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom bar */}
-        <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4 pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+        <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4 pt-6 sm:pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
           <span className="text-sm text-[#d9d9d9] text-center sm:text-left">
-            © {currentYear} <Link href="/" className="hover:text-[#F9A37E] transition-colors">Kliamo Fashion</Link>. All rights reserved.
+            © {currentYear} <Link href="/" className="hover:text-[#df794d] transition-colors">Kliamo Fashion</Link>. All rights reserved.
           </span>
           <div className="flex gap-2 justify-center">
             {[
-              { 
-                icon: (
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                  </svg>
-                ), 
-                href: companySettings.twitterUrl 
-              },
-              { icon: <Instagram className="w-4 h-4" />, href: companySettings.instagramUrl },
-              { icon: <Facebook className="w-4 h-4" />,  href: companySettings.facebookUrl },
+              { icon: <FacebookIcon className="w-4 h-4" />,  href: companySettings.facebookUrl },
+              { icon: <YoutubeIcon className="w-4 h-4" />,   href: companySettings.youtubeUrl || companySettings.twitterUrl },
+              { icon: <InstagramIcon className="w-4 h-4" />, href: companySettings.instagramUrl },
             ].map((s, i) => (
               <a 
                 key={i} 
                 href={s.href} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="w-8 h-8 rounded-lg bg-[rgba(255,255,255,0.08)] hover:bg-[#F9A37E] hover:text-white text-[#A89B8A] flex items-center justify-center transition-all"
+                className="w-8 h-8 rounded-lg bg-[rgba(255,255,255,0.08)] hover:bg-[#df794d] hover:text-white text-[#A89B8A] flex items-center justify-center transition-all"
               >
                 {s.icon}
               </a>

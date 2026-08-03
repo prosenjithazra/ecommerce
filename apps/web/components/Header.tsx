@@ -89,7 +89,7 @@ export const Header: React.FC = () => {
                 href={item.href}
                 className={`text-sm font-medium transition-all ${
                   pathname === item.href
-                    ? "text-[#F9A37E] font-bold"
+                    ? "text-[#df794d] font-bold"
                     : "text-[#7A736A] hover:text-[#4A453E]"
                 }`}
               >
@@ -103,7 +103,7 @@ export const Header: React.FC = () => {
             {/* Search */}
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="p-2 text-[#7A736A] hover:text-[#F9A37E] transition-colors"
+              className="p-2 text-[#7A736A] hover:text-[#df794d] transition-colors"
               aria-label="Search"
             >
               <Search className="w-5 h-5" />
@@ -112,12 +112,12 @@ export const Header: React.FC = () => {
             {/* Wishlist */}
             <Link
               href="/wishlist"
-              className="hidden md:inline-flex p-2 text-[#7A736A] hover:text-[#F9A37E] transition-colors relative"
+              className="hidden md:inline-flex p-2 text-[#7A736A] hover:text-[#df794d] transition-colors relative"
               aria-label="Wishlist"
             >
               <Heart className="w-5 h-5" />
               {wishlistCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#F9A37E] text-white rounded-full flex items-center justify-center text-[9px] font-bold">
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#df794d] text-white rounded-full flex items-center justify-center text-[9px] font-bold">
                   {wishlistCount}
                 </span>
               )}
@@ -126,12 +126,12 @@ export const Header: React.FC = () => {
             {/* Cart */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="hidden md:inline-flex p-2 text-[#7A736A] hover:text-[#F9A37E] transition-colors relative"
+              className="hidden md:inline-flex p-2 text-[#7A736A] hover:text-[#df794d] transition-colors relative"
               aria-label="Cart"
             >
               <ShoppingBag className="w-5 h-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#A8C69F] text-[#2E2B26] rounded-full flex items-center justify-center text-[9px] font-bold">
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#7e9677] text-[#2E2B26] rounded-full flex items-center justify-center text-[9px] font-bold">
                   {cartCount}
                 </span>
               )}
@@ -144,17 +144,21 @@ export const Header: React.FC = () => {
                 className="flex items-center gap-2 hover:opacity-90 transition-opacity pl-2"
                 aria-label="Account"
               >
-                <div className="w-7 h-7 rounded-full bg-[#F9A37E] text-white flex items-center justify-center text-xs font-black border border-[#E8E2D6] shadow-sm">
-                  {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+                <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-[#df794d]/40 bg-[#df794d] text-white flex items-center justify-center text-xs font-black shadow-xs flex-shrink-0">
+                  {currentUser.avatar ? (
+                    <img src={currentUser.avatar} alt={currentUser.name} className="w-full h-full object-cover" />
+                  ) : (
+                    currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'
+                  )}
                 </div>
-                <span className="hidden sm:inline text-xs font-extrabold text-[#4A453E]">
+                <span className="hidden sm:inline text-xs font-extrabold text-[#4A453E] max-w-[120px] truncate">
                   {currentUser.name}
                 </span>
               </Link>
             ) : (
               <Link
                 href="/login"
-                className="flex items-center gap-1.5 py-2 px-3.5 bg-[#F9A37E] hover:bg-[#E8855A] text-white rounded-md text-xs font-extrabold transition-all shadow-md shadow-[#F9A37E]/20 active:scale-95 ml-1"
+                className="flex items-center gap-1.5 py-2 px-3.5 bg-[#df794d] hover:bg-[#E8855A] text-white rounded-md text-xs font-extrabold transition-all shadow-md shadow-[#df794d]/20 active:scale-95 ml-1"
                 aria-label="Account"
               >
                 <User className="w-3.5 h-3.5" />
@@ -164,7 +168,7 @@ export const Header: React.FC = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="md:hidden p-2 text-[#7A736A] hover:text-[#F9A37E] transition-colors"
+              className="md:hidden p-2 text-[#7A736A] hover:text-[#df794d] transition-colors"
               aria-label="Open menu"
             >
               <LayoutDashboard className="w-5 h-5"/>
@@ -176,8 +180,8 @@ export const Header: React.FC = () => {
       {/* ── FULL-PAGE SEARCH DRAWER ── */}
       {isSearchOpen && (
         <div
-          className="fixed inset-0 z-50 flex flex-col bg-white/98 backdrop-blur-md animate-fade-in-up"
-          style={{ animationDuration: "200ms" }}
+          className="fixed inset-0 z-50 flex flex-col backdrop-blur-md animate-fade-in-up"
+          style={{ animationDuration: "200ms", background: "rgba(255, 255, 255, 0.8" }}
         >
           {/* Search Header */}
           <div className="max-w-3xl mx-auto w-full px-4 pt-16 pb-8">
@@ -186,28 +190,28 @@ export const Header: React.FC = () => {
                 setIsSearchOpen(false);
                 setSearchValue("");
               }}
-              className="absolute top-4 right-4 p-2 rounded-full bg-[#E8E2D6] hover:bg-[#F9A37E] hover:text-white text-[#4A453E] transition-all"
+              className="absolute top-4 right-4 p-2 rounded-full bg-[#E8E2D6] hover:bg-[#df794d] hover:text-white text-[#4A453E] transition-all"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <p className="text-xs font-bold tracking-widest uppercase text-[#A8C69F] mb-3">
+            <p className="text-xs font-bold tracking-widest uppercase text-[#7e9677] mb-3">
               Search Kliamo Fashion
             </p>
             <form onSubmit={handleSearchSubmit} className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A8C69F]" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#7e9677]" />
               <input
                 ref={searchRef}
                 type="text"
                 placeholder="Search t-shirts, hoodies, accessories..."
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
-                className="w-full bg-[#FDFAF6] border-2 border-[#E8E2D6] focus:border-[#F9A37E] rounded-lg py-4 pl-12 pr-4 text-base font-medium text-[#4A453E] outline-none transition-colors placeholder:text-[#C4B8A8]"
+                className="w-full bg-[#FDFAF6] border-2 border-[#E8E2D6] focus:border-[#df794d] rounded-lg py-4 pl-12 pr-4 text-base font-medium text-[#4A453E] outline-none transition-colors placeholder:text-[#C4B8A8]"
               />
               {searchValue && (
                 <button
                   type="submit"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#F9A37E] hover:bg-[#E8855A] text-white font-bold text-xs py-2 px-4 rounded-lg transition-all flex items-center gap-1"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#df794d] hover:bg-[#E8855A] text-white font-bold text-xs py-2 px-4 rounded-lg transition-all flex items-center gap-1"
                 >
                   Search <ArrowRight className="w-3.5 h-3.5" />
                 </button>
@@ -216,7 +220,7 @@ export const Header: React.FC = () => {
 
             {/* Quick Suggestions */}
             <div className="mt-6 space-y-3">
-              <p className="text-xs font-semibold text-[#A8C69F] uppercase tracking-wider">
+              <p className="text-xs font-semibold text-[#7e9677] uppercase tracking-wider">
                 Popular searches
               </p>
               <div className="flex flex-wrap gap-2">
@@ -234,7 +238,7 @@ export const Header: React.FC = () => {
                       setIsSearchOpen(false);
                       setSearchValue("");
                     }}
-                    className="text-xs font-medium px-3 py-1.5 bg-[#E8E2D6] hover:bg-[#F9A37E] hover:text-white text-[#4A453E] rounded-full transition-all"
+                    className="text-xs font-medium px-3 py-1.5 bg-[#E8E2D6] hover:bg-[#df794d] hover:text-white text-[#4A453E] rounded-full transition-all"
                   >
                     {tag}
                   </button>
@@ -281,6 +285,19 @@ export const Header: React.FC = () => {
               ))}
               {currentUser ? (
                 <>
+                  <div className="flex items-center gap-3 p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl my-2">
+                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#df794d]/40 bg-[#df794d] text-white flex items-center justify-center font-black text-sm shadow-xs flex-shrink-0">
+                      {currentUser.avatar ? (
+                        <img src={currentUser.avatar} alt={currentUser.name} className="w-full h-full object-cover" />
+                      ) : (
+                        currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-extrabold text-xs text-[#4A453E] truncate">{currentUser.name}</p>
+                      <p className="text-[10px] text-[#A89B8A] truncate">{currentUser.email}</p>
+                    </div>
+                  </div>
                   <Link
                     href="/profile"
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -302,7 +319,7 @@ export const Header: React.FC = () => {
                 <Link
                   href="/login"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="mt-2 text-center text-sm font-bold py-2.5 px-3 rounded-lg bg-[#F9A37E] text-white hover:bg-[#E8855A]"
+                  className="mt-2 text-center text-sm font-bold py-2.5 px-3 rounded-lg bg-[#df794d] text-white hover:bg-[#E8855A]"
                 >
                   Log In / Register
                 </Link>
@@ -323,7 +340,7 @@ export const Header: React.FC = () => {
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#E8E2D6]">
               <h3 className="font-bold text-base text-[#4A453E] flex items-center gap-2">
-                <ShoppingBag className="w-5 h-5 text-[#F9A37E]" />
+                <ShoppingBag className="w-5 h-5 text-[#df794d]" />
                 Your Cart
                 <span className="text-xs font-semibold text-[#7A736A]">
                   ({cartCount})
@@ -342,7 +359,7 @@ export const Header: React.FC = () => {
               {cart.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center gap-4">
                   <div className="w-16 h-16 bg-[#E8E2D6] rounded-full flex items-center justify-center">
-                    <ShoppingBag className="w-7 h-7 text-[#A8C69F]" />
+                    <ShoppingBag className="w-7 h-7 text-[#7e9677]" />
                   </div>
                   <div>
                     <p className="font-bold text-sm text-[#4A453E]">
@@ -355,7 +372,7 @@ export const Header: React.FC = () => {
                   <Link
                     href="/products"
                     onClick={() => setIsCartOpen(false)}
-                    className="bg-[#F9A37E] hover:bg-[#E8855A] text-white text-xs font-bold py-2.5 px-6 rounded-lg transition-all"
+                    className="bg-[#df794d] hover:bg-[#E8855A] text-white text-xs font-bold py-2.5 px-6 rounded-lg transition-all"
                   >
                     Start Shopping
                   </Link>
@@ -438,7 +455,7 @@ export const Header: React.FC = () => {
                   <Link
                     href="/checkout"
                     onClick={() => setIsCartOpen(false)}
-                    className="bg-[#F9A37E] hover:bg-[#E8855A] text-white text-xs font-bold py-3 px-4 rounded-lg transition-all text-center shadow-sm"
+                    className="bg-[#df794d] hover:bg-[#E8855A] text-white text-xs font-bold py-3 px-4 rounded-lg transition-all text-center shadow-sm"
                   >
                     Checkout
                   </Link>

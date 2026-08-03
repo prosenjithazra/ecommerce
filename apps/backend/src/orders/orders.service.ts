@@ -1,131 +1,339 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
-import { OrderEntity } from './entities/order.entity';
+import { Order, OrderDocument } from './schemas/order.schema';
+import { EmailService } from '../email/email.service';
+import { v2 as cloudinary } from 'cloudinary';
 
 @Injectable()
 export class OrdersService implements OnModuleInit {
   constructor(
-    @InjectRepository(OrderEntity)
-    private readonly orderRepository: Repository<OrderEntity>,
+    @InjectModel(Order.name)
+    private readonly orderModel: Model<OrderDocument>,
     private readonly configService: ConfigService,
-  ) {}
-
-  async onModuleInit() {
-    // Disable automatic seeding as per user request to manage orders dynamically only
-    // await this.seedOrders();
-  }
-
-  private async seedOrders() {
-    try {
-      const count = await this.orderRepository.count();
-      if (count > 0) return;
-
-      const initial = [
-        {
-          id: 'ORD-9872',
-          customer: 'Jane Doe',
-          email: 'jane.doe@example.com',
-          date: '2026-07-08',
-          items: 2,
-          total: 4598,
-          status: 'Delivered',
-        },
-        {
-          id: 'ORD-4819',
-          customer: 'Alex Mercer',
-          email: 'alex.mercer@gmail.com',
-          date: '2026-07-12',
-          items: 3,
-          total: 8040,
-          status: 'Processing',
-        },
-        {
-          id: 'ORD-2391',
-          customer: 'Sarah Connor',
-          email: 's.connor@cyberdyne.org',
-          date: '2026-07-13',
-          items: 1,
-          total: 2299,
-          status: 'Pending',
-        },
-        {
-          id: 'ORD-1104',
-          customer: 'Mark Wells',
-          email: 'mark.w@example.com',
-          date: '2026-07-11',
-          items: 4,
-          total: 12840,
-          status: 'Shipped',
-        },
-        {
-          id: 'ORD-7761',
-          customer: 'Priya Sharma',
-          email: 'priya.s@gmail.com',
-          date: '2026-07-09',
-          items: 1,
-          total: 1699,
-          status: 'Cancelled',
-        },
-      ];
-
-      const now = new Date();
-      for (const item of initial) {
-        const order = new OrderEntity();
-        order.id = item.id;
-        order.customer = item.customer;
-        order.email = item.email;
-        order.date = item.date;
-        order.items = item.items;
-        order.total = item.total;
-        order.status = item.status;
-        order.createdAt = now;
-        order.updatedAt = now;
-        await this.orderRepository.save(order);
-      }
-      console.log('Seeded initial orders successfully.');
-    } catch (err) {
-      console.error('Error seeding orders:', err);
-    }
-  }
-
-  async findAll(email?: string): Promise<OrderEntity[]> {
-    if (email) {
-      return this.orderRepository.find({
-        where: { email },
-        order: { createdAt: 'DESC' },
+    private readonly emailService: EmailService,
+  ) {
+    const cloudName = this.configService.get<string>('CLOUDINARY_CLOUD_NAME');
+    const apiKey = this.configService.get<string>('CLOUDINARY_API_KEY');
+    const apiSecret = this.configService.get<string>('CLOUDINARY_API_SECRET');
+    if (cloudName && apiKey && apiSecret) {
+      cloudinary.config({
+        cloud_name: cloudName,
+        api_key: apiKey,
+        api_secret: apiSecret,
       });
     }
-    return this.orderRepository.find({ order: { createdAt: 'DESC' } });
   }
 
-  async findOne(id: string): Promise<OrderEntity | null> {
-    return this.orderRepository.findOne({ where: { id } });
+  async onModuleInit() {
+    // Seeding optional
   }
 
-  async create(data: Partial<OrderEntity>): Promise<OrderEntity> {
+  async findAll(email?: string): Promise<Order[]> {
+    if (email) {
+      return this.orderModel.find({ email }).sort({ createdAt: -1 }).lean();
+    }
+    return this.orderModel.find().sort({ createdAt: -1 }).lean();
+  }
+
+  async findOne(id: string): Promise<Order | null> {
+    return this.orderModel.findOne({ id }).lean();
+  }
+
+  /**
+   * Helper to ensure image URL is a public HTTPS URL (uploads base64 data URIs to Cloudinary if needed)
+   */
+  private async ensurePublicUrl(url: string | undefined): Promise<string> {
+    const defaultSampleUrl = 'https://sgp1.digitaloceanspaces.com/cdn.qikink.com/erp2/assets/designs/83/1696668376.jpg';
+    if (!url || typeof url !== 'string') return defaultSampleUrl;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+
+    if (url.startsWith('data:image')) {
+      try {
+        const uploadRes = await cloudinary.uploader.upload(url, { folder: 'qikink_designs' });
+        if (uploadRes && uploadRes.secure_url) {
+          return uploadRes.secure_url;
+        }
+      } catch (err) {
+        console.error('Error uploading base64 artwork to Cloudinary:', err);
+      }
+    }
+    return defaultSampleUrl;
+  }
+
+  /**
+   * Dynamically resolves Qikink SKU and search_from_my_products based on product specs and category
+   */
+  private resolveDynamicQikinkSku(item: any): { sku: string; searchFromMyProducts: number } {
+    if (item.search_from_my_products === 1) {
+      return {
+        sku: item.sku || `${item.productId}-${item.size}-${item.color}`,
+        searchFromMyProducts: 1,
+      };
+    }
+
+    const colorName = item.color || 'White';
+    const sizeName = item.size || 'M';
+    const COLOR_CODES: Record<string, string> = {
+      white: 'Wh', black: 'Bk', grey: 'Gy', navy: 'Ny', green: 'Gn', red: 'Rd', blue: 'Bl', yellow: 'Yl', maroon: 'Mr', pink: 'Pk',
+    };
+    const cCode = COLOR_CODES[colorName.toLowerCase()] || 'Wh';
+    const sCode = sizeName || 'M';
+
+    const candidateSku = item.sku || '';
+    if (candidateSku && candidateSku.includes('-') && candidateSku.length >= 6 && !candidateSku.startsWith('PHT-') && !candidateSku.startsWith('PHH-')) {
+      return {
+        sku: candidateSku,
+        searchFromMyProducts: 0,
+      };
+    }
+
+    const catLower = `${item.category || ''} ${item.name || ''}`.toLowerCase();
+    let basePrefix = 'MVnHs';
+    if (catLower.includes('hoodie')) {
+      basePrefix = 'MVnHs'; // Universal blank for direct print fulfillment
+    } else if (catLower.includes('polo')) {
+      basePrefix = 'MPlHs';
+    } else if (catLower.includes('sweatshirt')) {
+      basePrefix = 'MSwFs';
+    } else if (catLower.includes('cap') || catLower.includes('accessory')) {
+      basePrefix = 'ACpCv';
+    } else if (catLower.includes('jacket')) {
+      basePrefix = 'MJkSl';
+    } else if (catLower.includes('mug')) {
+      basePrefix = 'AMgCm';
+    }
+
+    return {
+      sku: `${basePrefix}-${cCode}-${sCode}`,
+      searchFromMyProducts: 0,
+    };
+  }
+
+  /**
+   * Submits order asynchronously to Qikink Custom API
+   */
+  private async pushOrderToQikink(orderData: any): Promise<any> {
+    try {
+      const clientId = this.configService.get<string>('QIKINK_CLIENT_ID') || '912432173059030';
+      const clientSecret = this.configService.get<string>('QIKINK_CLIENT_SECRET') || 'da287a1f1d672166cb8822e61e22fbb4fb6bfcccbbb62eddb4bab68d66be1ea7';
+      const baseUrl = this.configService.get<string>('QIKINK_API_URL') || 'https://api.qikink.com';
+
+      // 1. Get Token via POST /api/token
+      const tokenRes = await fetch(`${baseUrl}/api/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ ClientId: clientId, client_secret: clientSecret }),
+      });
+
+      if (!tokenRes.ok) {
+        console.error('Qikink Token fetch failed:', await tokenRes.text());
+        return null;
+      }
+
+      const tokenJson = await tokenRes.json();
+      const token = tokenJson.Accesstoken || tokenJson.access_token;
+      if (!token) return null;
+
+      // 2. Prepare payload
+      const rawOrderNo = String(orderData.id || orderData._id || '').replace(/[^a-zA-Z0-9]/g, '');
+      const cleanOrderNum = rawOrderNo.length > 15 ? rawOrderNo.slice(-15) : (rawOrderNo || `ORD${Date.now().toString().slice(-8)}`);
+
+      const itemsList = Array.isArray(orderData.itemsJson) ? orderData.itemsJson : [];
+      const address = orderData.shippingAddress || itemsList[0]?.address || {
+        fullName: orderData.customer || 'Customer',
+        street: '123 Main Street',
+        city: 'Bengaluru',
+        state: 'Karnataka',
+        zip: '560001',
+        phone: '9876543210',
+      };
+
+      const rawPhone = (address.phone || '').replace(/\D/g, '');
+      const cleanPhone = rawPhone.length >= 10 ? rawPhone.slice(-10) : '9876543210';
+      const cleanZip = (address.zip || '560001').replace(/[^a-zA-Z0-9]/g, '') || '560001';
+
+      const first_name = address.fullName ? address.fullName.split(' ')[0] || address.fullName : 'Customer';
+      const last_name = address.fullName && address.fullName.includes(' ') ? address.fullName.split(' ').slice(1).join(' ') : '';
+
+      const lineItems = await Promise.all(
+        itemsList.map(async (item: any) => {
+          const skuInfo = this.resolveDynamicQikinkSku(item);
+
+          if (skuInfo.searchFromMyProducts === 1) {
+            return {
+              sku: skuInfo.sku,
+              quantity: String(item.quantity || 1),
+              price: String(item.price || 0),
+              search_from_my_products: 1,
+            };
+          }
+
+          const design = item.customDesign;
+          const fallbackImg = await this.ensurePublicUrl(item.image);
+
+          const rawFront = design?.rawFrontArtworkUrl || design?.frontDesignUrl || design?.front?.imageUrl || design?.front?.rawArtworkUrl;
+          const rawFrontMockup = design?.frontMockupUrl || rawFront;
+
+          const rawBack = design?.rawBackArtworkUrl || design?.backDesignUrl || design?.back?.imageUrl || design?.back?.rawArtworkUrl;
+          const rawBackMockup = design?.backMockupUrl || rawBack;
+
+          const frontDesignUrl = await this.ensurePublicUrl(rawFront || fallbackImg);
+          const frontMockupUrl = await this.ensurePublicUrl(rawFrontMockup || frontDesignUrl);
+
+          const backDesignUrl = rawBack ? await this.ensurePublicUrl(rawBack) : null;
+          const backMockupUrl = rawBackMockup ? await this.ensurePublicUrl(rawBackMockup || backDesignUrl || '') : null;
+
+          const designs: any[] = [];
+          designs.push({
+            design_code: `DSGNF${Date.now().toString().slice(-6)}`,
+            placement_sku: 'fr',
+            width_inches: '10',
+            height_inches: '12',
+            design_link: frontDesignUrl,
+            mockup_link: frontMockupUrl,
+          });
+
+          if (backDesignUrl) {
+            designs.push({
+              design_code: `DSGNB${Date.now().toString().slice(-6)}`,
+              placement_sku: 'bk',
+              width_inches: '10',
+              height_inches: '12',
+              design_link: backDesignUrl,
+              mockup_link: backMockupUrl || backDesignUrl,
+            });
+          }
+
+          return {
+            sku: skuInfo.sku,
+            quantity: String(item.quantity || 1),
+            price: String(item.price || 0),
+            search_from_my_products: 0,
+            print_type_id: 1,
+            designs,
+          };
+        })
+      );
+
+      const qikPayload = {
+        order_number: cleanOrderNum,
+        qikink_shipping: '1',
+        gateway: (orderData.paymentMethod || 'Prepaid').toUpperCase().includes('COD') ? 'COD' : 'Prepaid',
+        total_order_value: String(orderData.total || 0),
+        shipping_address: {
+          first_name: first_name || 'Customer',
+          last_name: last_name || '',
+          address1: address.street || '123 Main Street',
+          address2: '',
+          phone: cleanPhone,
+          email: orderData.email || 'customer@example.com',
+          city: address.city || 'Bengaluru',
+          zip: cleanZip,
+          province: address.state || 'Karnataka',
+          country_code: 'IN',
+        },
+        line_items: lineItems.length > 0 ? lineItems : [
+          {
+            sku: 'MVnHs-Wh-M',
+            quantity: '1',
+            price: String(orderData.total || 0),
+            search_from_my_products: 0,
+            print_type_id: 1,
+            designs: [{
+              design_code: `DSGNF${Date.now().toString().slice(-6)}`,
+              placement_sku: 'fr',
+              width_inches: '10',
+              height_inches: '12',
+              design_link: 'https://sgp1.digitaloceanspaces.com/cdn.qikink.com/erp2/assets/designs/83/1696668376.jpg',
+              mockup_link: 'https://sgp1.digitaloceanspaces.com/cdn.qikink.com/erp2/assets/designs/83/1696668376.jpg',
+            }],
+          },
+        ],
+      };
+
+      // 3. Post Order to Qikink /api/order/create
+      const qikRes = await fetch(`${baseUrl}/api/order/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          ClientId: clientId,
+          Accesstoken: token,
+        },
+        body: JSON.stringify(qikPayload),
+      });
+
+      if (qikRes.ok) {
+        const qikJson = await qikRes.json();
+        console.log('Successfully created order in Qikink:', qikJson);
+        return qikJson;
+      } else {
+        console.warn('Qikink Order creation warning:', await qikRes.text());
+        return null;
+      }
+    } catch (err) {
+      console.error('Error submitting order to Qikink:', err);
+      return null;
+    }
+  }
+
+  async create(data: Partial<Order>): Promise<Order> {
+    if (data.paymentMethod === 'COD') {
+      const itemsList = Array.isArray(data.itemsJson) ? data.itemsJson : [];
+      const hasCustom = itemsList.some(item => 
+        item.customDesign || 
+        item.productId?.toLowerCase().includes('custom') || 
+        item.name?.toLowerCase().includes('custom')
+      );
+      if (hasCustom) {
+        throw new Error('Cash on Delivery (COD) is not available for custom/personalized products.');
+      }
+    }
+
     const now = new Date();
-    const order = new OrderEntity();
-    order.id = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
-    order.customer = data.customer!;
-    order.email = data.email!;
-    order.date = data.date || now.toISOString().split('T')[0];
-    order.items = data.items ?? 1;
-    order.total = Number(data.total) || 0;
-    order.status = data.status || 'Pending';
-    order.itemsJson = data.itemsJson || null;
-    order.paymentMethod = data.paymentMethod || 'Pending';
-    order.paymentId = data.paymentId || null;
-    order.paymentStatus = data.paymentStatus || 'Pending';
-    order.createdAt = now;
-    order.updatedAt = now;
-    return this.orderRepository.save(order);
+    const orderId = data.id || ('ORD-' + Math.floor(1000 + Math.random() * 9000));
+    
+    const order = new this.orderModel({
+      id: orderId,
+      customer: data.customer!,
+      email: data.email!,
+      date: data.date || now.toISOString().split('T')[0],
+      items: data.items ?? 1,
+      total: Number(data.total) || 0,
+      status: data.status || 'Pending',
+      itemsJson: data.itemsJson || null,
+      paymentMethod: data.paymentMethod || 'Pending',
+      paymentId: data.paymentId || null,
+      paymentStatus: data.paymentStatus || 'Pending',
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    const savedOrder = await order.save();
+
+    // Send confirmation email asynchronously
+    this.emailService.sendOrderConfirmationEmail(savedOrder).catch((err) => {
+      console.error('Error sending order confirmation email asynchronously:', err);
+    });
+
+    // Automatically submit order to Qikink Custom API asynchronously
+    this.pushOrderToQikink(savedOrder).then((qikinkResult) => {
+      if (qikinkResult && (qikinkResult.order_id || qikinkResult.qikinkResponse?.order_id)) {
+        const qId = String(qikinkResult.order_id || qikinkResult.qikinkResponse?.order_id);
+        this.orderModel.updateOne({ id: savedOrder.id }, { qikinkOrderId: qId, qikinkStatus: 'Submitted' }).catch(() => {});
+      }
+    }).catch((err) => {
+      console.error('Qikink async order push error:', err);
+    });
+
+    return savedOrder;
   }
 
-  async update(id: string, data: Partial<OrderEntity>): Promise<OrderEntity> {
-    const order = await this.orderRepository.findOne({ where: { id } });
+  async update(id: string, data: Partial<Order>): Promise<Order> {
+    const order = await this.orderModel.findOne({ id });
     if (!order) throw new Error('Order not found');
 
     if (data.status !== undefined) order.status = data.status;
@@ -136,15 +344,15 @@ export class OrdersService implements OnModuleInit {
     if (data.returnReason !== undefined) order.returnReason = data.returnReason;
     order.updatedAt = new Date();
 
-    return this.orderRepository.save(order);
+    return order.save();
   }
 
   async createRazorpayOrder(amount: number) {
     const keyId = this.configService.get<string>('RAZORPAY_KEY_ID');
     const keySecret = this.configService.get<string>('RAZORPAY_KEY_SECRET');
 
-    // Convert amount to paise (subunit)
-    const amountInPaise = Math.round(amount * 100);
+    const numAmount = Number(amount) || 1;
+    const amountInPaise = Math.round(numAmount * 100);
 
     if (!keyId || !keySecret) {
       console.log('Razorpay keys not configured. Simulating order creation...');
@@ -175,6 +383,7 @@ export class OrdersService implements OnModuleInit {
 
       if (!response.ok) {
         const errorText = await response.text();
+        console.error('Razorpay API error response:', errorText);
         throw new Error(`Razorpay API error: ${errorText}`);
       }
 
@@ -186,7 +395,7 @@ export class OrdersService implements OnModuleInit {
         key: keyId,
         simulated: false,
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating Razorpay order:', error);
       throw error;
     }
