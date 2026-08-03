@@ -93,8 +93,15 @@ export const signUpSchema = z
     email: emailValidation,
     phone: z
       .string()
-      .min(10, { message: 'Phone number must be at least 10 digits' })
-      .regex(/^[+0-9\s-]{10,15}$/, { message: 'Please enter a valid phone number' }),
+      .min(1, { message: 'Phone number is required' })
+      .transform((val) => val.replace(/\D/g, '').slice(0, 10))
+      .refine((val) => val.length === 10, { message: 'Phone number must be exactly 10 digits' })
+      .refine((val) => /^[6-9]\d{9}$/.test(val), {
+        message: 'Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9',
+      })
+      .refine((val) => !/^(\d)\1{9}$/.test(val), {
+        message: 'Please enter a valid phone number sequence',
+      }),
     password: z
       .string()
       .min(8, { message: 'Password must be at least 8 characters long' }),

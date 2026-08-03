@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CacheModule } from '@nestjs/cache-manager';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { OrdersModule } from './orders/orders.module';
@@ -18,6 +19,8 @@ import { EmailModule } from './email/email.module';
 import { CartModule } from './cart/cart.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { CouponsModule } from './coupons/coupons.module';
+import { TestimonialsModule } from './testimonials/testimonials.module';
+import { PoliciesModule } from './policies/policies.module';
 
 @Module({
   imports: [
@@ -25,19 +28,30 @@ import { CouponsModule } from './coupons/coupons.module';
       isGlobal: true,
       envFilePath: ['apps/backend/.env', '.env'],
     }),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 300000, // 5 minutes in milliseconds
+      max: 500, // max items in cache
+    }),
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const mongoUrl =
           configService.get<string>('MONGODB_URI') ||
           configService.get<string>('MONGDB_URI') ||
-          configService.get<string>('DATABASE_URL');
-          console.log('[AppModule] Connecting to MongoDB URL:', mongoUrl?.replace(/:([^@]+)@/, ':****@'));
+          configService.get<string>('DATABASE_URL') ||
+          process.env.MONGODB_URI ||
+          'mongodb+srv://adminkliamo:icBdyCz81CWrLMX6@kliamocluster.lnwdlde.mongodb.net/kliamo';
+        console.log('[AppModule] Connecting to MongoDB URL:', mongoUrl.replace(/:([^@]+)@/, ':****@'));
 
         return {
           uri: mongoUrl,
-          serverSelectionTimeoutMS: 10000,
-          connectTimeoutMS: 10000,
+          maxPoolSize: 10,
+          minPoolSize: 2,
+          serverSelectionTimeoutMS: 15000,
+          connectTimeoutMS: 15000,
+          autoIndex: false,
+          retryWrites: true,
         };
       },
     }),
@@ -56,6 +70,8 @@ import { CouponsModule } from './coupons/coupons.module';
     CartModule,
     WishlistModule,
     CouponsModule,
+    TestimonialsModule,
+    PoliciesModule,
   ],
 
   controllers: [AppController],

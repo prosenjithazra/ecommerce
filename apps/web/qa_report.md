@@ -8,7 +8,7 @@ This Quality Assurance (QA) report catalogs design inconsistencies, brand color 
 
 ### [Issue 1] Indigo Styling Contamination
 - **Category**: Branding & Visual Design
-- **Description**: Multiple components still utilize default Tailwind `indigo-` colors for text, backgrounds, focus rings, and badges, deviating from the warm peach (`#F9A37E`), sage green (`#A8C69F`), and charcoal brown (`#4A453E`) design system.
+- **Description**: Multiple components still utilize default Tailwind `indigo-` colors for text, backgrounds, focus rings, and badges, deviating from the warm peach (`#df794d`), sage green (`#7e9677`), and charcoal brown (`#4A453E`) design system.
 - **Affected Files**:
   1. [app/about/page.tsx](file:///Users/user228/Desktop/Prosenjit%20Hazra/my-turborepo/apps/web/app/about/page.tsx):
      - Line 162: `text-indigo-500 bg-indigo-50 dark:bg-indigo-950/30` used for the page category badge.
@@ -77,7 +77,7 @@ This Quality Assurance (QA) report catalogs design inconsistencies, brand color 
 
 ### [Issue 6] Input Focus Outline Discrepancy
 - **Category**: Design Style
-- **Description**: The search input box in the FAQ and product catalog pages has a rounded peach glow focus style (`focus:ring-[#F9A37E]/50`), whereas static forms in the Contact and Address pages default to dark outline rings.
+- **Description**: The search input box in the FAQ and product catalog pages has a rounded peach glow focus style (`focus:ring-[#df794d]/50`), whereas static forms in the Contact and Address pages default to dark outline rings.
 - **Affected Files**:
   - [app/contact/page.tsx](file:///Users/user228/Desktop/Prosenjit%20Hazra/my-turborepo/apps/web/app/contact/page.tsx)
   - [app/addresses/page.tsx](file:///Users/user228/Desktop/Prosenjit%20Hazra/my-turborepo/apps/web/app/addresses/page.tsx)
@@ -87,10 +87,10 @@ This Quality Assurance (QA) report catalogs design inconsistencies, brand color 
 ## 4. Suggested Fixes (Aesthetics & Logic Code Remediation)
 
 1. **Replace Indigo Colors**: Swap out all `indigo-` selectors with equivalent peach color systems:
-   - `text-indigo-500` -> `text-[#F9A37E]` (or `text-[#e8855a]`)
+   - `text-indigo-500` -> `text-[#df794d]` (or `text-[#e8855a]`)
    - `bg-indigo-50` -> `bg-[#FBD5C1]/20`
-   - `focus:border-indigo-500` -> `focus:border-[#F9A37E] focus:ring-[#F9A37E]/20`
-   - `accent-indigo-600` -> `accent-[#F9A37E]`
+   - `focus:border-indigo-500` -> `focus:border-[#df794d] focus:ring-[#df794d]/20`
+   - `accent-indigo-600` -> `accent-[#df794d]`
 2. **Apply Form Validation Rules**:
    - Implement regex checker checks for phone (`/^\d{10}$/`) and pincode (`/^\d{6}$/`) inside Address page validations.
    - Implement standard email syntax regex checking inside Contact and Profile page email input handlers.

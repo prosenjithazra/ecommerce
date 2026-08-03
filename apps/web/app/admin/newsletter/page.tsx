@@ -171,7 +171,7 @@ export default function AdminNewsletterPage() {
               placeholder="Search by email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#F9A37E] transition-colors text-zinc-700 placeholder:text-zinc-400"
+              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#df794d] transition-colors text-zinc-700 placeholder:text-zinc-400"
             />
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -179,7 +179,7 @@ export default function AdminNewsletterPage() {
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`text-[10px] font-extrabold px-3 py-1.5 rounded-lg border transition-all ${filter === f ? "bg-[#F9A37E]/15 border-[#F9A37E] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
+                className={`text-[10px] font-extrabold px-3 py-1.5 rounded-lg border transition-all ${filter === f ? "bg-[#df794d]/15 border-[#df794d] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
               >
                 {f}
               </button>
@@ -196,7 +196,7 @@ export default function AdminNewsletterPage() {
         {/* Table */}
         {loading ? (
           <div className="py-20 flex flex-col items-center justify-center gap-3 text-zinc-400">
-            <Loader2 className="w-8 h-8 animate-spin text-[#F9A37E]" />
+            <Loader2 className="w-8 h-8 animate-spin text-[#df794d]" />
             <span className="text-xs font-bold">Loading subscribers...</span>
           </div>
         ) : filtered.length === 0 ? (
@@ -226,7 +226,7 @@ export default function AdminNewsletterPage() {
                       <td className="py-4 pl-5 px-4 text-zinc-400 font-bold text-[11px]">{idx + 1}</td>
                       <td className="py-4 px-4">
                         <span className="font-extrabold text-zinc-900 flex items-center gap-2">
-                          <Mail className="w-3.5 h-3.5 text-[#F9A37E] flex-shrink-0" />
+                          <Mail className="w-3.5 h-3.5 text-[#df794d] flex-shrink-0" />
                           {s.email}
                         </span>
                       </td>

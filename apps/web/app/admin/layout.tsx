@@ -58,7 +58,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   if (loading && !isLoginPage) {
     return (
       <div className="flex h-screen flex-col items-center justify-center bg-[#F7F4F0] text-[#4A453E]">
-        <Loader2 className="w-10 h-10 animate-spin text-[#F9A37E] mb-3" strokeWidth={2.5} />
+        <Loader2 className="w-10 h-10 animate-spin text-[#df794d] mb-3" strokeWidth={2.5} />
         <span className="text-xs font-bold tracking-widest uppercase">Loading admin console...</span>
       </div>
     );

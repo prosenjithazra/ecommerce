@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Edit2, Trash2, Search, ArrowUpDown } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, ArrowUpDown, RefreshCw } from "lucide-react";
 import { AdminTopbar } from "../AdminSidebar";
 import { useApp } from "../../../components/AppContext";
 import { getApiUrl } from "../../../components/ApiConfig";
@@ -34,6 +34,8 @@ interface Product {
   tag: string;
   sku: string;
   slug?: string;
+  homeSection?: string[];
+  targetGender?: string;
 }
 
 const slugify = (name: string) =>
@@ -51,18 +53,34 @@ export default function AdminProductsPage() {
 
   useEffect(() => {
     fetch(getApiUrl("/products"))
-      .then(res => {
-        if (res.ok) return res.json();
-        throw new Error("Failed to load products");
+      .then(async (res) => {
+        if (res.ok) {
+          const text = await res.text();
+          return text && text.trim() ? JSON.parse(text) : [];
+        }
+        return [];
       })
       .then(data => {
-        setProducts(data);
-        setLoading(false);
+        if (Array.isArray(data) && data.length > 0) {
+          setProducts(data);
+          setLoading(false);
+        } else {
+          return fetch('/api/qikink/products')
+            .then(r => r.json())
+            .then(qData => {
+              setProducts(qData.products || []);
+              setLoading(false);
+            });
+        }
       })
-      .catch(err => {
-        showToast("Error", err.message || "Failed to load products.", "error");
-        setProducts([]);
-        setLoading(false);
+      .catch(() => {
+        fetch('/api/qikink/products')
+          .then(r => r.json())
+          .then(qData => {
+            setProducts(qData.products || []);
+            setLoading(false);
+          })
+          .catch(() => setLoading(false));
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -112,9 +130,9 @@ export default function AdminProductsPage() {
     });
 
   const SortButton = ({ field, label }: { field: "name" | "price" | "category"; label: string }) => (
-    <button onClick={() => toggleSort(field)} className="flex items-center gap-1 hover:text-[#F9A37E] transition-colors group">
+    <button onClick={() => toggleSort(field)} className="flex items-center gap-1 hover:text-[#df794d] transition-colors group">
       {label}
-      <ArrowUpDown className={`w-3 h-3 ${sortField === field ? "text-[#F9A37E]" : "text-zinc-400 group-hover:text-[#F9A37E]"}`} />
+      <ArrowUpDown className={`w-3 h-3 ${sortField === field ? "text-[#df794d]" : "text-zinc-400 group-hover:text-[#df794d]"}`} />
     </button>
   );
 
@@ -123,6 +141,19 @@ export default function AdminProductsPage() {
       <AdminTopbar title="Products" subtitle={`${products.length} products in catalog`} />
 
       <main className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-5">
+        {/* Qikink Library Mapping Notice Banner */}
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3 shadow-sm">
+          <div className="p-2 bg-amber-500/10 rounded-lg text-amber-700 shrink-0">
+            <RefreshCw className="w-5 h-5" />
+          </div>
+          <div className="flex-1 text-xs">
+            <h4 className="font-extrabold text-zinc-900 text-sm">Qikink Store Product Mapping</h4>
+            <p className="text-amber-900 font-medium leading-relaxed mt-0.5">
+              For syncing orders from your store to Qikink, make sure to map the products present in your store with the products in the Qikink My Products Library. This step is crucial for the orders to be pulled correctly from your store.
+            </p>
+          </div>
+        </div>
+
         {/* Actions Bar */}
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
           <div className="relative w-full sm:w-72">
@@ -132,15 +163,41 @@ export default function AdminProductsPage() {
               placeholder="Search by name, SKU, or category..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#F9A37E] transition-colors text-zinc-700 placeholder:text-zinc-400"
+              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#df794d] transition-colors text-zinc-700 placeholder:text-zinc-400"
             />
           </div>
-          <Link
-            href="/admin/products/add"
-            className="flex items-center gap-2 bg-[#F9A37E] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20 whitespace-nowrap"
-          >
-            <Plus className="w-4 h-4" /> Add New Product
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                showToast("Syncing Products...", "Fetching and mapping products from Qikink catalog.", "info");
+                fetch('/api/qikink/products/sync', { method: 'POST' })
+                  .then(res => res.json())
+                  .then(data => {
+                    if (data.success) {
+                      showToast("Sync Complete", data.message || "Qikink products synced to store database.", "success");
+                      // Reload products table
+                      fetch(getApiUrl("/products"))
+                        .then(r => r.json())
+                        .then(d => Array.isArray(d) && d.length > 0 && setProducts(d));
+                    } else {
+                      throw new Error(data.error || "Sync failed");
+                    }
+                  })
+                  .catch(err => {
+                    showToast("Sync Error", err.message || "Failed to sync Qikink products", "error");
+                  });
+              }}
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-2.5 px-4 rounded-lg transition-all shadow-md shadow-emerald-600/20 whitespace-nowrap cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> Sync from Qikink
+            </button>
+            <Link
+              href="/admin/products/add"
+              className="flex items-center gap-2 bg-[#df794d] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg transition-all shadow-md shadow-[#df794d]/20 whitespace-nowrap"
+            >
+              <Plus className="w-4 h-4" /> Add New Product
+            </Link>
+          </div>
         </div>
 
         {/* Filters */}
@@ -150,7 +207,7 @@ export default function AdminProductsPage() {
             <button
               key={c}
               onClick={() => setFilterCat(c)}
-              className={`text-[10px] font-extrabold px-3 py-1 rounded-md border transition-all ${filterCat === c ? "bg-[#F9A37E]/15 border-[#F9A37E] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
+              className={`text-[10px] font-extrabold px-3 py-1 rounded-md border transition-all ${filterCat === c ? "bg-[#df794d]/15 border-[#df794d] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
             >
               {c}
             </button>
@@ -160,7 +217,7 @@ export default function AdminProductsPage() {
             <button
               key={s}
               onClick={() => setFilterStock(s)}
-              className={`text-[10px] font-extrabold px-3 py-1 rounded-md border transition-all ${filterStock === s ? "bg-[#F9A37E]/15 border-[#F9A37E] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
+              className={`text-[10px] font-extrabold px-3 py-1 rounded-md border transition-all ${filterStock === s ? "bg-[#df794d]/15 border-[#df794d] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
             >
               {s}
             </button>
@@ -201,7 +258,7 @@ export default function AdminProductsPage() {
                     <SortButton field="price" label="Price" />
                   </th>
                   <th className="py-3.5 px-4 font-extrabold text-zinc-500 text-[10px] uppercase tracking-wide">Original</th>
-                  <th className="py-3.5 px-4 font-extrabold text-zinc-500 text-[10px] uppercase tracking-wide">Tag</th>
+                  <th className="py-3.5 px-4 font-extrabold text-zinc-500 text-[10px] uppercase tracking-wide">Qikink Sync</th>
                   <th className="py-3.5 px-4 font-extrabold text-zinc-500 text-[10px] uppercase tracking-wide">Stock</th>
                   <th className="py-3.5 px-5 font-extrabold text-zinc-500 text-[10px] uppercase tracking-wide text-right">Actions</th>
                 </tr>
@@ -216,16 +273,28 @@ export default function AdminProductsPage() {
                         className="w-10 h-10 rounded-lg object-cover border border-zinc-100"
                       />
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 w-[40%]">
                       <Link
                         href={`/products/${p.slug || slugify(p.name)}`}
                         target="_blank"
-                        className="font-extrabold text-zinc-900 leading-snug hover:text-[#F9A37E] transition-colors group-hover:underline block"
+                        className="font-extrabold text-zinc-900 leading-snug hover:text-[#df794d] transition-colors group-hover:underline block"
                         title="View on store"
                       >
                         {p.name}
                       </Link>
-                      <span className="text-[9px] text-zinc-400 font-mono">/{p.slug || slugify(p.name)}</span>
+                      <div className="flex flex-wrap items-center gap-1 mt-1">
+                        <span className="text-[9px] text-zinc-400 font-mono">/{p.slug || slugify(p.name)}</span>
+                        {p.targetGender && (
+                          <span className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600 border border-zinc-200">
+                            {p.targetGender}
+                          </span>
+                        )}
+                        {Array.isArray(p.homeSection) && p.homeSection.length > 0 && p.homeSection.map(sec => (
+                          <span key={sec} className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-[#df794d]/10 text-[#df794d] border border-[#df794d]/20">
+                            {sec}
+                          </span>
+                        ))}
+                      </div>
                     </td>
                     <td className="py-3 px-4">
                       <code className="text-[10px] font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-md">{p.sku}</code>
@@ -240,13 +309,30 @@ export default function AdminProductsPage() {
                       <span className="text-zinc-400 line-through text-[11px]">₹{p.originalPrice.toLocaleString()}</span>
                     </td>
                     <td className="py-3 px-4">
-                      {p.tag ? (
-                        <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full border uppercase tracking-wide ${TAG_STYLES[p.tag] || "bg-zinc-100 text-zinc-500 border-zinc-200"}`}>
-                          {p.tag}
-                        </span>
-                      ) : (
-                        <span className="text-zinc-300 text-[10px]">—</span>
-                      )}
+                      <button
+                        onClick={() => {
+                          fetch('/api/qikink/products', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(p),
+                          })
+                            .then(async (res) => {
+                              const text = await res.text();
+                              if (!res.ok) throw new Error(text || "Failed to sync product");
+                              return text ? JSON.parse(text) : {};
+                            })
+                            .then(() => {
+                              showToast("Pushed to Qikink", `${p.name} mapped in Qikink My Products Library.`, "success");
+                            })
+                            .catch(err => {
+                              showToast("Error", err.message || "Failed to push product to Qikink", "error");
+                            });
+                        }}
+                        className="inline-flex items-center gap-1 text-[9px] font-extrabold px-2 py-0.5 rounded-full border bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer"
+                        title="Click to push/map this product to Qikink My Products Library"
+                      >
+                        <RefreshCw className="w-2.5 h-2.5" /> Qikink Mapped
+                      </button>
                     </td>
                     <td className="py-3 px-4">
                       <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full border uppercase tracking-wide ${p.inStock ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-red-50 text-red-600 border-red-100"}`}>
@@ -257,7 +343,7 @@ export default function AdminProductsPage() {
                       <div className="flex gap-1.5 justify-end opacity-60 group-hover:opacity-100 transition-opacity">
                         <Link
                           href={`/admin/products/edit/${p.slug || slugify(p.name)}`}
-                          className="p-1.5 border border-zinc-200 hover:border-[#F9A37E]/40 hover:bg-[#F9A37E]/5 hover:text-[#F9A37E] text-zinc-400 rounded-lg transition-all"
+                          className="p-1.5 border border-zinc-200 hover:border-[#df794d]/40 hover:bg-[#df794d]/5 hover:text-[#df794d] text-zinc-400 rounded-lg transition-all"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </Link>

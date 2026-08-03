@@ -162,7 +162,7 @@ export default function AdminCouponsPage() {
       .catch((err) => showToast("Error", err.message, "error"));
   };
 
-  const inputCls = "w-full bg-white border border-zinc-200 rounded-lg py-2.5 px-3 text-xs font-semibold text-zinc-800 outline-none focus:border-[#F9A37E] transition-all";
+  const inputCls = "w-full bg-white border border-zinc-200 rounded-lg py-2.5 px-3 text-xs font-semibold text-zinc-800 outline-none focus:border-[#df794d] transition-all";
   const labelCls = "block text-xs font-extrabold text-zinc-600 mb-1";
 
   return (
@@ -178,7 +178,7 @@ export default function AdminCouponsPage() {
           </div>
           <button
             onClick={() => openModal()}
-            className="flex items-center gap-2 bg-[#F9A37E] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20"
+            className="flex items-center gap-2 bg-[#df794d] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg transition-all shadow-md shadow-[#df794d]/20"
           >
             <Plus className="w-4 h-4" /> Create New Coupon
           </button>
@@ -214,7 +214,7 @@ export default function AdminCouponsPage() {
                     return (
                       <tr key={c.id} className="hover:bg-zinc-50 transition-colors">
                         <td className="py-3.5 px-5 font-black text-zinc-900 flex items-center gap-2">
-                          <Tag className="w-3.5 h-3.5 text-[#F9A37E]" />
+                          <Tag className="w-3.5 h-3.5 text-[#df794d]" />
                           <code className="bg-zinc-100 text-zinc-800 px-2 py-0.5 rounded font-mono text-xs uppercase">{c.code}</code>
                         </td>
                         <td className="py-3.5 px-4 font-bold text-zinc-800">
@@ -261,7 +261,7 @@ export default function AdminCouponsPage() {
                         <td className="py-3.5 px-5 text-right space-x-1">
                           <button
                             onClick={() => openModal(c)}
-                            className="p-1.5 border border-zinc-200 hover:border-[#F9A37E]/40 hover:bg-[#F9A37E]/5 hover:text-[#F9A37E] text-zinc-400 rounded-lg transition-all"
+                            className="p-1.5 border border-zinc-200 hover:border-[#df794d]/40 hover:bg-[#df794d]/5 hover:text-[#df794d] text-zinc-400 rounded-lg transition-all"
                             title="Edit Coupon"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
@@ -386,7 +386,7 @@ export default function AdminCouponsPage() {
                   type="checkbox"
                   checked={form.isActive}
                   onChange={(e) => setForm((p) => ({ ...p, isActive: e.target.checked }))}
-                  className="w-4 h-4 rounded border-zinc-300 accent-[#F9A37E]"
+                  className="w-4 h-4 rounded border-zinc-300 accent-[#df794d]"
                 />
                 <span className="text-xs font-bold text-zinc-700">Coupon is Active</span>
               </label>
@@ -402,7 +402,7 @@ export default function AdminCouponsPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 py-2.5 text-xs font-extrabold text-white bg-[#F9A37E] hover:bg-[#e8855a] disabled:opacity-60 rounded-lg shadow-md shadow-[#F9A37E]/20"
+                  className="flex-1 py-2.5 text-xs font-extrabold text-white bg-[#df794d] hover:bg-[#e8855a] disabled:opacity-60 rounded-lg shadow-md shadow-[#df794d]/20"
                 >
                   {submitting ? "Saving..." : editingCoupon ? "Update Coupon" : "Create Coupon"}
                 </button>

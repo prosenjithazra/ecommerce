@@ -209,7 +209,7 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6">
           {data.milestones.map((m) => (
             <div key={m.year} className="p-3 md:p-6 border border-zinc-150 dark:border-zinc-800 rounded-lg bg-white dark:bg-zinc-900/60 relative">
-              <span className="text-2xl font-black text-[#e8855a] dark:text-[#F9A37E] block mb-2">{m.year}</span>
+              <span className="text-2xl font-black text-[#e8855a] dark:text-[#df794d] block mb-2">{m.year}</span>
               <h4 className="font-bold text-sm text-zinc-850 dark:text-white mb-2">{m.title}</h4>
               <p className="text-[11px] text-zinc-450 dark:text-zinc-400 leading-relaxed">{m.desc}</p>
             </div>
@@ -223,7 +223,7 @@ export default function AboutPage() {
         <div className="flex flex-wrap gap-6 md:gap-8 justify-center">
           {data.team.map((t) => (
             <div key={t.name} className="text-center space-y-3 group w-36 sm:w-40 flex-shrink-0">
-              <div className="w-32 h-32 rounded-full overflow-hidden mx-auto shadow-md border-2 border-transparent group-hover:border-[#F9A37E] transition-all duration-300">
+              <div className="w-32 h-32 rounded-full overflow-hidden mx-auto shadow-md border-2 border-transparent group-hover:border-[#df794d] transition-all duration-300">
                 <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
               </div>
               <div>
@@ -237,12 +237,12 @@ export default function AboutPage() {
 
       {/* Call to action */}
       <section className="p-6 md:p-12 bg-[#4A453E] text-white rounded-[20px] md:rounded-[32px] text-center space-y-4 md:space-y-6 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-[#F9A37E]/10 blur-[100px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-[#df794d]/10 blur-[100px] pointer-events-none" />
         <h2 className="text-3xl font-extrabold tracking-tight max-w-lg mx-auto text-white">{data.ctaTitle}</h2>
         <p className="text-xs text-[#E8E2D6]/70 max-w-full md:max-w-[60%] mx-auto">{data.ctaDesc}</p>
         <Link
           href="/products"
-          className="inline-block bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3.5 px-8 rounded-lg transition-colors shadow-lg"
+          className="inline-block bg-[#df794d] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3.5 px-8 rounded-lg transition-colors shadow-lg"
         >
           Explore Collection
         </Link>

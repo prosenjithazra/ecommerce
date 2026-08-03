@@ -23,6 +23,9 @@ export class Category {
   @Prop({ default: 'Active' })
   status: string;
 
+  @Prop({ default: '' })
+  description?: string;
+
   @Prop()
   createdAt?: Date;
 
@@ -31,3 +34,6 @@ export class Category {
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category);
+
+CategorySchema.index({ status: 1, createdAt: 1 });
+CategorySchema.index({ name: 1 });

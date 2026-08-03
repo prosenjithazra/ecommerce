@@ -60,7 +60,7 @@ export default function LoginPage() {
                 type="email"
                 {...register("email")}
                 placeholder="you@example.com"
-                className={`mt-1.5 w-full bg-[#FDFAF6] border ${errors.email ? 'border-red-500' : 'border-[#E8E2D6]'} rounded-lg py-3 px-4 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E]`}
+                className={`mt-1.5 w-full bg-[#FDFAF6] border ${errors.email ? 'border-red-500' : 'border-[#E8E2D6]'} rounded-lg py-3 px-4 text-xs outline-none focus:border-[#df794d] text-[#4A453E]`}
               />
               {errors.email && (
                 <p className="mt-1.5 flex items-start gap-1.5 text-xs text-red-500 font-medium">
@@ -78,7 +78,7 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
                   placeholder="••••••••"
-                  className={`w-full bg-[#FDFAF6] border ${errors.password ? 'border-red-500' : 'border-[#E8E2D6]'} rounded-lg py-3 px-4 pr-10 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E]`}
+                  className={`w-full bg-[#FDFAF6] border ${errors.password ? 'border-red-500' : 'border-[#E8E2D6]'} rounded-lg py-3 px-4 pr-10 text-xs outline-none focus:border-[#df794d] text-[#4A453E]`}
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A89B8A] hover:text-[#4A453E] transition-colors">
@@ -105,10 +105,10 @@ export default function LoginPage() {
 
             <div className="flex items-center justify-between pt-1">
               <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input type="checkbox" className="w-4 h-4 rounded border-[#E8E2D6] accent-[#F9A37E]" />
+                <input type="checkbox" className="w-4 h-4 rounded border-[#E8E2D6] accent-[#df794d]" />
                 <span className="text-[11px] text-[#7A736A] font-medium">Remember me</span>
               </label>
-              <Link href="/forgot-password" className="text-[11px] font-bold text-[#F9A37E] hover:text-[#E8855A]">
+              <Link href="/forgot-password" className="text-[11px] font-bold text-[#df794d] hover:text-[#E8855A]">
                 Forgot password?
               </Link>
             </div>
@@ -116,7 +116,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95 disabled:opacity-70"
+              className="w-full bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#df794d]/25 active:scale-95 disabled:opacity-70"
             >
               {isSubmitting ? 'Signing In...' : 'Sign In'}
             </button>
@@ -128,12 +128,12 @@ export default function LoginPage() {
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-[#E8E2D6]" />
               </div>
-              <div className="relative flex justify-center text-xs">
+              {/* <div className="relative flex justify-center text-xs">
                 <span className="px-3 bg-white text-[#A89B8A]">Or continue with</span>
-              </div>
+              </div> */}
             </div>
 
-            <GoogleAuthButton text="continue_with" />
+            {/* <GoogleAuthButton text="continue_with" /> */}
           </div>
 
           {/* Bottom Switcher buttons */}
@@ -143,7 +143,7 @@ export default function LoginPage() {
             </span>
             <Link
               href="/signup"
-              className="w-full bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-3.5 px-4 rounded-lg transition-all shadow-md shadow-[#A8C69F]/20 flex items-center justify-center text-center animate-fade-in-up"
+              className="w-full bg-[#7e9677] hover:bg-[#92b089] text-white font-extrabold text-xs py-3.5 px-4 rounded-lg transition-all shadow-md shadow-[#7e9677]/20 flex items-center justify-center text-center animate-fade-in-up"
             >
               Sign Up
             </Link>

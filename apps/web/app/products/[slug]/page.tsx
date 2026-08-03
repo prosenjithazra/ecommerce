@@ -10,6 +10,8 @@ import { Breadcrumb, Price, Rating, Slider, SkeletonLoader, EmptyState } from '.
 import { StickyAddToCart } from '../../../components/StickyAddToCart';
 import { getApiUrl } from '../../../components/ApiConfig';
 
+import { getProductSchema, getBreadcrumbSchema, getFaqSchema } from '../../../components/SeoConfig';
+
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -19,6 +21,8 @@ export default function ProductDetailPage() {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [testimonialsLoading, setTestimonialsLoading] = useState(true);
   const [loading, setLoading] = useState(true);
 
   const [selectedColor, setSelectedColor] = useState("");
@@ -26,6 +30,16 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'desc' | 'print' | 'ship'>('desc');
   const [isSizeChartOpen, setIsSizeChartOpen] = useState(false);
+
+  // Load testimonials from API
+  useEffect(() => {
+    setTestimonialsLoading(true);
+    fetch(getApiUrl('/testimonials'))
+      .then(res => res.ok ? res.json() : [])
+      .then(data => { if (Array.isArray(data) && data.length > 0) setTestimonials(data); })
+      .catch(() => {})
+      .finally(() => setTestimonialsLoading(false));
+  }, []);
 
   // Load product details by slug (falls back to id lookup for legacy URLs)
   useEffect(() => {
@@ -64,10 +78,11 @@ export default function ProductDetailPage() {
 
   const isSaved = product ? isInWishlist(product.id) : false;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
-    addToCart({
+    await addToCart({
       productId: product.id,
+      slug: product.slug,
       name: product.name,
       price: product.price,
       quantity,
@@ -77,9 +92,9 @@ export default function ProductDetailPage() {
     });
   };
 
-  const handleBuyNow = () => {
-    handleAddToCart();
-    router.push('/cart');
+  const handleBuyNow = async () => {
+    await handleAddToCart();
+    router.push('/checkout');
   };
 
   if (loading) {
@@ -98,7 +113,7 @@ export default function ProductDetailPage() {
           description="The product you are looking for does not exist or has been removed from our catalog."
           actionText="Browse Blanks Catalog"
           actionHref="/products"
-          icon={<ShoppingBag className="w-8 h-8 text-[#A8C69F]" />}
+          icon={<ShoppingBag className="w-8 h-8 text-[#7e9677]" />}
         />
       </div>
     );
@@ -106,6 +121,26 @@ export default function ProductDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-5 pb-12 sm:pb-24">
+      {/* Schema.org JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            getProductSchema(product),
+            getBreadcrumbSchema([
+              { name: "Home", path: "/" },
+              { name: "Products", path: "/products" },
+              { name: product.name, path: `/products/${product.slug || product.id}` }
+            ]),
+            getFaqSchema([
+              { heading: `Is ${product.name} eligible for return?`, content: "Yes, defective items or print errors are eligible for a free replacement within 7 days." },
+              { heading: "What is the delivery turnaround?", content: "Orders are printed on demand within 2-3 business days and delivered in 3-5 days." },
+              { heading: "What printing technique is used?", content: "We use high-fidelity Direct-to-Garment (DTG) and DTF eco-friendly printing for crisp, vibrant artwork." }
+            ])
+          ])
+        }}
+      />
+
       <Breadcrumb items={[{ name: "Products", href: "/products" }, { name: product.name }]} />
 
       {/* ── Product Main Grid ── */}
@@ -119,7 +154,7 @@ export default function ProductDetailPage() {
 
           {/* Category + Tag */}
           <div className="flex items-center gap-2">
-            <span className="text-xs uppercase font-extrabold text-[#F9A37E] tracking-wider">
+            <span className="text-xs uppercase font-extrabold text-[#df794d] tracking-wider">
               {product.category}
             </span>
             {product.tag && (
@@ -150,7 +185,7 @@ export default function ProductDetailPage() {
           {product.colors && product.colors.length > 0 && (
             <div className="space-y-2">
               <span className="text-xs font-bold text-[#4A453E]">
-                Color: <span className="text-[#F9A37E]">{selectedColor}</span>
+                Color: <span className="text-[#df794d]">{selectedColor}</span>
               </span>
               <div className="flex gap-2.5">
                 {product.colors.map(color => (
@@ -159,7 +194,7 @@ export default function ProductDetailPage() {
                     onClick={() => setSelectedColor(color.name)}
                     className={`w-7 h-7 rounded-full border-2 transition-all hover:scale-105 ${
                       selectedColor === color.name
-                        ? 'border-[#F9A37E] scale-110 shadow-md shadow-[#F9A37E]/30'
+                        ? 'border-[#df794d] scale-110 shadow-md shadow-[#df794d]/30'
                         : 'border-[#E8E2D6]'
                     }`}
                     style={{ backgroundColor: color.hex }}
@@ -175,12 +210,12 @@ export default function ProductDetailPage() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-xs font-bold text-[#4A453E]">
-                  Size: <span className="text-[#F9A37E] uppercase">{selectedSize}</span>
+                  Size: <span className="text-[#df794d] uppercase">{selectedSize}</span>
                 </span>
                 <button
                   type="button"
                   onClick={() => setIsSizeChartOpen(true)}
-                  className="text-xs font-bold text-[#A89B8A] hover:text-[#F9A37E] transition-colors cursor-pointer"
+                  className="text-xs font-bold text-[#A89B8A] hover:text-[#df794d] transition-colors cursor-pointer"
                 >
                   Size Chart
                 </button>
@@ -229,14 +264,14 @@ export default function ProductDetailPage() {
           <div className="grid grid-cols-2 gap-3 pt-2">
             <button
               onClick={handleAddToCart}
-              className="flex items-center justify-center gap-2 bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-[14px] py-2 px-4 sm:py-3.5 sm:px-6 rounded-lg transition-all shadow-lg shadow-[#A8C69F]/25 active:scale-95"
+              className="flex items-center justify-center gap-2 bg-[#7e9677] hover:bg-[#92b089] text-white font-extrabold text-[14px] py-2 px-4 sm:py-3.5 sm:px-6 rounded-lg transition-all shadow-lg shadow-[#7e9677]/25 active:scale-95"
             >
               <ShoppingBag className="w-4 h-4" />
               Add to Cart
             </button>
             <button
               onClick={handleBuyNow}
-              className="bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-[14px] py-2 px-4 sm:py-3.5 sm:px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95"
+              className="bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-[14px] py-2 px-4 sm:py-3.5 sm:px-6 rounded-lg transition-all shadow-lg shadow-[#df794d]/25 active:scale-95"
             >
               Buy It Now
             </button>
@@ -256,15 +291,15 @@ export default function ProductDetailPage() {
           {/* Trust indicators */}
           <div className="grid grid-cols-3 gap-1.5 sm:gap-3 py-3 sm:py-4 border-t border-[#E8E2D6] text-[10px] text-[#7A736A] text-center">
             <div className="space-y-1.5">
-              <ShieldCheck className="w-5 h-5 text-[#A8C69F] mx-auto" />
+              <ShieldCheck className="w-5 h-5 text-[#7e9677] mx-auto" />
               <span className="font-bold text-[#4A453E] block">Safe Print</span>
             </div>
             <div className="space-y-1.5">
-              <Truck className="w-5 h-5 text-[#A8C69F] mx-auto" />
+              <Truck className="w-5 h-5 text-[#7e9677] mx-auto" />
               <span className="font-bold text-[#4A453E] block">Fast Delivery</span>
             </div>
             <div className="space-y-1.5">
-              <RefreshCw className="w-5 h-5 text-[#A8C69F] mx-auto" />
+              <RefreshCw className="w-5 h-5 text-[#7e9677] mx-auto" />
               <span className="font-bold text-[#4A453E] block">Easy Returns</span>
             </div>
           </div>
@@ -282,7 +317,7 @@ export default function ProductDetailPage() {
                 onClick={() => setActiveTab(tab)}
                 className={`pb-3 text-[12px] sm:text-sm md:text-lg font-bold p-2 sm:px-4 transition-all border-b-2 ${
                   activeTab === tab
-                    ? 'text-[#4A453E] border-[#F9A37E]'
+                    ? 'text-[#4A453E] border-[#df794d]'
                     : 'text-[#A89B8A] border-transparent hover:text-[#4A453E]'
                 }`}
               >
@@ -294,22 +329,56 @@ export default function ProductDetailPage() {
         <div className="text-sm text-[#7A736A] leading-relaxed max-w-3xl font-medium">
           {activeTab === 'desc' && <p>{product.description}</p>}
           {activeTab === 'print' && (
-            <p>We use high-fidelity Direct-To-Garment (DTG) digital printing with ecological, water-based inks that penetrate deep into the fibers. Crisp designs that won&apos;t peel, crack, or flake — even after multiple machine washes.</p>
+            <p>We use premium Direct-to-Garment (DTG) printing technology with eco-friendly, water-based inks that bond deeply with the fabric for vibrant, long-lasting results. Every design is printed with exceptional detail and soft-touch comfort, ensuring it won't peel, crack, or flake. Your apparel stays bright, sharp, and comfortable even after repeated machine washes.</p>
           )}
           {activeTab === 'ship' && (
-            <p>Custom apparel is made to order. Production takes 2–3 business days. Standard US shipping is 3–5 business days. Hassle-free returns on print errors or defective blanks within 30 days of receipt.</p>
+            <p>Every product is printed and made to order just for you. Orders are typically processed within 2–3 business days before shipping. Delivery times vary by location but generally take 3–7 business days after dispatch. If you receive a misprinted, damaged, or defective item, please contact us within 30 days of delivery, and we'll gladly arrange a replacement or refund.</p>
           )}
         </div>
       </section>
 
-      {/* ── Reviews ── */}
-      <section className="space-y-3 pt-1.5 sm:pt-2 border-t border-[#E8E2D6]">
+      {/* ── Customer Reviews / Testimonials ── */}
+      <section className="space-y-3 pt-3 sm:pt-6 border-t border-[#E8E2D6]">
         <h2 className="text-xl font-extrabold text-[#4A453E] tracking-tight">Customer Reviews</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <ReviewCard name="Jane Doe" rating={5} date="3 days ago" comment="Perfect sizing and very comfortable fabric. The print came out exactly as shown!" verified={true} />
-          <ReviewCard name="Robert Fletcher" rating={5} date="1 week ago" comment="Highly durable. Washed it three times already and the print looks brand new." verified={true} />
-          <ReviewCard name="Mila Vance" rating={4} date="2 weeks ago" comment="Soft material and print lines are extremely clean. Fits perfectly!" verified={true} />
-        </div>
+        {testimonialsLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="p-4 rounded-lg bg-white space-y-3 animate-pulse border border-[#E8E2D6]">
+                <div className="h-3 bg-zinc-100 rounded w-1/2" />
+                <div className="h-2 bg-zinc-100 rounded w-1/3" />
+                <div className="h-8 bg-zinc-100 rounded" />
+              </div>
+            ))}
+          </div>
+        ) : testimonials.length === 0 ? (
+          <p className="text-xs text-[#A89B8A] py-2">No reviews available yet.</p>
+        ) : testimonials.length > 1 ? (
+          <Slider desktopCols={3}>
+            {testimonials.map((rev) => (
+              <ReviewCard
+                key={rev.id}
+                name={rev.name}
+                rating={rev.rating}
+                date={rev.createdAt ? new Date(rev.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Verified Buyer'}
+                comment={rev.comment}
+                verified={true}
+              />
+            ))}
+          </Slider>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {testimonials.map((rev) => (
+              <ReviewCard
+                key={rev.id}
+                name={rev.name}
+                rating={rev.rating}
+                date={rev.createdAt ? new Date(rev.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Verified Buyer'}
+                comment={rev.comment}
+                verified={true}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* ── Related Products ── */}
@@ -446,15 +515,25 @@ function SizeChartModal({ isOpen, onClose }: SizeChartModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm transition-all"
+      className="fixed top-0 !m-0 inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm transition-all"
       onClick={onClose}
     >
       <div
         className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-4 sm:p-6 overflow-hidden border border-[#E8E2D6] space-y-4 max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Close Button — fixed top-right corner */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 p-1.5 rounded-lg text-[#A89B8A] hover:text-[#4A453E] hover:bg-[#FDFAF6] transition-colors"
+          title="Close Size Chart"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-[#E8E2D6] pb-3 flex-shrink-0">
+        <div className="flex items-center justify-between border-b border-[#E8E2D6] pb-3 flex-shrink-0 gap-2">
           <div>
             <h3 className="text-base sm:text-lg font-extrabold text-[#4A453E] tracking-tight">
               Garment Size Chart
@@ -495,23 +574,13 @@ function SizeChartModal({ isOpen, onClose }: SizeChartModalProps) {
                 <button
                   type="button"
                   onClick={handleResetZoom}
-                  className="p-1.5 rounded text-[#F9A37E] hover:bg-[#F9A37E]/10 transition-colors"
+                  className="p-1.5 rounded text-[#df794d] hover:bg-[#df794d]/10 transition-colors"
                   title="Reset Zoom"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
-
-            {/* Close Button */}
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 rounded-lg text-[#A89B8A] hover:text-[#4A453E] hover:bg-[#FDFAF6] transition-colors"
-              title="Close Size Chart"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
         </div>
 
@@ -532,7 +601,7 @@ function SizeChartModal({ isOpen, onClose }: SizeChartModalProps) {
           }}
         >
           <img
-            src="/sizecart.webp"
+            src="/newSizeCart.png"
             alt="Garment Size Chart"
             draggable={false}
             className="w-full h-auto object-contain max-h-[70vh] rounded-lg shadow-sm transition-transform duration-75 ease-out pointer-events-none"

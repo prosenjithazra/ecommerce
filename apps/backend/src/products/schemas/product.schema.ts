@@ -33,6 +33,9 @@ export class Product {
   category: string;
 
   @Prop({ default: '' })
+  categoryId?: string;
+
+  @Prop({ default: '' })
   tag: string;
 
   @Prop({ default: '' })
@@ -53,6 +56,18 @@ export class Product {
   @Prop({ default: '' })
   slug: string;
 
+  @Prop({ type: Object, default: {} })
+  skuMapping?: Record<string, string>;
+
+  @Prop({ default: true })
+  isQikinkSynced?: boolean;
+
+  @Prop({ type: [String], default: [] })
+  homeSection?: string[];
+
+  @Prop({ default: 'Both' })
+  targetGender?: string;
+
   @Prop()
   createdAt?: Date;
 
@@ -61,3 +76,10 @@ export class Product {
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
+
+ProductSchema.index({ slug: 1 });
+ProductSchema.index({ category: 1, createdAt: -1 });
+ProductSchema.index({ categoryId: 1 });
+ProductSchema.index({ homeSection: 1 });
+ProductSchema.index({ targetGender: 1 });
+ProductSchema.index({ createdAt: -1 });

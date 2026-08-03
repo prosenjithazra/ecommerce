@@ -162,7 +162,7 @@ export default function AdminContactPage() {
               placeholder="Search queries..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#F9A37E] transition-colors text-zinc-700 placeholder:text-zinc-400"
+              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#df794d] transition-colors text-zinc-700 placeholder:text-zinc-400"
             />
           </div>
           <div className="flex gap-2">
@@ -170,7 +170,7 @@ export default function AdminContactPage() {
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`text-[10px] font-extrabold px-3 py-1.5 rounded-lg border transition-all ${filter === f ? "bg-[#F9A37E]/15 border-[#F9A37E] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
+                className={`text-[10px] font-extrabold px-3 py-1.5 rounded-lg border transition-all ${filter === f ? "bg-[#df794d]/15 border-[#df794d] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
               >
                 {f}
               </button>
@@ -181,7 +181,7 @@ export default function AdminContactPage() {
         {/* Loading Spinner */}
         {loading ? (
           <div className="py-20 flex flex-col items-center justify-center gap-3 text-zinc-400">
-            <Loader2 className="w-8 h-8 animate-spin text-[#F9A37E]" />
+            <Loader2 className="w-8 h-8 animate-spin text-[#df794d]" />
             <span className="text-xs font-bold">Loading contact logs...</span>
           </div>
         ) : filtered.length === 0 ? (
@@ -258,7 +258,7 @@ export default function AdminContactPage() {
             {/* Header */}
             <div className="flex items-center justify-between pb-4 border-b border-zinc-100 flex-shrink-0">
               <h3 className="font-extrabold text-sm text-zinc-800 uppercase tracking-wider flex items-center gap-2">
-                <Mail className="w-4 h-4 text-[#F9A37E]" /> Query Details
+                <Mail className="w-4 h-4 text-[#df794d]" /> Query Details
               </h3>
               <button
                 onClick={() => setSelectedQuery(null)}
@@ -277,7 +277,7 @@ export default function AdminContactPage() {
                 </div>
                 <div className="text-xs">
                   <span className="text-zinc-400 block font-bold">Email Address</span>
-                  <a href={`mailto:${selectedQuery.email}`} className="font-black text-[#F9A37E] hover:underline mt-1 block">
+                  <a href={`mailto:${selectedQuery.email}`} className="font-black text-[#df794d] hover:underline mt-1 block">
                     {selectedQuery.email}
                   </a>
                 </div>

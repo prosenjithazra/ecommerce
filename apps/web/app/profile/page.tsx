@@ -4,12 +4,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp, Address } from '../../components/AppContext';
-import { Breadcrumb } from '../../components/UIComponents';
-import { User, MapPin, ShieldAlert, KeyRound, Sliders, LogOut, LayoutDashboard, Upload, Camera, X, ShoppingBag, Loader2, Calendar, CreditCard, ExternalLink, ChevronDown, ChevronUp, XCircle, Package, Truck, CheckCircle2, Clock, AlertTriangle, Eye, EyeOff, Tag, Copy, Check } from 'lucide-react';
-
-import { AddressCard } from '../../components/InfoCards';
+import { Breadcrumb, Select } from '../../components/UIComponents';
+import { User, MapPin, ShieldAlert, KeyRound, Sliders, LogOut, LayoutDashboard, Upload, Camera, X, ShoppingBag, Loader2, Calendar, CreditCard, ExternalLink, ChevronDown, ChevronUp, XCircle, Package, Truck, CheckCircle2, Clock, AlertTriangle, Eye, EyeOff, Tag, Copy, Check, Download } from 'lucide-react';
+import { validatePhoneNumber, sanitizePhoneInput } from '../../utils/phoneValidation';
+import { INDIAN_STATES, sanitizePincodeInput, validateIndianPincode, validateIndianState } from '../../utils/addressValidation';
 import { getApiUrl } from '../../components/ApiConfig';
 import { CustomGarmentPreview } from '../../components/CustomGarmentPreview';
+import { AddressCard } from '../../components/InfoCards';
+import { downloadOrderInvoice } from '../../utils/invoiceGenerator';
 
 const STATUS_STYLES: Record<string, string> = {
   Delivered: "bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30",
@@ -37,6 +39,7 @@ const STATUS_STEPS = [
 
 const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelling, onReturn, returning }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showReturnConfirm, setShowReturnConfirm] = useState(false);
   const [cancelReasonSelection, setCancelReasonSelection] = useState("Changed my mind");
@@ -51,6 +54,18 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
   const canReturn = order.status === 'Delivered';
 
   const currentStepIndex = STATUS_STEPS.findIndex(s => s.key === order.status);
+
+  const handleDownloadInvoice = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setIsDownloading(true);
+    try {
+      await downloadOrderInvoice(order.id, order);
+    } catch (err) {
+      console.error("Error downloading invoice:", err);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-950/20 shadow-sm transition-all hover:shadow-md">
@@ -72,11 +87,21 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
           </p>
         </div>
 
-        <div className="flex items-center gap-4 self-stretch sm:self-auto justify-between sm:justify-end">
+        <div className="flex items-center gap-3 self-stretch sm:self-auto justify-between sm:justify-end">
           <div className="text-right">
             <p className="text-[10px] text-zinc-400 font-bold">{order.items} {order.items === 1 ? 'item' : 'items'}</p>
             <p className="text-sm font-black text-zinc-900 dark:text-white mt-0.5">₹{Number(order.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
           </div>
+          <button
+            type="button"
+            onClick={handleDownloadInvoice}
+            disabled={isDownloading}
+            title="Download PDF Invoice"
+            className="flex items-center gap-1.5 text-xs font-extrabold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 rounded-lg transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+          >
+            {isDownloading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#df794d]" /> : <Download className="w-3.5 h-3.5 text-[#df794d]" />}
+            <span className="hidden sm:inline">Invoice</span>
+          </button>
           <div className="p-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors">
             {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </div>
@@ -101,7 +126,7 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
                       <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${
                           isActive
-                            ? 'bg-[#F9A37E] border-[#F9A37E] text-white shadow-md shadow-[#F9A37E]/30'
+                            ? 'bg-[#df794d] border-[#df794d] text-white shadow-md shadow-[#df794d]/30'
                             : isCompleted
                             ? 'bg-emerald-500 border-emerald-500 text-white'
                             : 'bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 text-zinc-400'
@@ -172,7 +197,7 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
                     <div key={i} className="border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-900/40">
                       {/* Item Header */}
                       <div className="flex flex-col sm:flex-row gap-3 p-3.5">
-                        <div className="flex-shrink-0 w-full sm:w-auto h-auto sm:h-14 rounded-lg overflow-hidden flex justify-center bg-[#f1f1f1] p-2 sm:p-0">
+                        <div className="flex-shrink-0 w-full sm:w-auto min-h-20 sm:min-h-16 h-auto sm:h-14 rounded-lg overflow-hidden flex justify-center bg-[#f1f1f1] p-2 sm:p-0">
                           <CustomGarmentPreview
                             customDesign={item.customDesign}
                             defaultImage={item.image}
@@ -302,6 +327,22 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
             </div>
           </div>
 
+          {/* Download Invoice Banner */}
+          <div className="px-5 py-3.5 bg-[#FDFAF6] dark:bg-zinc-900/40 border-t border-[#E8E2D6] dark:border-zinc-800 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 block">Tax Invoice / Receipt</span>
+              <span className="text-[10px] text-zinc-500 block mt-0.5">Download official PDF tax invoice with full product & order breakdown.</span>
+            </div>
+            <button
+              onClick={handleDownloadInvoice}
+              disabled={isDownloading}
+              className="flex items-center gap-1.5 text-xs font-extrabold text-zinc-800 dark:text-zinc-100 hover:text-[#e8855a] border border-zinc-200 dark:border-zinc-700 hover:border-[#df794d] bg-white dark:bg-zinc-800 px-4 py-2 rounded-lg transition-all shadow-xs cursor-pointer disabled:opacity-50"
+            >
+              {isDownloading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#df794d]" /> : <Download className="w-3.5 h-3.5 text-[#df794d]" />}
+              Download PDF Invoice
+            </button>
+          </div>
+
           {/* Display Cancellation Reason if Cancelled */}
           {isCancelled && order.cancelReason && (
             <div className="px-5 py-3 bg-red-50/30 dark:bg-red-950/5 border-t border-red-100/50 text-[10px] font-bold text-red-600">
@@ -379,14 +420,14 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
                         setShowCancelConfirm(false);
                       }}
                       disabled={cancelling}
-                      className="flex items-center gap-1.5 text-xs font-extrabold bg-red-650 hover:bg-red-700 active:scale-95 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-all shadow-md shadow-red-500/10 cursor-pointer"
+                      className="flex items-center gap-1.5 text-xs font-extrabold bg-red-600 hover:bg-red-700 active:scale-95 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-all shadow-sm shadow-red-500/20 cursor-pointer"
                     >
                       {cancelling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
                       {cancelling ? 'Cancelling...' : 'Confirm Cancellation'}
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); setShowCancelConfirm(false); }}
-                      className="text-xs font-bold text-zinc-650 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 bg-white dark:bg-zinc-800/80 hover:bg-zinc-50 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-4 py-2 rounded-lg transition-all active:scale-95 cursor-pointer"
+                      className="text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white bg-white dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-4 py-2 rounded-lg transition-all active:scale-95 cursor-pointer"
                     >
                       Keep Order
                     </button>
@@ -459,14 +500,14 @@ const OrderListItem: React.FC<OrderListItemProps> = ({ order, onCancel, cancelli
                         setShowReturnConfirm(false);
                       }}
                       disabled={returning}
-                      className="flex items-center gap-1.5 text-xs font-extrabold bg-violet-600 hover:bg-violet-750 active:scale-95 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-all shadow-md shadow-violet-650/10 cursor-pointer"
+                      className="flex items-center gap-1.5 text-xs font-extrabold bg-violet-600 hover:bg-violet-700 active:scale-95 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-all shadow-sm shadow-violet-500/20 cursor-pointer"
                     >
                       {returning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                       {returning ? 'Submitting...' : 'Confirm Return'}
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); setShowReturnConfirm(false); }}
-                      className="text-xs font-bold text-zinc-650 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 bg-white dark:bg-zinc-800/80 hover:bg-zinc-50 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-4 py-2 rounded-lg transition-all active:scale-95 cursor-pointer"
+                      className="text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white bg-white dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-4 py-2 rounded-lg transition-all active:scale-95 cursor-pointer"
                     >
                       Keep Product
                     </button>
@@ -589,7 +630,8 @@ export default function ProfilePage() {
   // Address inline add/edit state
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [showAddressForm, setShowAddressForm] = useState(false);
-  const [addrForm, setAddrForm] = useState({ fullName: "", street: "", city: "", state: "", zip: "", country: "United States", phone: "", isDefault: false });
+  const [addrForm, setAddrForm] = useState({ fullName: "", street: "", city: "", state: "", zip: "", country: "India", phone: "", isDefault: false });
+  const [addrErrors, setAddrErrors] = useState<Record<string, string>>({});
 
   const handleUpdateInfo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -597,9 +639,12 @@ export default function ProfilePage() {
       showToast("Error", "Please enter a valid email address.", "error");
       return;
     }
-    if (phone && !/^\d{10}$/.test(phone.replace(/[\s()-]+/g, ""))) {
-      showToast("Error", "Please enter a valid 10-digit phone number.", "error");
-      return;
+    if (phone) {
+      const phoneCheck = validatePhoneNumber(phone);
+      if (!phoneCheck.isValid) {
+        showToast("Error", phoneCheck.error || "Please enter a valid 10-digit phone number.", "error");
+        return;
+      }
     }
     await updateUserProfile(name, avatar, phone);
   };
@@ -645,6 +690,41 @@ export default function ProfilePage() {
 
   const handleAddressSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors: Record<string, string> = {};
+
+    if (!addrForm.fullName.trim()) {
+      newErrors.fullName = "Please enter receiver full name.";
+    }
+
+    const phoneCheck = validatePhoneNumber(addrForm.phone);
+    if (!phoneCheck.isValid) {
+      newErrors.phone = phoneCheck.error || "Please enter a valid 10-digit phone number.";
+    }
+
+    if (!addrForm.street.trim()) {
+      newErrors.street = "Please enter street address / suite / flat.";
+    }
+
+    if (!addrForm.city.trim()) {
+      newErrors.city = "Please enter city name.";
+    }
+
+    const stateCheck = validateIndianState(addrForm.state);
+    if (!stateCheck.isValid) {
+      newErrors.state = stateCheck.error || "Please select a valid Indian State / UT.";
+    }
+
+    const pinCheck = validateIndianPincode(addrForm.zip);
+    if (!pinCheck.isValid) {
+      newErrors.zip = pinCheck.error || "Please enter a valid 6-digit Indian PIN Code.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setAddrErrors(newErrors);
+      return;
+    }
+
+    setAddrErrors({});
     if (editingAddress) {
       updateAddress({ ...addrForm, id: editingAddress.id });
     } else {
@@ -652,7 +732,7 @@ export default function ProfilePage() {
     }
     setShowAddressForm(false);
     setEditingAddress(null);
-    setAddrForm({ fullName: "", street: "", city: "", state: "", zip: "", country: "United States", phone: "", isDefault: false });
+    setAddrForm({ fullName: "", street: "", city: "", state: "", zip: "", country: "India", phone: "", isDefault: false });
   };
 
   const handleEditAddressClick = (addr: Address) => {
@@ -712,7 +792,7 @@ export default function ProfilePage() {
 
   if (isProfileDataLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-6 md:space-y-8 pb-10 md:pb-16 animate-pulse">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-6 md:space-y-8 pb-10 md:pb-16 animate-pulse">
         {/* Breadcrumb Skeleton */}
         <div className="h-4 w-36 bg-zinc-200 dark:bg-zinc-800 rounded mt-6"></div>
 
@@ -824,7 +904,7 @@ export default function ProfilePage() {
                   <Link
                     href="/admin"
                     onClick={() => setIsMobileSidebarOpen(false)}
-                    className="flex items-center gap-2.5 text-xs font-extrabold py-2.5 px-4 rounded-lg text-left transition-all text-[#F9A37E] hover:bg-[#FBD5C1]/10"
+                    className="flex items-center gap-2.5 text-xs font-extrabold py-2.5 px-4 rounded-lg text-left transition-all text-[#df794d] hover:bg-[#FBD5C1]/10"
                   >
                     <LayoutDashboard className="w-4 h-4" /> Admin Console
                   </Link>
@@ -848,7 +928,7 @@ export default function ProfilePage() {
       <div className="lg:hidden">
         <button
           onClick={() => setIsMobileSidebarOpen(true)}
-          className="w-full flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-3.5 text-xs font-bold text-zinc-750 dark:text-zinc-300 shadow-sm hover:border-[#F9A37E] transition-colors"
+          className="w-full flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-3.5 text-xs font-bold text-zinc-750 dark:text-zinc-300 shadow-sm hover:border-[#df794d] transition-colors"
         >
           <span className="flex items-center gap-2">
             {activeTab === 'info' && <><User className="w-4.5 h-4.5 text-[#E8855A]" /> Personal Info</>}
@@ -910,7 +990,7 @@ export default function ProfilePage() {
             <div className="border-t border-[#E8E2D6] my-1.5 pt-1.5">
               <Link
                 href="/admin"
-                className="flex items-center gap-2.5 text-xs font-extrabold py-2.5 px-4 rounded-lg text-left transition-all text-[#F9A37E] hover:bg-[#FBD5C1]/10"
+                className="flex items-center gap-2.5 text-xs font-extrabold py-2.5 px-4 rounded-lg text-left transition-all text-[#df794d] hover:bg-[#FBD5C1]/10"
               >
                 <LayoutDashboard className="w-4 h-4" /> Admin Console
               </Link>
@@ -948,7 +1028,7 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="absolute bottom-0 right-0 p-1.5 bg-[#F9A37E] hover:bg-[#E8855A] text-white rounded-full shadow transition-all hover:scale-110"
+                    className="absolute bottom-0 right-0 p-1.5 bg-[#df794d] hover:bg-[#E8855A] text-white rounded-full shadow transition-all hover:scale-110"
                     title="Change Avatar"
                   >
                     <Camera className="w-3.5 h-3.5" />
@@ -976,30 +1056,36 @@ export default function ProfilePage() {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-900 dark:text-white"
+                    className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-[#df794d] focus:ring-2 focus:ring-[#df794d]/20 text-zinc-900 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-zinc-650 mb-1.5">Email Address</label>
+                  <label className="block text-xs font-bold text-zinc-650 mb-1.5">
+                    Email Address <span className="text-[10px] text-zinc-400 font-normal">(Non-editable)</span>
+                  </label>
                   <input
                     type="email"
-                    required
+                    disabled
+                    readOnly
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-[#F9A37E] focus:ring-2 focus:ring-[#F9A37E]/20 text-zinc-900 dark:text-white"
+                    className="w-full bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-lg py-3 px-4 text-xs text-zinc-500 dark:text-zinc-400 cursor-not-allowed select-none opacity-80"
+                    title="Email address is linked to your account and cannot be edited."
                   />
                 </div>
               </div>
               <div>
                 <label className="block text-xs font-bold text-zinc-650 mb-1.5">Phone Number</label>
                 <input
-                  type="text"
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={10}
+                  placeholder="9876543210"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none"
+                  onChange={(e) => setPhone(sanitizePhoneInput(e.target.value))}
+                  className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-[#df794d] focus:ring-2 focus:ring-[#df794d]/20 text-zinc-900 dark:text-white"
                 />
               </div>
-              <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-lg transition-all">
+              <button type="submit" className="bg-[#df794d] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-lg transition-all">
                 Save Changes
               </button>
             </form>
@@ -1016,7 +1102,7 @@ export default function ProfilePage() {
                       setEditingAddress(null);
                       setShowAddressForm(true);
                     }}
-                    className="text-xs font-bold text-[#F9A37E] hover:text-[#E8855A] transition-colors"
+                    className="text-xs font-bold text-[#df794d] hover:text-[#E8855A] transition-colors"
                   >
                     + Add New Address
                   </button>
@@ -1024,68 +1110,124 @@ export default function ProfilePage() {
               </div>
 
               {showAddressForm ? (
-                <form onSubmit={handleAddressSubmit} className="space-y-4 p-4 border border-zinc-200 dark:border-zinc-850 rounded-lg bg-zinc-50 dark:bg-zinc-950/20">
+                <form onSubmit={handleAddressSubmit} noValidate className="space-y-4 p-4 border border-zinc-200 dark:border-zinc-850 rounded-lg bg-zinc-50 dark:bg-zinc-950/20">
                   <h4 className="font-bold text-xs text-zinc-800 dark:text-zinc-200">
                     {editingAddress ? "Edit Address details" : "Add New Address"}
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      placeholder="Receiver name"
-                      required
-                      value={addrForm.fullName}
-                      onChange={(e) => setAddrForm({ ...addrForm, fullName: e.target.value })}
-                      className="w-full bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs outline-none"
-                    />
-                    <input
-                      type="tel"
-                      placeholder="Phone"
-                      required
-                      value={addrForm.phone}
-                      onChange={(e) => setAddrForm({ ...addrForm, phone: e.target.value })}
-                      className="w-full bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs outline-none"
-                    />
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Receiver name"
+                        value={addrForm.fullName}
+                        onChange={(e) => {
+                          setAddrForm({ ...addrForm, fullName: e.target.value });
+                          if (addrErrors.fullName) setAddrErrors(prev => ({ ...prev, fullName: "" }));
+                        }}
+                        className={`w-full bg-white dark:bg-zinc-800 border rounded-lg py-2 px-3.5 text-xs font-semibold text-[#4A453E] dark:text-zinc-200 placeholder:font-normal outline-none focus:outline-none focus:ring-0 ${
+                          addrErrors.fullName ? 'border-red-500 dark:border-red-500' : 'border-[#E8E2D6] dark:border-zinc-700'
+                        }`}
+                      />
+                      {addrErrors.fullName && (
+                        <p className="text-[10px] text-red-500 dark:text-red-400 font-medium mt-1 ml-0.5">{addrErrors.fullName}</p>
+                      )}
+                    </div>
+                    <div>
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        maxLength={10}
+                        placeholder="Phone (10 digits)"
+                        value={addrForm.phone}
+                        onChange={(e) => {
+                          setAddrForm({ ...addrForm, phone: sanitizePhoneInput(e.target.value) });
+                          if (addrErrors.phone) setAddrErrors(prev => ({ ...prev, phone: "" }));
+                        }}
+                        className={`w-full bg-white dark:bg-zinc-800 border rounded-lg py-2 px-3.5 text-xs font-semibold text-[#4A453E] dark:text-zinc-200 placeholder:font-normal outline-none focus:outline-none focus:ring-0 ${
+                          addrErrors.phone ? 'border-red-500 dark:border-red-500' : 'border-[#E8E2D6] dark:border-zinc-700'
+                        }`}
+                      />
+                      {addrErrors.phone && (
+                        <p className="text-[10px] text-red-500 dark:text-red-400 font-medium mt-1 ml-0.5">{addrErrors.phone}</p>
+                      )}
+                    </div>
                   </div>
-                  <input
-                    type="text"
-                    placeholder="Street, suite, flat"
-                    required
-                    value={addrForm.street}
-                    onChange={(e) => setAddrForm({ ...addrForm, street: e.target.value })}
-                    className="w-full bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs outline-none"
-                  />
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Street, suite, flat"
+                      value={addrForm.street}
+                      onChange={(e) => {
+                        setAddrForm({ ...addrForm, street: e.target.value });
+                        if (addrErrors.street) setAddrErrors(prev => ({ ...prev, street: "" }));
+                      }}
+                      className={`w-full bg-white dark:bg-zinc-800 border rounded-lg py-2 px-3.5 text-xs font-semibold text-[#4A453E] dark:text-zinc-200 placeholder:font-normal outline-none focus:outline-none focus:ring-0 ${
+                        addrErrors.street ? 'border-red-500 dark:border-red-500' : 'border-[#E8E2D6] dark:border-zinc-700'
+                      }`}
+                    />
+                    {addrErrors.street && (
+                      <p className="text-[10px] text-red-500 dark:text-red-400 font-medium mt-1 ml-0.5">{addrErrors.street}</p>
+                    )}
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-2">
-                    <input
-                      type="text"
-                      placeholder="City"
-                      required
-                      value={addrForm.city}
-                      onChange={(e) => setAddrForm({ ...addrForm, city: e.target.value })}
-                      className="bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs"
-                    />
-                    <input
-                      type="text"
-                      placeholder="State"
-                      required
-                      value={addrForm.state}
-                      onChange={(e) => setAddrForm({ ...addrForm, state: e.target.value })}
-                      className="bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Zip"
-                      required
-                      value={addrForm.zip}
-                      onChange={(e) => setAddrForm({ ...addrForm, zip: e.target.value })}
-                      className="bg-white dark:bg-zinc-800 border border-zinc-250 rounded-lg py-2 px-3 text-xs"
-                    />
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="City"
+                        value={addrForm.city}
+                        onChange={(e) => {
+                          setAddrForm({ ...addrForm, city: e.target.value });
+                          if (addrErrors.city) setAddrErrors(prev => ({ ...prev, city: "" }));
+                        }}
+                        className={`w-full bg-white dark:bg-zinc-800 border rounded-lg py-2 px-3.5 text-xs font-semibold text-[#4A453E] dark:text-zinc-200 placeholder:font-normal outline-none focus:outline-none focus:ring-0 ${
+                          addrErrors.city ? 'border-red-500 dark:border-red-500' : 'border-[#E8E2D6] dark:border-zinc-700'
+                        }`}
+                      />
+                      {addrErrors.city && (
+                        <p className="text-[10px] text-red-500 dark:text-red-400 font-medium mt-1 ml-0.5">{addrErrors.city}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Select
+                        value={addrForm.state}
+                        onChange={(val) => {
+                          setAddrForm({ ...addrForm, state: val });
+                          if (addrErrors.state) setAddrErrors(prev => ({ ...prev, state: "" }));
+                        }}
+                        options={INDIAN_STATES.map((st) => ({ value: st, label: st }))}
+                        placeholder="Select State / UT"
+                        className="w-full"
+                      />
+                      {addrErrors.state && (
+                        <p className="text-[10px] text-red-500 dark:text-red-400 font-medium mt-1 ml-0.5">{addrErrors.state}</p>
+                      )}
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={6}
+                        placeholder="PIN Code (6 digits)"
+                        value={addrForm.zip}
+                        onChange={(e) => {
+                          setAddrForm({ ...addrForm, zip: sanitizePincodeInput(e.target.value) });
+                          if (addrErrors.zip) setAddrErrors(prev => ({ ...prev, zip: "" }));
+                        }}
+                        className={`w-full bg-white dark:bg-zinc-800 border rounded-lg py-2 px-3.5 text-xs font-semibold text-[#4A453E] dark:text-zinc-200 placeholder:font-normal outline-none focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                          addrErrors.zip ? 'border-red-500 dark:border-red-500' : 'border-[#E8E2D6] dark:border-zinc-700'
+                        }`}
+                      />
+                      {addrErrors.zip && (
+                        <p className="text-[10px] text-red-500 dark:text-red-400 font-medium mt-1 ml-0.5">{addrErrors.zip}</p>
+                      )}
+                    </div>
                   </div>
                   <label className="flex items-center gap-2 cursor-pointer pt-2">
                     <input
                       type="checkbox"
                       checked={addrForm.isDefault}
                       onChange={(e) => setAddrForm({ ...addrForm, isDefault: e.target.checked })}
-                      className="w-4 h-4 rounded border border-zinc-200 accent-[#F9A37E]"
+                      className="w-4 h-4 rounded border border-zinc-200 accent-[#df794d]"
                     />
                     <span className="text-xs text-zinc-550 dark:text-zinc-400 font-medium">Set as primary shipping address</span>
                   </label>
@@ -1100,7 +1242,7 @@ export default function ProfilePage() {
                     >
                       Cancel
                     </button>
-                    <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2 px-4 rounded-lg shadow-md">
+                    <button type="submit" className="bg-[#df794d] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2 px-4 rounded-lg shadow-md">
                       Save Details
                     </button>
                   </div>
@@ -1126,7 +1268,7 @@ export default function ProfilePage() {
             <div className="space-y-6">
               <div>
                 <h3 className="font-extrabold text-base text-zinc-900 dark:text-white pb-1 border-b border-zinc-150 flex items-center gap-2">
-                  <Tag className="w-4.5 h-4.5 text-[#F9A37E]" /> My Offers & Coupons
+                  <Tag className="w-4.5 h-4.5 text-[#df794d]" /> My Offers & Coupons
                 </h3>
                 <p className="text-xs text-zinc-500 mt-1">Copy coupon code and apply it at checkout to get exclusive discounts!</p>
               </div>
@@ -1151,10 +1293,10 @@ export default function ProfilePage() {
                     return (
                       <div
                         key={coupon.id}
-                        className="relative border-2 border-dashed border-[#F9A37E]/40 hover:border-[#F9A37E] bg-gradient-to-br from-[#FDFAF6] via-white to-[#FBD5C1]/10 dark:from-zinc-900 dark:to-zinc-950 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                        className="relative border-2 border-dashed border-[#df794d]/40 hover:border-[#df794d] bg-gradient-to-br from-[#FDFAF6] via-white to-[#FBD5C1]/10 dark:from-zinc-900 dark:to-zinc-950 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
                       >
                         {isExclusive && (
-                          <span className="absolute -top-2.5 right-4 bg-gradient-to-r from-[#F9A37E] to-[#E8855A] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm">
+                          <span className="absolute -top-2.5 right-4 bg-gradient-to-r from-[#df794d] to-[#E8855A] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm">
                             ★ Exclusive For You
                           </span>
                         )}
@@ -1189,7 +1331,7 @@ export default function ProfilePage() {
                           <button
                             onClick={() => handleCopyCouponCode(coupon.code)}
                             disabled={isExpired}
-                            className="bg-[#F9A37E] hover:bg-[#E8855A] disabled:opacity-50 text-white font-extrabold text-xs py-2 px-3.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+                            className="bg-[#df794d] hover:bg-[#E8855A] disabled:opacity-50 text-white font-extrabold text-xs py-2 px-3.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
                           >
                             {copiedCode === coupon.code ? (
                               <>
@@ -1264,7 +1406,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
-              <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-lg transition-all">
+              <button type="submit" className="bg-[#df794d] hover:bg-[#E8855A] text-white font-extrabold text-xs py-3 px-6 rounded-lg transition-all">
                 Update credentials
               </button>
             </form>
@@ -1277,7 +1419,7 @@ export default function ProfilePage() {
               
               {ordersLoading ? (
                 <div className="py-12 flex flex-col items-center justify-center gap-3">
-                  <Loader2 className="w-8 h-8 text-[#F9A37E] animate-spin" />
+                  <Loader2 className="w-8 h-8 text-[#df794d] animate-spin" />
                   <p className="text-xs text-zinc-500 font-bold">Loading your orders...</p>
                 </div>
               ) : orders.length === 0 ? (
@@ -1289,7 +1431,7 @@ export default function ProfilePage() {
                   <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto">You haven't placed any orders yet. Head to the custom shop to create your custom design shirt!</p>
                   <Link
                     href="/custom"
-                    className="mt-4 inline-block bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg shadow-sm transition-all"
+                    className="mt-4 inline-block bg-[#df794d] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg shadow-sm transition-all"
                   >
                     Start Customizing
                   </Link>
@@ -1322,7 +1464,7 @@ export default function ProfilePage() {
                     type="checkbox"
                     checked={prefOrderEmail}
                     onChange={(e) => setPrefOrderEmail(e.target.checked)}
-                    className="w-4 h-4 rounded border border-zinc-200 accent-[#F9A37E] mt-0.5"
+                    className="w-4 h-4 rounded border border-zinc-200 accent-[#df794d] mt-0.5"
                   />
                   <div>
                     <span className="text-xs font-bold text-zinc-800 block">Order Status Emails</span>
@@ -1335,7 +1477,7 @@ export default function ProfilePage() {
                     type="checkbox"
                     checked={prefNewsletter}
                     onChange={(e) => setPrefNewsletter(e.target.checked)}
-                    className="w-4 h-4 rounded border border-zinc-200 accent-[#F9A37E] mt-0.5"
+                    className="w-4 h-4 rounded border border-zinc-200 accent-[#df794d] mt-0.5"
                   />
                   <div>
                     <span className="text-xs font-bold text-zinc-800 block">Marketing Newsletter</span>
@@ -1343,7 +1485,7 @@ export default function ProfilePage() {
                   </div>
                 </label>
 
-                <button type="submit" className="bg-[#F9A37E] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-colors shadow-sm">
+                <button type="submit" className="bg-[#df794d] hover:bg-[#E8855A] text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-colors shadow-sm">
                   Save Preferences
                 </button>
               </form>

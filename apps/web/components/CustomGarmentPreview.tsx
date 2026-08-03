@@ -110,7 +110,7 @@ const SingleViewPreview = ({ type, colorHex, design, side, showMarkers }: { type
 
       {artworkUrl && (
         <div 
-          className={`absolute pointer-events-none ${showMarkers ? 'border border-dashed border-[#e8855a] bg-[#F9A37E]/5' : ''}`}
+          className={`absolute pointer-events-none ${showMarkers ? 'border border-dashed border-[#e8855a] bg-[#df794d]/5' : ''}`}
           style={{
             width: '42%',
             height: '48%',

@@ -44,6 +44,37 @@ export default function AdminOrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showRawJson, setShowRawJson] = useState(false);
 
+  // Qikink Live API state
+  const [qikinkDetails, setQikinkDetails] = useState<any | null>(null);
+  const [qikinkLoading, setQikinkLoading] = useState(false);
+  const [qikinkError, setQikinkError] = useState<string | null>(null);
+
+  const fetchQikinkDetails = async (orderId: string) => {
+    setQikinkLoading(true);
+    setQikinkError(null);
+    try {
+      const res = await fetch(`/api/qikink/orders?orderId=${encodeURIComponent(orderId)}`);
+      const data = await res.json();
+      if (data.success && data.order) {
+        setQikinkDetails(data.order);
+      } else {
+        setQikinkError(data.error || 'Qikink order sync pending or not found in partners account.');
+      }
+    } catch (err: any) {
+      setQikinkError(err.message || 'Failed to connect to Qikink Print-On-Demand API.');
+    } finally {
+      setQikinkLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedOrder) {
+      setQikinkDetails(null);
+      setQikinkError(null);
+      fetchQikinkDetails(selectedOrder.id);
+    }
+  }, [selectedOrder]);
+
   useEffect(() => {
     fetch(getApiUrl("/orders"))
       .then(res => {
@@ -100,7 +131,7 @@ export default function AdminOrdersPage() {
       <div className="flex flex-col h-full overflow-hidden">
         <AdminTopbar title="Orders" subtitle="Loading..." />
         <main className="flex-1 flex items-center justify-center p-8 bg-[#FDFAF6]">
-          <Loader2 className="w-8 h-8 text-[#F9A37E] animate-spin" />
+          <Loader2 className="w-8 h-8 text-[#df794d] animate-spin" />
         </main>
       </div>
     );
@@ -120,7 +151,7 @@ export default function AdminOrdersPage() {
               placeholder="Search by order ID or customer..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#F9A37E] transition-colors text-zinc-700 placeholder:text-zinc-400"
+              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#df794d] transition-colors text-zinc-700 placeholder:text-zinc-400"
             />
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -128,7 +159,7 @@ export default function AdminOrdersPage() {
               <button
                 key={s}
                 onClick={() => setFilterStatus(s)}
-                className={`text-[10px] font-extrabold px-3 py-1.5 rounded-lg border transition-all ${filterStatus === s ? "bg-[#F9A37E]/15 border-[#F9A37E] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
+                className={`text-[10px] font-extrabold px-3 py-1.5 rounded-lg border transition-all ${filterStatus === s ? "bg-[#df794d]/15 border-[#df794d] text-[#e8855a]" : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"}`}
               >
                 {s}
               </button>
@@ -187,7 +218,7 @@ export default function AdminOrdersPage() {
                         <select
                           value={o.status}
                           onChange={(e) => updateStatus(o.id, e.target.value)}
-                          className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-1.5 pl-2.5 pr-8 text-[10px] font-black text-zinc-700 outline-none hover:border-[#F9A37E] transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1rem_1rem] bg-[right_0.4rem_center] bg-no-repeat"
+                          className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-1.5 pl-2.5 pr-8 text-[10px] font-black text-zinc-700 outline-none hover:border-[#df794d] transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1rem_1rem] bg-[right_0.4rem_center] bg-no-repeat"
                         >
                           {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
                         </select>
@@ -244,7 +275,7 @@ export default function AdminOrdersPage() {
                     <select
                       value={selectedOrder.status}
                       onChange={(e) => updateStatus(selectedOrder.id, e.target.value)}
-                      className="w-full bg-white border border-zinc-200 rounded-lg py-2 pl-3 pr-10 text-xs font-bold text-zinc-700 outline-none hover:border-[#F9A37E] transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat"
+                      className="w-full bg-white border border-zinc-200 rounded-lg py-2 pl-3 pr-10 text-xs font-bold text-zinc-700 outline-none hover:border-[#df794d] transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat"
                     >
                       {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
                     </select>
@@ -264,6 +295,73 @@ export default function AdminOrdersPage() {
                     Reason for Return: <span className="font-extrabold text-violet-700">{selectedOrder.returnReason}</span>
                   </div>
                 )}
+              </div>
+
+              {/* Qikink POD Live Sync Status Card */}
+              <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 text-white rounded-xl p-4 space-y-3 shadow-md border border-zinc-700">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-400">
+                      Qikink Print-On-Demand Status
+                    </h4>
+                  </div>
+                  <button
+                    onClick={() => fetchQikinkDetails(selectedOrder.id)}
+                    disabled={qikinkLoading}
+                    className="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-white rounded-md text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                  >
+                    {qikinkLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Tag className="w-3 h-3 text-emerald-400" />}
+                    Refresh Live API
+                  </button>
+                </div>
+
+                {qikinkLoading ? (
+                  <div className="flex items-center gap-2 py-2 text-xs text-zinc-300">
+                    <Loader2 className="w-4 h-4 animate-spin text-[#df794d]" />
+                    <span>Connecting to Qikink Print-On-Demand API (https://api.qikink.com)...</span>
+                  </div>
+                ) : qikinkDetails ? (
+                  <div className="space-y-2 text-xs border-t border-zinc-700/80 pt-2.5 font-mono">
+                    <div className="flex justify-between">
+                      <span className="text-zinc-400">Qikink Order ID:</span>
+                      <span className="font-extrabold text-amber-300">{qikinkDetails.order_id}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-400">Order Number:</span>
+                      <span className="font-bold text-zinc-200">{qikinkDetails.number || selectedOrder.id}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-400">POD Status:</span>
+                      <span className="font-black px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase text-[10px]">
+                        {qikinkDetails.status}
+                      </span>
+                    </div>
+                    {qikinkDetails.shipping_type && (
+                      <div className="flex justify-between">
+                        <span className="text-zinc-400">Shipping Type:</span>
+                        <span className="text-zinc-200">{qikinkDetails.shipping_type}</span>
+                      </div>
+                    )}
+                    {qikinkDetails.payment_type && (
+                      <div className="flex justify-between">
+                        <span className="text-zinc-400">Payment Type:</span>
+                        <span className="text-zinc-200">{qikinkDetails.payment_type}</span>
+                      </div>
+                    )}
+                    {qikinkDetails.total_order_value && (
+                      <div className="flex justify-between">
+                        <span className="text-zinc-400">Total Value:</span>
+                        <span className="text-emerald-400 font-bold">₹{qikinkDetails.total_order_value}</span>
+                      </div>
+                    )}
+                  </div>
+                ) : qikinkError ? (
+                  <div className="text-[11px] text-amber-300 bg-amber-950/40 p-2.5 rounded-lg border border-amber-500/30">
+                    <p className="font-bold">Sync Info:</p>
+                    <p className="text-zinc-300 mt-0.5">{qikinkError}</p>
+                  </div>
+                ) : null}
               </div>
 
               {/* Customer Info */}
@@ -475,7 +573,7 @@ export default function AdminOrdersPage() {
                             <button
                               type="button"
                               onClick={() => handleDownloadMockup('front')}
-                              className="px-2.5 py-1.5 bg-[#F9A37E] hover:bg-[#e8855a] text-white font-extrabold text-[10px] rounded-lg transition-all flex items-center gap-1 shadow-xs flex-shrink-0 cursor-pointer"
+                              className="px-2.5 py-1.5 bg-[#df794d] hover:bg-[#e8855a] text-white font-extrabold text-[10px] rounded-lg transition-all flex items-center gap-1 shadow-xs flex-shrink-0 cursor-pointer"
                             >
                               <Download className="w-3 h-3" />
                               Download
@@ -539,7 +637,7 @@ export default function AdminOrdersPage() {
                                         <button
                                           type="button"
                                           onClick={() => handleDownloadMockup('front')}
-                                          className="w-full text-center bg-[#F9A37E] hover:bg-[#e8855a] text-white font-extrabold text-[9px] py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+                                          className="w-full text-center bg-[#df794d] hover:bg-[#e8855a] text-white font-extrabold text-[9px] py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 shadow-xs cursor-pointer"
                                         >
                                           <Download className="w-3 h-3" />
                                           Download Front Mockup
@@ -560,7 +658,7 @@ export default function AdminOrdersPage() {
                                         <button
                                           type="button"
                                           onClick={() => handleDownloadMockup('back')}
-                                          className="w-full text-center bg-[#F9A37E] hover:bg-[#e8855a] text-white font-extrabold text-[9px] py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+                                          className="w-full text-center bg-[#df794d] hover:bg-[#e8855a] text-white font-extrabold text-[9px] py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 shadow-xs cursor-pointer"
                                         >
                                           <Download className="w-3 h-3" />
                                           Download Back Mockup

@@ -6,6 +6,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Newsletter, NewsletterDocument } from './schemas/newsletter.schema';
+import { EmailService } from '../email/email.service';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -13,6 +14,7 @@ export class NewsletterService {
   constructor(
     @InjectModel(Newsletter.name)
     private readonly newsletterModel: Model<NewsletterDocument>,
+    private readonly emailService: EmailService,
   ) {}
 
   async subscribe(email: string): Promise<Newsletter> {
@@ -21,7 +23,11 @@ export class NewsletterService {
       if (existing.status === 'Unsubscribed') {
         existing.status = 'Active';
         existing.subscribedAt = new Date();
-        return existing.save();
+        const savedResub = await existing.save();
+        this.emailService
+          .sendNewsletterWelcomeEmail(email)
+          .catch((err) => console.error('Failed to send newsletter email:', err));
+        return savedResub;
       }
       throw new ConflictException('This email is already subscribed.');
     }
@@ -31,7 +37,11 @@ export class NewsletterService {
       status: 'Active',
       subscribedAt: new Date(),
     });
-    return subscriber.save();
+    const saved = await subscriber.save();
+    this.emailService
+      .sendNewsletterWelcomeEmail(email)
+      .catch((err) => console.error('Failed to send newsletter email:', err));
+    return saved;
   }
 
   async findAll(): Promise<Newsletter[]> {

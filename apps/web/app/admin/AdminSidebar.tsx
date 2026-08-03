@@ -20,9 +20,10 @@ import {
   Mail,
   Settings,
   Newspaper,
-  Instagram,
   Tag,
+  Star,
 } from "lucide-react";
+import { InstagramIcon } from "../../components/BrandIcons";
 import { useApp } from "../../components/AppContext";
 
 const mainMenuItems = [
@@ -36,7 +37,8 @@ const mainMenuItems = [
   { href: "/admin/about", label: "About Us Page", icon: FileText, exact: false },
   { href: "/admin/contact", label: "Contact Queries", icon: Mail, exact: false },
   { href: "/admin/newsletter", label: "Newsletter", icon: Newspaper, exact: false },
-  { href: "/admin/gallery", label: "Gallery (#Wear)", icon: Instagram, exact: false },
+  { href: "/admin/gallery", label: "Gallery (#Wear)", icon: InstagramIcon, exact: false },
+  { href: "/admin/testimonials", label: "Testimonials", icon: Star, exact: false },
   { href: "/admin/settings", label: "Store Settings", icon: Settings, exact: false },
 ];
 
@@ -69,11 +71,11 @@ export function AdminSidebar() {
         onClick={() => setMobileOpen(false)}
         className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-bold transition-all group ${
           active
-            ? "bg-[#F9A37E]/15 text-[#F9A37E] border border-[#F9A37E]/20"
+            ? "bg-[#df794d]/15 text-[#df794d] border border-[#df794d]/20"
             : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
         }`}
       >
-        <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${active ? "text-[#F9A37E]" : "group-hover:text-white"}`} />
+        <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${active ? "text-[#df794d]" : "group-hover:text-white"}`} />
         <span className="flex-1 truncate">{item.label}</span>
         {active && <ChevronRight className="w-3 h-3 opacity-60 flex-shrink-0" />}
       </Link>
@@ -122,7 +124,7 @@ export function AdminSidebar() {
       {/* Admin user footer */}
       <div className="px-3 pb-5 pt-3 border-t border-zinc-800 flex-shrink-0">
         <div className="flex items-center gap-2.5 p-2 rounded-lg">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#A8C69F] to-[#7dab73] flex items-center justify-center font-black text-zinc-950 text-sm flex-shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#7e9677] to-[#7dab73] flex items-center justify-center font-black text-zinc-950 text-sm flex-shrink-0">
             {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : "A"}
           </div>
           <div className="flex-1 min-w-0">
@@ -180,13 +182,13 @@ export function AdminTopbar({ title, subtitle }: { title: string; subtitle?: str
       <div className="flex items-center gap-2">
         <Link
           href="/"
-          className="text-xs font-bold text-zinc-500 hover:text-[#F9A37E] py-1.5 px-3 rounded-lg border border-zinc-200 hover:border-[#F9A37E]/30 hover:bg-[#F9A37E]/5 flex items-center gap-1.5 transition-all"
+          className="text-xs font-bold text-zinc-500 hover:text-[#df794d] py-1.5 px-3 rounded-lg border border-zinc-200 hover:border-[#df794d]/30 hover:bg-[#df794d]/5 flex items-center gap-1.5 transition-all"
         >
           <Store className="w-3.5 h-3.5" /> Storefront
         </Link>
         <button className="relative p-2 hover:bg-zinc-50 rounded-lg text-zinc-400 hover:text-zinc-600 transition-colors">
           <Bell className="w-4.5 h-4.5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#F9A37E] rounded-full border-2 border-white" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#df794d] rounded-full border-2 border-white" />
         </button>
       </div>
     </header>

@@ -15,7 +15,7 @@ const INITIAL_CATEGORIES = [
   { id: "c5", name: "Mugs", count: 3, slug: "mugs", image: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=300&auto=format&fit=crop&q=80", status: "Inactive" },
 ];
 
-type Category = { id: string; name: string; count: number; slug: string; image: string; status: string };
+type Category = { id: string; name: string; count: number; slug: string; image: string; status: string; description?: string };
 
 function CategoryForm({ initial, onSave, onCancel }: {
   initial?: Partial<Category>;
@@ -25,6 +25,7 @@ function CategoryForm({ initial, onSave, onCancel }: {
   const fileRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(initial?.name || "");
   const [slug, setSlug] = useState(initial?.slug || "");
+  const [description, setDescription] = useState(initial?.description || "");
   const [count, setCount] = useState(String(initial?.count ?? ""));
   const [status, setStatus] = useState(initial?.status || "Active");
   const [preview, setPreview] = useState(initial?.image || "");
@@ -42,8 +43,8 @@ function CategoryForm({ initial, onSave, onCancel }: {
     if (!initial?.slug) setSlug(v.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""));
   };
 
-  const inputCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3.5 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] transition-all placeholder:text-zinc-400";
-  const selectCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 pl-3.5 pr-10 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer font-bold";
+  const inputCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3.5 text-xs text-zinc-800 outline-none focus:border-[#df794d] transition-all placeholder:text-zinc-400";
+  const selectCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 pl-3.5 pr-10 text-xs text-zinc-800 outline-none focus:border-[#df794d] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer font-bold";
 
   return (
     <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm space-y-5 max-w-full">
@@ -57,14 +58,14 @@ function CategoryForm({ initial, onSave, onCancel }: {
         <div className="space-y-2">
           <label className="block text-[9px] font-black uppercase text-zinc-500 tracking-widest">Category Image</label>
           {preview ? (
-            <div className="relative aspect-square rounded-lg overflow-hidden border-2 border-[#F9A37E]">
+            <div className="relative aspect-square rounded-lg overflow-hidden border-2 border-[#df794d]">
               <img src={preview} alt="" className="w-full h-full object-cover" />
               <button type="button" onClick={() => setPreview("")} className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow">
                 <X className="w-3.5 h-3.5 text-white" />
               </button>
             </div>
           ) : (
-            <button type="button" onClick={() => fileRef.current?.click()} className="w-full aspect-square border-2 border-dashed border-zinc-300 hover:border-[#F9A37E] rounded-lg flex flex-col items-center justify-center gap-1.5 text-zinc-400 hover:text-[#F9A37E] transition-all">
+            <button type="button" onClick={() => fileRef.current?.click()} className="w-full aspect-square border-2 border-dashed border-zinc-300 hover:border-[#df794d] rounded-lg flex flex-col items-center justify-center gap-1.5 text-zinc-400 hover:text-[#df794d] transition-all">
               <Upload className="w-6 h-6" />
               <span className="text-[9px] font-bold">Upload Image</span>
             </button>
@@ -80,10 +81,20 @@ function CategoryForm({ initial, onSave, onCancel }: {
           </div>
           <div>
             <label className="block text-[9px] font-black uppercase text-zinc-500 tracking-widest mb-1.5">URL Slug</label>
-            <div className="flex items-center border border-zinc-200 rounded-lg bg-zinc-50 overflow-hidden focus-within:border-[#F9A37E] transition-colors">
+            <div className="flex items-center border border-zinc-200 rounded-lg bg-zinc-50 overflow-hidden focus-within:border-[#df794d] transition-colors">
               <span className="px-3 py-2.5 text-[10px] font-bold text-zinc-400 bg-zinc-100 border-r border-zinc-200">/categories/</span>
               <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="activewear" className="flex-1 py-2.5 px-3 text-xs text-zinc-800 outline-none bg-transparent" />
             </div>
+          </div>
+          <div>
+            <label className="block text-[9px] font-black uppercase text-zinc-500 tracking-widest mb-1.5">Description</label>
+            <textarea
+              rows={2}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Brief summary of this category..."
+              className={inputCls + " resize-none"}
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -114,12 +125,13 @@ function CategoryForm({ initial, onSave, onCancel }: {
             onSave({
               name: name.trim(),
               slug: slug || name.toLowerCase().replace(/\s+/g, "-"),
+              description: description.trim(),
               count: parseInt(count) || 0,
               image: preview || "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=300&auto=format&fit=crop&q=80",
               status,
             });
           }}
-          className="flex-1 flex items-center justify-center gap-2 bg-[#F9A37E] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-4 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20"
+          className="flex-1 flex items-center justify-center gap-2 bg-[#df794d] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-4 rounded-lg transition-all shadow-md shadow-[#df794d]/20"
         >
           <Save className="w-3.5 h-3.5" /> Save Category
         </button>
@@ -253,7 +265,7 @@ export default function AdminCategoriesPage() {
       <div className="flex flex-col h-full overflow-hidden">
         <AdminTopbar title="Categories" subtitle={mode === "add" ? "Add new category" : `Edit: ${editTarget?.name}`} />
         <main className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-4">
-          <button onClick={() => { setMode("table"); setEditTarget(null); }} className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-[#F9A37E] transition-colors">
+          <button onClick={() => { setMode("table"); setEditTarget(null); }} className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-[#df794d] transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Categories
           </button>
           <CategoryForm
@@ -280,12 +292,12 @@ export default function AdminCategoriesPage() {
               placeholder="Search categories..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#F9A37E] transition-colors text-zinc-700 placeholder:text-zinc-400"
+              className="w-full pl-9 pr-4 py-2.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg outline-none focus:border-[#df794d] transition-colors text-zinc-700 placeholder:text-zinc-400"
             />
           </div>
           <button
             onClick={() => { setEditTarget(null); setMode("add"); }}
-            className="flex items-center gap-2 bg-[#F9A37E] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20 whitespace-nowrap"
+            className="flex items-center gap-2 bg-[#df794d] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg transition-all shadow-md shadow-[#df794d]/20 whitespace-nowrap"
           >
             <Plus className="w-4 h-4" /> Add Category
           </button>
@@ -358,7 +370,7 @@ export default function AdminCategoriesPage() {
                       <div className="flex gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => { setEditTarget(c); setMode("edit"); }}
-                          className="p-1.5 border border-zinc-200 hover:border-[#F9A37E]/40 hover:bg-[#F9A37E]/5 hover:text-[#F9A37E] text-zinc-400 rounded-lg transition-all"
+                          className="p-1.5 border border-zinc-200 hover:border-[#df794d]/40 hover:bg-[#df794d]/5 hover:text-[#df794d] text-zinc-400 rounded-lg transition-all"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>

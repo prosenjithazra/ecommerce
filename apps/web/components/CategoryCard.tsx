@@ -18,8 +18,11 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ name, image, count, 
       <div className="relative block aspect-[4/3] rounded-lg overflow-hidden bg-[#E8E2D6] shadow-sm border border-[#E8E2D6] skeleton-shimmer" />
     );
   }
+  const displayCount = typeof count === 'number' && !isNaN(count) ? count : 0;
+  const countLabel = `${displayCount} ${displayCount === 1 ? 'Product' : 'Products'}`;
+
   return (
-    <Link href={href} className="group relative block aspect-[4/3] rounded-lg overflow-hidden bg-[#E8E2D6] shadow-sm border border-[#E8E2D6]">
+    <Link href={href} className="group relative block aspect-[10/9] sm:aspect-[4/3] rounded-lg overflow-hidden bg-[#E8E2D6] shadow-sm border border-[#E8E2D6]">
       <img
         src={image}
         alt={name}
@@ -28,10 +31,10 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ name, image, count, 
         loading="lazy"
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 p-2 md:p-4">
-        <span className="text-[9px] uppercase font-extrabold tracking-widest text-[#F9A37E]">
-          {count} Products
+        <span className="text-[9px] uppercase font-extrabold tracking-widest text-[#f9a37e]">
+          {countLabel}
         </span>
         <h3 className="font-extrabold text-sm sm:text-base text-white mt-0.5 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
           {name}

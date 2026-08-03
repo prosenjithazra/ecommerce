@@ -10,7 +10,7 @@ export async function qikinkRequest(
   options: RequestInit = {}
 ): Promise<Response> {
   const clientId = process.env.QIKINK_CLIENT_ID;
-  const baseUrl = process.env.QIKINK_SANDBOX_BASE_URL || process.env.QIKINK_API_URL || 'https://sandbox.qikink.com';
+  const baseUrl = process.env.QIKINK_API_URL || process.env.QIKINK_SANDBOX_BASE_URL || 'https://api.qikink.com';
 
   if (!clientId) {
     throw new Error('Missing QIKINK_CLIENT_ID in environment variables.');
@@ -23,18 +23,32 @@ export async function qikinkRequest(
   
   const headers = {
     'Content-Type': 'application/json',
-    ...options.headers,
+    'Authorization': `Bearer ${token}`,
     [QIKINK_HEADERS.CLIENT_ID]: clientId,
     [QIKINK_HEADERS.ACCESS_TOKEN]: token,
+    ...options.headers,
   };
 
   let attempt = 0;
   const maxRetries = 3;
   const backoffMs = 1000;
+  let activeToken = token;
 
   while (attempt < maxRetries) {
     try {
-      const response = await fetch(url, { ...options, headers });
+      const currentHeaders = {
+        ...headers,
+        [QIKINK_HEADERS.ACCESS_TOKEN]: activeToken,
+      };
+      const response = await fetch(url, { ...options, headers: currentHeaders });
+      
+      // Auto-refresh token on 401 Unauthorized
+      if (response.status === 401 && attempt < maxRetries - 1) {
+        console.warn('Qikink request returned 401 Unauthorized. Refreshing token...');
+        activeToken = await getAccessToken(true);
+        attempt++;
+        continue;
+      }
       
       // Auto-retry on rate limits (429) and server errors (5xx)
       if (response.status >= 500 || response.status === 429) {

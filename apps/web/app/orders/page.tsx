@@ -133,7 +133,7 @@ export default function OrdersPage() {
               onClick={() => setStatusFilter(status)}
               className={`text-[10px] sm:text-xs font-extrabold py-1.5 sm:py-2 px-2.5 sm:px-4 rounded-lg border transition-all ${
                 statusFilter === status
-                  ? 'bg-[#A8C69F] border-[#A8C69F] text-white shadow-md shadow-[#A8C69F]/20'
+                  ? 'bg-[#7e9677] border-[#7e9677] text-white shadow-md shadow-[#7e9677]/20'
                   : 'bg-transparent text-[#7A736A] border-[#E8E2D6] hover:border-[#A89B8A]'
               }`}
             >
@@ -147,7 +147,7 @@ export default function OrdersPage() {
           <input
             type="text" placeholder="Search orders..."
             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg py-2 pl-9 pr-3 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E]"
+            className="w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg py-2 pl-9 pr-3 text-xs outline-none focus:border-[#df794d] text-[#4A453E]"
           />
         </div>
       </div>
@@ -158,7 +158,7 @@ export default function OrdersPage() {
           description="You haven't placed any print orders matching this query."
           actionText="Browse Products"
           actionHref="/products"
-          icon={<ShoppingBag className="w-8 h-8 text-[#A8C69F]" />}
+          icon={<ShoppingBag className="w-8 h-8 text-[#7e9677]" />}
         />
       ) : (
         <div className="grid grid-cols-1 gap-4">

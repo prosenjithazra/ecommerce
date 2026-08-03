@@ -18,7 +18,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         title: product.name,
         description: product.description || `Order ${product.name} on Kliamo Fashion. Premium print quality with zero minimums.`,
         path: `/products/${slug}`,
-        ogType: 'product',
         ogImage: product.image,
         keywords: [product.name, product.category, 'custom printed apparel', 'Kliamo Fashion'],
       });

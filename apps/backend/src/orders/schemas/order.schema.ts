@@ -44,6 +44,12 @@ export class Order {
   @Prop({ default: null })
   returnReason: string;
 
+  @Prop({ default: null })
+  qikinkOrderId: string;
+
+  @Prop({ default: null })
+  qikinkStatus: string;
+
   @Prop()
   createdAt?: Date;
 
@@ -52,3 +58,6 @@ export class Order {
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
+
+OrderSchema.index({ email: 1, createdAt: -1 });
+OrderSchema.index({ status: 1 });

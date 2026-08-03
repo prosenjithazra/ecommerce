@@ -58,7 +58,7 @@ export default function RootLayout({
                   "name": "Kliamo Fashion",
                   "url": baseUrl,
                   "logo": `${baseUrl}/kliamologoNew.png`,
-                  "email": "support@kliamofashion.com",
+                  "email": "contact@kliamo.com",
                   "sameAs": [
                     "https://twitter.com/kliamofashion",
                     "https://instagram.com/kliamofashion",

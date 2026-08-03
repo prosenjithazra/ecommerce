@@ -33,7 +33,7 @@ function GalleryForm({ initial, onSave, onCancel }: {
     r.readAsDataURL(f);
   };
 
-  const inputCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3.5 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] transition-all placeholder:text-zinc-400";
+  const inputCls = "w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 px-3.5 text-xs text-zinc-800 outline-none focus:border-[#df794d] transition-all placeholder:text-zinc-400";
   const labelCls = "block text-[9px] font-black uppercase text-zinc-500 tracking-widest mb-1.5";
 
   return (
@@ -59,7 +59,7 @@ function GalleryForm({ initial, onSave, onCancel }: {
               </button>
             </div>
           ) : (
-            <button type="button" onClick={() => fileRef.current?.click()} className="w-full h-32 border-2 border-dashed border-zinc-300 hover:border-[#F9A37E] rounded-lg flex flex-col items-center justify-center gap-1.5 text-zinc-400 hover:text-[#F9A37E] transition-all bg-zinc-50">
+            <button type="button" onClick={() => fileRef.current?.click()} className="w-full h-32 border-2 border-dashed border-zinc-300 hover:border-[#df794d] rounded-lg flex flex-col items-center justify-center gap-1.5 text-zinc-400 hover:text-[#df794d] transition-all bg-zinc-50">
               <Upload className="w-5 h-5" />
               <span className="text-[10px] font-bold">Select & Upload Image</span>
             </button>
@@ -79,7 +79,7 @@ function GalleryForm({ initial, onSave, onCancel }: {
               <select
                 value={mediaType}
                 onChange={(e) => setMediaType(e.target.value)}
-                className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 pl-3.5 pr-10 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer font-bold"
+                className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 pl-3.5 pr-10 text-xs text-zinc-800 outline-none focus:border-[#df794d] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer font-bold"
               >
                 <option value="image">Image Post</option>
                 <option value="video">Video Reel / YouTube</option>
@@ -92,7 +92,7 @@ function GalleryForm({ initial, onSave, onCancel }: {
               <select
                 value={isActive ? "true" : "false"}
                 onChange={(e) => setIsActive(e.target.value === "true")}
-                className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 pl-3.5 pr-10 text-xs text-zinc-800 outline-none focus:border-[#F9A37E] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer font-bold"
+                className="w-full bg-zinc-50 border border-zinc-200 rounded-lg py-2.5 pl-3.5 pr-10 text-xs text-zinc-800 outline-none focus:border-[#df794d] transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2371717A%22%20stroke-width%3D%221.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:1.1rem_1.1rem] bg-[right_0.5rem_center] bg-no-repeat cursor-pointer font-bold"
               >
                 <option value="true">Active (Show)</option>
                 <option value="false">Inactive (Hide)</option>
@@ -117,7 +117,7 @@ function GalleryForm({ initial, onSave, onCancel }: {
               isActive,
             });
           }}
-          className="flex items-center gap-1.5 bg-[#F9A37E] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20"
+          className="flex items-center gap-1.5 bg-[#df794d] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all shadow-md shadow-[#df794d]/20"
         >
           <Save className="w-4 h-4" /> Save Item
         </button>
@@ -264,7 +264,7 @@ export default function AdminGalleryPage() {
       <div className="flex flex-col h-full overflow-hidden">
         <AdminTopbar title="Social Gallery" subtitle={mode === "add" ? "Link new Instagram / YouTube media" : `Edit gallery item details`} />
         <main className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-4">
-          <button onClick={() => { setMode("table"); setEditTarget(null); }} className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-505 hover:text-[#F9A37E] transition-colors">
+          <button onClick={() => { setMode("table"); setEditTarget(null); }} className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-505 hover:text-[#df794d] transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to List
           </button>
           <GalleryForm
@@ -285,7 +285,7 @@ export default function AdminGalleryPage() {
         <div className="flex justify-end">
           <button
             onClick={() => { setEditTarget(null); setMode("add"); }}
-            className="flex items-center gap-2 bg-[#F9A37E] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg transition-all shadow-md shadow-[#F9A37E]/20"
+            className="flex items-center gap-2 bg-[#df794d] hover:bg-[#e8855a] text-white font-extrabold text-xs py-2.5 px-5 rounded-lg transition-all shadow-md shadow-[#df794d]/20"
           >
             <Plus className="w-4 h-4" /> Add Gallery Item
           </button>
@@ -329,7 +329,7 @@ export default function AdminGalleryPage() {
                     </td>
                     <td className="py-3.5 px-4 max-w-xs">
                       {item.link ? (
-                        <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-zinc-600 font-medium hover:text-[#F9A37E] flex items-center gap-1 transition-colors">
+                        <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-zinc-600 font-medium hover:text-[#df794d] flex items-center gap-1 transition-colors">
                           <Link2 className="w-3.5 h-3.5 text-zinc-400" />
                           <span className="truncate">{item.link}</span>
                         </a>
@@ -354,7 +354,7 @@ export default function AdminGalleryPage() {
                       <div className="flex gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => { setEditTarget(item); setMode("edit"); }}
-                          className="p-1.5 border border-zinc-200 hover:border-[#F9A37E]/40 hover:bg-[#F9A37E]/5 hover:text-[#F9A37E] text-zinc-400 rounded-lg transition-all"
+                          className="p-1.5 border border-zinc-200 hover:border-[#df794d]/40 hover:bg-[#df794d]/5 hover:text-[#df794d] text-zinc-400 rounded-lg transition-all"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>

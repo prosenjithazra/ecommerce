@@ -70,7 +70,7 @@ export default function TrackOrderPage() {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-32 flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-8 h-8 text-[#F9A37E] animate-spin" />
+        <Loader2 className="w-8 h-8 text-[#df794d] animate-spin" />
         <p className="text-xs text-zinc-450 font-bold">Loading tracking information...</p>
       </div>
     );
@@ -80,7 +80,7 @@ export default function TrackOrderPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center space-y-4">
         <h2 className="text-xl font-bold">Order not found</h2>
-        <Link href="/profile" className="text-[#F9A37E] hover:text-[#e8855a] font-bold hover:underline">Back to Profile</Link>
+        <Link href="/profile" className="text-[#df794d] hover:text-[#e8855a] font-bold hover:underline">Back to Profile</Link>
       </div>
     );
   }
@@ -108,7 +108,7 @@ export default function TrackOrderPage() {
       <Breadcrumb items={[{ name: "My Profile", href: "/profile" }, { name: `Order ${order.id}`, href: `/orders/${order.id}` }, { name: "Track" }]} />
 
       <div className="space-y-1">
-        <span className="text-[10px] font-extrabold text-[#F9A37E] uppercase tracking-wider flex items-center gap-1">
+        <span className="text-[10px] font-extrabold text-[#df794d] uppercase tracking-wider flex items-center gap-1">
           <Truck className="w-3.5 h-3.5" /> Courier: Standard Express Partner
         </span>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
@@ -166,7 +166,7 @@ export default function TrackOrderPage() {
 
       {/* Delivery Summary destination */}
       <div className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-150 dark:border-zinc-800 rounded-lg p-3 sm:p-4 sm:p-6 flex gap-3 sm:gap-4 items-start">
-        <MapPin className="w-6 h-6 text-[#F9A37E] mt-0.5 flex-shrink-0" />
+        <MapPin className="w-6 h-6 text-[#df794d] mt-0.5 flex-shrink-0" />
         <div className="text-xs space-y-1">
           <span className="font-extrabold text-zinc-900 dark:text-white block">Delivery Destination</span>
           <p className="text-zinc-800 dark:text-zinc-200 font-bold">{customerName}</p>

@@ -7,6 +7,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Cart, CartDocument } from './schemas/cart.schema';
+import { Product, ProductDocument } from '../products/schemas/product.schema';
 import * as crypto from 'crypto';
 
 const MAX_UNIQUE_ITEMS = 20; // max different products/designs per cart
@@ -17,10 +18,49 @@ export class CartService implements OnModuleInit {
   constructor(
     @InjectModel(Cart.name)
     private readonly cartModel: Model<CartDocument>,
+    @InjectModel(Product.name)
+    private readonly productModel: Model<ProductDocument>,
   ) {}
 
   async onModuleInit() {
     // No seeding needed
+  }
+
+  private async filterValidCartItems(items: any[]): Promise<any[]> {
+    if (!items || items.length === 0) return [];
+    const productIdsToCheck = Array.from(
+      new Set(
+        items
+          .map((i) => i.productId)
+          .filter(
+            (id) => id && id !== 'custom' && id !== 'standard' && !id.startsWith('p-custom-'),
+          ),
+      ),
+    );
+    if (productIdsToCheck.length === 0) return items;
+
+    const existingProducts = await this.productModel
+      .find({
+        $or: [
+          { id: { $in: productIdsToCheck } },
+          { slug: { $in: productIdsToCheck } },
+        ],
+      })
+      .select('id slug')
+      .lean();
+
+    const validIdSet = new Set<string>();
+    existingProducts.forEach((p) => {
+      if (p.id) validIdSet.add(p.id);
+      if (p.slug) validIdSet.add(p.slug);
+    });
+
+    return items.filter((item) => {
+      if (item.customDesign || item.productId === 'custom' || item.productId === 'standard' || item.productId?.startsWith('p-custom-')) {
+        return true;
+      }
+      return validIdSet.has(item.productId);
+    });
   }
 
   async getCart(userId: string): Promise<Cart> {
@@ -29,8 +69,19 @@ export class CartService implements OnModuleInit {
       const now = new Date();
       cart = new this.cartModel({ userId, items: [], createdAt: now, updatedAt: now });
       await cart.save();
+      return cart.toObject() as unknown as Cart;
     }
-    return cart;
+
+    const originalCount = cart.items.length;
+    const validItems = await this.filterValidCartItems(cart.items);
+
+    if (validItems.length !== originalCount) {
+      cart.items = validItems;
+      cart.updatedAt = new Date();
+      await cart.save();
+    }
+
+    return cart.toObject() as unknown as Cart;
   }
 
   async addItem(
@@ -52,6 +103,17 @@ export class CartService implements OnModuleInit {
       throw new BadRequestException(
         `Quantity must be between 1 and ${MAX_QTY_PER_ITEM}.`,
       );
+    }
+
+    // Verify underlying product exists in database (unless custom design)
+    if (!data.customDesign && data.productId && data.productId !== 'custom' && data.productId !== 'standard') {
+      const exists = await this.productModel.findOne({
+        $or: [{ id: data.productId }, { slug: data.productId }],
+      }).select('id').lean();
+
+      if (!exists) {
+        throw new NotFoundException('Product no longer exists in store database.');
+      }
     }
 
     let cart = await this.cartModel.findOne({ userId });

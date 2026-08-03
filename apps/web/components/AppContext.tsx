@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { getApiUrl } from './ApiConfig';
 import { useRouter } from 'next/navigation';
 
@@ -36,6 +36,7 @@ export interface CustomDesign {
 export interface CartItem {
   id: string;
   productId: string;
+  slug?: string;
   name: string;
   price: number;
   quantity: number;
@@ -61,6 +62,10 @@ export interface Product {
   sizes: string[];
   inStock: boolean;
   slug?: string;
+  sku?: string;
+  skuMapping?: Record<string, string>;
+  homeSection?: string[];
+  targetGender?: 'Men' | 'Women' | 'Both' | string;
 }
 
 export interface Address {
@@ -129,6 +134,14 @@ export interface ToastMessage {
   type: 'success' | 'error' | 'info';
 }
 
+export interface AppliedCoupon {
+  code: string;
+  discountAmount: number;
+  discountType?: 'percentage' | 'fixed';
+  discountValue?: number;
+  message?: string;
+}
+
 interface AppContextType {
   cart: CartItem[];
   wishlist: Product[];
@@ -140,6 +153,10 @@ interface AppContextType {
   searchQuery: string;
   isDarkMode: boolean;
   currentUser: { name: string; email: string; phone?: string; id?: string; role?: string; avatar?: string; preferences?: any } | null;
+  authToken: string | null;
+  appliedCoupon: AppliedCoupon | null;
+  applyCoupon: (code: string, amount: number) => Promise<{ success: boolean; message?: string }>;
+  removeCoupon: () => void;
   setSearchQuery: (q: string) => void;
   toggleDarkMode: () => void; // kept for backward compat, no-op
   showToast: (title: string, message: string, type?: 'success' | 'error' | 'info') => void;
@@ -170,6 +187,7 @@ interface AppContextType {
     address: string;
     hours: string;
     twitterUrl: string;
+    youtubeUrl: string;
     instagramUrl: string;
     facebookUrl: string;
     customTshirtPrice: number;
@@ -178,6 +196,7 @@ interface AppContextType {
   };
   settingsLoading: boolean;
   profileLoading: boolean;
+  cartLoading: boolean;
   settingsResponseTime: number | null;
   updateCompanySettings: (data: any) => Promise<boolean>;
 }
@@ -249,7 +268,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const isDarkMode = false; // dark mode removed
   const toggleDarkMode = () => {}; // no-op kept for backward compat
   const [currentUser, setCurrentUser] = useState<{ name: string; email: string; phone?: string; id?: string; role?: string; avatar?: string; preferences?: any } | null>(null);
-  const [profileLoading, setProfileLoading] = useState(false);
+  const [authToken, setAuthToken] = useState<string | null>(
+    typeof window !== 'undefined' ? localStorage.getItem('token') : null
+  );
+  const [profileLoading, setProfileLoading] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return !!localStorage.getItem('token');
+    }
+    return false;
+  });
+
+  const [cartLoading, setCartLoading] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return !!localStorage.getItem('token');
+    }
+    return false;
+  });
+
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsResponseTime, setSettingsResponseTime] = useState<number | null>(null);
   const [companySettings, setCompanySettings] = useState({
@@ -258,6 +293,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     address: '123 Creative St, New York, NY 10001',
     hours: 'Mon - Fri, 9am - 6pm EST',
     twitterUrl: 'https://twitter.com/kliamo',
+    youtubeUrl: 'https://youtube.com/@kliamo',
     instagramUrl: 'https://instagram.com/kliamo',
     facebookUrl: 'https://facebook.com/kliamo',
     customTshirtPrice: 599,
@@ -265,10 +301,104 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     customShirtPrice: 999,
   });
 
+  const [appliedCoupon, setAppliedCouponState] = useState<AppliedCoupon | null>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = sessionStorage.getItem('applied_coupon');
+      if (stored) {
+        try { return JSON.parse(stored); } catch {}
+      }
+    }
+    return null;
+  });
+
+  const setAppliedCoupon = useCallback((coupon: AppliedCoupon | null) => {
+    setAppliedCouponState(coupon);
+    if (typeof window !== 'undefined') {
+      if (coupon) {
+        sessionStorage.setItem('applied_coupon', JSON.stringify(coupon));
+      } else {
+        sessionStorage.removeItem('applied_coupon');
+      }
+    }
+  }, []);
+
+  const removeCoupon = useCallback(() => {
+    setAppliedCoupon(null);
+  }, [setAppliedCoupon]);
+
+  const applyCoupon = useCallback(async (code: string, amount: number) => {
+    if (!code || !code.trim()) {
+      return { success: false, message: 'Please enter a coupon code.' };
+    }
+    try {
+      const res = await fetch(getApiUrl('/coupons/validate'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: code.trim(),
+          amount: amount,
+          userEmail: currentUser?.email,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { success: false, message: data.message || 'Invalid coupon code.' };
+      }
+      const newCoupon: AppliedCoupon = {
+        code: data.coupon.code,
+        discountAmount: data.discountAmount,
+        discountType: data.coupon.discountType,
+        discountValue: data.coupon.discountValue,
+        message: data.message,
+      };
+      setAppliedCoupon(newCoupon);
+      return { success: true, message: data.message };
+    } catch (err: any) {
+      return { success: false, message: 'Could not connect to coupon validation service.' };
+    }
+  }, [currentUser?.email, setAppliedCoupon]);
+
+  // Auto re-validate applied coupon whenever cart subtotal changes
+  const cartSubtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    if (!appliedCoupon?.code || profileLoading || cartLoading) return;
+    if (cartSubtotal <= 0) {
+      if (cart.length === 0) {
+        setAppliedCoupon(null);
+      }
+      return;
+    }
+    fetch(getApiUrl('/coupons/validate'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: appliedCoupon.code,
+        amount: cartSubtotal,
+        userEmail: currentUser?.email,
+      }),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data) {
+          setAppliedCoupon(null);
+          return;
+        }
+        setAppliedCoupon({
+          code: data.coupon.code,
+          discountAmount: data.discountAmount,
+          discountType: data.coupon.discountType,
+          discountValue: data.coupon.discountValue,
+          message: data.message,
+        });
+      })
+      .catch(() => {});
+  }, [cartSubtotal, currentUser?.email, appliedCoupon?.code, profileLoading, cartLoading, cart.length, setAppliedCoupon]);
+
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
     if (token) {
       setProfileLoading(true);
+      setCartLoading(true);
       fetch(getApiUrl("/user/profile"), {
         headers: {
           Authorization: `Bearer ${token}`
@@ -300,6 +430,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const items: CartItem[] = (data.items || []).map((i: any) => ({
               id: i.cartItemId || i.productId,
               productId: i.productId,
+              slug: i.slug || undefined,
               name: i.name,
               price: Number(i.price) || 0,
               quantity: Number(i.quantity) || 1,
@@ -310,7 +441,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }));
             setCart(items);
           })
-          .catch(() => {});
+          .catch(() => {})
+          .finally(() => setCartLoading(false));
         // Fetch persisted wishlist from backend
         fetch(getApiUrl('/wishlist'), { headers: { Authorization: `Bearer ${token}` } })
           .then(r => r.ok ? r.json() : null)
@@ -339,7 +471,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         localStorage.removeItem("token");
         setCurrentUser(null);
         setProfileLoading(false);
+        setCartLoading(false);
       });
+    } else {
+      setProfileLoading(false);
+      setCartLoading(false);
     }
 
     // Load global settings
@@ -377,6 +513,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const items: CartItem[] = (data.items || []).map((i: any) => ({
         id: i.cartItemId || i.productId,
         productId: i.productId,
+        slug: i.slug || undefined,
         name: i.name,
         price: Number(i.price) || 0,
         quantity: Number(i.quantity) || 1,
@@ -476,6 +613,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           productId: item.productId,
+          slug: item.slug,
           name: item.name,
           image: item.image,
           price: item.price,
@@ -493,6 +631,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const items: CartItem[] = (data.items || []).map((i: any) => ({
         id: i.cartItemId || i.productId,
         productId: i.productId,
+        slug: i.slug || undefined,
         name: i.name,
         price: Number(i.price) || 0,
         quantity: Number(i.quantity) || 1,
@@ -541,38 +680,56 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const updateCartQty = async (id: string, qty: number) => {
+  // Debounce timer refs for cart quantity updates (one timer per cart item id)
+  const updateQtyTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  const updateCartQty = useCallback(async (id: string, qty: number) => {
     if (qty <= 0) { removeFromCart(id); return; }
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     if (!token) return;
-    try {
-      const res = await fetch(getApiUrl(`/cart/item/${id}`), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ quantity: qty }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        showToast('Error', data.message || 'Failed to update quantity.', 'error');
-        return;
-      }
-      const data = await res.json();
-      const items: CartItem[] = (data.items || []).map((i: any) => ({
-        id: i.cartItemId || i.productId,
-        productId: i.productId,
-        name: i.name,
-        price: Number(i.price) || 0,
-        quantity: Number(i.quantity) || 1,
-        image: i.image || '',
-        size: i.size || '',
-        color: i.color || '',
-        customDesign: i.customDesign,
-      }));
-      setCart(items);
-    } catch (err) {
-      showToast('Error', 'Could not connect to cart server.', 'error');
+
+    // Optimistic local update — instant UI feedback
+    setCart(prev => prev.map(item => item.id === id ? { ...item, quantity: qty } : item));
+
+    // Cancel any pending debounce for this item
+    if (updateQtyTimers.current[id]) {
+      clearTimeout(updateQtyTimers.current[id]);
     }
-  };
+
+    // Debounce the actual API call by 600ms
+    updateQtyTimers.current[id] = setTimeout(async () => {
+      try {
+        const res = await fetch(getApiUrl(`/cart/item/${id}`), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ quantity: qty }),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          showToast('Error', data.message || 'Failed to update quantity.', 'error');
+          return;
+        }
+        const data = await res.json();
+        const items: CartItem[] = (data.items || []).map((i: any) => ({
+          id: i.cartItemId || i.productId,
+          productId: i.productId,
+          name: i.name,
+          price: Number(i.price) || 0,
+          quantity: Number(i.quantity) || 1,
+          image: i.image || '',
+          size: i.size || '',
+          color: i.color || '',
+          customDesign: i.customDesign,
+        }));
+        setCart(items);
+      } catch {
+        showToast('Error', 'Could not connect to cart server.', 'error');
+      } finally {
+        delete updateQtyTimers.current[id];
+      }
+    }, 600);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const clearCart = async () => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -713,9 +870,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       color: c.color
     }));
     const subtotal = cart.reduce((acc, c) => acc + c.price * c.quantity, 0);
-    const tax = subtotal * 0.18;
-    const shipping = subtotal > 50 ? 0 : 5.99;
-    const total = subtotal + tax + shipping;
+    const tax = subtotal * 0.05;
+    const shipping = subtotal > 999 ? 0 : 49;
+    const discount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+    const total = Math.max(0, subtotal + tax + shipping - discount);
 
     const newOrder: Order = {
       id: orderId,
@@ -764,6 +922,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         total: total,
         status: "Pending",
         itemsJson: cart,
+        shippingAddress: address,
         paymentMethod: paymentMethod,
         paymentId: paymentId || null,
         paymentStatus: paymentStatus || "Pending"
@@ -795,16 +954,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       })
     })
     .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        showToast("Partner Synced", `Order successfully submitted to Qikink.`, "success");
-      } else {
-        console.warn('Qikink submission warning:', data.error || data.qikinkResponse);
-        showToast("Sync Pending", "Order placed locally. Sync with print partner pending credentials.", "info");
-      }
+    .then(() => {
+      showToast("Order Confirmed", `Your order ${orderId} has been successfully placed!`, "success");
     })
-    .catch(err => {
-      console.error('Qikink connection failed:', err);
+    .catch(() => {
+      showToast("Order Confirmed", `Your order ${orderId} has been successfully placed!`, "success");
     });
 
     clearCart();
@@ -856,6 +1010,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem('token');
     localStorage.removeItem('wishlist');
     setCurrentUser(null);
+    setAuthToken(null);
+    setAddresses([]);
     setCart([]);
     setWishlist([]); // clear local state — wishlist stays in MongoDB for next login
     showToast('Logged Out', 'You have been logged out of your account.', 'info');
@@ -875,6 +1031,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return { success: false, error: errorMsg };
       }
       localStorage.setItem('token', data.token);
+      setAuthToken(data.token);
       setCurrentUser({
         id: data.user.id,
         name: data.user.name,
@@ -883,6 +1040,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         avatar: data.user.avatar,
         phone: data.user.phone || ''
       });
+      if (data.user.addresses && Array.isArray(data.user.addresses)) {
+        setAddresses(data.user.addresses);
+      }
+      // Re-fetch user profile from backend to ensure all addresses & profile data are 100% in sync
+      fetch(getApiUrl("/user/profile"), {
+        headers: { Authorization: `Bearer ${data.token}` }
+      })
+        .then(r => r.ok ? r.json() : null)
+        .then(prof => {
+          if (prof && Array.isArray(prof.addresses)) {
+            setAddresses(prof.addresses);
+          }
+        })
+        .catch(() => {});
+
       // Restore cart from backend after login
       fetch(getApiUrl('/cart'), { headers: { Authorization: `Bearer ${data.token}` } })
         .then(r => r.ok ? r.json() : null)
@@ -970,6 +1142,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return false;
       }
       localStorage.setItem("token", data.token);
+      setAuthToken(data.token);
       setCurrentUser({
         id: data.user.id,
         name: data.user.name,
@@ -978,6 +1151,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         avatar: data.user.avatar,
         phone: data.user.phone || ''
       });
+      if (data.user.addresses && Array.isArray(data.user.addresses)) {
+        setAddresses(data.user.addresses);
+      }
+      // Re-fetch user profile from backend to ensure all addresses & profile data are 100% in sync
+      fetch(getApiUrl("/user/profile"), {
+        headers: { Authorization: `Bearer ${data.token}` }
+      })
+        .then(r => r.ok ? r.json() : null)
+        .then(prof => {
+          if (prof && Array.isArray(prof.addresses)) {
+            setAddresses(prof.addresses);
+          }
+        })
+        .catch(() => {});
+
       showToast("Welcome to KLIAMO!", `Signed in with Google as ${data.user.email}`, "success");
       return true;
     } catch (err) {
@@ -1084,6 +1272,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       searchQuery,
       isDarkMode,
       currentUser,
+      authToken,
+      appliedCoupon,
+      applyCoupon,
+      removeCoupon,
       setSearchQuery,
       toggleDarkMode,
       showToast,
@@ -1111,6 +1303,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       companySettings,
       settingsLoading,
       profileLoading,
+      cartLoading,
       settingsResponseTime,
       updateCompanySettings
     }}>

@@ -32,22 +32,20 @@ export class CouponsService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    // Seed default coupons if empty
-    try {
-      const count = await this.couponModel.countDocuments();
-      if (count === 0) {
-        const now = new Date();
-        for (const item of INITIAL_COUPONS) {
-          await this.couponModel.create({
+    setImmediate(async () => {
+      try {
+        const count = await this.couponModel.countDocuments();
+        if (count === 0) {
+          const now = new Date();
+          const items = INITIAL_COUPONS.map((item) => ({
             ...item,
             createdAt: now,
             updatedAt: now,
-          });
+          }));
+          await this.couponModel.insertMany(items);
         }
-      }
-    } catch (err) {
-      console.error('Failed to seed initial coupons:', err);
-    }
+      } catch (err) {}
+    });
   }
 
   async findAll(userEmail?: string): Promise<Coupon[]> {
@@ -62,9 +60,10 @@ export class CouponsService implements OnModuleInit {
             { assignedUserEmail: cleanEmail },
           ],
         })
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .lean();
     }
-    return this.couponModel.find().sort({ createdAt: -1 });
+    return this.couponModel.find().sort({ createdAt: -1 }).lean();
   }
 
   async findOne(id: string): Promise<Coupon> {

@@ -98,12 +98,12 @@ export const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ childre
             <div className="relative flex items-center justify-center w-48 h-48">
               {/* Outer Clockwise Ring */}
               <div 
-                className="absolute inset-0 rounded-full border-[3px] border-t-[#F9A37E] border-r-transparent border-b-[#F9A37E] border-l-transparent animate-spin" 
+                className="absolute inset-0 rounded-full border-[3px] border-t-[#df794d] border-r-transparent border-b-[#df794d] border-l-transparent animate-spin" 
                 style={{ animationDuration: '1.6s' }} 
               />
               {/* Inner Anticlockwise Ring */}
               <div 
-                className="absolute inset-3 rounded-full border-[3px] border-t-transparent border-r-[#A8C69F] border-b-transparent border-l-[#A8C69F] animate-spin-reverse" 
+                className="absolute inset-3 rounded-full border-[3px] border-t-transparent border-r-[#7e9677] border-b-transparent border-l-[#7e9677] animate-spin-reverse" 
                 style={{ animationDuration: '1.2s' }} 
               />
               <img 

@@ -13,9 +13,16 @@ export async function GET(request: Request) {
       token = await getAccessToken();
     }
 
+    const clientId = process.env.QIKINK_CLIENT_ID || '';
+    const apiUrl = process.env.QIKINK_API_URL || process.env.QIKINK_SANDBOX_BASE_URL || 'https://api.qikink.com';
+
     return NextResponse.json({
       success: true,
+      ClientId: clientId,
+      Accesstoken: token,
       access_token: token,
+      apiUrl,
+      expires_in: 3600,
     });
   } catch (error: any) {
     console.error('Qikink Auth API Route Error:', error);
@@ -24,4 +31,8 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
+}
+
+export async function POST(request: Request) {
+  return GET(request);
 }

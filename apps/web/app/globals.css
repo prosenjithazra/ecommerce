@@ -6,8 +6,8 @@
 
 @layer base {
   :root {
-    --brand-peach:       #F9A37E;
-    --brand-sage:        #A8C69F;
+    --brand-peach:       #df794d;
+    --brand-sage:        #7e9677;
     --brand-cream:       #E8E2D6;
     --brand-brown:       #4A453E;
     --brand-peach-light: #FBD5C1;
@@ -47,7 +47,7 @@
 @layer components {
   /* Primary button - Peach */
   .btn-primary {
-    @apply bg-[#F9A37E] hover:bg-[#E8855A] text-white font-bold text-xs py-3 px-6 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95;
+    @apply bg-[#df794d] hover:bg-[#E8855A] text-white font-bold text-xs py-3 px-6 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95;
   }
 
   /* Secondary button - Brown outline */
@@ -57,7 +57,7 @@
 
   /* Sage button */
   .btn-sage {
-    @apply bg-[#A8C69F] hover:bg-[#7AA870] text-[#2E2B26] font-bold text-xs py-3 px-6 rounded-xl transition-all duration-200 active:scale-95;
+    @apply bg-[#7e9677] hover:bg-[#7AA870] text-[#2E2B26] font-bold text-xs py-3 px-6 rounded-xl transition-all duration-200 active:scale-95;
   }
 }
 
@@ -65,7 +65,7 @@
 ::-webkit-scrollbar         { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track   { background: transparent; }
 ::-webkit-scrollbar-thumb   { background: #E8E2D6; border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #A8C69F; }
+::-webkit-scrollbar-thumb:hover { background: #7e9677; }
 
 @media (max-width: 479px) {
   .grid-cols-mobile-single {
@@ -129,7 +129,7 @@
   top: 0;
   left: 0;
   height: 3px;
-  background: linear-gradient(90deg, #F9A37E, #A8C69F, #F9A37E);
+  background: linear-gradient(90deg, #df794d, #7e9677, #df794d);
   background-size: 200% 100%;
   z-index: 99999;
   transition: width 0.4s ease-out, opacity 0.4s ease-out;
@@ -183,9 +183,31 @@
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
 }
-.animate-subtle-bounce {
-  animation: subtle-bounce 2.2s ease-in-out infinite;
+@keyframes slide-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateX(35px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
 }
+.animate-slide-fade-in {
+  animation: slide-fade-in 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Hide number input spin buttons globally */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+
 
 
 

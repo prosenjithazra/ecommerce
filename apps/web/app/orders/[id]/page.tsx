@@ -8,7 +8,7 @@ import { Download, Calendar, Truck, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { CustomGarmentPreview } from '../../../components/CustomGarmentPreview';
 import { getApiUrl } from '../../../components/ApiConfig';
-import { printPdfInvoice } from '../../../utils/invoiceGenerator';
+import { downloadOrderInvoice } from '../../../utils/invoiceGenerator';
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -16,8 +16,21 @@ export default function OrderDetailPage() {
   const [cancelOpen, setCancelOpen] = useState(false);
   const [order, setOrder] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [qikinkPodDetails, setQikinkPodDetails] = useState<any | null>(null);
 
   const orderId = (params?.id as string) || "";
+
+  useEffect(() => {
+    if (!orderId) return;
+    fetch(`/api/qikink/orders?orderId=${encodeURIComponent(orderId)}`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.success && data?.order) {
+          setQikinkPodDetails(data.order);
+        }
+      })
+      .catch(() => {});
+  }, [orderId]);
 
   useEffect(() => {
     // 1. First look in context orders
@@ -100,7 +113,7 @@ export default function OrderDetailPage() {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-32 flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-8 h-8 text-[#F9A37E] animate-spin" />
+        <Loader2 className="w-8 h-8 text-[#df794d] animate-spin" />
         <p className="text-xs text-zinc-400 font-bold">Loading order details...</p>
       </div>
     );
@@ -110,7 +123,7 @@ export default function OrderDetailPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center space-y-4">
         <h2 className="text-xl font-bold">Order not found</h2>
-        <Link href="/profile" className="text-[#F9A37E] hover:text-[#e8855a] hover:underline font-bold">Back to Profile</Link>
+        <Link href="/profile" className="text-[#df794d] hover:text-[#e8855a] hover:underline font-bold">Back to Profile</Link>
       </div>
     );
   }
@@ -134,14 +147,14 @@ export default function OrderDetailPage() {
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <button
-            onClick={() => printPdfInvoice(order)}
+            onClick={() => downloadOrderInvoice(order.id, order)}
             className="w-full sm:w-auto justify-center border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-extrabold text-xs py-2.5 px-4 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
           >
-            <Download className="w-4 h-4 text-[#F9A37E]" /> Download Invoice
+            <Download className="w-4 h-4 text-[#df794d]" /> Download Invoice
           </button>
           <Link
             href={`/orders/${order.id}/track`}
-            className="w-full sm:w-auto justify-center bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-2.5 px-4 rounded-lg transition-all flex items-center gap-1.5 text-center"
+            className="w-full sm:w-auto justify-center bg-[#7e9677] hover:bg-[#92b089] text-white font-extrabold text-xs py-2.5 px-4 rounded-lg transition-all flex items-center gap-1.5 text-center"
           >
             <Truck className="w-4 h-4" /> Track Shipment
           </Link>
@@ -206,7 +219,7 @@ export default function OrderDetailPage() {
                           Size: <span className="font-bold text-zinc-700 dark:text-zinc-300">{item.size}</span> | Color: <span className="font-bold text-zinc-700 dark:text-zinc-300">{item.color}</span> | Quantity: <span className="font-bold text-zinc-700 dark:text-zinc-300">{item.quantity}</span>
                         </p>
                         {sizeSummary && (
-                          <p className="text-[11px] text-[#e8855a] font-bold mt-1.5 bg-[#FDFAF6] px-2 py-0.5 rounded-md inline-block border border-[#F9A37E]/30">
+                          <p className="text-[11px] text-[#e8855a] font-bold mt-1.5 bg-[#FDFAF6] px-2 py-0.5 rounded-md inline-block border border-[#df794d]/30">
                             Size Breakdown: {sizeSummary}
                           </p>
                         )}
@@ -218,7 +231,7 @@ export default function OrderDetailPage() {
                       <div className="w-full sm:hidden pt-1.5 border-t border-zinc-100 dark:border-zinc-800 space-y-1 text-[10px] text-zinc-500">
                         <p>Color: <span className="font-bold text-zinc-700 dark:text-zinc-300">{item.color}</span></p>
                         {sizeSummary && (
-                          <p className="text-[10px] text-[#e8855a] font-bold bg-[#FDFAF6] px-2 py-0.5 rounded-md inline-block border border-[#F9A37E]/30 mt-1">
+                          <p className="text-[10px] text-[#e8855a] font-bold bg-[#FDFAF6] px-2 py-0.5 rounded-md inline-block border border-[#df794d]/30 mt-1">
                             Size Breakdown: {sizeSummary}
                           </p>
                         )}
@@ -255,18 +268,35 @@ export default function OrderDetailPage() {
               </div>
               <div className="flex justify-between text-zinc-500 font-medium">
                 <span>Subtotal</span>
-                <span className="font-bold text-zinc-800 dark:text-zinc-250">₹{(order.total / 1.18).toFixed(2)}</span>
+                <span className="font-bold text-zinc-800 dark:text-zinc-250">₹{(order.total / 1.05).toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-zinc-500 font-medium">
-                <span>Tax / GST (18%)</span>
-                <span className="font-bold text-zinc-800 dark:text-zinc-250">₹{(order.total - order.total / 1.18).toFixed(2)}</span>
+                <span>Tax / GST (5%)</span>
+                <span className="font-bold text-zinc-800 dark:text-zinc-250">₹{(order.total - order.total / 1.05).toFixed(2)}</span>
               </div>
               <div className="flex justify-between pt-2 border-t border-zinc-150 dark:border-zinc-800 font-extrabold text-sm text-zinc-900 dark:text-white">
                 <span>Total Amount Paid</span>
-                <span className="text-[#e8855a] dark:text-[#F9A37E] font-black">₹{order.total.toFixed(2)}</span>
+                <span className="text-[#e8855a] dark:text-[#df794d] font-black">₹{order.total.toFixed(2)}</span>
               </div>
             </div>
           </div>
+
+          {/* Live Fulfillment Status Card */}
+          {qikinkPodDetails && (
+            <div className="bg-[#FDFAF6] dark:bg-zinc-850 border border-[#df794d]/30 dark:border-zinc-700 rounded-2xl p-4 sm:p-5 shadow-xs space-y-2.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase text-[#e8855a] tracking-wider">Fulfillment Status</span>
+                <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 uppercase">
+                  {qikinkPodDetails.status}
+                </span>
+              </div>
+              <div className="space-y-1 text-zinc-600 dark:text-zinc-300 text-[11px] font-medium">
+                <p>Tracking Reference: <span className="font-extrabold text-zinc-900 dark:text-white font-mono">{qikinkPodDetails.order_id}</span></p>
+                {qikinkPodDetails.shipping_type && <p>Shipping Method: <span className="font-bold">{qikinkPodDetails.shipping_type}</span></p>}
+                {qikinkPodDetails.created_on && <p>Processing Date: <span className="font-bold">{qikinkPodDetails.created_on}</span></p>}
+              </div>
+            </div>
+          )}
 
           {/* Cancellation Option */}
           {isCancellable && (

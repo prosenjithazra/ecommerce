@@ -125,7 +125,7 @@ export default function VerifyOtpPage() {
                   onChange={(e) => handleChange(e.target, index)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
                   onFocus={(e) => e.target.select()}
-                  className={`w-10 h-10 sm:w-12 sm:h-12 text-center text-lg font-bold border ${error ? 'border-red-400' : 'border-[#E8E2D6]'} bg-[#FDFAF6] rounded-lg outline-none focus:border-[#F9A37E] text-[#4A453E]`}
+                  className={`w-10 h-10 sm:w-12 sm:h-12 text-center text-lg font-bold border ${error ? 'border-red-400' : 'border-[#E8E2D6]'} bg-[#FDFAF6] rounded-lg outline-none focus:border-[#df794d] text-[#4A453E]`}
                 />
               ))}
             </div>
@@ -137,7 +137,7 @@ export default function VerifyOtpPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 active:scale-95 disabled:opacity-70"
+              className="w-full bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#df794d]/25 active:scale-95 disabled:opacity-70"
             >
               {loading ? 'Verifying...' : 'Verify OTP'}
             </button>
@@ -149,7 +149,7 @@ export default function VerifyOtpPage() {
                 <button
                   type="button"
                   onClick={handleResend}
-                  className="font-bold text-[#F9A37E] hover:text-[#E8855A]"
+                  className="font-bold text-[#df794d] hover:text-[#E8855A]"
                 >
                   Resend OTP Code
                 </button>
@@ -165,7 +165,7 @@ export default function VerifyOtpPage() {
             <div className="grid grid-cols-2 gap-3">
               <Link
                 href="/login"
-                className="w-full bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-3 px-4 rounded-lg transition-all shadow-md shadow-[#A8C69F]/20 flex items-center justify-center text-center"
+                className="w-full bg-[#7e9677] hover:bg-[#92b089] text-white font-extrabold text-xs py-3 px-4 rounded-lg transition-all shadow-md shadow-[#7e9677]/20 flex items-center justify-center text-center"
               >
                 Sign In
               </Link>

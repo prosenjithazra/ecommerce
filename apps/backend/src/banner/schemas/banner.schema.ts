@@ -9,6 +9,18 @@ export class Banner {
   id: string;
 
   @Prop({ default: '' })
+  title: string;
+
+  @Prop({ default: '' })
+  desktopImage: string;
+
+  @Prop({ default: '' })
+  mobileImage: string;
+
+  @Prop({ default: '' })
+  link: string;
+
+  @Prop({ default: '' })
   badge: string;
 
   @Prop({ default: '' })
@@ -17,7 +29,7 @@ export class Banner {
   @Prop({ default: '' })
   headline2: string;
 
-  @Prop({ default: '#F9A37E' })
+  @Prop({ default: '#df794d' })
   headline2Color: string;
 
   @Prop({ default: '' })
@@ -44,7 +56,7 @@ export class Banner {
   @Prop({ default: '#E8E2D6' })
   bg: string;
 
-  @Prop({ default: '#F9A37E' })
+  @Prop({ default: '#df794d' })
   accent: string;
 
   @Prop({ default: true })

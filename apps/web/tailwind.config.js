@@ -12,8 +12,8 @@ export default {
       colors: {
         // Brand palette
         brand: {
-          peach:    '#F9A37E',
-          sage:     '#A8C69F',
+          peach:    '#df794d',
+          sage:     '#7e9677',
           cream:    '#E8E2D6',
           brown:    '#4A453E',
           'peach-light': '#FBD5C1',

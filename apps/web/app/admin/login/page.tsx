@@ -97,7 +97,7 @@ export default function AdminLoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@kliamofashion.com"
                 disabled={submitting}
-                className="mt-1.5 w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl py-3 px-4 text-xs font-medium outline-none focus:border-[#F9A37E] text-[#4A453E] transition-colors disabled:opacity-50"
+                className="mt-1.5 w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl py-3 px-4 text-xs font-medium outline-none focus:border-[#df794d] text-[#4A453E] transition-colors disabled:opacity-50"
               />
             </div>
 
@@ -116,7 +116,7 @@ export default function AdminLoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   disabled={submitting}
-                  className="w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl py-3 px-4 pr-10 text-xs font-medium outline-none focus:border-[#F9A37E] text-[#4A453E] transition-colors disabled:opacity-50"
+                  className="w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl py-3 px-4 pr-10 text-xs font-medium outline-none focus:border-[#df794d] text-[#4A453E] transition-colors disabled:opacity-50"
                 />
                 <button
                   type="button"
@@ -148,7 +148,7 @@ export default function AdminLoginPage() {
           <div className="mt-6 pt-5 border-t border-[#E8E2D6] text-center">
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#F9A37E] hover:text-[#E8855A] transition-colors"
+              className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#df794d] hover:text-[#E8855A] transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Back to Storefront

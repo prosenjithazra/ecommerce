@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ChevronRight, Home, EyeOff, X, ArrowLeft, ArrowRight, Star, AlertTriangle, ChevronDown, Check, ChevronLeft } from 'lucide-react';
+import { ChevronRight, Home, EyeOff, X, ArrowLeft, ArrowRight, Star, AlertTriangle, ChevronDown, Check, ChevronLeft, Search } from 'lucide-react';
 
 /* 1. BREADCRUMB */
 interface BreadcrumbItem { name: string; href?: string; }
@@ -60,7 +60,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ title, description, acti
     <h3 className="font-extrabold text-lg text-[#4A453E] dark:text-white tracking-tight">{title}</h3>
     <p className="text-xs text-[#7A736A] dark:text-zinc-400 max-w-sm mt-2 leading-relaxed">{description}</p>
     {actionText && actionHref && (
-      <Link href={actionHref} className="mt-6 bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25">
+      <Link href={actionHref} className="mt-6 bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#df794d]/25">
         {actionText}
       </Link>
     )}
@@ -217,7 +217,7 @@ export const LoadingSpinner: React.FC = () => (
   <div className="flex items-center justify-center py-12">
     <div className="relative w-10 h-10">
       <div className="absolute inset-0 border-4 border-[#E8E2D6] rounded-full" />
-      <div className="absolute inset-0 border-4 border-t-[#F9A37E] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin" />
+      <div className="absolute inset-0 border-4 border-t-[#df794d] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin" />
     </div>
   </div>
 );
@@ -238,54 +238,103 @@ interface SelectProps {
 
 export const Select: React.FC<SelectProps> = ({ value, onChange, options, placeholder = "Select...", className = "" }) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState("");
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        setSearchQuery("");
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  React.useEffect(() => {
+    if (isOpen && searchInputRef.current) {
+      setTimeout(() => searchInputRef.current?.focus(), 50);
+    }
+  }, [isOpen]);
+
   const selectedOption = options.find(opt => opt.value === value);
+
+  const filteredOptions = options.filter(opt =>
+    opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    opt.value.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className={`relative ${className}`} ref={containerRef}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between border border-[#E8E2D6] bg-white rounded-lg py-2 px-3.5 text-xs font-semibold text-[#4A453E] outline-none shadow-sm focus:border-[#F9A37E] transition-all text-left"
+        onClick={() => {
+          setIsOpen(!isOpen);
+          if (!isOpen) setSearchQuery("");
+        }}
+        className="w-full flex items-center justify-between border border-[#E8E2D6] dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg py-2 px-3.5 text-xs font-semibold text-[#4A453E] dark:text-zinc-200 outline-none focus:outline-none focus:ring-0 focus:border-[#E8E2D6] dark:focus:border-zinc-700 hover:border-[#E8E2D6] dark:hover:border-zinc-700 transition-all text-left"
       >
         <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
         <ChevronDown className={`w-4 h-4 text-[#A89B8A] transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 w-full min-w-[8rem] mt-1.5 bg-white border border-[#E8E2D6] rounded-lg shadow-lg p-1 space-y-0.5 animate-fade-in-up duration-150">
-          {options.map((opt) => {
-            const isSelected = opt.value === value;
-            return (
+        <div className="absolute z-50 w-full min-w-[10rem] mt-1.5 bg-white dark:bg-zinc-900 border border-[#E8E2D6] dark:border-zinc-800 rounded-lg shadow-xl overflow-hidden animate-fade-in-up duration-150">
+          {/* Autocomplete Search Header */}
+          <div className="p-1.5 border-b border-[#E8E2D6]/60 dark:border-zinc-800 bg-[#FDFAF6] dark:bg-zinc-900/90 flex items-center gap-1.5">
+            <Search className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0 ml-1" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-transparent text-xs text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 outline-none focus:outline-none focus:ring-0"
+            />
+            {searchQuery && (
               <button
-                key={opt.value}
                 type="button"
-                onClick={() => {
-                  onChange(opt.value);
-                  setIsOpen(false);
-                }}
-                className={`w-full flex items-center justify-between rounded-lg py-2 px-3 text-xs text-left transition-colors ${
-                  isSelected
-                    ? "bg-[#FBD5C1]/30 text-[#E8855A] font-extrabold"
-                    : "text-[#7A736A] hover:bg-[#FDFAF6] hover:text-[#4A453E] font-medium"
-                }`}
+                onClick={() => setSearchQuery("")}
+                className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-0.5"
               >
-                <span className="truncate">{opt.label}</span>
-                {isSelected && <Check className="w-3.5 h-3.5 text-[#E8855A]" />}
+                <X className="w-3 h-3" />
               </button>
-            );
-          })}
+            )}
+          </div>
+
+          {/* Options List */}
+          <div className="p-1 space-y-0.5 max-h-[180px] overflow-y-auto">
+            {filteredOptions.length > 0 ? (
+              filteredOptions.map((opt) => {
+                const isSelected = opt.value === value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      onChange(opt.value);
+                      setIsOpen(false);
+                      setSearchQuery("");
+                    }}
+                    className={`w-full flex items-center justify-between rounded-lg py-2 px-3 text-xs text-left transition-colors ${
+                      isSelected
+                        ? "bg-[#FBD5C1]/30 text-[#E8855A] font-extrabold"
+                        : "text-[#7A736A] dark:text-zinc-300 hover:bg-[#FDFAF6] dark:hover:bg-zinc-800 hover:text-[#4A453E] dark:hover:text-white font-medium"
+                    }`}
+                  >
+                    <span className="truncate">{opt.label}</span>
+                    {isSelected && <Check className="w-3.5 h-3.5 text-[#E8855A]" />}
+                  </button>
+                );
+              })
+            ) : (
+              <div className="py-3 px-3 text-center text-xs text-zinc-400 dark:text-zinc-500">
+                No matching results
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -303,91 +352,201 @@ export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => 
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
   const [canScrollRight, setCanScrollRight] = React.useState(false);
   const [activeIndex, setActiveIndex] = React.useState(0);
+  const [visibleCols, setVisibleCols] = React.useState(1);
+  const [isMouseDown, setIsMouseDown] = React.useState(false);
+  const [startX, setStartX] = React.useState(0);
+  const [scrollLeftState, setScrollLeftState] = React.useState(0);
+  const [hasDragged, setHasDragged] = React.useState(false);
+
   const childrenArray = React.Children.toArray(children);
+  const isMobileSlider1Point5 = childrenArray.length > 2;
+  const isTabSlider = childrenArray.length > 3;
+  const isDesktopSlider = childrenArray.length > desktopCols;
+
+  const updateVisibleCols = React.useCallback(() => {
+    if (typeof window === 'undefined') return;
+    const width = window.innerWidth;
+    if (width >= 992) {
+      setVisibleCols(isDesktopSlider ? (desktopCols || 4) : Math.min(childrenArray.length, desktopCols || 4));
+    } else if (width >= 768) {
+      setVisibleCols(2);
+    } else {
+      setVisibleCols(1);
+    }
+  }, [childrenArray.length, desktopCols, isDesktopSlider]);
+
+  const numDots = React.useMemo(() => {
+    if (childrenArray.length <= 1) return 0;
+    return Math.max(1, Math.ceil(childrenArray.length / (visibleCols || 1)));
+  }, [childrenArray.length, visibleCols]);
 
   const updateScrollState = React.useCallback(() => {
     if (scrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
       setCanScrollLeft(scrollLeft > 5);
       setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
-      const index = Math.round(scrollLeft / (clientWidth * 0.666));
-      setActiveIndex(Math.min(index, childrenArray.length - 1));
+      
+      const maxScroll = scrollWidth - clientWidth;
+      if (maxScroll <= 0 || numDots <= 1) {
+        setActiveIndex(0);
+        return;
+      }
+      const progress = Math.min(1, Math.max(0, scrollLeft / maxScroll));
+      const idx = Math.min(Math.round(progress * (numDots - 1)), numDots - 1);
+      setActiveIndex(idx);
     }
-  }, [childrenArray.length]);
+  }, [numDots]);
 
   React.useEffect(() => {
+    updateVisibleCols();
     updateScrollState();
-    window.addEventListener('resize', updateScrollState);
-    return () => window.removeEventListener('resize', updateScrollState);
-  }, [updateScrollState]);
+    const handleResize = () => {
+      updateVisibleCols();
+      updateScrollState();
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [updateVisibleCols, updateScrollState]);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
       const { clientWidth } = scrollRef.current;
-      const scrollAmount = direction === 'left' ? -clientWidth * 0.75 : clientWidth * 0.75;
+      const scrollAmount = direction === 'left' ? -clientWidth * 0.8 : clientWidth * 0.8;
       scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   };
 
-  const itemWidthClass = desktopCols === 3
-    ? 'w-full sm:w-[48%] md:w-[calc(33.333%-14px)] min-w-full sm:min-w-[48%] md:min-w-[calc(33.333%-14px)]'
-    : 'w-full sm:w-[48%] lg:w-[calc(25%-15px)] min-w-full sm:min-w-[48%] lg:min-w-[calc(25%-15px)]';
+  const handleDotClick = (dotIdx: number) => {
+    if (!scrollRef.current) return;
+    const targetItemIdx = Math.min(dotIdx * visibleCols, childrenArray.length - 1);
+    const child = scrollRef.current.children[targetItemIdx] as HTMLElement;
+    if (child) {
+      const targetLeft = child.offsetLeft - scrollRef.current.offsetLeft;
+      scrollRef.current.scrollTo({ left: targetLeft, behavior: 'smooth' });
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsMouseDown(true);
+    setHasDragged(false);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeftState(scrollRef.current.scrollLeft);
+  };
+
+  const handleMouseLeave = () => {
+    setIsMouseDown(false);
+  };
+
+  const handleMouseUp = () => {
+    setIsMouseDown(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isMouseDown || !scrollRef.current) return;
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    if (Math.abs(x - startX) > 4) {
+      setHasDragged(true);
+    }
+    scrollRef.current.scrollLeft = scrollLeftState - walk;
+  };
+
+  const handleClickCapture = (e: React.MouseEvent) => {
+    if (hasDragged) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
+  // Mobile (<= 767px / < md): 82% width per card for 1.5 slider view
+  const mobileWidthClass = childrenArray.length > 1 ? 'w-[82%] min-w-[82%]' : 'w-full min-w-full';
+
+  // Tab (768px to 991px / md:): 2 items per view in slider mode, or w-full in grid mode
+  const tabWidthClass = isTabSlider
+    ? 'md:w-[calc(50%-10px)] md:min-w-[calc(50%-10px)]'
+    : 'md:w-full md:min-w-0';
+
+  // Desktop (>= 992px / lg:): 3 or 4 items per view in slider mode, or w-full in grid mode
+  let desktopWidthClass = '';
+  if (isDesktopSlider) {
+    desktopWidthClass = desktopCols === 3
+      ? 'lg:w-[calc(33.333%-14px)] lg:min-w-[calc(33.333%-14px)]'
+      : 'lg:w-[calc(25%-15px)] lg:min-w-[calc(25%-15px)]';
+  } else {
+    desktopWidthClass = 'lg:w-full lg:min-w-0 lg:max-w-none';
+  }
+
+  const itemWidthClass = `${mobileWidthClass} ${tabWidthClass} ${desktopWidthClass}`;
+
+  const baseContainerClass = 'flex gap-3 md:gap-5 overflow-x-auto snap-x snap-mandatory pb-4 no-scrollbar select-none cursor-grab active:cursor-grabbing transition-all duration-300';
+
+  let containerClass = baseContainerClass;
+  if (!isTabSlider && !isDesktopSlider) {
+    // <= 3 items: grid on tab (3 cols at md: 768px) & grid on desktop
+    containerClass += ` md:grid md:grid-cols-3 md:gap-5 md:overflow-visible md:pb-0 md:select-auto md:cursor-auto lg:grid-cols-${desktopCols}`;
+  } else if (!isDesktopSlider) {
+    // 4 items (desktopCols=4): slider on tab (> 3 items), grid on desktop (4 cols)
+    containerClass += ` lg:grid lg:grid-cols-${desktopCols} lg:gap-5 lg:overflow-visible lg:pb-0 lg:select-auto lg:cursor-auto`;
+  }
+
+  // Dynamic CSS Mask for smooth edge fade on scroll
+  const maskStyle = React.useMemo(() => {
+    if (canScrollLeft && canScrollRight) {
+      return {
+        WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%)',
+        maskImage: 'linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%)',
+      };
+    }
+    if (canScrollLeft) {
+      return {
+        WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 4%, black 100%)',
+        maskImage: 'linear-gradient(to right, transparent 0%, black 4%, black 100%)',
+      };
+    }
+    if (canScrollRight) {
+      return {
+        WebkitMaskImage: 'linear-gradient(to right, black 0%, black 96%, transparent 100%)',
+        maskImage: 'linear-gradient(to right, black 0%, black 96%, transparent 100%)',
+      };
+    }
+    return {};
+  }, [canScrollLeft, canScrollRight]);
 
   return (
     <div className="relative group/slider w-full">
-      {/* Left Arrow Button */}
-      {canScrollLeft && (
-        <button
-          type="button"
-          onClick={() => scroll('left')}
-          className="absolute -left-3.5 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-white/95 hover:bg-white text-[#4A453E] shadow-md border border-[#E8E2D6] hover:scale-110 transition-all opacity-0 group-hover/slider:opacity-100 flex items-center justify-center cursor-pointer"
-          aria-label="Previous items"
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-      )}
 
-      {/* Right Arrow Button */}
-      {canScrollRight && (
-        <button
-          type="button"
-          onClick={() => scroll('right')}
-          className="absolute -right-3.5 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-white/95 hover:bg-white text-[#4A453E] shadow-md border border-[#E8E2D6] hover:scale-110 transition-all opacity-0 group-hover/slider:opacity-100 flex items-center justify-center cursor-pointer"
-          aria-label="Next items"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      )}
-
-      {/* Scrollable Container */}
+      {/* Scrollable & Draggable Container with Smooth Edge Fade */}
       <div
         ref={scrollRef}
+        style={maskStyle}
         onScroll={updateScrollState}
-        className="flex gap-5 overflow-x-auto snap-x snap-mandatory pb-4 no-scrollbar scroll-smooth"
+        onMouseDown={handleMouseDown}
+        onMouseLeave={handleMouseLeave}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+        onClickCapture={handleClickCapture}
+        className={containerClass}
       >
         {childrenArray.map((child, idx) => (
-          <div key={idx} className={`${itemWidthClass} snap-start flex-shrink-0 flex [&>*]:w-full [&>*]:h-full`}>
+          <div key={idx} className={`${itemWidthClass} snap-start flex-shrink-0 flex [&>*]:w-full [&>*]:h-full transition-all duration-500 ease-out`}>
             {child}
           </div>
         ))}
       </div>
 
       {/* Dot Indicators */}
-      {childrenArray.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-2">
-          {Array.from({ length: childrenArray.length }).map((_, idx) => (
+      {numDots > 1 && (
+        <div className={`flex justify-center gap-1.5 mt-3 ${
+          isDesktopSlider ? '' : isTabSlider ? 'lg:hidden' : 'md:hidden'
+        }`}>
+          {Array.from({ length: numDots }).map((_, idx) => (
             <button
               key={idx}
-              onClick={() => {
-                if (scrollRef.current) {
-                  const child = scrollRef.current.children[idx] as HTMLElement;
-                  if (child) {
-                    child.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-                  }
-                }
-              }}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                activeIndex === idx ? 'bg-[#F9A37E] w-4' : 'bg-[#E8E2D6] w-1.5'
+              type="button"
+              onClick={() => handleDotClick(idx)}
+              className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                activeIndex === idx ? 'bg-[#df794d] w-4' : 'bg-[#E8E2D6] w-1.5 hover:bg-[#A89B8A]'
               }`}
               aria-label={`Go to slide ${idx + 1}`}
             />

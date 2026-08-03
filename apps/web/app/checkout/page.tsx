@@ -2,21 +2,25 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Info, Tag } from 'lucide-react';
 import { useApp } from '../../components/AppContext';
-import { Breadcrumb } from '../../components/UIComponents';
+import { Breadcrumb, Select } from '../../components/UIComponents';
 import { CustomGarmentPreview } from '../../components/CustomGarmentPreview';
+import { validatePhoneNumber, sanitizePhoneInput } from '../../utils/phoneValidation';
+import { INDIAN_STATES, sanitizePincodeInput, validateIndianPincode, validateIndianState } from '../../utils/addressValidation';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, addresses, addAddress, currentUser, profileLoading, showToast } = useApp();
+  const { cart, addresses, addAddress, currentUser, profileLoading, cartLoading, showToast, appliedCoupon, applyCoupon, removeCoupon } = useApp();
 
   React.useEffect(() => {
-    if (profileLoading) return;
+    if (profileLoading || cartLoading) return;
     const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
     if (!token && !currentUser) {
       router.push('/login');
     }
-  }, [currentUser, profileLoading, router]);
+  }, [currentUser, profileLoading, cartLoading, router]);
 
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [sameAsBilling, setSameAsBilling] = useState(true);
@@ -24,8 +28,11 @@ export default function CheckoutPage() {
   const [gstNumber, setGstNumber] = useState("");
   const [orderNotes, setOrderNotes] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [couponInput, setCouponInput] = useState("");
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
+
   const [newAddr, setNewAddr] = useState({
-    fullName: "", street: "", city: "", state: "", zip: "", country: "United States", phone: ""
+    fullName: "", street: "", city: "", state: "", zip: "", country: "India", phone: ""
   });
 
   React.useEffect(() => {
@@ -35,7 +42,7 @@ export default function CheckoutPage() {
     }
   }, [addresses, selectedAddressId]);
 
-  if (profileLoading) {
+  if (profileLoading || cartLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-16 pt-8">
         <div className="h-4 w-48 bg-zinc-200 animate-pulse rounded" />
@@ -57,18 +64,66 @@ export default function CheckoutPage() {
   }
 
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const tax = subtotal * 0.18;
-  const shippingFee = shippingMethod === 'express' ? 14.99 : (subtotal > 50 ? 0 : 5.99);
-  const total = subtotal + tax + shippingFee;
+  const tax = subtotal * 0.05;
+  const shippingFee = shippingMethod === 'express' ? 99 : (subtotal > 999 ? 0 : 49);
+  const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+  const total = Math.max(0, subtotal + tax + shippingFee - discountAmount);
 
-  const inputClass = "w-full bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg py-2.5 px-4 text-xs outline-none focus:border-[#F9A37E] text-[#4A453E] placeholder-[#A89B8A]";
+  const handleApplyCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!couponInput.trim()) return;
+
+    setApplyingCoupon(true);
+    const res = await applyCoupon(couponInput.trim(), subtotal);
+    setApplyingCoupon(false);
+    if (res.success) {
+      showToast("Coupon Applied", res.message || `Coupon ${couponInput.trim().toUpperCase()} applied!`, "success");
+      setCouponInput("");
+    } else {
+      showToast("Coupon Error", res.message || "Failed to apply coupon", "error");
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    removeCoupon();
+    setCouponInput("");
+    showToast("Coupon Removed", "Promo code has been removed.", "info");
+  };
+
+  const inputClass = "w-full bg-white dark:bg-zinc-800 border border-[#E8E2D6] dark:border-zinc-700 rounded-lg py-2.5 px-4 text-xs outline-none focus:outline-none focus:ring-0 text-[#4A453E] dark:text-zinc-200 placeholder-[#A89B8A]";
 
   const handleAddNewAddress = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newAddr.fullName || !newAddr.street || !newAddr.city) return;
+    if (!newAddr.fullName.trim()) {
+      showToast("Validation Error", "Please enter receiver full name.", "error");
+      return;
+    }
+    const phoneCheck = validatePhoneNumber(newAddr.phone);
+    if (!phoneCheck.isValid) {
+      showToast("Validation Error", phoneCheck.error || "Please enter a valid 10-digit phone number.", "error");
+      return;
+    }
+    if (!newAddr.street.trim()) {
+      showToast("Validation Error", "Please enter street address / suite / flat.", "error");
+      return;
+    }
+    if (!newAddr.city.trim()) {
+      showToast("Validation Error", "Please enter city name.", "error");
+      return;
+    }
+    const stateCheck = validateIndianState(newAddr.state);
+    if (!stateCheck.isValid) {
+      showToast("Validation Error", stateCheck.error || "Please select a valid Indian State / UT.", "error");
+      return;
+    }
+    const pinCheck = validateIndianPincode(newAddr.zip);
+    if (!pinCheck.isValid) {
+      showToast("Validation Error", pinCheck.error || "Please enter a valid 6-digit Indian PIN Code.", "error");
+      return;
+    }
     addAddress({ ...newAddr, isDefault: false });
     setShowAddForm(false);
-    setNewAddr({ fullName: "", street: "", city: "", state: "", zip: "", country: "United States", phone: "" });
+    setNewAddr({ fullName: "", street: "", city: "", state: "", zip: "", country: "India", phone: "" });
   };
 
   const handleProceedToPayment = () => {
@@ -95,30 +150,30 @@ export default function CheckoutPage() {
               <h3 className="font-extrabold text-sm text-[#4A453E]">1. Shipping Address</h3>
               {!showAddForm && (
                 <button onClick={() => setShowAddForm(true)}
-                  className="text-xs font-bold text-[#F9A37E] hover:text-[#E8855A] transition-colors">
+                  className="text-xs font-bold text-[#df794d] hover:text-[#E8855A] transition-colors">
                   + Add New
                 </button>
               )}
             </div>
 
             {showAddForm ? (
-              <form onSubmit={handleAddNewAddress} className="space-y-3 p-4 border border-[#E8E2D6] rounded-lg bg-[#FDFAF6]">
+              <form onSubmit={handleAddNewAddress} noValidate className="space-y-3 p-4 border border-[#E8E2D6] rounded-lg bg-[#FDFAF6]">
                 <h4 className="font-bold text-xs text-[#4A453E]">New Shipping Details</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input type="text" placeholder="Full Name" required value={newAddr.fullName}
+                  <input type="text" placeholder="Full Name" value={newAddr.fullName}
                     onChange={(e) => setNewAddr({ ...newAddr, fullName: e.target.value })} className={inputClass} />
-                  <input type="tel" placeholder="Phone Number" required value={newAddr.phone}
-                    onChange={(e) => setNewAddr({ ...newAddr, phone: e.target.value })} className={inputClass} />
+                  <input type="tel" inputMode="numeric" maxLength={10} placeholder="Phone Number (10 digits)" value={newAddr.phone}
+                    onChange={(e) => setNewAddr({ ...newAddr, phone: sanitizePhoneInput(e.target.value) })} className={inputClass} />
                 </div>
-                <input type="text" placeholder="Street address, Suite, Apartment" required value={newAddr.street}
+                <input type="text" placeholder="Street address, Suite, Apartment" value={newAddr.street}
                   onChange={(e) => setNewAddr({ ...newAddr, street: e.target.value })} className={inputClass} />
                 <div className="flex flex-col sm:grid grid-cols-3 gap-2">
-                  <input type="text" placeholder="City" required value={newAddr.city}
+                  <input type="text" placeholder="City" value={newAddr.city}
                     onChange={(e) => setNewAddr({ ...newAddr, city: e.target.value })} className={inputClass} />
-                  <input type="text" placeholder="State" required value={newAddr.state}
-                    onChange={(e) => setNewAddr({ ...newAddr, state: e.target.value })} className={inputClass} />
-                  <input type="text" placeholder="ZIP" required value={newAddr.zip}
-                    onChange={(e) => setNewAddr({ ...newAddr, zip: e.target.value })} className={inputClass} />
+                  <Select value={newAddr.state} onChange={(val) => setNewAddr({ ...newAddr, state: val })}
+                    options={INDIAN_STATES.map(st => ({ value: st, label: st }))} placeholder="Select State / UT" className="w-full" />
+                  <input type="text" inputMode="numeric" maxLength={6} placeholder="PIN Code (6 digits)" value={newAddr.zip}
+                    onChange={(e) => setNewAddr({ ...newAddr, zip: sanitizePincodeInput(e.target.value) })} className={inputClass} />
                 </div>
                 <div className="flex gap-2 justify-end">
                   <button type="button" onClick={() => setShowAddForm(false)}
@@ -126,7 +181,7 @@ export default function CheckoutPage() {
                     Cancel
                   </button>
                   <button type="submit"
-                    className="bg-[#A8C69F] hover:bg-[#92b089] text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all shadow-lg shadow-[#A8C69F]/20">
+                    className="bg-[#7e9677] hover:bg-[#92b089] text-white font-extrabold text-xs py-2.5 px-6 rounded-lg transition-all shadow-lg shadow-[#7e9677]/20">
                     Save Address
                   </button>
                 </div>
@@ -137,7 +192,7 @@ export default function CheckoutPage() {
                   <div key={addr.id} onClick={() => setSelectedAddressId(addr.id)}
                     className={`cursor-pointer border-2 rounded-lg p-2 md:p-4 transition-all ${
                       selectedAddressId === addr.id
-                        ? 'border-[#F9A37E] bg-[#FBD5C1]/10'
+                        ? 'border-[#df794d] bg-[#FBD5C1]/10'
                         : 'border-[#E8E2D6] hover:border-[#A89B8A]'
                     }`}>
                     <span className="font-extrabold text-xs text-[#4A453E]">{addr.fullName}</span>
@@ -154,7 +209,7 @@ export default function CheckoutPage() {
             <label className="flex items-center gap-2.5 cursor-pointer">
               <input type="checkbox" checked={sameAsBilling}
                 onChange={(e) => setSameAsBilling(e.target.checked)}
-                className="w-4 h-4 rounded border-[#E8E2D6] accent-[#F9A37E]" />
+                className="w-4 h-4 rounded border-[#E8E2D6] accent-[#df794d]" />
               <span className="text-xs font-bold text-[#4A453E]">Billing address same as shipping</span>
             </label>
           </div>
@@ -164,27 +219,33 @@ export default function CheckoutPage() {
             <h3 className="font-extrabold text-sm text-[#4A453E]">2. Shipping Method</h3>
             <div className="space-y-2">
               {[
-                { id: 'standard', label: 'Standard Ground Shipping', sub: '4–6 business days', price: subtotal > 50 ? 'FREE' : '₹5.99' },
-                { id: 'express', label: 'Express Air Shipping', sub: '2–3 business days', price: '₹14.99' }
+                { id: 'standard', label: 'Standard Ground Shipping', sub: '5–7 business days', price: subtotal > 999 ? 'FREE' : '₹49' },
+                { id: 'express', label: 'Express Air Shipping', sub: '2–3 business days', price: '₹99' }
               ].map(opt => (
                 <label key={opt.id}
                   className={`flex items-center justify-between p-2 md:p-4 border rounded-lg cursor-pointer transition-all ${
                     shippingMethod === opt.id
-                      ? 'border-[#F9A37E] bg-[#FBD5C1]/10'
+                      ? 'border-[#df794d] bg-[#FBD5C1]/10'
                       : 'border-[#E8E2D6] hover:border-[#A89B8A]'
                   }`}
                   onClick={() => setShippingMethod(opt.id as 'standard' | 'express')}
                 >
                   <div className="flex items-center gap-2 md:gap-3">
-                    <input type="radio" checked={shippingMethod === opt.id} readOnly className="accent-[#F9A37E]" />
+                    <input type="radio" checked={shippingMethod === opt.id} readOnly className="accent-[#df794d]" />
                     <div className="text-xs">
                       <span className="font-extrabold text-[#4A453E] block">{opt.label}</span>
                       <span className="text-[10px] text-[#A89B8A] mt-0.5 block">{opt.sub}</span>
                     </div>
                   </div>
-                  <span className="font-extrabold text-xs text-[#F9A37E]">{opt.price}</span>
+                  <span className="font-extrabold text-xs text-[#df794d]">{opt.price}</span>
                 </label>
               ))}
+            </div>
+            <div className="mt-3 p-3 bg-[#FDFAF6] dark:bg-zinc-800/40 border border-[#E8E2D6] dark:border-zinc-700/60 rounded-xl flex items-start gap-2.5">
+              <Info className="w-4 h-4 text-[#df794d] flex-shrink-0 mt-0.5" />
+              <p className="text-[11px] text-[#7A736A] dark:text-zinc-350 font-semibold leading-relaxed">
+                Standard shipping is <span className="text-[#df794d] font-extrabold">FREE</span> for orders of <span className="text-[#4A453E] dark:text-zinc-200 font-extrabold">₹999</span> or more. A standard shipping charge of <span className="text-[#4A453E] dark:text-zinc-200 font-extrabold">₹49</span> is applicable on orders below ₹999.
+              </p>
             </div>
           </div>
 
@@ -212,23 +273,84 @@ export default function CheckoutPage() {
 
           {/* Items */}
           <div className="space-y-3 max-h-48 overflow-y-auto">
-            {cart.map(item => (
-              <div key={item.id} className="flex gap-3 justify-between items-center text-xs">
-                <div className="flex gap-2 items-center min-w-0">
-                  <CustomGarmentPreview
-                    customDesign={item.customDesign}
-                    defaultImage={item.image}
-                    view="both"
-                    className="w-9 h-9"
-                  />
-                  <span className="font-bold text-[#4A453E] truncate">
-                    {item.name} <span className="text-[10px] text-[#A89B8A]">×{item.quantity}</span>
-                  </span>
-                </div>
-                <span className="font-extrabold text-[#4A453E] flex-shrink-0">₹{(item.price * item.quantity).toFixed(2)}</span>
-              </div>
-            ))}
+             {cart.map(item => {
+               const isCustom = item.productId === "custom" || !!item.customDesign;
+               return (
+                 <div key={item.id} className="flex gap-3 justify-between items-center text-xs">
+                   <div className="flex gap-2 items-center min-w-0">
+                     {isCustom ? (
+                       <CustomGarmentPreview
+                         customDesign={item.customDesign}
+                         defaultImage={item.image}
+                         view="both"
+                         className="w-9 h-9 flex-shrink-0"
+                       />
+                     ) : (
+                       <Link href={`/products/${item.slug || item.productId}`} className="cursor-pointer hover:opacity-85 transition-opacity flex-shrink-0">
+                         <CustomGarmentPreview
+                           customDesign={item.customDesign}
+                           defaultImage={item.image}
+                           view="both"
+                           className="w-9 h-9"
+                         />
+                       </Link>
+                     )}
+                     {isCustom ? (
+                       <span className="font-bold text-[#4A453E] truncate block flex-1">
+                         {item.name} <span className="text-[10px] text-[#A89B8A]">×{item.quantity}</span>
+                       </span>
+                     ) : (
+                       <Link href={`/products/${item.slug || item.productId}`} className="hover:text-[#df794d] transition-colors truncate flex-1">
+                         <span className="font-bold text-[#4A453E] truncate block">
+                           {item.name} <span className="text-[10px] text-[#A89B8A]">×{item.quantity}</span>
+                         </span>
+                       </Link>
+                     )}
+                   </div>
+                   <span className="font-extrabold text-[#4A453E] flex-shrink-0">₹{(item.price * item.quantity).toFixed(2)}</span>
+                 </div>
+               );
+             })}
           </div>
+
+          {/* Dynamic Coupon Section */}
+          {appliedCoupon ? (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Tag className="w-4 h-4 text-emerald-600" />
+                <div>
+                  <span className="text-xs font-black text-emerald-800 uppercase tracking-wide">{appliedCoupon.code}</span>
+                  <span className="text-[10px] font-bold text-emerald-600 block">Applied (-₹{appliedCoupon.discountAmount.toFixed(2)})</span>
+                </div>
+              </div>
+              <button
+                onClick={handleRemoveCoupon}
+                className="text-xs font-bold text-rose-500 hover:text-rose-700 hover:underline"
+              >
+                Remove
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleApplyCoupon} className="flex gap-2">
+              <div className="relative flex-1">
+                <Tag className="w-3.5 h-3.5 text-[#A89B8A] absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Coupon code"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value)}
+                  className="w-full h-10 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg pl-9 pr-3 text-xs outline-none focus:border-[#df794d] uppercase text-[#4A453E] font-mono"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={applyingCoupon}
+                className="h-10 bg-[#7e9677] hover:bg-[#92b089] disabled:opacity-60 text-white rounded-lg px-4 text-xs font-extrabold transition-all shadow-md shadow-[#7e9677]/10 flex-shrink-0 flex items-center justify-center cursor-pointer"
+              >
+                {applyingCoupon ? "..." : "Apply"}
+              </button>
+            </form>
+          )}
 
           {/* Totals */}
           <div className="space-y-2.5 text-xs pt-3 border-t border-[#E8E2D6]">
@@ -237,21 +359,27 @@ export default function CheckoutPage() {
               <span className="font-bold text-[#4A453E]">₹{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#7A736A]">Tax / GST (18%)</span>
+              <span className="text-[#7A736A]">Tax / GST (5%)</span>
               <span className="font-bold text-[#4A453E]">₹{tax.toFixed(2)}</span>
             </div>
+            {discountAmount > 0 && (
+              <div className="flex justify-between text-emerald-600 font-bold">
+                <span>Coupon Discount</span>
+                <span>-₹{discountAmount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-[#7A736A]">Shipping</span>
-              <span className="font-bold text-[#A8C69F]">{shippingFee === 0 ? "FREE" : `₹${shippingFee.toFixed(2)}`}</span>
+              <span className="font-bold text-[#7e9677]">{shippingFee === 0 ? "FREE" : `₹${shippingFee.toFixed(2)}`}</span>
             </div>
             <div className="flex justify-between pt-3 border-t border-[#E8E2D6] text-sm font-black">
               <span className="text-[#4A453E]">Estimated Total</span>
-              <span className="text-[#F9A37E]">₹{total.toFixed(2)}</span>
+              <span className="text-[#df794d]">₹{total.toFixed(2)}</span>
             </div>
           </div>
 
           <button onClick={handleProceedToPayment}
-            className="w-full bg-[#F9A37E] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#F9A37E]/25 flex items-center justify-center active:scale-95">
+            className="w-full bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-xs py-3.5 px-6 rounded-lg transition-all shadow-lg shadow-[#df794d]/25 flex items-center justify-center active:scale-95">
             Continue to Payment →
           </button>
         </div>
