@@ -43,29 +43,63 @@ export default function CategoryDetailPage() {
     setLoading(true);
     setError(null);
 
+    const norm = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const slugNorm = norm(slug);
+
     Promise.all([
       fetch(getApiUrl(`/category/slug/${slug}`)).then(res => res.ok ? res.json() : null),
-      fetch(getApiUrl(`/products/category/${slug}`)).then(res => res.ok ? res.json() : [])
+      fetch(getApiUrl(`/products/category/${slug}`)).then(res => res.ok ? res.json() : []),
+      fetch(getApiUrl('/products')).then(res => res.ok ? res.json() : [])
     ])
-      .then(([catData, prodData]) => {
-        if (!catData) {
-          // Fallback fetch all categories to see if name matches
-          return fetch(getApiUrl('/category'))
+      .then(([catData, catProdData, allProdData]) => {
+        let finalCat = catData;
+        if (!finalCat && Array.isArray(allProdData)) {
+          // Look up in all categories
+          fetch(getApiUrl('/category'))
             .then(r => r.ok ? r.json() : [])
             .then(allCats => {
-              const matched = allCats.find((c: any) => c.slug === slug || c.name.toLowerCase().replace(/\s+/g, '-') === slug || c.id === slug);
-              if (matched) {
-                setCategory(matched);
-                setProducts(prodData || []);
-                setLoading(false);
-              } else {
-                setError("Category not found.");
-                setLoading(false);
+              if (Array.isArray(allCats)) {
+                finalCat = allCats.find((c: any) => c.slug === slug || norm(c.name) === slugNorm || c.id === slug);
               }
-            });
+            }).catch(() => {});
         }
-        setCategory(catData);
-        setProducts(prodData || []);
+
+        const catName = finalCat?.name || slug;
+        const catNameNorm = norm(catName);
+
+        // Filter products using all available products as fallback
+        let matchedProducts = Array.isArray(catProdData) && catProdData.length > 0 ? catProdData : [];
+        if (matchedProducts.length === 0 && Array.isArray(allProdData)) {
+          matchedProducts = allProdData.filter((p: any) => {
+            const pCat = p.category ? norm(p.category) : '';
+            const pCatId = p.categoryId ? norm(String(p.categoryId)) : '';
+            const pGender = p.targetGender ? norm(p.targetGender) : '';
+            return (
+              pCat === catNameNorm ||
+              pCat === slugNorm ||
+              pCatId === catNameNorm ||
+              pCatId === slugNorm ||
+              pGender === catNameNorm ||
+              pGender === slugNorm ||
+              (pCat.length > 0 && (pCat.includes(slugNorm) || slugNorm.includes(pCat)))
+            );
+          });
+        }
+
+        if (!finalCat) {
+          // Construct category object if missing
+          finalCat = {
+            id: slug,
+            name: slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+            slug,
+            image: matchedProducts[0]?.image || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80",
+            description: `Explore our collection of ${slug.replace(/-/g, ' ')} products.`,
+            count: matchedProducts.length
+          };
+        }
+
+        setCategory(finalCat);
+        setProducts(matchedProducts);
         setLoading(false);
       })
       .catch(err => {

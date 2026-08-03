@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Info } from 'lucide-react';
+import { Info, Tag } from 'lucide-react';
 import { useApp } from '../../components/AppContext';
 import { Breadcrumb, Select } from '../../components/UIComponents';
 import { CustomGarmentPreview } from '../../components/CustomGarmentPreview';
@@ -12,15 +12,15 @@ import { INDIAN_STATES, sanitizePincodeInput, validateIndianPincode, validateInd
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, addresses, addAddress, currentUser, profileLoading, showToast } = useApp();
+  const { cart, addresses, addAddress, currentUser, profileLoading, cartLoading, showToast, appliedCoupon, applyCoupon, removeCoupon } = useApp();
 
   React.useEffect(() => {
-    if (profileLoading) return;
+    if (profileLoading || cartLoading) return;
     const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
     if (!token && !currentUser) {
       router.push('/login');
     }
-  }, [currentUser, profileLoading, router]);
+  }, [currentUser, profileLoading, cartLoading, router]);
 
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [sameAsBilling, setSameAsBilling] = useState(true);
@@ -28,6 +28,9 @@ export default function CheckoutPage() {
   const [gstNumber, setGstNumber] = useState("");
   const [orderNotes, setOrderNotes] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [couponInput, setCouponInput] = useState("");
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
+
   const [newAddr, setNewAddr] = useState({
     fullName: "", street: "", city: "", state: "", zip: "", country: "India", phone: ""
   });
@@ -39,7 +42,7 @@ export default function CheckoutPage() {
     }
   }, [addresses, selectedAddressId]);
 
-  if (profileLoading) {
+  if (profileLoading || cartLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-16 pt-8">
         <div className="h-4 w-48 bg-zinc-200 animate-pulse rounded" />
@@ -63,7 +66,29 @@ export default function CheckoutPage() {
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const tax = subtotal * 0.05;
   const shippingFee = shippingMethod === 'express' ? 99 : (subtotal > 999 ? 0 : 49);
-  const total = subtotal + tax + shippingFee;
+  const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+  const total = Math.max(0, subtotal + tax + shippingFee - discountAmount);
+
+  const handleApplyCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!couponInput.trim()) return;
+
+    setApplyingCoupon(true);
+    const res = await applyCoupon(couponInput.trim(), subtotal);
+    setApplyingCoupon(false);
+    if (res.success) {
+      showToast("Coupon Applied", res.message || `Coupon ${couponInput.trim().toUpperCase()} applied!`, "success");
+      setCouponInput("");
+    } else {
+      showToast("Coupon Error", res.message || "Failed to apply coupon", "error");
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    removeCoupon();
+    setCouponInput("");
+    showToast("Coupon Removed", "Promo code has been removed.", "info");
+  };
 
   const inputClass = "w-full bg-white dark:bg-zinc-800 border border-[#E8E2D6] dark:border-zinc-700 rounded-lg py-2.5 px-4 text-xs outline-none focus:outline-none focus:ring-0 text-[#4A453E] dark:text-zinc-200 placeholder-[#A89B8A]";
 
@@ -288,6 +313,45 @@ export default function CheckoutPage() {
              })}
           </div>
 
+          {/* Dynamic Coupon Section */}
+          {appliedCoupon ? (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Tag className="w-4 h-4 text-emerald-600" />
+                <div>
+                  <span className="text-xs font-black text-emerald-800 uppercase tracking-wide">{appliedCoupon.code}</span>
+                  <span className="text-[10px] font-bold text-emerald-600 block">Applied (-₹{appliedCoupon.discountAmount.toFixed(2)})</span>
+                </div>
+              </div>
+              <button
+                onClick={handleRemoveCoupon}
+                className="text-xs font-bold text-rose-500 hover:text-rose-700 hover:underline"
+              >
+                Remove
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleApplyCoupon} className="flex gap-2">
+              <div className="relative flex-1">
+                <Tag className="w-3.5 h-3.5 text-[#A89B8A] absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Coupon code"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value)}
+                  className="w-full h-10 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg pl-9 pr-3 text-xs outline-none focus:border-[#df794d] uppercase text-[#4A453E] font-mono"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={applyingCoupon}
+                className="h-10 bg-[#7e9677] hover:bg-[#92b089] disabled:opacity-60 text-white rounded-lg px-4 text-xs font-extrabold transition-all shadow-md shadow-[#7e9677]/10 flex-shrink-0 flex items-center justify-center cursor-pointer"
+              >
+                {applyingCoupon ? "..." : "Apply"}
+              </button>
+            </form>
+          )}
+
           {/* Totals */}
           <div className="space-y-2.5 text-xs pt-3 border-t border-[#E8E2D6]">
             <div className="flex justify-between">
@@ -298,6 +362,12 @@ export default function CheckoutPage() {
               <span className="text-[#7A736A]">Tax / GST (5%)</span>
               <span className="font-bold text-[#4A453E]">₹{tax.toFixed(2)}</span>
             </div>
+            {discountAmount > 0 && (
+              <div className="flex justify-between text-emerald-600 font-bold">
+                <span>Coupon Discount</span>
+                <span>-₹{discountAmount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-[#7A736A]">Shipping</span>
               <span className="font-bold text-[#7e9677]">{shippingFee === 0 ? "FREE" : `₹${shippingFee.toFixed(2)}`}</span>

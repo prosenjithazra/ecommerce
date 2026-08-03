@@ -1,9 +1,12 @@
 "use client";
 
 import React from 'react';
-import { Settings, ShieldCheck, Heart } from 'lucide-react';
+import { Settings, ShieldCheck, Heart, Mail, Phone } from 'lucide-react';
+import { useApp } from '../../components/AppContext';
 
 export default function MaintenancePage() {
+  const { companySettings } = useApp();
+
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center p-6 text-center bg-[#FDFAF6] relative overflow-hidden select-none">
       {/* Background blobs */}
@@ -53,7 +56,9 @@ export default function MaintenancePage() {
             <Heart className="w-3.5 h-3.5 text-[#df794d] mt-0.5 flex-shrink-0" />
             <div>
               <p className="text-[12px] sm:text-[14px] font-black text-[#4A453E] uppercase tracking-wide">Customer Support</p>
-              <p className="text-[10px] text-[#7A736A] leading-tight mt-0.5">Have an urgent question? Email support@kliamofashion.com anytime.</p>
+              <p className="text-[10px] text-[#7A736A] leading-tight mt-0.5">
+                Have an urgent question? Email <a href={`mailto:${companySettings.email}`} className="font-bold text-[#df794d] hover:underline">{companySettings.email}</a> or call <a href={`tel:${companySettings.phone.replace(/\s+/g, '')}`} className="font-bold text-[#df794d] hover:underline">{companySettings.phone}</a> anytime.
+              </p>
             </div>
           </div>
         </div>

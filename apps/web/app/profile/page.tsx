@@ -792,7 +792,7 @@ export default function ProfilePage() {
 
   if (isProfileDataLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-6 md:space-y-8 pb-10 md:pb-16 animate-pulse">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3 sm:space-y-6 md:space-y-8 pb-10 md:pb-16 animate-pulse">
         {/* Breadcrumb Skeleton */}
         <div className="h-4 w-36 bg-zinc-200 dark:bg-zinc-800 rounded mt-6"></div>
 
@@ -1060,13 +1060,16 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-zinc-650 mb-1.5">Email Address</label>
+                  <label className="block text-xs font-bold text-zinc-650 mb-1.5">
+                    Email Address <span className="text-[10px] text-zinc-400 font-normal">(Non-editable)</span>
+                  </label>
                   <input
                     type="email"
-                    required
+                    disabled
+                    readOnly
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-zinc-55 dark:bg-zinc-800 border border-zinc-200 rounded-lg py-3 px-4 text-xs outline-none focus:border-[#df794d] focus:ring-2 focus:ring-[#df794d]/20 text-zinc-900 dark:text-white"
+                    className="w-full bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-lg py-3 px-4 text-xs text-zinc-500 dark:text-zinc-400 cursor-not-allowed select-none opacity-80"
+                    title="Email address is linked to your account and cannot be edited."
                   />
                 </div>
               </div>

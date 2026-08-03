@@ -136,15 +136,18 @@ export class ProductsService implements OnModuleInit {
     const cached = await this.cacheManager.get<Product[]>(cacheKey);
     if (cached) return cached;
 
-    const slugifiedQuery = slugify(categoryOrId);
-    const catRegex = new RegExp(`^${categoryOrId.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')}$`, 'i');
+    const trimmed = (categoryOrId || '').trim();
+    const flexPattern = trimmed.replace(/[-_\s]+/g, '[-_\\s]*');
+    const flexRegex = new RegExp(`^${flexPattern}$`, 'i');
+    const containRegex = new RegExp(flexPattern, 'i');
 
     const products = await this.productModel
       .find({
         $or: [
-          { categoryId: categoryOrId },
-          { category: { $regex: catRegex } },
-          { slug: slugifiedQuery },
+          { categoryId: trimmed },
+          { category: { $regex: flexRegex } },
+          { category: { $regex: containRegex } },
+          { targetGender: { $regex: flexRegex } },
         ],
       })
       .sort({ createdAt: -1 })
@@ -168,13 +171,15 @@ export class ProductsService implements OnModuleInit {
 
     if (filters.category) {
       const catQuery = filters.category.trim();
-      const slugifiedQuery = slugify(catQuery);
-      const catRegex = new RegExp(`^${catQuery.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')}$`, 'i');
+      const flexPattern = catQuery.replace(/[-_\s]+/g, '[-_\\s]*');
+      const flexRegex = new RegExp(`^${flexPattern}$`, 'i');
+      const containRegex = new RegExp(flexPattern, 'i');
 
       mongoQuery.$or = [
-        { category: { $regex: catRegex } },
+        { category: { $regex: flexRegex } },
+        { category: { $regex: containRegex } },
         { categoryId: catQuery },
-        { slug: slugifiedQuery },
+        { targetGender: { $regex: flexRegex } },
       ];
     }
 

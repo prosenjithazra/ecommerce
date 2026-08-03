@@ -21,6 +21,8 @@ export default function ProductDetailPage() {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [testimonialsLoading, setTestimonialsLoading] = useState(true);
   const [loading, setLoading] = useState(true);
 
   const [selectedColor, setSelectedColor] = useState("");
@@ -28,6 +30,16 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'desc' | 'print' | 'ship'>('desc');
   const [isSizeChartOpen, setIsSizeChartOpen] = useState(false);
+
+  // Load testimonials from API
+  useEffect(() => {
+    setTestimonialsLoading(true);
+    fetch(getApiUrl('/testimonials'))
+      .then(res => res.ok ? res.json() : [])
+      .then(data => { if (Array.isArray(data) && data.length > 0) setTestimonials(data); })
+      .catch(() => {})
+      .finally(() => setTestimonialsLoading(false));
+  }, []);
 
   // Load product details by slug (falls back to id lookup for legacy URLs)
   useEffect(() => {
@@ -325,14 +337,48 @@ export default function ProductDetailPage() {
         </div>
       </section>
 
-      {/* ── Reviews ── */}
-      <section className="space-y-3 pt-1.5 sm:pt-2 border-t border-[#E8E2D6]">
+      {/* ── Customer Reviews / Testimonials ── */}
+      <section className="space-y-3 pt-3 sm:pt-6 border-t border-[#E8E2D6]">
         <h2 className="text-xl font-extrabold text-[#4A453E] tracking-tight">Customer Reviews</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <ReviewCard name="Jane Doe" rating={5} date="3 days ago" comment="Perfect sizing and very comfortable fabric. The print came out exactly as shown!" verified={true} />
-          <ReviewCard name="Robert Fletcher" rating={5} date="1 week ago" comment="Highly durable. Washed it three times already and the print looks brand new." verified={true} />
-          <ReviewCard name="Mila Vance" rating={4} date="2 weeks ago" comment="Soft material and print lines are extremely clean. Fits perfectly!" verified={true} />
-        </div>
+        {testimonialsLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="p-4 rounded-lg bg-white space-y-3 animate-pulse border border-[#E8E2D6]">
+                <div className="h-3 bg-zinc-100 rounded w-1/2" />
+                <div className="h-2 bg-zinc-100 rounded w-1/3" />
+                <div className="h-8 bg-zinc-100 rounded" />
+              </div>
+            ))}
+          </div>
+        ) : testimonials.length === 0 ? (
+          <p className="text-xs text-[#A89B8A] py-2">No reviews available yet.</p>
+        ) : testimonials.length > 1 ? (
+          <Slider desktopCols={3}>
+            {testimonials.map((rev) => (
+              <ReviewCard
+                key={rev.id}
+                name={rev.name}
+                rating={rev.rating}
+                date={rev.createdAt ? new Date(rev.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Verified Buyer'}
+                comment={rev.comment}
+                verified={true}
+              />
+            ))}
+          </Slider>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {testimonials.map((rev) => (
+              <ReviewCard
+                key={rev.id}
+                name={rev.name}
+                rating={rev.rating}
+                date={rev.createdAt ? new Date(rev.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Verified Buyer'}
+                comment={rev.comment}
+                verified={true}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* ── Related Products ── */}

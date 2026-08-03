@@ -97,7 +97,7 @@ export function normalizeOrderForInvoice(o: any) {
   };
 }
 
-export function printPdfInvoice(order: any) {
+export function printPdfInvoice(order: any, companySettings?: any) {
   if (!order || typeof window === 'undefined') return;
 
   const normalized = normalizeOrderForInvoice(order) || order;
@@ -116,6 +116,10 @@ export function printPdfInvoice(order: any) {
   const totalAmount = Number(normalized.total || 0);
   const subtotal = (totalAmount / 1.05).toFixed(2);
   const taxGst = (totalAmount - Number(subtotal)).toFixed(2);
+
+  const compEmail = companySettings?.email || 'support@kliamofashion.com';
+  const compPhone = companySettings?.phone || '+1 555-0199';
+  const compAddr = companySettings?.address || '123 Creative St, New York, NY 10001';
 
   const itemsHtml = items.map((item: any, idx: number) => {
     const itemMeta = itemsJson[idx] || {};
@@ -271,11 +275,12 @@ export function printPdfInvoice(order: any) {
           
           <div class="header">
             <div>
-              <img src="${logoUrl}" alt="Kliamo Fashion India Logo" class="logo" />
+              <img src="${logoUrl}" alt="Kliamo Fashion Logo" class="logo" />
               <div style="font-size: 11px; color: #71717A; margin-top: 8px; line-height: 1.5;">
-                <strong>Kliamo Fashion India</strong><br />
-                Email: contact@kliamo.com<br />
-                Website: kliamo.com
+                <strong>Kliamo Fashion</strong><br />
+                Address: ${compAddr}<br />
+                Email: ${compEmail}<br />
+                Phone: ${compPhone}
               </div>
             </div>
             <div>
@@ -375,8 +380,18 @@ export function printPdfInvoice(order: any) {
   invoiceWindow.document.close();
 }
 
-export async function downloadOrderInvoice(orderId: string, existingOrder?: any) {
+export async function downloadOrderInvoice(orderId: string, existingOrder?: any, companySettings?: any) {
   let targetOrder = existingOrder ? normalizeOrderForInvoice(existingOrder) : null;
+  let settings = companySettings;
+
+  if (!settings) {
+    try {
+      const sRes = await fetch(getApiUrl('/settings')).catch(() => null);
+      if (sRes && sRes.ok) {
+        settings = await sRes.json();
+      }
+    } catch {}
+  }
 
   // Fetch full details from API if items or address detail is missing
   if ((!targetOrder || !targetOrder.items || targetOrder.items.length === 0 || !targetOrder.address?.street) && orderId) {
@@ -407,7 +422,7 @@ export async function downloadOrderInvoice(orderId: string, existingOrder?: any)
   }
 
   if (targetOrder) {
-    printPdfInvoice(targetOrder);
+    printPdfInvoice(targetOrder, settings);
   }
 }
 

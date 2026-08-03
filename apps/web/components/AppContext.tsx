@@ -134,6 +134,14 @@ export interface ToastMessage {
   type: 'success' | 'error' | 'info';
 }
 
+export interface AppliedCoupon {
+  code: string;
+  discountAmount: number;
+  discountType?: 'percentage' | 'fixed';
+  discountValue?: number;
+  message?: string;
+}
+
 interface AppContextType {
   cart: CartItem[];
   wishlist: Product[];
@@ -146,6 +154,9 @@ interface AppContextType {
   isDarkMode: boolean;
   currentUser: { name: string; email: string; phone?: string; id?: string; role?: string; avatar?: string; preferences?: any } | null;
   authToken: string | null;
+  appliedCoupon: AppliedCoupon | null;
+  applyCoupon: (code: string, amount: number) => Promise<{ success: boolean; message?: string }>;
+  removeCoupon: () => void;
   setSearchQuery: (q: string) => void;
   toggleDarkMode: () => void; // kept for backward compat, no-op
   showToast: (title: string, message: string, type?: 'success' | 'error' | 'info') => void;
@@ -185,6 +196,7 @@ interface AppContextType {
   };
   settingsLoading: boolean;
   profileLoading: boolean;
+  cartLoading: boolean;
   settingsResponseTime: number | null;
   updateCompanySettings: (data: any) => Promise<boolean>;
 }
@@ -259,7 +271,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [authToken, setAuthToken] = useState<string | null>(
     typeof window !== 'undefined' ? localStorage.getItem('token') : null
   );
-  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return !!localStorage.getItem('token');
+    }
+    return false;
+  });
+
+  const [cartLoading, setCartLoading] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return !!localStorage.getItem('token');
+    }
+    return false;
+  });
+
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsResponseTime, setSettingsResponseTime] = useState<number | null>(null);
   const [companySettings, setCompanySettings] = useState({
@@ -276,10 +301,104 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     customShirtPrice: 999,
   });
 
+  const [appliedCoupon, setAppliedCouponState] = useState<AppliedCoupon | null>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = sessionStorage.getItem('applied_coupon');
+      if (stored) {
+        try { return JSON.parse(stored); } catch {}
+      }
+    }
+    return null;
+  });
+
+  const setAppliedCoupon = useCallback((coupon: AppliedCoupon | null) => {
+    setAppliedCouponState(coupon);
+    if (typeof window !== 'undefined') {
+      if (coupon) {
+        sessionStorage.setItem('applied_coupon', JSON.stringify(coupon));
+      } else {
+        sessionStorage.removeItem('applied_coupon');
+      }
+    }
+  }, []);
+
+  const removeCoupon = useCallback(() => {
+    setAppliedCoupon(null);
+  }, [setAppliedCoupon]);
+
+  const applyCoupon = useCallback(async (code: string, amount: number) => {
+    if (!code || !code.trim()) {
+      return { success: false, message: 'Please enter a coupon code.' };
+    }
+    try {
+      const res = await fetch(getApiUrl('/coupons/validate'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: code.trim(),
+          amount: amount,
+          userEmail: currentUser?.email,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { success: false, message: data.message || 'Invalid coupon code.' };
+      }
+      const newCoupon: AppliedCoupon = {
+        code: data.coupon.code,
+        discountAmount: data.discountAmount,
+        discountType: data.coupon.discountType,
+        discountValue: data.coupon.discountValue,
+        message: data.message,
+      };
+      setAppliedCoupon(newCoupon);
+      return { success: true, message: data.message };
+    } catch (err: any) {
+      return { success: false, message: 'Could not connect to coupon validation service.' };
+    }
+  }, [currentUser?.email, setAppliedCoupon]);
+
+  // Auto re-validate applied coupon whenever cart subtotal changes
+  const cartSubtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    if (!appliedCoupon?.code || profileLoading || cartLoading) return;
+    if (cartSubtotal <= 0) {
+      if (cart.length === 0) {
+        setAppliedCoupon(null);
+      }
+      return;
+    }
+    fetch(getApiUrl('/coupons/validate'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: appliedCoupon.code,
+        amount: cartSubtotal,
+        userEmail: currentUser?.email,
+      }),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data) {
+          setAppliedCoupon(null);
+          return;
+        }
+        setAppliedCoupon({
+          code: data.coupon.code,
+          discountAmount: data.discountAmount,
+          discountType: data.coupon.discountType,
+          discountValue: data.coupon.discountValue,
+          message: data.message,
+        });
+      })
+      .catch(() => {});
+  }, [cartSubtotal, currentUser?.email, appliedCoupon?.code, profileLoading, cartLoading, cart.length, setAppliedCoupon]);
+
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
     if (token) {
       setProfileLoading(true);
+      setCartLoading(true);
       fetch(getApiUrl("/user/profile"), {
         headers: {
           Authorization: `Bearer ${token}`
@@ -322,7 +441,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }));
             setCart(items);
           })
-          .catch(() => {});
+          .catch(() => {})
+          .finally(() => setCartLoading(false));
         // Fetch persisted wishlist from backend
         fetch(getApiUrl('/wishlist'), { headers: { Authorization: `Bearer ${token}` } })
           .then(r => r.ok ? r.json() : null)
@@ -351,7 +471,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         localStorage.removeItem("token");
         setCurrentUser(null);
         setProfileLoading(false);
+        setCartLoading(false);
       });
+    } else {
+      setProfileLoading(false);
+      setCartLoading(false);
     }
 
     // Load global settings
@@ -748,7 +872,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const subtotal = cart.reduce((acc, c) => acc + c.price * c.quantity, 0);
     const tax = subtotal * 0.05;
     const shipping = subtotal > 999 ? 0 : 49;
-    const total = subtotal + tax + shipping;
+    const discount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+    const total = Math.max(0, subtotal + tax + shipping - discount);
 
     const newOrder: Order = {
       id: orderId,
@@ -1148,6 +1273,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isDarkMode,
       currentUser,
       authToken,
+      appliedCoupon,
+      applyCoupon,
+      removeCoupon,
       setSearchQuery,
       toggleDarkMode,
       showToast,
@@ -1175,6 +1303,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       companySettings,
       settingsLoading,
       profileLoading,
+      cartLoading,
       settingsResponseTime,
       updateCompanySettings
     }}>

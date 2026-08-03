@@ -675,7 +675,7 @@ export default function HomePage() {
       {/* ── 1. TRENDING PRODUCTS (Full Warm Beige Band) ── */}
       <section className="w-full bg-[#FAF7F2] py-10 sm:py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-          <div className="flex flex-row sm:items-center justify-between gap-1 sm:gap-3">
+          <div className="flex flex-row sm:items-center justify-between gap-2 sm:gap-3">
             <div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight flex items-center gap-2">
                 <Flame className="w-5.5 h-5.5 text-[#df794d]" /> Hot off the Press
@@ -700,18 +700,12 @@ export default function HomePage() {
                 icon={<ShoppingBag className="w-8 h-8 text-[#7e9677]" />}
               />
             </div>
-          ) : trendingProducts.length > 1 ? (
+          ) : (
             <Slider desktopCols={4}>
               {trendingProducts.map((product) => (
                 <ProductCard key={`trending-${product.id}`} product={product} />
               ))}
             </Slider>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-              {trendingProducts.map((product) => (
-                <ProductCard key={`trending-${product.id}`} product={product} />
-              ))}
-            </div>
           )}
         </div>
       </section>
@@ -719,7 +713,7 @@ export default function HomePage() {
       {/* ── 2. BEST SELLERS (Full Rich Sand Band) ── */}
       <section className="w-full bg-[#F5F0E8] py-10 sm:py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-          <div className="flex flex-row sm:items-center justify-between gap-1 sm:gap-3">
+          <div className="flex flex-row sm:items-center justify-between gap-2 sm:gap-3">
             <div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A453E] tracking-tight flex items-center gap-2">
                 <Sparkles className="w-5.5 h-5.5 text-[#df794d]" /> Best Sellers
@@ -744,18 +738,12 @@ export default function HomePage() {
                 icon={<ShoppingBag className="w-8 h-8 text-[#7e9677]" />}
               />
             </div>
-          ) : bestSellerProducts.length > 1 ? (
+          ) : (
             <Slider desktopCols={4}>
               {bestSellerProducts.map((product) => (
                 <ProductCard key={`best-${product.id}`} product={product} />
               ))}
             </Slider>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-              {bestSellerProducts.map((product) => (
-                <ProductCard key={`best-${product.id}`} product={product} />
-              ))}
-            </div>
           )}
         </div>
       </section>
@@ -763,7 +751,7 @@ export default function HomePage() {
       {/* ── 3. MEN'S COLLECTION (Full Cool Slate Band) ── */}
       <section className="w-full bg-[#F0F4F8] py-10 sm:py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-          <div className="flex flex-row sm:items-center justify-between gap-1 sm:gap-3">
+          <div className="flex flex-row sm:items-center justify-between gap-2 sm:gap-3">
             <div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-[#334E68] tracking-tight flex items-center gap-2">
                 <Shirt className="w-5.5 h-5.5 text-[#df794d]" /> Men's Collection
@@ -788,18 +776,12 @@ export default function HomePage() {
                 icon={<Shirt className="w-8 h-8 text-[#3B82F6]" />}
               />
             </div>
-          ) : mensProducts.length > 1 ? (
+          ) : (
             <Slider desktopCols={4}>
               {mensProducts.map((product) => (
                 <ProductCard key={`mens-${product.id}`} product={product} />
               ))}
             </Slider>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-              {mensProducts.map((product) => (
-                <ProductCard key={`mens-${product.id}`} product={product} />
-              ))}
-            </div>
           )}
         </div>
       </section>
@@ -807,7 +789,7 @@ export default function HomePage() {
       {/* ── 4. WOMEN'S COLLECTION (Full Soft Blush Band) ── */}
       <section className="w-full bg-[#FAF0F4] py-10 sm:py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-          <div className="flex flex-row sm:items-center justify-between gap-1 sm:gap-3">
+          <div className="flex flex-row sm:items-center justify-between gap-2 sm:gap-3">
             <div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-[#702444] tracking-tight flex items-center gap-2">
                 <Heart className="w-5.5 h-5.5 text-[#df794d]" /> Women's Collection
@@ -832,18 +814,12 @@ export default function HomePage() {
                 icon={<Heart className="w-8 h-8 text-[#EC4899]" />}
               />
             </div>
-          ) : womensProducts.length > 1 ? (
+          ) : (
             <Slider desktopCols={4}>
               {womensProducts.map((product) => (
                 <ProductCard key={`womens-${product.id}`} product={product} />
               ))}
             </Slider>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-              {womensProducts.map((product) => (
-                <ProductCard key={`womens-${product.id}`} product={product} />
-              ))}
-            </div>
           )}
         </div>
       </section>
@@ -851,7 +827,7 @@ export default function HomePage() {
       {/* ── 5. NEW ARRIVALS (Full Fresh Mint Band) ── */}
       <section className="w-full bg-[#F2F7F2] py-10 sm:py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-          <div className="flex flex-row sm:items-center justify-between gap-1 sm:gap-3">
+          <div className="flex flex-row sm:items-center justify-between gap-2 sm:gap-3">
             <div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-[#264D29] tracking-tight flex items-center gap-2">
                 <Paintbrush className="w-5.5 h-5.5 text-[#df794d]" /> New Arrivals
@@ -876,18 +852,12 @@ export default function HomePage() {
                 icon={<ShoppingBag className="w-8 h-8 text-[#10B981]" />}
               />
             </div>
-          ) : newArrivalProducts.length > 1 ? (
+          ) : (
             <Slider desktopCols={4}>
               {newArrivalProducts.map((product) => (
                 <ProductCard key={`new-${product.id}`} product={product} />
               ))}
             </Slider>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-              {newArrivalProducts.map((product) => (
-                <ProductCard key={`new-${product.id}`} product={product} />
-              ))}
-            </div>
           )}
         </div>
       </section>

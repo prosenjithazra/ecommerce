@@ -170,24 +170,24 @@ export const ProductGallery: React.FC<{ images: string[]; name: string }> = ({ i
 /* 2. REVIEW CARD */
 interface ReviewCardProps { name: string; rating: number; date: string; comment: string; verified: boolean; }
 export const ReviewCard: React.FC<ReviewCardProps> = ({ name, rating, date, comment, verified }) => (
-  <div className="p-4 border border-[#E8E2D6] rounded-lg bg-white space-y-3">
-    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-      <div className="space-y-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-extrabold text-sm text-[#4A453E]">{name}</span>
+  <div className="p-4 border border-[#E8E2D6] rounded-xl bg-white space-y-2.5 overflow-hidden flex flex-col justify-between h-full shadow-xs">
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+          <span className="font-extrabold text-xs sm:text-sm text-[#4A453E] truncate">{name}</span>
           {verified && (
             <span className="inline-flex items-center text-[9px] font-extrabold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md whitespace-nowrap">
               Verified Purchase
             </span>
           )}
         </div>
-        <span className="text-[10px] text-[#A89B8A] block">{date}</span>
+        <div className="flex-shrink-0">
+          <Rating value={rating} size={3} />
+        </div>
       </div>
-      <div className="flex-shrink-0 self-start sm:self-auto">
-        <Rating value={rating} size={3.5} />
-      </div>
+      <span className="text-[10px] text-[#A89B8A] block">{date}</span>
+      <p className="text-xs text-[#7A736A] leading-relaxed line-clamp-4">{comment}</p>
     </div>
-    <p className="text-xs text-[#7A736A] leading-relaxed">{comment}</p>
   </div>
 );
 

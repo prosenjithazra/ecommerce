@@ -24,30 +24,27 @@ const loadRazorpayScript = () => {
 function PaymentPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { cart, addresses, createOrder, showToast, currentUser, profileLoading } = useApp();
+  const { cart, addresses, createOrder, showToast, currentUser, profileLoading, cartLoading, appliedCoupon } = useApp();
 
   React.useEffect(() => {
-    if (profileLoading) return;
+    if (profileLoading || cartLoading) return;
     const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
     if (!token && !currentUser) {
       router.push('/login');
     }
-  }, [currentUser, profileLoading, router]);
+  }, [currentUser, profileLoading, cartLoading, router]);
 
-  // Guard: if cart is empty (e.g. user navigated back after placing an order), redirect to orders
+  // Guard: if cart is empty after loading completes (e.g. user completed order), redirect to orders
   React.useEffect(() => {
-    if (profileLoading) return;
+    if (profileLoading || cartLoading) return;
     if (cart.length === 0) {
       router.replace('/orders');
     }
-  }, [cart, profileLoading, router]);
+  }, [cart, profileLoading, cartLoading, router]);
 
   const addressId = searchParams?.get('addressId') || "";
   const shippingMethod = searchParams?.get('shipping') || "standard";
   const address = addresses.find(a => a.id === addressId) || addresses.find(a => a.isDefault) || addresses[0];
-
-
-
 
   const hasCustomProduct = cart.some(item => 
     item.customDesign || 
@@ -62,12 +59,13 @@ function PaymentPageContent() {
       setPaymentMode('online');
     }
   }, [hasCustomProduct, paymentMode]);
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSimulatedModal, setShowSimulatedModal] = useState(false);
   const [simulatedOrderId, setSimulatedOrderId] = useState("");
   const [simulatedError, setSimulatedError] = useState<string | null>(null);
 
-  if (profileLoading) {
+  if (profileLoading || cartLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-16 pt-8">
         <div className="h-4 w-48 bg-zinc-200 animate-pulse rounded" />
@@ -110,8 +108,9 @@ function PaymentPageContent() {
 
   const subtotal = cart.reduce((acc, item) => acc + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
   const tax = subtotal * 0.05;
-  const shippingFee = shippingMethod === 'express' ? 99 : (subtotal > 999 ? 0 : 49);
-  const total = subtotal + tax + shippingFee;
+  const shippingFee = shippingMethod === 'express' ? 99 : (subtotal > 999 || subtotal === 0 ? 0 : 49);
+  const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+  const total = Math.max(0, subtotal + tax + shippingFee - discountAmount);
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -482,6 +481,12 @@ function PaymentPageContent() {
                 <span className="text-zinc-500">Tax / GST (5%)</span>
                 <span className="font-bold text-zinc-800 dark:text-zinc-200">₹{tax.toFixed(2)}</span>
               </div>
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-emerald-600 font-bold">
+                  <span>Coupon Discount ({appliedCoupon?.code})</span>
+                  <span>-₹{discountAmount.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-zinc-500">Shipping Fees</span>
                 <span className="font-bold text-zinc-800 dark:text-zinc-200">

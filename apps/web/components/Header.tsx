@@ -144,10 +144,14 @@ export const Header: React.FC = () => {
                 className="flex items-center gap-2 hover:opacity-90 transition-opacity pl-2"
                 aria-label="Account"
               >
-                <div className="w-7 h-7 rounded-full bg-[#df794d] text-white flex items-center justify-center text-xs font-black border border-[#E8E2D6] shadow-sm">
-                  {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+                <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-[#df794d]/40 bg-[#df794d] text-white flex items-center justify-center text-xs font-black shadow-xs flex-shrink-0">
+                  {currentUser.avatar ? (
+                    <img src={currentUser.avatar} alt={currentUser.name} className="w-full h-full object-cover" />
+                  ) : (
+                    currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'
+                  )}
                 </div>
-                <span className="hidden sm:inline text-xs font-extrabold text-[#4A453E]">
+                <span className="hidden sm:inline text-xs font-extrabold text-[#4A453E] max-w-[120px] truncate">
                   {currentUser.name}
                 </span>
               </Link>
@@ -281,6 +285,19 @@ export const Header: React.FC = () => {
               ))}
               {currentUser ? (
                 <>
+                  <div className="flex items-center gap-3 p-3 bg-[#FDFAF6] border border-[#E8E2D6] rounded-xl my-2">
+                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#df794d]/40 bg-[#df794d] text-white flex items-center justify-center font-black text-sm shadow-xs flex-shrink-0">
+                      {currentUser.avatar ? (
+                        <img src={currentUser.avatar} alt={currentUser.name} className="w-full h-full object-cover" />
+                      ) : (
+                        currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-extrabold text-xs text-[#4A453E] truncate">{currentUser.name}</p>
+                      <p className="text-[10px] text-[#A89B8A] truncate">{currentUser.email}</p>
+                    </div>
+                  </div>
                   <Link
                     href="/profile"
                     onClick={() => setIsMobileMenuOpen(false)}

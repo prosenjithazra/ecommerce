@@ -352,34 +352,77 @@ export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => 
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
   const [canScrollRight, setCanScrollRight] = React.useState(false);
   const [activeIndex, setActiveIndex] = React.useState(0);
+  const [visibleCols, setVisibleCols] = React.useState(1);
   const [isMouseDown, setIsMouseDown] = React.useState(false);
   const [startX, setStartX] = React.useState(0);
   const [scrollLeftState, setScrollLeftState] = React.useState(0);
   const [hasDragged, setHasDragged] = React.useState(false);
 
   const childrenArray = React.Children.toArray(children);
+  const isMobileSlider1Point5 = childrenArray.length > 2;
+  const isTabSlider = childrenArray.length > 3;
+  const isDesktopSlider = childrenArray.length > desktopCols;
+
+  const updateVisibleCols = React.useCallback(() => {
+    if (typeof window === 'undefined') return;
+    const width = window.innerWidth;
+    if (width >= 992) {
+      setVisibleCols(isDesktopSlider ? (desktopCols || 4) : Math.min(childrenArray.length, desktopCols || 4));
+    } else if (width >= 768) {
+      setVisibleCols(2);
+    } else {
+      setVisibleCols(1);
+    }
+  }, [childrenArray.length, desktopCols, isDesktopSlider]);
+
+  const numDots = React.useMemo(() => {
+    if (childrenArray.length <= 1) return 0;
+    return Math.max(1, Math.ceil(childrenArray.length / (visibleCols || 1)));
+  }, [childrenArray.length, visibleCols]);
 
   const updateScrollState = React.useCallback(() => {
     if (scrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
       setCanScrollLeft(scrollLeft > 5);
       setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
-      const index = Math.round(scrollLeft / (clientWidth * 0.666));
-      setActiveIndex(Math.min(index, childrenArray.length - 1));
+      
+      const maxScroll = scrollWidth - clientWidth;
+      if (maxScroll <= 0 || numDots <= 1) {
+        setActiveIndex(0);
+        return;
+      }
+      const progress = Math.min(1, Math.max(0, scrollLeft / maxScroll));
+      const idx = Math.min(Math.round(progress * (numDots - 1)), numDots - 1);
+      setActiveIndex(idx);
     }
-  }, [childrenArray.length]);
+  }, [numDots]);
 
   React.useEffect(() => {
+    updateVisibleCols();
     updateScrollState();
-    window.addEventListener('resize', updateScrollState);
-    return () => window.removeEventListener('resize', updateScrollState);
-  }, [updateScrollState]);
+    const handleResize = () => {
+      updateVisibleCols();
+      updateScrollState();
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [updateVisibleCols, updateScrollState]);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
       const { clientWidth } = scrollRef.current;
-      const scrollAmount = direction === 'left' ? -clientWidth * 0.75 : clientWidth * 0.75;
+      const scrollAmount = direction === 'left' ? -clientWidth * 0.8 : clientWidth * 0.8;
       scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const handleDotClick = (dotIdx: number) => {
+    if (!scrollRef.current) return;
+    const targetItemIdx = Math.min(dotIdx * visibleCols, childrenArray.length - 1);
+    const child = scrollRef.current.children[targetItemIdx] as HTMLElement;
+    if (child) {
+      const targetLeft = child.offsetLeft - scrollRef.current.offsetLeft;
+      scrollRef.current.scrollTo({ left: targetLeft, behavior: 'smooth' });
     }
   };
 
@@ -416,22 +459,36 @@ export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => 
     }
   };
 
-  const isMultiItemMobile = childrenArray.length > 1;
-  const mobileWidthClass = isMultiItemMobile ? 'w-[78%] min-w-[78%]' : 'w-full min-w-full';
+  // Mobile (<= 767px / < md): 82% width per card for 1.5 slider view
+  const mobileWidthClass = childrenArray.length > 1 ? 'w-[82%] min-w-[82%]' : 'w-full min-w-full';
 
+  // Tab (768px to 991px / md:): 2 items per view in slider mode, or w-full in grid mode
+  const tabWidthClass = isTabSlider
+    ? 'md:w-[calc(50%-10px)] md:min-w-[calc(50%-10px)]'
+    : 'md:w-full md:min-w-0';
+
+  // Desktop (>= 992px / lg:): 3 or 4 items per view in slider mode, or w-full in grid mode
   let desktopWidthClass = '';
-  if (childrenArray.length === 1) {
-    desktopWidthClass = 'md:w-full md:min-w-full';
-  } else if (childrenArray.length === 2 && desktopCols >= 2) {
-    desktopWidthClass = 'sm:w-[48%] sm:min-w-[48%] md:w-[calc(50%-10px)] md:min-w-[calc(50%-10px)]';
-  } else if (desktopCols === 3) {
-    desktopWidthClass = 'sm:w-[48%] sm:min-w-[48%] md:w-[calc(33.333%-14px)] md:min-w-[calc(33.333%-14px)]';
+  if (isDesktopSlider) {
+    desktopWidthClass = desktopCols === 3
+      ? 'lg:w-[calc(33.333%-14px)] lg:min-w-[calc(33.333%-14px)]'
+      : 'lg:w-[calc(25%-15px)] lg:min-w-[calc(25%-15px)]';
   } else {
-    desktopWidthClass = 'sm:w-[48%] sm:min-w-[48%] lg:w-[calc(25%-15px)] lg:min-w-[calc(25%-15px)]';
+    desktopWidthClass = 'lg:w-full lg:min-w-0 lg:max-w-none';
   }
 
-  const itemWidthClass = `${mobileWidthClass} ${desktopWidthClass}`;
-  const showDotsOnDesktop = childrenArray.length > desktopCols;
+  const itemWidthClass = `${mobileWidthClass} ${tabWidthClass} ${desktopWidthClass}`;
+
+  const baseContainerClass = 'flex gap-3 md:gap-5 overflow-x-auto snap-x snap-mandatory pb-4 no-scrollbar select-none cursor-grab active:cursor-grabbing transition-all duration-300';
+
+  let containerClass = baseContainerClass;
+  if (!isTabSlider && !isDesktopSlider) {
+    // <= 3 items: grid on tab (3 cols at md: 768px) & grid on desktop
+    containerClass += ` md:grid md:grid-cols-3 md:gap-5 md:overflow-visible md:pb-0 md:select-auto md:cursor-auto lg:grid-cols-${desktopCols}`;
+  } else if (!isDesktopSlider) {
+    // 4 items (desktopCols=4): slider on tab (> 3 items), grid on desktop (4 cols)
+    containerClass += ` lg:grid lg:grid-cols-${desktopCols} lg:gap-5 lg:overflow-visible lg:pb-0 lg:select-auto lg:cursor-auto`;
+  }
 
   // Dynamic CSS Mask for smooth edge fade on scroll
   const maskStyle = React.useMemo(() => {
@@ -458,31 +515,6 @@ export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => 
 
   return (
     <div className="relative group/slider w-full">
-      {/* Navigation Arrows on Desktop */}
-      {childrenArray.length > 1 && (
-        <>
-          {canScrollLeft && (
-            <button
-              type="button"
-              onClick={() => scroll('left')}
-              className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white hover:bg-[#df794d] text-zinc-800 hover:text-white rounded-full shadow-lg items-center justify-center border border-zinc-200 transition-all z-20 cursor-pointer hover:scale-110"
-              aria-label="Previous products"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-          )}
-          {canScrollRight && (
-            <button
-              type="button"
-              onClick={() => scroll('right')}
-              className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white hover:bg-[#df794d] text-zinc-800 hover:text-white rounded-full shadow-lg items-center justify-center border border-zinc-200 transition-all z-20 cursor-pointer hover:scale-110"
-              aria-label="Next products"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          )}
-        </>
-      )}
 
       {/* Scrollable & Draggable Container with Smooth Edge Fade */}
       <div
@@ -494,9 +526,7 @@ export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => 
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
         onClickCapture={handleClickCapture}
-        className={`flex gap-5 overflow-x-auto snap-x snap-mandatory pb-4 no-scrollbar select-none cursor-grab active:cursor-grabbing transition-all duration-300 ${
-          isMouseDown ? '' : 'scroll-smooth'
-        }`}
+        className={containerClass}
       >
         {childrenArray.map((child, idx) => (
           <div key={idx} className={`${itemWidthClass} snap-start flex-shrink-0 flex [&>*]:w-full [&>*]:h-full transition-all duration-500 ease-out`}>
@@ -506,21 +536,17 @@ export const Slider: React.FC<SliderProps> = ({ children, desktopCols = 4 }) => 
       </div>
 
       {/* Dot Indicators */}
-      {childrenArray.length > 1 && (
-        <div className={`flex justify-center gap-1.5 mt-2 ${showDotsOnDesktop ? '' : 'md:hidden'}`}>
-          {Array.from({ length: childrenArray.length }).map((_, idx) => (
+      {numDots > 1 && (
+        <div className={`flex justify-center gap-1.5 mt-3 ${
+          isDesktopSlider ? '' : isTabSlider ? 'lg:hidden' : 'md:hidden'
+        }`}>
+          {Array.from({ length: numDots }).map((_, idx) => (
             <button
               key={idx}
-              onClick={() => {
-                if (scrollRef.current) {
-                  const child = scrollRef.current.children[idx] as HTMLElement;
-                  if (child) {
-                    child.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-                  }
-                }
-              }}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                activeIndex === idx ? 'bg-[#df794d] w-4' : 'bg-[#E8E2D6] w-1.5'
+              type="button"
+              onClick={() => handleDotClick(idx)}
+              className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                activeIndex === idx ? 'bg-[#df794d] w-4' : 'bg-[#E8E2D6] w-1.5 hover:bg-[#A89B8A]'
               }`}
               aria-label={`Go to slide ${idx + 1}`}
             />

@@ -12,7 +12,7 @@ import { getApiUrl } from '../../components/ApiConfig';
 
 export default function CartPage() {
   const router = useRouter();
-  const { cart, removeFromCart, updateCartQty, showToast, currentUser, profileLoading } = useApp();
+  const { cart, removeFromCart, updateCartQty, showToast, currentUser, profileLoading, appliedCoupon, applyCoupon, removeCoupon } = useApp();
 
   React.useEffect(() => {
     if (profileLoading) return;
@@ -21,8 +21,8 @@ export default function CartPage() {
       router.push('/login');
     }
   }, [currentUser, profileLoading, router]);
-  const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountAmount: number } | null>(null);
+
+  const [couponInput, setCouponInput] = useState("");
   const [applyingCoupon, setApplyingCoupon] = useState(false);
 
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
@@ -31,60 +31,24 @@ export default function CartPage() {
   const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
   const total = Math.max(0, subtotal + tax + shipping - discountAmount);
 
-  // Automatically re-validate active coupon whenever subtotal / item quantity changes
-  React.useEffect(() => {
-    if (!appliedCoupon?.code) return;
-    if (subtotal === 0) {
-      setAppliedCoupon(null);
-      return;
-    }
-
-    fetch(getApiUrl("/coupons/validate"), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: appliedCoupon.code, amount: subtotal }),
-    })
-      .then((res) => {
-        if (res.ok) return res.json();
-        return res.json().then((err) => { throw new Error(err.message || "Coupon no longer valid"); });
-      })
-      .then((data) => {
-        setAppliedCoupon({ code: data.coupon.code, discountAmount: data.discountAmount });
-      })
-      .catch((err) => {
-        setAppliedCoupon(null);
-        showToast("Coupon Invalidated", err.message || "Minimum cart requirement not met", "error");
-      });
-  }, [subtotal, appliedCoupon?.code]);
-
-  const handleApplyCoupon = (e: React.FormEvent) => {
+  const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!couponCode.trim()) return;
+    if (!couponInput.trim()) return;
 
     setApplyingCoupon(true);
-    fetch(getApiUrl("/coupons/validate"), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: couponCode.trim(), amount: subtotal }),
-    })
-      .then((res) => {
-        if (res.ok) return res.json();
-        return res.json().then((err) => { throw new Error(err.message || "Invalid coupon"); });
-      })
-      .then((data) => {
-        setAppliedCoupon({ code: data.coupon.code, discountAmount: data.discountAmount });
-        showToast("Coupon Applied", data.message || `Saved ₹${data.discountAmount}!`, "success");
-      })
-      .catch((err) => {
-        showToast("Coupon Error", err.message || "Failed to apply coupon", "error");
-      })
-      .finally(() => setApplyingCoupon(false));
+    const res = await applyCoupon(couponInput.trim(), subtotal);
+    setApplyingCoupon(false);
+    if (res.success) {
+      showToast("Coupon Applied", res.message || `Coupon ${couponInput.trim().toUpperCase()} applied!`, "success");
+      setCouponInput("");
+    } else {
+      showToast("Coupon Error", res.message || "Failed to apply coupon", "error");
+    }
   };
 
-
   const handleRemoveCoupon = () => {
-    setAppliedCoupon(null);
-    setCouponCode("");
+    removeCoupon();
+    setCouponInput("");
     showToast("Coupon Removed", "Promo code has been removed.", "info");
   };
 
@@ -207,8 +171,8 @@ export default function CartPage() {
                     <input
                       type="text"
                       placeholder="Coupon code"
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value)}
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value)}
                       className="w-full h-10 bg-[#FDFAF6] border border-[#E8E2D6] rounded-lg pl-9 pr-3 text-xs outline-none focus:border-[#df794d] uppercase text-[#4A453E] font-mono"
                     />
                   </div>

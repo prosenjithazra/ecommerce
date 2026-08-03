@@ -121,7 +121,22 @@ function ProductsCatalog() {
     const matchSize = selectedSizes.length === 0 || 
                       p.sizes?.some(s => selectedSizes.includes(s));
 
-    const matchCategory = !selectedCategory || p.category?.toLowerCase() === selectedCategory.toLowerCase() || (p as any).categoryId === selectedCategory;
+    const matchCategory = !selectedCategory || (() => {
+      const norm = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const selNorm = norm(selectedCategory);
+      if (!selNorm) return true;
+
+      const pCat = p.category ? norm(p.category) : '';
+      const pCatId = (p as any).categoryId ? norm(String((p as any).categoryId)) : '';
+      const pGender = (p as any).targetGender ? norm((p as any).targetGender) : '';
+
+      return (
+        pCat === selNorm ||
+        pCatId === selNorm ||
+        pGender === selNorm ||
+        (pCat.length > 0 && (pCat.includes(selNorm) || selNorm.includes(pCat)))
+      );
+    })();
 
     // Tag filtering using the product's `tag` string field
     const matchTag = !selectedTag || (() => {
@@ -221,7 +236,7 @@ function ProductsCatalog() {
         <section className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
 
           {/* Sidebar - Desktop Only */}
-          <div className="hidden lg:block p-5 space-y-5 lg:sticky lg:top-20">
+          <div className="hidden lg:block p-5 bg-white border border-zinc-200/50 dark:border-zinc-800 rounded-2xl space-y-5 lg:sticky lg:top-20">
             <div className="flex items-center justify-between pb-3">
               <h3 className="font-extrabold text-sm text-[#4A453E] flex items-center gap-1.5">
                 <SlidersHorizontal className="w-4 h-4 text-[#df794d]" /> Filters
