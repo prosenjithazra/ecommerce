@@ -302,7 +302,13 @@ export const OrderCard: React.FC<{ order: Order; onViewDetails: (id: string) => 
         </div>
         <div className="text-right">
           <span className="font-extrabold text-sm text-[#4A453E]">₹{order.total.toFixed(2)}</span>
-          <p className="text-[10px] text-[#A89B8A] mt-1">({itemsCount} units)</p>
+          {((order.paymentMethod || '').toUpperCase().includes('COD') || order.isPartialCod) ? (
+            <p className="text-[9px] font-bold text-[#df794d] mt-0.5">
+              50% Paid · COD Bal: ₹{(order.codAmount !== undefined ? order.codAmount : Math.round(order.total * 0.5 * 100) / 100).toFixed(2)}
+            </p>
+          ) : (
+            <p className="text-[10px] text-[#A89B8A] mt-0.5">({itemsCount} units)</p>
+          )}
         </div>
       </div>
       <div className="flex items-center justify-between pt-3 border-t border-[#E8E2D6] text-xs">

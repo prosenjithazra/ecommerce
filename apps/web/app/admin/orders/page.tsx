@@ -24,6 +24,9 @@ interface Order {
   date: string;
   items: number;
   total: number;
+  paidAmount?: number;
+  codAmount?: number;
+  isPartialCod?: boolean;
   status: string;
   itemsJson?: any;
   paymentMethod?: string;
@@ -394,7 +397,7 @@ export default function AdminOrdersPage() {
                   <div>
                     <span className="text-[10px] text-zinc-400 block font-bold">Method</span>
                     <span className="font-extrabold text-zinc-800 uppercase">
-                      {selectedOrder.paymentMethod === 'COD' ? 'COD' : 'Online'}
+                      {(selectedOrder.paymentMethod || '').toUpperCase().includes('COD') || selectedOrder.isPartialCod ? 'COD (50% Advance Paid)' : 'Online Prepaid'}
                     </span>
                   </div>
                   <div>
@@ -402,12 +405,22 @@ export default function AdminOrdersPage() {
                     <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full border uppercase tracking-wide inline-block ${
                       selectedOrder.paymentStatus === 'Paid' || selectedOrder.paymentStatus === 'Success'
                         ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                        : selectedOrder.paymentStatus === 'Refunded'
+                        : selectedOrder.paymentStatus === 'Partially Paid'
                         ? 'bg-amber-50 text-amber-700 border-amber-100'
+                        : selectedOrder.paymentStatus === 'Refunded'
+                        ? 'bg-purple-50 text-purple-700 border-purple-100'
                         : 'bg-zinc-100 text-zinc-600 border-zinc-200'
                     }`}>
                       {selectedOrder.paymentStatus || 'Pending'}
                     </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-zinc-450 block font-bold">Advance Paid Online</span>
+                    <span className="font-extrabold text-emerald-600">₹{(selectedOrder.paidAmount !== undefined ? selectedOrder.paidAmount : (selectedOrder.paymentMethod === 'COD' ? Math.round(selectedOrder.total * 0.5 * 100) / 100 : selectedOrder.total)).toLocaleString()}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-zinc-450 block font-bold">COD Balance Due</span>
+                    <span className="font-extrabold text-[#df794d]">₹{(selectedOrder.codAmount !== undefined ? selectedOrder.codAmount : (selectedOrder.paymentMethod === 'COD' ? Math.round(selectedOrder.total * 0.5 * 100) / 100 : 0)).toLocaleString()}</span>
                   </div>
                   {selectedOrder.paymentId && (
                     <div className="col-span-2 border-t border-zinc-200/60 pt-2">

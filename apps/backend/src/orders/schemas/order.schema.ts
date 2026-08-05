@@ -59,6 +59,15 @@ export class Order {
   @Prop({ default: null })
   paymentStatus: string;
 
+  @Prop({ default: 0 })
+  paidAmount: number;
+
+  @Prop({ default: 0 })
+  codAmount: number;
+
+  @Prop({ default: false })
+  isPartialCod: boolean;
+
   @Prop({ default: null })
   cancelReason: string;
 

@@ -131,6 +131,18 @@ export default function TrackOrderPage() {
         </div>
       )}
 
+      {((order.paymentMethod || '').toUpperCase().includes('COD') || order.isPartialCod) && order.status !== 'Cancelled' && (
+        <div className="p-4 bg-amber-50 border border-amber-200 text-amber-900 rounded-lg text-xs font-bold flex items-center justify-between">
+          <div>
+            <p className="font-extrabold text-[#df794d]">💵 Cash on Delivery (50% Advance Paid)</p>
+            <p className="text-[11px] font-normal text-zinc-600 mt-0.5">
+              50% Advance Paid Online: <strong className="text-emerald-600">₹{(order.paidAmount !== undefined ? order.paidAmount : Math.round(order.total * 0.5 * 100) / 100).toFixed(2)}</strong> &nbsp;·&nbsp;
+              Remaining 50% Balance Due on Delivery: <strong className="text-[#df794d]">₹{(order.codAmount !== undefined ? order.codAmount : Math.round(order.total * 0.5 * 100) / 100).toFixed(2)}</strong> (Pay in cash to delivery agent).
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Main timeline tracker */}
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 rounded-lg p-3 sm:p-10 shadow">
         <div className="relative border-l border-zinc-200 dark:border-zinc-800 ml-2 sm:ml-3 pl-4 sm:pl-6 sm:pl-8 space-y-5 sm:space-y-8 py-1 sm:py-2">

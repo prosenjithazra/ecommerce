@@ -20,7 +20,7 @@ const QIKINK_COLOR_CODES: Record<string, string> = {
 
 export async function POST(request: Request) {
   try {
-    const { orderId, address, cart, gateway, total, email } = await request.json();
+    const { orderId, address, cart, gateway, total, email, codAmount } = await request.json();
 
     const clientId = process.env.QIKINK_CLIENT_ID;
     const clientSecret = process.env.QIKINK_CLIENT_SECRET;
@@ -209,11 +209,14 @@ export async function POST(request: Request) {
     const cleanZip = (address?.zip || '560001').replace(/[^a-zA-Z0-9]/g, '') || '560001';
     const customerEmail = email || address?.email || 'customer@example.com';
 
+    const isCod = (gateway || '').toUpperCase().includes('COD');
+    const codVal = codAmount !== undefined && codAmount !== null ? codAmount : Math.round((total || 0) * 0.5);
+
     const payload = {
       order_number: cleanOrderNumber,
       qikink_shipping: "1",
-      gateway: gateway || 'Prepaid',
-      total_order_value: String(total || 0),
+      gateway: isCod ? 'COD' : 'Prepaid',
+      total_order_value: String(isCod ? codVal : (total || 0)),
       shipping_address: {
         first_name: first_name || 'Customer',
         last_name: last_name || '',

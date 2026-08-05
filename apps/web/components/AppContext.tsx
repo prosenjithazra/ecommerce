@@ -101,6 +101,9 @@ export interface Order {
   discountAmount?: number;
   couponCode?: string;
   total: number;
+  paidAmount?: number;
+  codAmount?: number;
+  isPartialCod?: boolean;
   address: Address;
   paymentMethod: string;
   paymentId?: string;
@@ -176,7 +179,7 @@ interface AppContextType {
   updateAddress: (address: Address) => void;
   deleteAddress: (id: string) => void;
   setDefaultAddress: (id: string) => void;
-  createOrder: (address: Address, paymentMethod: string, paymentId?: string, paymentStatus?: string, customShippingFee?: number, customTotal?: number) => Order;
+  createOrder: (address: Address, paymentMethod: string, paymentId?: string, paymentStatus?: string, customShippingFee?: number, customTotal?: number, customPaidAmount?: number, customCodAmount?: number) => Order;
   cancelOrder: (id: string, reason: string) => Promise<boolean>;
   returnOrder: (id: string, reason: string) => Promise<boolean>;
   markNotificationsAsRead: () => void;
@@ -819,7 +822,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     paymentId?: string,
     paymentStatus?: string,
     customShippingFee?: number,
-    customTotal?: number
+    customTotal?: number,
+    customPaidAmount?: number,
+    customCodAmount?: number
   ) => {
     const orderId = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
     const items: OrderItem[] = cart.map(c => ({
@@ -838,6 +843,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const couponCode = appliedCoupon ? appliedCoupon.code : undefined;
     const total = customTotal !== undefined ? Number(customTotal) : Math.max(0, Math.round((subtotal + tax + shippingFee - discountAmount) * 100) / 100);
 
+    const isCod = paymentMethod.toUpperCase().includes('COD');
+    const paidAmount = customPaidAmount !== undefined ? Number(customPaidAmount) : (isCod ? Math.round((total / 2) * 100) / 100 : total);
+    const codAmount = customCodAmount !== undefined ? Number(customCodAmount) : (isCod ? Math.max(0, Math.round((total - paidAmount) * 100) / 100) : 0);
+    const isPartialCod = isCod && codAmount > 0;
+    const resolvedPaymentStatus = paymentStatus || (isPartialCod ? "Partially Paid" : "Pending");
+
     const newOrder: Order = {
       id: orderId,
       date: new Date().toISOString().split('T')[0] || "",
@@ -849,10 +860,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       discountAmount,
       couponCode,
       total,
+      paidAmount,
+      codAmount,
+      isPartialCod,
       address,
       paymentMethod,
       paymentId: paymentId || undefined,
-      paymentStatus: paymentStatus || "Pending",
+      paymentStatus: resolvedPaymentStatus,
       trackingNumber: `TRK-${Math.floor(10000000 + Math.random() * 90000000)}`,
       trackingTimeline: [
         { status: "Order Placed", date: "Just now", desc: "Your order has been logged and confirmed.", done: true },
@@ -865,8 +879,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newTxn: Transaction = {
       id: `TXN-${Math.floor(100000 + Math.random() * 900000)}`,
       date: newOrder.date,
-      amount: total,
-      status: (paymentStatus === "Paid" || paymentStatus === "Success") ? "Success" : "Pending",
+      amount: paidAmount,
+      status: (resolvedPaymentStatus === "Paid" || resolvedPaymentStatus === "Partially Paid" || resolvedPaymentStatus === "Success") ? "Success" : "Pending",
       type: "Payment",
       orderId: orderId,
       invoiceUrl: "#"
@@ -893,12 +907,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         discountAmount,
         couponCode: couponCode || null,
         total: total,
+        paidAmount: paidAmount,
+        codAmount: codAmount,
+        isPartialCod: isPartialCod,
         status: "Pending",
         itemsJson: cart,
         shippingAddress: address,
         paymentMethod: paymentMethod,
         paymentId: paymentId || null,
-        paymentStatus: paymentStatus || "Pending"
+        paymentStatus: resolvedPaymentStatus
       })
     })
     .then(res => {
@@ -924,7 +941,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         cart,
         email: currentUser?.email || (address as any).email || 'customer@example.com',
         gateway: paymentMethod.toUpperCase().includes('COD') ? 'COD' : 'PREPAID',
-        total
+        total,
+        paidAmount,
+        codAmount
       })
     })
     .then(res => res.json())

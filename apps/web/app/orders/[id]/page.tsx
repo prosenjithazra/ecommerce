@@ -268,7 +268,7 @@ export default function OrderDetailPage() {
               <div className="flex justify-between text-zinc-500 font-medium">
                 <span>Payment Method</span>
                 <span className="font-bold text-zinc-800 dark:text-zinc-250 uppercase">
-                  {order.paymentMethod === 'COD' ? 'COD' : 'Online'}
+                  {(order.paymentMethod || '').toUpperCase().includes('COD') || order.isPartialCod ? 'COD (50% Advance Paid)' : 'Online Prepaid'}
                 </span>
               </div>
               {(() => {
@@ -276,8 +276,11 @@ export default function OrderDetailPage() {
                 const taxVal = (order.tax && order.tax > 0) ? order.tax : Math.round(subtotalVal * 0.05 * 100) / 100;
                 const discountVal = order.discountAmount || 0;
                 const storedTotal = order.total || 0;
-                let shippingVal = (typeof order.shippingFee === 'number' && order.shippingFee > 0) ? order.shippingFee : undefined;
+                const isCod = (order.paymentMethod || '').toUpperCase().includes('COD') || order.isPartialCod;
+                const paidVal = typeof order.paidAmount === 'number' && order.paidAmount >= 0 ? order.paidAmount : (isCod ? Math.round(storedTotal * 0.5 * 100) / 100 : storedTotal);
+                const codVal = typeof order.codAmount === 'number' && order.codAmount >= 0 ? order.codAmount : (isCod ? Math.max(0, Math.round((storedTotal - paidVal) * 100) / 100) : 0);
 
+                let shippingVal = (typeof order.shippingFee === 'number' && order.shippingFee > 0) ? order.shippingFee : undefined;
                 if (shippingVal === undefined) {
                   if (storedTotal > 0 && Math.abs(storedTotal - (subtotalVal + taxVal - discountVal)) > 0.01) {
                     shippingVal = Math.max(0, Math.round((storedTotal - (subtotalVal + taxVal - discountVal)) * 100) / 100);
@@ -310,13 +313,23 @@ export default function OrderDetailPage() {
                         {shippingVal === 0 ? 'FREE' : `₹${shippingVal.toFixed(2)}`}
                       </span>
                     </div>
+                    <div className="flex justify-between pt-2 border-t border-zinc-150 dark:border-zinc-800 font-extrabold text-xs text-zinc-900 dark:text-white">
+                      <span>Total Order Value</span>
+                      <span className="font-black">₹{storedTotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                      <span>50% Advance Online Paid</span>
+                      <span>₹{paidVal.toFixed(2)}</span>
+                    </div>
+                    {isCod && codVal > 0 && (
+                      <div className="flex justify-between text-xs font-bold text-[#df794d]">
+                        <span>50% COD Balance Due on Delivery</span>
+                        <span>₹{codVal.toFixed(2)}</span>
+                      </div>
+                    )}
                   </>
                 );
               })()}
-              <div className="flex justify-between pt-2 border-t border-zinc-150 dark:border-zinc-800 font-extrabold text-sm text-zinc-900 dark:text-white">
-                <span>Total Amount Paid</span>
-                <span className="text-[#e8855a] dark:text-[#df794d] font-black">₹{order.total.toFixed(2)}</span>
-              </div>
             </div>
           </div>
 

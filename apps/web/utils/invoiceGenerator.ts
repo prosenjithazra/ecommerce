@@ -99,6 +99,11 @@ export function normalizeOrderForInvoice(o: any) {
 
   const total = storedTotal > 0 ? storedTotal : Math.max(0, Math.round((subtotal + tax + shippingFee - discountAmount) * 100) / 100);
 
+  const isCodOrder = (o.paymentMethod || '').toUpperCase().includes('COD') || !!o.isPartialCod;
+  const paidAmount = typeof o.paidAmount === 'number' && o.paidAmount >= 0 ? o.paidAmount : (isCodOrder ? Math.round(total * 0.5 * 100) / 100 : total);
+  const codAmount = typeof o.codAmount === 'number' && o.codAmount >= 0 ? o.codAmount : (isCodOrder ? Math.max(0, Math.round((total - paidAmount) * 100) / 100) : 0);
+  const isPartialCod = isCodOrder && codAmount > 0;
+
   return {
     id: o.id,
     date: o.date || (o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-IN') : new Date().toLocaleDateString('en-IN')),
@@ -109,10 +114,13 @@ export function normalizeOrderForInvoice(o: any) {
     discountAmount: Number(discountAmount.toFixed(2)),
     couponCode,
     total: Number(total.toFixed(2)),
+    paidAmount: Number(paidAmount.toFixed(2)),
+    codAmount: Number(codAmount.toFixed(2)),
+    isPartialCod,
     address: o.address || o.shippingAddress,
-    paymentMethod: o.paymentMethod || 'CARD',
+    paymentMethod: o.paymentMethod || (isPartialCod ? 'COD (50% Advance)' : 'CARD'),
     paymentId: o.paymentId,
-    paymentStatus: o.paymentStatus || 'PAID',
+    paymentStatus: o.paymentStatus || (isPartialCod ? 'PARTIALLY PAID' : 'PAID'),
     trackingNumber: o.trackingNumber,
     items,
     itemsJson: o.itemsJson,
@@ -350,6 +358,10 @@ export function printPdfInvoice(order: any, companySettings?: any) {
 
           <table class="totals-table">
             <tr>
+              <td style="color: #71717A;">Total Order Value:</td>
+              <td style="text-align: right; font-weight: 700; color: #18181B;">₹${totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            </tr>
+            <tr>
               <td style="color: #71717A;">Items Subtotal:</td>
               <td style="text-align: right; font-weight: 600;">₹${subtotalVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             </tr>
@@ -370,9 +382,15 @@ export function printPdfInvoice(order: any, companySettings?: any) {
               </td>
             </tr>
             <tr class="grand-total">
-              <td>Total Amount Paid:</td>
-              <td style="text-align: right;">₹${totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+              <td style="color: #10B981;">50% Advance Online Paid:</td>
+              <td style="text-align: right; color: #10B981;">₹${Number(normalized.paidAmount || (normalized.isPartialCod ? totalAmount * 0.5 : totalAmount)).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             </tr>
+            ${normalized.isPartialCod || (normalized.codAmount && normalized.codAmount > 0) ? `
+            <tr style="font-size: 14px; font-weight: 800; color: #df794d;">
+              <td style="padding-top: 6px;">50% COD Due on Delivery:</td>
+              <td style="text-align: right; padding-top: 6px; color: #df794d;">₹${Number(normalized.codAmount || totalAmount * 0.5).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            </tr>
+            ` : ''}
           </table>
 
           <div class="footer">

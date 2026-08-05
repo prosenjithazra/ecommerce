@@ -373,6 +373,9 @@ export class EmailService {
     }
 
     const orderDateFormatted = order.date || (order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN') : new Date().toLocaleDateString('en-IN'));
+    const isCodOrder = (order.paymentMethod || '').toUpperCase().includes('COD') || order.isPartialCod;
+    const paidAmountVal = typeof order.paidAmount === 'number' && order.paidAmount >= 0 ? order.paidAmount : (isCodOrder ? Math.round(storedTotal * 0.5 * 100) / 100 : storedTotal);
+    const codAmountVal = typeof order.codAmount === 'number' && order.codAmount >= 0 ? order.codAmount : (isCodOrder ? Math.max(0, Math.round((storedTotal - paidAmountVal) * 100) / 100) : 0);
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -395,7 +398,7 @@ export class EmailService {
           <!-- Body Content -->
           <div style="padding: 32px 28px; color: #4A453E; line-height: 1.6; font-size: 15px;">
             <p style="margin-top: 0; font-size: 16px;">Dear <strong>${order.customer}</strong>,</p>
-            <p style="margin-bottom: 24px;">Thank you for your order! We've successfully received your payment and design details. Our production team is currently preparing your custom apparel.</p>
+            <p style="margin-bottom: 24px;">Thank you for your order! We've successfully received your ${isCodOrder ? '50% advance payment' : 'payment'} and design details. Our production team is currently preparing your custom apparel.</p>
             
             <!-- Itemized Order Table -->
             <table style="width: 100%; border-collapse: collapse; margin: 0 0 20px 0;">
@@ -420,6 +423,10 @@ export class EmailService {
               
               <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #5C554C;">
                 <tr>
+                  <td style="padding: 4px 0;">Total Order Amount</td>
+                  <td style="padding: 4px 0; text-align: right; font-weight: 700; color: #2D2A26;">₹${Number(order.total).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                </tr>
+                <tr>
                   <td style="padding: 4px 0;">Items Subtotal</td>
                   <td style="padding: 4px 0; text-align: right; font-weight: 600;">₹${itemsSubtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 </tr>
@@ -443,7 +450,7 @@ export class EmailService {
                 </tr>
                 <tr>
                   <td style="padding: 4px 0;">Payment Method</td>
-                  <td style="padding: 4px 0; text-align: right; font-weight: 700; text-transform: uppercase; color: #4A453E;">${order.paymentMethod === 'COD' ? 'Cash on Delivery' : 'Online Payment (Razorpay)'}</td>
+                  <td style="padding: 4px 0; text-align: right; font-weight: 700; text-transform: uppercase; color: #4A453E;">${isCodOrder ? 'Cash on Delivery (50% Advance Paid)' : 'Online Payment (Razorpay)'}</td>
                 </tr>
                 ${order.paymentId ? `
                 <tr>
@@ -451,14 +458,16 @@ export class EmailService {
                   <td style="padding: 4px 0; text-align: right; font-family: monospace; font-size: 12px; color: #4A453E;">${order.paymentId}</td>
                 </tr>
                 ` : ''}
-                <tr>
-                  <td style="padding: 4px 0;">Status</td>
-                  <td style="padding: 4px 0; text-align: right; font-weight: 700; color: #7e9677; text-transform: uppercase;">${order.paymentStatus || 'Paid'}</td>
-                </tr>
                 <tr style="border-top: 1px solid #E8E2D6;">
-                  <td style="padding: 12px 0 4px 0; font-size: 16px; font-weight: 800; color: #2D2A26;">Grand Total Paid</td>
-                  <td style="padding: 12px 0 4px 0; text-align: right; font-size: 18px; font-weight: 800; color: #df794d;">₹${Number(order.total).toLocaleString('en-IN')}</td>
+                  <td style="padding: 8px 0 4px 0; font-size: 14px; font-weight: 800; color: #7e9677;">50% Advance Online Paid</td>
+                  <td style="padding: 8px 0 4px 0; text-align: right; font-size: 15px; font-weight: 800; color: #7e9677;">₹${paidAmountVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 </tr>
+                ${isCodOrder ? `
+                <tr>
+                  <td style="padding: 4px 0 8px 0; font-size: 14px; font-weight: 800; color: #df794d;">50% COD Balance Due on Delivery</td>
+                  <td style="padding: 4px 0 8px 0; text-align: right; font-size: 15px; font-weight: 800; color: #df794d;">₹${codAmountVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                </tr>
+                ` : ''}
               </table>
             </div>
 

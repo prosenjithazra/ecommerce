@@ -233,11 +233,14 @@ export class OrdersService implements OnModuleInit {
         })
       );
 
+      const isCodOrder = (orderData.paymentMethod || '').toUpperCase().includes('COD') || orderData.isPartialCod;
+      const codValue = orderData.codAmount !== undefined && orderData.codAmount !== null ? orderData.codAmount : (isCodOrder ? Math.round((orderData.total || 0) * 0.5) : orderData.total);
+
       const qikPayload = {
         order_number: cleanOrderNum,
         qikink_shipping: '1',
-        gateway: (orderData.paymentMethod || 'Prepaid').toUpperCase().includes('COD') ? 'COD' : 'Prepaid',
-        total_order_value: String(orderData.total || 0),
+        gateway: isCodOrder ? 'COD' : 'Prepaid',
+        total_order_value: String(isCodOrder ? codValue : (orderData.total || 0)),
         shipping_address: {
           first_name: first_name || 'Customer',
           last_name: last_name || '',
@@ -296,20 +299,25 @@ export class OrdersService implements OnModuleInit {
   }
 
   async create(data: Partial<Order>): Promise<Order> {
-    if (data.paymentMethod === 'COD') {
-      const itemsList = Array.isArray(data.itemsJson) ? data.itemsJson : [];
-      const hasCustom = itemsList.some(item => 
-        item.customDesign || 
-        item.productId?.toLowerCase().includes('custom') || 
-        item.name?.toLowerCase().includes('custom')
-      );
-      if (hasCustom) {
-        throw new Error('Cash on Delivery (COD) is not available for custom/personalized products.');
-      }
-    }
-
     const now = new Date();
     const orderId = data.id || ('ORD-' + Math.floor(1000 + Math.random() * 9000));
+    const totalAmount = Number(data.total) || 0;
+    const isCod = (data.paymentMethod || '').toUpperCase().includes('COD');
+
+    let paidAmount = data.paidAmount !== undefined && data.paidAmount !== null ? Number(data.paidAmount) : 0;
+    let codAmount = data.codAmount !== undefined && data.codAmount !== null ? Number(data.codAmount) : 0;
+
+    if (isCod) {
+      if (!data.paidAmount && !data.codAmount) {
+        paidAmount = Math.round((totalAmount / 2) * 100) / 100;
+        codAmount = Math.max(0, Math.round((totalAmount - paidAmount) * 100) / 100);
+      }
+    } else {
+      paidAmount = totalAmount;
+      codAmount = 0;
+    }
+
+    const isPartialCod = isCod && codAmount > 0;
     
     const order = new this.orderModel({
       id: orderId,
@@ -317,7 +325,7 @@ export class OrdersService implements OnModuleInit {
       email: data.email!,
       date: data.date || now.toISOString().split('T')[0],
       items: data.items ?? 1,
-      total: Number(data.total) || 0,
+      total: totalAmount,
       subtotal: Number(data.subtotal) || 0,
       tax: Number(data.tax) || 0,
       shippingFee: Number(data.shippingFee) || 0,
@@ -329,7 +337,10 @@ export class OrdersService implements OnModuleInit {
       address: data.address || data.shippingAddress || null,
       paymentMethod: data.paymentMethod || 'Pending',
       paymentId: data.paymentId || null,
-      paymentStatus: data.paymentStatus || 'Pending',
+      paymentStatus: data.paymentStatus || (isPartialCod ? 'Partially Paid' : 'Pending'),
+      paidAmount: paidAmount,
+      codAmount: codAmount,
+      isPartialCod: isPartialCod,
       createdAt: now,
       updatedAt: now,
     });
@@ -362,6 +373,9 @@ export class OrdersService implements OnModuleInit {
     if (data.paymentMethod !== undefined) order.paymentMethod = data.paymentMethod;
     if (data.paymentId !== undefined) order.paymentId = data.paymentId;
     if (data.paymentStatus !== undefined) order.paymentStatus = data.paymentStatus;
+    if (data.paidAmount !== undefined) order.paidAmount = data.paidAmount;
+    if (data.codAmount !== undefined) order.codAmount = data.codAmount;
+    if (data.isPartialCod !== undefined) order.isPartialCod = data.isPartialCod;
     if (data.cancelReason !== undefined) order.cancelReason = data.cancelReason;
     if (data.returnReason !== undefined) order.returnReason = data.returnReason;
     order.updatedAt = new Date();

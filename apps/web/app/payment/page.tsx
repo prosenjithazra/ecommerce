@@ -56,12 +56,6 @@ function PaymentPageContent() {
 
   const [paymentMode, setPaymentMode] = useState<'online' | 'cod'>('online');
 
-  React.useEffect(() => {
-    if (hasCustomProduct && paymentMode === 'cod') {
-      setPaymentMode('online');
-    }
-  }, [hasCustomProduct, paymentMode]);
-
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSimulatedModal, setShowSimulatedModal] = useState(false);
   const [simulatedOrderId, setSimulatedOrderId] = useState("");
@@ -88,33 +82,16 @@ function PaymentPageContent() {
     );
   }
 
-  const handleCodOrder = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!address) {
-      showToast("Select Address", "Please select a shipping address.", "error");
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      setIsOrderPlaced(true);
-      const order = createOrder(address!, "COD", "COD_PAYMENT_" + Math.floor(100000 + Math.random() * 900000), "Pending", shippingFee, total);
-      showToast("Order Placed", `Your COD Order ${order.id} has been placed successfully!`, "success");
-      router.push(`/thank-you?orderId=${order.id}`);
-    } catch (err: any) {
-      setIsOrderPlaced(false);
-      showToast("Error", err.message || "Failed to place COD order.", "error");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   const subtotal = Math.round(cart.reduce((acc, item) => acc + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0) * 100) / 100;
   const tax = Math.round(subtotal * 0.05 * 100) / 100;
   const shippingFee = shippingMethod === 'express' ? 99 : (subtotal > 999 || subtotal === 0 ? 0 : 49);
   const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
   const total = Math.max(0, Math.round((subtotal + tax + shippingFee - discountAmount) * 100) / 100);
+
+  const isCod = paymentMode === 'cod';
+  const advanceAmount = isCod ? Math.round((total / 2) * 100) / 100 : total;
+  const remainingCodAmount = isCod ? Math.max(0, Math.round((total - advanceAmount) * 100) / 100) : 0;
+  const payNowAmount = isCod ? advanceAmount : total;
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,11 +103,11 @@ function PaymentPageContent() {
     setIsProcessing(true);
 
     try {
-      // 1. Create Razorpay order on backend
+      // 1. Create Razorpay order on backend for payNowAmount (50% for COD, 100% for Online)
       const res = await fetch(getApiUrl('/orders/razorpay-create'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: total }),
+        body: JSON.stringify({ amount: payNowAmount }),
       });
 
       if (!res.ok) {
@@ -160,7 +137,7 @@ function PaymentPageContent() {
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
         name: "Ecommerce Store",
-        description: "Secure Order Payment",
+        description: isCod ? "50% Advance Online Payment for COD Order" : "Secure Order Payment",
         order_id: razorpayOrder.id,
         handler: async function (paymentRes: any) {
           try {
@@ -186,10 +163,12 @@ function PaymentPageContent() {
               throw new Error('Verification failed. Payment invalid.');
             }
 
-            // 6. Create order in PostgreSQL + Qikink sync
+            // 6. Create order in database + Qikink sync
             setIsOrderPlaced(true);
-            const order = createOrder(address!, "RAZORPAY", paymentRes.razorpay_payment_id, "Paid", shippingFee, total);
-            showToast("Payment Success", `Order ${order.id} placed successfully!`, "success");
+            const method = isCod ? "COD" : "RAZORPAY";
+            const status = isCod ? "Partially Paid" : "Paid";
+            const order = createOrder(address!, method, paymentRes.razorpay_payment_id, status, shippingFee, total, payNowAmount, remainingCodAmount);
+            showToast("Payment Success", `Order ${order.id} placed successfully! ${isCod ? `50% Advance paid (₹${payNowAmount.toFixed(2)}). Pay ₹${remainingCodAmount.toFixed(2)} on delivery.` : ''}`, "success");
             router.push(`/thank-you?orderId=${order.id}`);
           } catch (err: any) {
             setIsOrderPlaced(false);
@@ -237,10 +216,12 @@ function PaymentPageContent() {
       const verifyData = await verifyRes.json();
       if (!verifyData.verified) throw new Error('Sandbox payment invalid');
 
-      // 2. Save order in PostgreSQL database and sync to print partner Qikink
+      // 2. Save order in database and sync to print partner Qikink
       setIsOrderPlaced(true);
-      const order = createOrder(address!, "RAZORPAY_SANDBOX", "pay_simulated", "Paid", shippingFee, total);
-      showToast("Order Created", `Sandbox Order ${order.id} verified and placed!`, "success");
+      const method = isCod ? "COD" : "RAZORPAY_SANDBOX";
+      const status = isCod ? "Partially Paid" : "Paid";
+      const order = createOrder(address!, method, "pay_simulated", status, shippingFee, total, payNowAmount, remainingCodAmount);
+      showToast("Order Created", `Sandbox Order ${order.id} verified and placed! ${isCod ? `50% Advance paid (₹${payNowAmount.toFixed(2)}). Pay ₹${remainingCodAmount.toFixed(2)} on delivery.` : ''}`, "success");
       router.push(`/thank-you?orderId=${order.id}`);
     } catch (err: any) {
       setIsOrderPlaced(false);
@@ -382,29 +363,16 @@ function PaymentPageContent() {
               
               <button
                 type="button"
-                onClick={() => {
-                  if (hasCustomProduct) {
-                    showToast("COD Unavailable", "Cash on Delivery is not available for customized products.", "info");
-                    return;
-                  }
-                  setPaymentMode('cod');
-                }}
-                disabled={hasCustomProduct}
+                onClick={() => setPaymentMode('cod')}
                 className={`flex flex-col items-center justify-center p-2 sm:p-5 border-2 rounded-xl gap-1 font-black text-xs transition-all ${
-                  hasCustomProduct ? 'opacity-40 cursor-not-allowed bg-zinc-55 dark:bg-zinc-900 border-zinc-200 text-zinc-450' : ''
-                } ${
-                  paymentMode === 'cod' && !hasCustomProduct
+                  paymentMode === 'cod'
                     ? 'border-[#e8855a] bg-[#FBD5C1]/10 text-[#e8855a]'
                     : 'border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-700 bg-white dark:bg-zinc-950/20'
                 }`}
               >
                 <Layers className="w-5 h-5" />
-                <span>Cash on Delivery (COD)</span>
-                {hasCustomProduct ? (
-                  <span className="text-[10px] font-bold text-red-500 mt-1 uppercase">Not available for custom items</span>
-                ) : (
-                  <span className="text-[12px] font-medium text-zinc-400 mt-0.5">Pay in cash upon delivery</span>
-                )}
+                <span>Cash on Delivery (50% Advance)</span>
+                <span className="text-[12px] font-medium text-zinc-400 mt-0.5">50% Online Advance + 50% Cash on Delivery</span>
               </button>
             </div>
 
@@ -412,7 +380,7 @@ function PaymentPageContent() {
               <form onSubmit={handlePay} className="pt-4 border-t border-zinc-100 dark:border-zinc-800/80 space-y-4 animate-fade-in-up duration-200">
                 <div className="flex justify-between items-center gap-1 pb-2">
                   <div>
-                    <h4 className="font-extrabold text-sm text-zinc-900 dark:text-white">Razorpay Secure Checkout</h4>
+                    <h4 className="font-extrabold text-sm text-zinc-900 dark:text-white">Razorpay Secure Checkout (100% Online)</h4>
                     <p className="text-[10px] text-zinc-400 mt-0.5">Opens Razorpay — choose Card, UPI, Net Banking or Wallet inside</p>
                   </div>
                   <img 
@@ -442,31 +410,53 @@ function PaymentPageContent() {
                   className="w-full bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-sm py-3.5 px-4 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 mt-4 sm:mt-6"
                 >
                   <CreditCard className="w-4 h-4" />
-                  Pay ₹{total.toFixed(2)} via Razorpay
+                  Pay Full Amount (₹{total.toFixed(2)})
                 </button>
               </form>
             ) : (
-              <form onSubmit={handleCodOrder} className="pt-4 border-t border-zinc-100 dark:border-zinc-800/80 space-y-4 animate-fade-in-up duration-200">
-                <div>
-                  <h4 className="font-extrabold text-sm text-zinc-900 dark:text-white">Cash on Delivery (COD)</h4>
-                  <p className="text-[10px] text-zinc-400 mt-0.5">Pay in cash when the delivery executive arrives at your door</p>
+              <form onSubmit={handlePay} className="pt-4 border-t border-zinc-100 dark:border-zinc-800/80 space-y-4 animate-fade-in-up duration-200">
+                <div className="flex justify-between items-center gap-1 pb-2">
+                  <div>
+                    <h4 className="font-extrabold text-sm text-zinc-900 dark:text-white">Cash on Delivery (50% Advance Online)</h4>
+                    <p className="text-[10px] text-zinc-400 mt-0.5">Pay 50% advance online, and pay remaining 50% cash on delivery</p>
+                  </div>
+                  <img 
+                    src="https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg" 
+                    className="h-5 dark:brightness-110" 
+                    alt="Razorpay Logo" 
+                  />
                 </div>
 
-                <div className="p-4 bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-150 dark:border-zinc-850 rounded-xl space-y-2.5">
+                <div className="p-2 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-900/40 rounded-xl space-y-3">
                   <div className="flex items-center gap-2">
                     <Package className="w-4 h-4 text-[#e8855a]" />
-                    <span className="text-xs font-extrabold text-zinc-850 dark:text-zinc-100">COD Ordering Notice</span>
+                    <span className="text-xs font-extrabold text-zinc-850 dark:text-zinc-100">50% Advance Payment Policy</span>
                   </div>
-                  <p className="text-[10px] text-zinc-550 leading-relaxed">
-                    By choosing Cash on Delivery, your order will be sent to our production queue immediately. A confirmation call or text might be sent to <span className="font-bold text-zinc-700 dark:text-zinc-300">{address?.phone}</span> before shipment. Please ensure the exact cash amount is ready during delivery.
+                  <div className="space-y-1.5 text-xs text-zinc-650 dark:text-zinc-300">
+                    <div className="flex justify-between font-bold">
+                      <span>Total Order Amount:</span>
+                      <span className="text-zinc-900 dark:text-white">₹{total.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between font-extrabold text-emerald-600 dark:text-emerald-400">
+                      <span>50% Advance Payment (Now):</span>
+                      <span>₹{advanceAmount.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between font-extrabold text-[#df794d]">
+                      <span>50% Cash on Delivery (On Delivery):</span>
+                      <span>₹{remainingCodAmount.toFixed(2)}</span>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-zinc-500 leading-relaxed border-t border-amber-200/50 pt-2">
+                    Paying the 50% advance ensures immediate order processing and production setup. The remaining ₹{remainingCodAmount.toFixed(2)} will be collected in cash by our courier partner when your package arrives at your door.
                   </p>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-[#7e9677] hover:bg-[#92b089] text-white font-extrabold text-xs py-3.5 px-4 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 mt-4 sm:mt-6 shadow-[#7e9677]/20"
+                  className="w-full bg-[#df794d] hover:bg-[#e28e6c] text-white font-extrabold text-sm py-3.5 px-4 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 mt-4 sm:mt-6"
                 >
-                  Place Cash on Delivery Order (₹{total.toFixed(2)})
+                  <CreditCard className="w-4 h-4" />
+                  Pay 50% Advance (₹{advanceAmount.toFixed(2)})
                 </button>
               </form>
             )}
@@ -501,9 +491,27 @@ function PaymentPageContent() {
                   {shippingFee === 0 ? "FREE" : `₹${shippingFee.toFixed(2)}`}
                 </span>
               </div>
-              <div className="flex justify-between pt-3 border-t border-zinc-150 dark:border-zinc-800 text-sm font-black">
-                <span className="text-zinc-900 dark:text-white">Amount Due</span>
-                <span className="text-[#e8855a]">₹{total.toFixed(2)}</span>
+              <div className="flex justify-between pt-3 border-t border-zinc-150 dark:border-zinc-800 text-xs font-black">
+                <span className="text-zinc-900 dark:text-white">Total Order Value</span>
+                <span className="text-zinc-900 dark:text-white font-black">₹{total.toFixed(2)}</span>
+              </div>
+
+              {isCod && (
+                <div className="p-3 bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 rounded-lg space-y-1.5 text-xs font-extrabold">
+                  <div className="flex justify-between text-emerald-600">
+                    <span>50% Advance Online Paid Now</span>
+                    <span>₹{advanceAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-[#df794d]">
+                    <span>50% COD Due on Delivery</span>
+                    <span>₹{remainingCodAmount.toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-between pt-2 border-t border-zinc-150 dark:border-zinc-800 text-sm font-black">
+                <span className="text-zinc-900 dark:text-white">{isCod ? "Pay Now (50% Advance)" : "Amount Due Now"}</span>
+                <span className="text-[#e8855a]">₹{payNowAmount.toFixed(2)}</span>
               </div>
             </div>
 

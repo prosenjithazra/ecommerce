@@ -376,6 +376,9 @@ export default function CheckoutPage() {
               <span className="text-[#4A453E]">Estimated Total</span>
               <span className="text-[#df794d]">₹{total.toFixed(2)}</span>
             </div>
+            <p className="text-[10px] text-[#7A736A] font-medium pt-1">
+              💡 Cash on Delivery (COD) requires <span className="font-extrabold text-[#df794d]">50% advance online payment</span> (₹{(total * 0.5).toFixed(2)}) on next step.
+            </p>
           </div>
 
           <button onClick={handleProceedToPayment}
